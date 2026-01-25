@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pasosdejesus/m": "link:/home/vtamara/comp/js/m"
+    "@pasosdejesus/m": "link:/home/vtamara/comp/js/m",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.12",
