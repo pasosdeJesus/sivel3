@@ -1,0 +1,30 @@
+{
+  "name": "sivel3",
+  "version": "0.0.0",
+  "description": "Political Violence Information System (SIVeL)",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pasosdejesus/m": "link:/home/vtamara/comp/js/m"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "kysely": "^0.27.4",
+    "typescript": "^5.5.4",
+    "vitest": "^4.0.16"
+  },
+  "pnpm": {
+    "trustedDependencies": [
+      "@pasosdejesus/m"
+    ],
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
