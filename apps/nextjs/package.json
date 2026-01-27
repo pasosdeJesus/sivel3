@@ -4,7 +4,7 @@
   "description": "Political Violence Information System (SIVeL)",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
