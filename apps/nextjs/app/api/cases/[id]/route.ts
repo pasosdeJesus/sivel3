@@ -9,7 +9,7 @@ export async function GET(
     const id = params.id;
     
     // Proxy a Rails
-    const railsUrl = `${process.env.RAILS_API_URL}/casos/${id}.json`;
+    const railsUrl = `${process.env.NEXT_PUBLIC_API1}/casos/${id}.json`;
     const response = await fetch(railsUrl);
     const data = await response.json();
     

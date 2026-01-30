@@ -1,0 +1,33 @@
+{
+  "MapaOSMPage": {
+    "title": "Mapa de Casos",
+    "description": "Mapa interactivo de casos documentados",
+    "counts": "Conteos",
+    "updated": "Actualizado",
+    "totalsByFilters": "Totales según filtros aplicados",
+    "cases": "Casos",
+    "victims": "Víctimas",
+    "victimizations": "Victimizaciones",
+    "acts": "Actos",
+    "filters": "Filtros",
+    "from": "Desde",
+    "to": "Hasta",
+    "department": "Departamento",
+    "perpetrator": "P. Responsable",
+    "violence": "Violencia",
+    "showAll": "Mostrar todos",
+    "filter": "Filtrar",
+    "connectWallet": "Conecta wallet para funciones avanzadas",
+    "share": "Compartir",
+    "export": "Exportar",
+    "caseDetails": "Detalles del Caso",
+    "completeInformation": "Información completa del caso",
+    "date": "Fecha",
+    "time": "Hora",
+    "municipality": "Municipio",
+    "place": "Lugar",
+    "code": "Código",
+    "viewComplete": "Ver completo",
+    "center": "Centrar"
+  }
+}

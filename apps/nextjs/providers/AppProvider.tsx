@@ -24,9 +24,11 @@ import { celo, celoSepolia } from 'wagmi/chains'
 
 import { WalletProvider } from '@/contexts/WalletContext';
 
-interface RainbowKitProviderProps {
+interface AppProviderProps {
   children: React.ReactNode
   autoConnect?: boolean
+  messages?: any
+  locale?: string
 }
 
 const connectors = connectorsForWallets(
@@ -58,14 +60,21 @@ const queryClient = new QueryClient()
 
 // Taking ideas of
 // https://github.com/0xRowdy/nextauth-siwe-route-handlers/blob/main/src/app/providers/web3-providers.tsx
-export function AppProvider(props: RainbowKitProviderProps) {
+export function AppProvider FC<AppProviderProps> = ({ 
+    children, 
+    autoConnect,
+    messages = {},
+    locale = 'en'
+}) => {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={lightTheme()}>
-            <WalletProvider>
-              {props.children}
-            </WalletProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <WalletProvider>
+                {props.children}
+              </WalletProvider>
+            </NextIntlClientProvider>
           </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

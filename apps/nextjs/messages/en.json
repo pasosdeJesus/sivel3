@@ -1,0 +1,33 @@
+{
+  "MapaOSMPage": {
+    "title": "Cases Map",
+    "description": "Interactive map of documented cases",
+    "counts": "Counts",
+    "updated": "Updated",
+    "totalsByFilters": "Totals by applied filters",
+    "cases": "Cases",
+    "victims": "Victims",
+    "victimizations": "Victimizations",
+    "acts": "Acts",
+    "filters": "Filters",
+    "from": "From",
+    "to": "To",
+    "department": "Department",
+    "perpetrator": "Perpetrator",
+    "violence": "Violence",
+    "showAll": "Show all",
+    "filter": "Filter",
+    "connectWallet": "Connect wallet for advanced features",
+    "share": "Share",
+    "export": "Export",
+    "caseDetails": "Case Details",
+    "completeInformation": "Complete case information",
+    "date": "Date",
+    "time": "Time",
+    "municipality": "Municipality",
+    "place": "Place",
+    "code": "Code",
+    "viewComplete": "View complete",
+    "center": "Center"
+  }
+}

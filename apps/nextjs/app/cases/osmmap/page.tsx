@@ -1,8 +1,13 @@
-// app/casos/mapaosm/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Filter, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter, usePathname } from 'next/navigation';
+import { useLocale, useTranslation } from 'next-intl';
+import { useEffect, useState} from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Card,
   CardContent,
@@ -10,14 +15,11 @@ import {
   CardTitle,
   CardDescription
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Filter, Info } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 
 // Componente dinámico del mapa
@@ -35,6 +37,16 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 });
 
 export default function MapaOSMPage() {
+  const t = useTranslations('CasesOSMMap');
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = useLocale() || 'en';
+
+  const cambiarIdioma = (nuevoLocale: string) => {
+    const nuevaRuta = pathname.replace(`/${currentLocale}/`, `/${nuevoLocale}/`);
+    router.push(nuevaRuta);
+  };
+
   const { isConnected } = useWallet();
   const [cargando, setCargando] = useState(true);
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
@@ -69,9 +81,9 @@ export default function MapaOSMPage() {
       try {
         // Cargar opciones para selects (si existen endpoints)
         const [deptRes, catRes, presRes] = await Promise.all([
-          fetch('/api/departamentos'),
-          fetch('/api/categorias'),
-          fetch('/api/presponsables')
+          fetch('/api/casos/departamentos'),
+          fetch('/api/casos/categorias'),
+          fetch('/api/casos/presponsables')
         ]);
 
         setDepartamentos(await deptRes.json());
@@ -94,6 +106,7 @@ export default function MapaOSMPage() {
   
   // Manejar cambio de filtros
   const handleFiltroChange = (key: string, value: string) => {
+    if (value === "separador") return;
     setFiltros(prev => ({
       ...prev,
       [key]: value
@@ -124,6 +137,18 @@ export default function MapaOSMPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Selector de idioma en esquina superior derecha */}
+      <div className="absolute top-4 right-4 z-50">
+        <select 
+          value={currentLocale}
+          onChange={(e) => cambiarIdioma(e.target.value)}
+          className="px-3 py-1 border rounded-md bg-white text-sm"
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          {/* Agregar más idiomas después */}
+        </select>
+      </div>
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar izquierda - Conteos y Filtros */}
@@ -132,13 +157,10 @@ export default function MapaOSMPage() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  📊 Conteos
-                  <Badge variant="outline" className="ml-auto">
-                    Actualizado
-                  </Badge>
+                  📊 {t('counts')}
                 </CardTitle>
                 <CardDescription>
-                  Totales según filtros aplicados
+                  {t('totalsByFilters')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -152,7 +174,7 @@ export default function MapaOSMPage() {
                 ) : (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">Casos</span>
+                      <span className="text-sm font-medium text-gray-600">{t('cases')}</span>
                       <Badge variant="secondary">{conteos.casos.toLocaleString()}</Badge>
                     </div>
                     
@@ -194,7 +216,7 @@ export default function MapaOSMPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="campo-desde" className="text-primary">
-                      Desde
+                      {t('from')}
                     </Label>
                     <Input
                       id="campo-desde"
@@ -235,7 +257,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="">-----------------------</SelectItem>
+                        <SelectItem value="separador">-----------------------</SelectItem>
                         {departamentos.map(dept => (
                           <SelectItem key={dept.id} value={dept.id}>
                             {dept.nombre}
@@ -259,7 +281,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="">-----------------------</SelectItem>
+                        <SelectItem value="separador">-----------------------</SelectItem>
                         {presponsables.map(pr => (
                           <SelectItem key={pr.id} value={pr.id}>
                             {pr.nombre}
@@ -283,7 +305,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="">-----------------------</SelectItem>
+                        <SelectItem value="separador">-----------------------</SelectItem>
                         {categorias.map(cat => (
                           <SelectItem key={cat.id} value={cat.id}>
                             {cat.nombre}
@@ -300,7 +322,7 @@ export default function MapaOSMPage() {
                     onClick={aplicarFiltros}
                     className="w-full md:w-auto px-8"
                   >
-                    Filtrar
+                    {t('filter')}
                   </Button>
                 </div>
               </CardContent>

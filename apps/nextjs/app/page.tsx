@@ -1,9 +1,5 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-
-export default function Home() {
-  return (
-    <main>
-    </main>
-  )
+export default function HomePage() {
+  redirect('/en/cases/osmmap')
 }

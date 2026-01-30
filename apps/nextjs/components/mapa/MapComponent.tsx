@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 import { 
   Card,
   CardContent,
@@ -50,7 +51,8 @@ export default function MapComponent({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<any>(null);
   const infoRef = useRef<any>(null);
-  
+  const filtrosAnterioresRef = useRef<any>({});
+
   const [cargando, setCargando] = useState(true);
   const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(null);
   const [mostrarInfo, setMostrarInfo] = useState(false);
@@ -137,12 +139,14 @@ export default function MapComponent({
   }, []);
 
   // Cargar casos desde API
-  const cargarCasos = useCallback(async () => {
+  const cargarCasos = useCallback(async (filtrosActuales?: any) => {
     if (!mapInstanceRef.current) return;
 
     setCargando(true);
     try {
-      let url = '/api/casos/datos-osm?';
+      let url = '/api/cases/datos-osm?';
+      const filtrosAUsar = filtrosActuales || filtros;
+
       Object.entries(filtros).forEach(([key, value]) => {
         if (value) {
           url += `${key}=${value}&`;
@@ -153,14 +157,17 @@ export default function MapComponent({
       const datos = await response.json();
       
       // Actualizar conteos
-      if (onCargarConteos) {
-        onCargarConteos({
-          casos: datos.casos || 0,
-          victimas: datos.victimas || 0,
-          victimizaciones: datos.victimizaciones || 0,
-          actos: datos.actos || 0
-        });
-      }
+      try {
+        const conteosUrl = `/api/cases/counts?${new URLSearchParams(filtros).toString()}`;
+        const conteosRes = await fetch(conteosUrl);
+        const conteosData = await conteosRes.json();
+
+        if (onCargarConteos) {
+          onCargarConteos(conteosData);
+        }
+      } catch (error) {
+        console.error('Error cargando conteos:', error);
+      } 
       
       // Limpiar marcadores anteriores
       markersRef.current?.clearLayers();
@@ -210,12 +217,12 @@ export default function MapComponent({
     } finally {
       setCargando(false);
     }
-  }, [filtros, onCargarConteos]);
+  }, []);
 
   // Cargar detalle de caso
   const cargarDetalleCaso = async (codigo: string) => {
     try {
-      const response = await fetch(`/casos/${codigo}.json`);
+      const response = await fetch(`/api/cases/${codigo}`);
       const datos = await response.json();
       const caso = datos.caso;
       
@@ -276,10 +283,12 @@ export default function MapComponent({
 
   // Recargar casos cuando cambian filtros
   useEffect(() => {
-    if (mapInstanceRef.current) {
+    const filtrosCambiaron = JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current);
+    if (mapInstanceRef.current && filtrosCambiaron) {
+      filtrosAnterioresRef.current = { ...filtros };
       cargarCasos();
     }
-  }, [filtros, cargarCasos]);
+  }, [filtros]);
 
   return (
     <div className="relative h-full">
