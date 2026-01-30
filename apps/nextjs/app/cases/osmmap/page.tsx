@@ -81,9 +81,9 @@ export default function MapaOSMPage() {
       try {
         // Cargar opciones para selects (si existen endpoints)
         const [deptRes, catRes, presRes] = await Promise.all([
-          fetch('/api/casos/departamentos'),
-          fetch('/api/casos/categorias'),
-          fetch('/api/casos/presponsables')
+          fetch('/api/departaments'),
+          fetch('/api/categories'),
+          fetch('/api/aprepetrator')
         ]);
 
         setDepartamentos(await deptRes.json());
@@ -106,7 +106,7 @@ export default function MapaOSMPage() {
   
   // Manejar cambio de filtros
   const handleFiltroChange = (key: string, value: string) => {
-    if (value === "separador") return;
+    if (value === "separator") return;
     setFiltros(prev => ({
       ...prev,
       [key]: value
@@ -257,7 +257,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="separador">-----------------------</SelectItem>
+                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {departamentos.map(dept => (
                           <SelectItem key={dept.id} value={dept.id}>
                             {dept.nombre}
@@ -281,7 +281,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="separador">-----------------------</SelectItem>
+                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {presponsables.map(pr => (
                           <SelectItem key={pr.id} value={pr.id}>
                             {pr.nombre}
@@ -305,7 +305,7 @@ export default function MapaOSMPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">Mostrar todos</SelectItem>
-                        <SelectItem value="separador">-----------------------</SelectItem>
+                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {categorias.map(cat => (
                           <SelectItem key={cat.id} value={cat.id}>
                             {cat.nombre}
