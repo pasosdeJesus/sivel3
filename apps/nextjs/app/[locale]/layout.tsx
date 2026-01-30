@@ -43,7 +43,7 @@ export default function LocaleLayout({
       <body>
         <I18nextProvider i18n={i18n}>
           <LanguageSync locale={locale} />
-          <AppProvider messages={messages} locale={locale}>
+          <AppProvider locale={locale}>
             <Layout>{children}</Layout>
           </AppProvider>
         </I18nextProvider>
