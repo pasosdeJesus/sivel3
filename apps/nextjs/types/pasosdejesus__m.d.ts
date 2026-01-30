@@ -1,0 +1,1 @@
+declare module "@pasosdejesus/m";

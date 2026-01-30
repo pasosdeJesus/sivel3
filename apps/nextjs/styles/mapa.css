@@ -1,0 +1,72 @@
+/* /styles/mapa.css */
+.leaflet-marker-custom .marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: #dc2626; /* Rojo para casos */
+  position: relative;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+
+.leaflet-marker-custom .marker-pin.urgente {
+  background: #991b1b; /* Rojo más oscuro para urgente */
+  animation: pulse 2s infinite;
+}
+
+.leaflet-marker-custom .marker-text {
+  transform: rotate(45deg);
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.btn-popup-detail {
+  background: #2563eb;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.btn-popup-pray {
+  background: #f59e0b;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.leaflet-popup-case {
+  max-width: 300px;
+}
+
+.leaflet-popup-case blockquote {
+  border-left: 3px solid #f59e0b;
+  padding-left: 10px;
+  margin: 8px 0;
+}
+
+/* Para el versículo del día en header */
+.verse-of-day {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+}

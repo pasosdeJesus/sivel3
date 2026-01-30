@@ -1,0 +1,361 @@
+@import 'tailwindcss';
+
+/* ================================
+   🎨 Diseño Global Moderno & Profesional
+================================== */
+@theme {
+  /* Tipografías */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Merriweather', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Colores base */
+  --color-background: #f9fafb; /* gris claro */
+  --color-foreground: #1f1f29; /* gris oscuro legible */
+
+  /* Branding principal (inspirado en lilas/morados del logo) */
+  --color-primary-100: #cba3e0; /* Lila claro */
+  --color-primary-200: #a875d6; /* Lila pastel */
+  --color-primary-300: #5b2d82; /* Morado fuerte */
+
+  /* Secundarios (contraste y acento cálido) */
+  --color-secondary-100: #f4b77a; /* Piel cálida */
+  --color-secondary-200: #4a3b60; /* Morado grisáceo */
+
+  /* Escala de grises elegante */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+
+  /* Semantic colors for Radix UI components */
+  --color-primary: var(
+    --color-primary-300
+  ); /* Morado fuerte para botones por defecto */
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-secondary-100); /* Piel cálida */
+  --color-secondary-foreground: #ffffff;
+  --color-accent: var(--color-primary-100); /* Lila claro para acentos */
+  --color-accent-foreground: var(--color-foreground);
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-gray-200);
+  --color-input: var(--color-gray-200);
+  --color-ring: var(--color-primary-200);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-foreground);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-foreground);
+}
+/* ================================
+   ✨ Estilos Globales
+================================== */
+html,
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* Títulos */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--color-foreground);
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 2.25rem;
+}
+h2 {
+  font-size: 1.875rem;
+}
+h3 {
+  font-size: 1.5rem;
+}
+h4 {
+  font-size: 1.25rem;
+}
+
+/* Código */
+code,
+pre {
+  font-family: var(--font-mono);
+  background: var(--color-gray-100);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  color: var(--color-foreground);
+}
+
+/* Figuras y pies de foto */
+figcaption {
+  font-size: 0.85rem;
+  color: var(--color-gray-500);
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+/* Links */
+a {
+  color: var(--color-primary-300);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+a:hover {
+  color: var(--color-primary-100);
+}
+
+/* Botones básicos */
+a.btn,
+button {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  border-color: white;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+a.btn:hover,
+button:hover {
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+a.primary,
+button.primary {
+  background: var(--color-primary-100);
+  color: white;
+}
+
+a.primary:hover,
+button.primary:hover {
+  background: var(--color-primary-200);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+a.secondary,
+button.secondary {
+  background: var(--color-secondary-100);
+  color: white;
+}
+
+a.secondary:hover,
+button.secondary:hover {
+  background: var(--color-secondary-200);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+}
+
+/* ================================
+ *    ✨ Modern Animations & Utilities
+ *    ================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(168, 85, 247, 0);
+  }
+}
+
+.animate-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.fade-in {
+  animation: fade-in var(--duration, 0.5s) ease-out;
+}
+
+.slide-in-from-bottom-4 {
+  animation: slide-in-from-bottom var(--duration, 0.5s) ease-out;
+  animation-delay: var(--delay, 0s);
+}
+
+.slide-in-from-top-4 {
+  animation: slide-in-from-top var(--duration, 0.5s) ease-out;
+  animation-delay: var(--delay, 0s);
+}
+
+.duration-1000 {
+  --duration: 1s;
+}
+
+.duration-700 {
+  --duration: 0.7s;
+}
+
+.duration-500 {
+  --duration: 0.5s;
+}
+
+.delay-200 {
+  --delay: 0.2s;
+}
+
+.delay-300 {
+  --delay: 0.3s;
+}
+
+.delay-500 {
+  --delay: 0.5s;
+}
+
+.delay-700 {
+  --delay: 0.7s;
+}
+
+/* Gradient
+ * text
+ * */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Smooth transitions for interactive elements only */
+a,
+button,
+input,
+select,
+textarea,
+.card,
+.card-hover,
+[role='button'],
+[role='link'],
+.transition,
+.group {
+  transition-property:
+    color, background-color, border-color, transform, box-shadow, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* Better scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-200);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-300);
+}
+
+/* Card hover
+ * effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Asegurar que diálogos estén sobre el mapa Leaflet */
+[role="dialog"] {
+    z-index: 10000 !important; /* Mayor que Leaflet (400) */
+}
+
+/* Asegurar que el contenedor del mapa tenga z-index bajo */
+.leaflet-container {
+    z-index: 1 !important; /* Forzar z-index bajo */
+}
+
+/* Por si hay algún overlay de fondo */
+[data-radix-portal] {
+      z-index: 9999 !important;
+}
