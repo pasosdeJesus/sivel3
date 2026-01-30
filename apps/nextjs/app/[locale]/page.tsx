@@ -5,7 +5,7 @@ export default async function HomePage({
 }: {
   params: { locale: string }
 }) {
-  // Espera a que se resuelvan los parmetros
+  // Espera a que se resuelvan los parámetros
   const { locale } = await params;
   redirect(`/${locale}/cases/osmmap`);
 

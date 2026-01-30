@@ -30,6 +30,11 @@ export default function LocaleLayout({
   params: { locale: string }
 }>) {
 
+  // Validar locale antes de renderizar
+  if (!['en', 'es'].includes(locale)) {
+    notFound()
+  }
+  
   return (
     <html
       lang={locale}
@@ -49,10 +54,8 @@ export default function LocaleLayout({
 
 // Componente auxiliar para sincronizar el idioma de i18n con la URL
 function LanguageSync({ locale }: { locale: string }) {
-   const params = useParams(); // Obtiene los parámetros de la ruta
-   const currentLocale = params.locale as string;
    useEffect(() => {
-     i18n.changeLanguage(currentLocale);
-   }, [currentLocale]);
+     i18n.changeLanguage(locale);
+   }, [locale]);
    return null;
 }

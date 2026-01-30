@@ -37,14 +37,19 @@ export function middleware(request: NextRequest) {
   
   // Redirigir agregando locale
   const locale = getLocale(request)
+  // IMPORTANTE: Asegurar que la redirección no cree bucles
+  // Si la ruta ya comienza con /api o /_next, no redirigir
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
+    return NextResponse.next()
+  }
   request.nextUrl.pathname = `/${locale}${pathname}`
   
-  return NextResponse.redirect(request.nextUrl)
+  return NextResponse.redirect(request.nextUrl, { status: 302 })
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next|_vercel|monitoring|health|favicon\\.ico|.*\\..*).*)'
+    '/((?!_next/static|_next/image|favicon.ico|public|locales).*)'
   ]
 };
 

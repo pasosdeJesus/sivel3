@@ -38,7 +38,7 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 });
 
 export default function OSMMapPage() {
-  const { t, i18n } = useTranslations('OSMMapPage');
+  const { t, i18n } = useTranslation('OSMMapPage');
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
