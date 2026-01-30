@@ -45,6 +45,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
+    "i18next": "^25.8.0",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
     "kysely": "^0.28.10",
     "kysely-postgres-js": "^2.0.0",
     "leaflet": "^1.9.4",
@@ -52,11 +55,11 @@
     "lucide-react": "^0.563.0",
     "negotiator": "^1.0.0",
     "next": "15.3.9",
-    "next-intl": "^4.8.0",
     "pg": "^8.17.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.1",
+    "react-i18next": "^16.5.4",
     "react-leaflet": "^5.0.0",
     "tailwind-merge": "^3.4.0",
     "viem": "^2.45.0",
@@ -99,6 +102,9 @@
       "sharp",
       "unrs-resolver",
       "utf-8-validate"
-    ]
+    ],
+    "resolutions": {
+      "@parcel/watcher": "2.5.2"
+    }
   }
 }
