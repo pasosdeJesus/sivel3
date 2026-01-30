@@ -81,9 +81,9 @@ export default function MapaOSMPage() {
       try {
         // Cargar opciones para selects (si existen endpoints)
         const [deptRes, catRes, presRes] = await Promise.all([
-          fetch('/api/departaments'),
+          fetch('/api/departments'),
           fetch('/api/categories'),
-          fetch('/api/aprepetrator')
+          fetch('/api/alleged-perpetrators')
         ]);
 
         setDepartamentos(await deptRes.json());
@@ -181,21 +181,21 @@ export default function MapaOSMPage() {
                     <Separator />
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">Víctimas</span>
+                      <span className="text-sm font-medium text-gray-600">{t('victims')}</span>
                       <Badge variant="secondary">{conteos.victimas.toLocaleString()}</Badge>
                     </div>
                     
                     <Separator />
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">Victimizaciones</span>
+                      <span className="text-sm font-medium text-gray-600">{t('victimizations')}</span>
                       <Badge variant="secondary">{conteos.victimizaciones.toLocaleString()}</Badge>
                     </div>
                     
                     <Separator />
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">Actos</span>
+                      <span className="text-sm font-medium text-gray-600">{t('acts')}</span>
                       <Badge variant="secondary">{conteos.actos.toLocaleString()}</Badge>
                     </div>
                   </>
@@ -208,7 +208,7 @@ export default function MapaOSMPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Filter className="h-4 w-4" />
-                  Filtros
+                    {t('filters')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -229,7 +229,7 @@ export default function MapaOSMPage() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="campo-hasta" className="text-primary">
-                      Hasta
+                     {t('to')}
                     </Label>
                     <Input
                       id="campo-hasta"
@@ -246,17 +246,17 @@ export default function MapaOSMPage() {
                   {/* Departamento */}
                   <div className="space-y-2">
                     <Label htmlFor="departamento" className="text-green-600">
-                      Departamento
+                      {t('department')}
                     </Label>
                     <Select 
                       value={filtros['filtro[departamento_id]']}
                       onValueChange={(value) => handleFiltroChange('filtro[departamento_id]', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Mostrar todos" />
+                        <SelectValue placeholder="{t('showAll')}" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0">Mostrar todos</SelectItem>
+                        <SelectItem value="0">{t('showAll')}</SelectItem>
                         <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {departamentos.map(dept => (
                           <SelectItem key={dept.id} value={dept.id}>
@@ -270,17 +270,17 @@ export default function MapaOSMPage() {
                   {/* P. Responsable */}
                   <div className="space-y-2">
                     <Label htmlFor="presponsable" className="text-red-600">
-                      P. Responsable
+                      {t('allegedPerpetrator')}
                     </Label>
                     <Select 
                       value={filtros['filtro[presponsable_id]']}
                       onValueChange={(value) => handleFiltroChange('filtro[presponsable_id]', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Mostrar todos" />
+                        <SelectValue placeholder="t('showAll')" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0">Mostrar todos</SelectItem>
+                        <SelectItem value="0">{t('showAll')}</SelectItem>
                         <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {presponsables.map(pr => (
                           <SelectItem key={pr.id} value={pr.id}>
@@ -294,17 +294,17 @@ export default function MapaOSMPage() {
                   {/* Violencia (Categoría) */}
                   <div className="space-y-2">
                     <Label htmlFor="tvio" className="text-blue-600">
-                      Violencia
+                      {t('violence')}
                     </Label>
                     <Select 
                       value={filtros['filtro[categoria_id]']}
                       onValueChange={(value) => handleFiltroChange('filtro[categoria_id]', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Mostrar todos" />
+                        <SelectValue placeholder="{t('showAll')}" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0">Mostrar todos</SelectItem>
+                        <SelectItem value="0">{t('showAll')}</SelectItem>
                         <SelectItem value="separator" disabled>-----------------------</SelectItem>
                         {categorias.map(cat => (
                           <SelectItem key={cat.id} value={cat.id}>
@@ -335,7 +335,7 @@ export default function MapaOSMPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-amber-600 text-sm">
                     <Info className="h-4 w-4" />
-                    <span>Conecta wallet para funciones avanzadas</span>
+                    <span>{t('connectWallet')}</span>
                   </div>
                 </CardContent>
               </Card>
