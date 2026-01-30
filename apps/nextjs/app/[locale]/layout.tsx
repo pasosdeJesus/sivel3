@@ -47,8 +47,3 @@ export default async function LocaleLayout({
     </html>
   )
 }
-
-// Generar rutas estáticas
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}

@@ -14,6 +14,9 @@ importers:
 
   .:
     dependencies:
+      '@formatjs/intl-localematcher':
+        specifier: ^0.8.0
+        version: 0.8.0
       '@pasosdejesus/m':
         specifier: gitlab:pasosdeJesus/m
         version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=6c428157954ba39b9b68fa8bfd36a5f7919f894a(@types/node@24.10.9)
@@ -113,6 +116,9 @@ importers:
       lucide-react:
         specifier: ^0.563.0
         version: 0.563.0(react@19.2.4)
+      negotiator:
+        specifier: ^1.0.0
+        version: 1.0.0
       next:
         specifier: 15.3.9
         version: 15.3.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1495,8 +1501,8 @@ packages:
   '@reown/appkit@1.7.8':
     resolution: {integrity: sha512-51kTleozhA618T1UvMghkhKfaPcc9JlKwLJ5uV+riHyvSoWPKPRIa5A6M1Wano5puNyW0s3fwywhyqTHSilkaA==}
 
-  '@rollup/wasm-node@4.57.0':
-    resolution: {integrity: sha512-EmuVEJWCxlkA/HIe9IJUSSXUXj3mw3w/4NDHhdu2KLCfBUOsjHMOWWrVzTGySmdaua0E120LSQ5ojDGfi+tA/Q==}
+  '@rollup/wasm-node@4.57.1':
+    resolution: {integrity: sha512-b0rcJH8ykEanfgTeDtlPubhphIUOx0oaAek+3hizTaFkoC1FBSTsY0GixwB4D5HZ5r3Gt2yI9c8M13OcW/kW5A==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -6517,7 +6523,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@rollup/wasm-node@4.57.0':
+  '@rollup/wasm-node@4.57.1':
     dependencies:
       '@types/estree': 1.0.8
     optionalDependencies:
@@ -10253,7 +10259,7 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
       postcss: 8.5.6
-      rollup: '@rollup/wasm-node@4.57.0'
+      rollup: '@rollup/wasm-node@4.57.1'
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 24.10.9

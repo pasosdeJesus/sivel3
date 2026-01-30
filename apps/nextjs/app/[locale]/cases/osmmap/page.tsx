@@ -3,7 +3,7 @@
 import { Filter, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname } from 'next/navigation';
-import { useLocale, useTranslation } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState} from 'react';
 
 import { Badge } from '@/components/ui/badge';
