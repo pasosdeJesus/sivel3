@@ -101,3 +101,4 @@ cache/
 typechain-types/
 apps/nextjs/html-snapshots/
 .next
+tsconfig.tsbuildinfo
