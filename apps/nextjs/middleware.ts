@@ -5,13 +5,24 @@ import Negotiator from 'negotiator';
 
 const locales = ['en', 'es']; // inglés primero
 const defaultLocale = 'en';
+const localeCache = new Map<string, string>();
 
 function getLocale(request: NextRequest): string {
-  const negotiatorHeaders: Record<string, string> = {}
-  request.headers.forEach((value, key) => (negotiatorHeaders[key] = value))
+  const cacheKey = request.headers.get('accept-language') || '';
 
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages()
-  return match(languages, locales, defaultLocale)
+  if (localeCache.has(cacheKey)) {
+    return localeCache.get(cacheKey)!;
+  }
+
+  const negotiatorHeaders: Record<string, string> = {};
+  request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
+
+  const languages = new Negotiator({ headers: negotiatorHeaders }).languages();
+  const locale = match(languages, locales, defaultLocale);
+
+  localeCache.set(cacheKey, locale);
+  return locale;
+
 }
 
 export function middleware(request: NextRequest) {
@@ -32,5 +43,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
-}
+  matcher: [
+    '/((?!api|_next|_vercel|.*\\..*).*)',
+    '/((?!monitoring|health|favicon.ico).*)' // excluir endpoints especiales
+  ]
+};
+
