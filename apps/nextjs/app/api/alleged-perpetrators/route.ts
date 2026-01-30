@@ -2,14 +2,13 @@
 
 import { Kysely } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
-import type { DB } from '@/db/db.d.ts';
-import defineConfig from '@/.config/kysely.config.ts'
+
+import { newKyselyPostgresql } from '@/.config/kysely.config'
+
 
 export async function GET(req: NextRequest) {
   try {
-    const db = new Kysely<DB>({
-      dialect: defineConfig.dialect
-    })
+    const db = newKyselyPostgresql()
 
     const presponsables = await db
       .selectFrom('sivel2_gen_presponsable')

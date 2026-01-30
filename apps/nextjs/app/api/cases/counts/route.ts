@@ -2,15 +2,14 @@
 
 import { Kysely, sql } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
-import type { DB } from '@/db/db.d.ts';
-import defineConfig from '@/.config/kysely.config.ts'
+
+import { newKyselyPostgresql } from '@/.config/kysely.config'
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const db = new Kysely<DB>({
-      dialect: defineConfig.dialect
-    });
+
+    const db = newKyselyPostgresql()
 
     // Obtener filtros de la URL
     const fechaini = searchParams.get('filtro[fechaini]');
@@ -26,10 +25,10 @@ export async function GET(req: NextRequest) {
     
     // Aplicar filtros a la consulta de casos (para otros necesitaríamos joins)
     if (fechaini) {
-      casoQuery = casoQuery.where('fecha', '>=', fechaini);
+      casoQuery = casoQuery.where('fecha', '>=', new Date(fechaini));
     }
     if (fechafin) {
-      casoQuery = casoQuery.where('fecha', '<=', fechafin);
+      casoQuery = casoQuery.where('fecha', '<=', new Date(fechafin));
     }
 
     // Para victimas y actos necesitaríamos joins complejos con filtros

@@ -2,14 +2,14 @@
 
 import { Kysely, sql } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
-import type { DB } from '@/db/db.d.ts';
-import defineConfig from '@/.config/kysely.config.ts'
+
+import { newKyselyPostgresql } from '@/.config/kysely.config'
+
 
 export async function GET(req: NextRequest) {
   try {
-    const db = new Kysely<DB>({
-      dialect: defineConfig.dialect
-    })
+
+    const db = newKyselyPostgresql()
 
     // Obtener categorías con su código como en Rails: [d.presenta_con_codigo, d.id]
     const categorias = await db

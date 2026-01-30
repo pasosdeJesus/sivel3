@@ -8,6 +8,7 @@ import Header from './Header'
 
 interface Props {
   children: ReactNode
+  lang?: string
 }
 const Layout: FC<Props> = ({ children, lang = 'en' }) => {
   return (

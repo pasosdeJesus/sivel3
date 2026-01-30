@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import { notFound, useParams } from 'next/navigation'
 import { I18nextProvider } from 'react-i18next'
-import { useEffect } from 'react'
+import { use, useEffect } from 'react'
 
 import '@/app/globals.css'
 import Layout from '@/components/Layout'
@@ -24,11 +24,13 @@ const dmMono = DM_Mono({
 
 export default function LocaleLayout({
   children,
-  params: { locale }
+  params
 }: Readonly<{
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }>) {
+
+  const { locale } = use(params)
 
   // Validar locale antes de renderizar
   if (!['en', 'es'].includes(locale)) {
