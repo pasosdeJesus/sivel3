@@ -44,8 +44,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-    '/((?!monitoring|health|favicon.ico).*)' // excluir endpoints especiales
+    '/((?!api|_next|_vercel|monitoring|health|favicon\\.ico|.*\\..*).*)'
   ]
 };
 
