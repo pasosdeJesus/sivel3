@@ -6,6 +6,7 @@ interface ExtendedWindow extends Window {
   }
 }
 import { AppProps } from 'next/app'
+import { NextIntlClientProvider } from 'next-intl';
 import {
   connectorsForWallets,
   lightTheme,
@@ -60,19 +61,19 @@ const queryClient = new QueryClient()
 
 // Taking ideas of
 // https://github.com/0xRowdy/nextauth-siwe-route-handlers/blob/main/src/app/providers/web3-providers.tsx
-export function AppProvider FC<AppProviderProps> = ({ 
+export function AppProvider({ 
     children, 
     autoConnect,
     messages = {},
     locale = 'en'
-}) => {
+}: AppProviderProps) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={lightTheme()}>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <WalletProvider>
-                {props.children}
+                {children}
               </WalletProvider>
             </NextIntlClientProvider>
           </RainbowKitProvider>
