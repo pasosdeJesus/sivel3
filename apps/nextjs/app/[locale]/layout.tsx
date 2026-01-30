@@ -1,11 +1,14 @@
+'use client'
+
 import type { Metadata } from 'next'
 import { DM_Sans, DM_Mono } from 'next/font/google'
-import { notFound } from 'next/navigation'
-import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { notFound, useParams } from 'next/navigation'
+import { I18nextProvider } from 'react-i18next'
+import { useEffect } from 'react'
 
 import '@/app/globals.css'
 import Layout from '@/components/Layout'
+import i18n from '@/i18n'
 import { AppProvider } from '@/providers/AppProvider'
 
 const dmSans = DM_Sans({
@@ -19,12 +22,7 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
 })
 
-export const metadata: Metadata = {
-  title: 'SIVEL 3',
-  description: 'Information System of Political Violence',
-}
-
-export default async function LocaleLayout({
+export default function LocaleLayout({
   children,
   params: { locale }
 }: Readonly<{
@@ -32,18 +30,29 @@ export default async function LocaleLayout({
   params: { locale: string }
 }>) {
 
-  const messages = await getMessages({ locale });
-
   return (
     <html
       lang={locale}
       className={`${dmSans.variable} ${dmMono.variable} antialiased`}
     >
       <body>
-        <AppProvider messages={messages} locale={locale}>
-          <Layout>{children}</Layout>
-        </AppProvider>
+        <I18nextProvider i18n={i18n}>
+          <LanguageSync locale={locale} />
+          <AppProvider messages={messages} locale={locale}>
+            <Layout>{children}</Layout>
+          </AppProvider>
+        </I18nextProvider>
       </body>
     </html>
   )
+}
+
+// Componente auxiliar para sincronizar el idioma de i18n con la URL
+function LanguageSync({ locale }: { locale: string }) {
+   const params = useParams(); // Obtiene los parámetros de la ruta
+   const currentLocale = params.locale as string;
+   useEffect(() => {
+     i18n.changeLanguage(currentLocale);
+   }, [currentLocale]);
+   return null;
 }

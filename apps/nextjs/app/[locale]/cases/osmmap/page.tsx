@@ -3,7 +3,8 @@
 import { Filter, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslation } from 'react-i18next'; // Nuevo hook
+import { useParams } from 'next/navigation'; // Para obtener el locale actual
 import { useEffect, useState} from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -36,15 +37,17 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ),
 });
 
-export default function MapaOSMPage() {
-  const t = useTranslations('CasesOSMMap');
+export default function OSMMapPage() {
+  const { t, i18n } = useTranslations('OSMMapPage');
   const router = useRouter();
   const pathname = usePathname();
-  const currentLocale = useLocale() || 'en';
+  const params = useParams();
+  const currentLocale = params.locale as string || 'en'; // Obtiene el locale de la URL
 
   const cambiarIdioma = (nuevoLocale: string) => {
     const nuevaRuta = pathname.replace(`/${currentLocale}/`, `/${nuevoLocale}/`);
     router.push(nuevaRuta);
+    // i18n.changeLanguage(nuevoLocale);
   };
 
   const { isConnected } = useWallet();

@@ -6,7 +6,6 @@ interface ExtendedWindow extends Window {
   }
 }
 import { AppProps } from 'next/app'
-import { NextIntlClientProvider } from 'next-intl';
 import {
   connectorsForWallets,
   lightTheme,
@@ -28,7 +27,6 @@ import { WalletProvider } from '@/contexts/WalletContext';
 interface AppProviderProps {
   children: React.ReactNode
   autoConnect?: boolean
-  messages?: any
   locale?: string
 }
 
@@ -64,18 +62,15 @@ const queryClient = new QueryClient()
 export function AppProvider({ 
     children, 
     autoConnect,
-    messages = {},
     locale = 'en'
 }: AppProviderProps) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={lightTheme()}>
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              <WalletProvider>
-                {children}
-              </WalletProvider>
-            </NextIntlClientProvider>
+            <WalletProvider>
+              {children}
+            </WalletProvider>
           </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
