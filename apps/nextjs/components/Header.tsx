@@ -13,7 +13,7 @@ export default function Header({ lang = 'en' }) {
             <Map className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                Mapa de Casos
+              { lang == 'es' ? "Mapa de Casos" : "Map of Cases" }
               </h1>
             </div>
           </div>

@@ -3,8 +3,8 @@
 import { Filter, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname } from 'next/navigation';
-import { useTranslation } from 'react-i18next'; // Nuevo hook
-import { useParams } from 'next/navigation'; // Para obtener el locale actual
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'next/navigation';
 import { useEffect, useState} from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,9 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 });
 
 export default function OSMMapPage() {
-  const { t, i18n } = useTranslation('OSMMapPage');
+  const { t, i18n } = useTranslation('common');
+  console.log("OJO t=", t)
+  console.log("OJO i18n=", i18n)
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();

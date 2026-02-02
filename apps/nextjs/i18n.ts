@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend'; // Para cargar archivos JSON
 import LanguageDetector from 'i18next-browser-languagedetector';
+import path from 'path'
 
 i18n
   .use(Backend)
@@ -11,10 +12,15 @@ i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'es'],
     debug: process.env.NODE_ENV === 'development',
+    i18n: {
+      defaultLocale: 'en',
+      locales: ['en', 'es'],
+      localePath: path.resolve('./public/locales'),
+    },
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json', // Ruta para tus archivos de traducción
     },
-    ns: ['common', 'OSMMapPage'],
+    ns: ['common'],
     defaultNS: 'common',
     fallbackNS: 'common',
     saveMissing: process.env.NODE_ENV === 'development',

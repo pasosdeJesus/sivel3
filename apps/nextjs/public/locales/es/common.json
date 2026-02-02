@@ -1,5 +1,4 @@
 {
-  "OSMMapPage": {
     "acts": "Actos",
     "allegedPerpetrator": "P. Responsable",
     "caseDetails": "Detalles del Caso",
@@ -30,5 +29,4 @@
     "victims": "Víctimas",
     "viewComplete": "Ver completo",
     "violence": "Violencia"
-  }
 }
