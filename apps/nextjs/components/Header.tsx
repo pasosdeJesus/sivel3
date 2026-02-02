@@ -1,8 +1,13 @@
-import { Map, Info } from 'lucide-react';
-import ConnectWalletButton from './ConnectWalletButton';
+import { Map, Info } from 'lucide-react'
+import ConnectWalletButton from './ConnectWalletButton'
 
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export default function Header({ lang = 'en' }) {
   return (
@@ -13,7 +18,7 @@ export default function Header({ lang = 'en' }) {
             <Map className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-              { lang == 'es' ? "Mapa de Casos" : "Map of Cases" }
+                {lang == 'es' ? 'Mapa de Casos' : 'Map of Cases'}
               </h1>
             </div>
           </div>
@@ -24,5 +29,5 @@ export default function Header({ lang = 'en' }) {
         </div>
       </div>
     </header>
-  );
+  )
 }

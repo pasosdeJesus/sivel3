@@ -6,21 +6,37 @@ import { describe, it, expect, vi } from 'vitest'
 // Mock @radix-ui/react-radio-group
 vi.mock('@radix-ui/react-radio-group', () => ({
   Root: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="radio-group-root" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="radio-group-root"
+      className={className}
+      {...props}
+    />
   )),
   Item: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <button ref={ref} data-testid="radio-group-item" className={className} {...props}>
+    <button
+      ref={ref}
+      data-testid="radio-group-item"
+      className={className}
+      {...props}
+    >
       {props.children}
     </button>
   )),
   Indicator: ({ className, children }: any) => (
-    <div data-testid="radio-group-indicator" className={className}>{children}</div>
+    <div data-testid="radio-group-indicator" className={className}>
+      {children}
+    </div>
   ),
 }))
 
 // Mock lucide-react Circle icon
 vi.mock('lucide-react', () => ({
-  Circle: ({ className }: any) => <div data-testid="circle-icon" className={className}>○</div>,
+  Circle: ({ className }: any) => (
+    <div data-testid="circle-icon" className={className}>
+      ○
+    </div>
+  ),
 }))
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -50,7 +66,7 @@ describe('RadioGroup', () => {
       <RadioGroup>
         <RadioGroupItem value="1" />
         <RadioGroupItem value="2" />
-      </RadioGroup>
+      </RadioGroup>,
     )
     const items = screen.getAllByTestId('radio-group-item')
     expect(items).toHaveLength(2)

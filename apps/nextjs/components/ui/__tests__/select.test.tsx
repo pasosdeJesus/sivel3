@@ -6,48 +6,111 @@ import { describe, it, expect, vi } from 'vitest'
 // Mock @radix-ui/react-select
 vi.mock('@radix-ui/react-select', () => ({
   Root: ({ children }: any) => <div data-testid="select-root">{children}</div>,
-  Group: ({ children }: any) => <div data-testid="select-group">{children}</div>,
-  Value: ({ children }: any) => <div data-testid="select-value">{children}</div>,
-  Trigger: React.forwardRef(({ className, children, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-trigger" className={className} {...props}>
+  Group: ({ children }: any) => (
+    <div data-testid="select-group">{children}</div>
+  ),
+  Value: ({ children }: any) => (
+    <div data-testid="select-value">{children}</div>
+  ),
+  Trigger: React.forwardRef(
+    ({ className, children, ...props }: any, ref: any) => (
+      <div
+        ref={ref}
+        data-testid="select-trigger"
+        className={className}
+        {...props}
+      >
+        {children}
+        <div data-testid="select-icon">icon</div>
+      </div>
+    ),
+  ),
+  Icon: ({ asChild, children }: any) =>
+    asChild ? children : <div data-testid="select-icon">{children}</div>,
+  Portal: ({ children }: any) => (
+    <div data-testid="select-portal">{children}</div>
+  ),
+  Content: React.forwardRef(
+    ({ className, children, position, ...props }: any, ref: any) => (
+      <div
+        ref={ref}
+        data-testid="select-content"
+        className={className}
+        {...props}
+      >
+        {children}
+      </div>
+    ),
+  ),
+  Viewport: ({ className, children }: any) => (
+    <div data-testid="select-viewport" className={className}>
       {children}
-      <div data-testid="select-icon">icon</div>
     </div>
-  )),
-  Icon: ({ asChild, children }: any) => asChild ? children : <div data-testid="select-icon">{children}</div>,
-  Portal: ({ children }: any) => <div data-testid="select-portal">{children}</div>,
-  Content: React.forwardRef(({ className, children, position, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-content" className={className} {...props}>
-      {children}
-    </div>
-  )),
-  Viewport: ({ className, children }: any) => <div data-testid="select-viewport" className={className}>{children}</div>,
+  ),
   Label: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-label" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="select-label"
+      className={className}
+      {...props}
+    />
   )),
   Item: React.forwardRef(({ className, children, ...props }: any, ref: any) => (
     <div ref={ref} data-testid="select-item" className={className} {...props}>
       {children}
     </div>
   )),
-  ItemIndicator: ({ children }: any) => <div data-testid="select-item-indicator">{children}</div>,
-  ItemText: ({ children }: any) => <div data-testid="select-item-text">{children}</div>,
+  ItemIndicator: ({ children }: any) => (
+    <div data-testid="select-item-indicator">{children}</div>
+  ),
+  ItemText: ({ children }: any) => (
+    <div data-testid="select-item-text">{children}</div>
+  ),
   Separator: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-separator" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="select-separator"
+      className={className}
+      {...props}
+    />
   )),
   ScrollUpButton: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-scroll-up" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="select-scroll-up"
+      className={className}
+      {...props}
+    />
   )),
-  ScrollDownButton: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="select-scroll-down" className={className} {...props} />
-  )),
+  ScrollDownButton: React.forwardRef(
+    ({ className, ...props }: any, ref: any) => (
+      <div
+        ref={ref}
+        data-testid="select-scroll-down"
+        className={className}
+        {...props}
+      />
+    ),
+  ),
 }))
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  Check: ({ className }: any) => <div data-testid="check-icon" className={className}>✓</div>,
-  ChevronDown: ({ className }: any) => <div data-testid="chevron-down-icon" className={className}>▼</div>,
-  ChevronUp: ({ className }: any) => <div data-testid="chevron-up-icon" className={className}>▲</div>,
+  Check: ({ className }: any) => (
+    <div data-testid="check-icon" className={className}>
+      ✓
+    </div>
+  ),
+  ChevronDown: ({ className }: any) => (
+    <div data-testid="chevron-down-icon" className={className}>
+      ▼
+    </div>
+  ),
+  ChevronUp: ({ className }: any) => (
+    <div data-testid="chevron-up-icon" className={className}>
+      ▲
+    </div>
+  ),
 }))
 
 import {
@@ -73,7 +136,11 @@ describe('Select components', () => {
   })
 
   it('renders SelectItem with children', () => {
-    render(<SelectItem className="item-class" value="option1">Option 1</SelectItem>)
+    render(
+      <SelectItem className="item-class" value="option1">
+        Option 1
+      </SelectItem>,
+    )
     const item = screen.getByTestId('select-item')
     expect(item).toBeInTheDocument()
     expect(item).toHaveClass('item-class')
@@ -112,7 +179,7 @@ describe('Select components', () => {
     render(
       <SelectGroup data-testid="group">
         <SelectValue>Selected value</SelectValue>
-      </SelectGroup>
+      </SelectGroup>,
     )
     const group = screen.getByTestId('select-group')
     const value = screen.getByTestId('select-value')
@@ -124,7 +191,7 @@ describe('Select components', () => {
     render(
       <SelectContent className="content-class">
         <SelectItem value="item">Item</SelectItem>
-      </SelectContent>
+      </SelectContent>,
     )
     const content = screen.getByTestId('select-content')
     expect(content).toBeInTheDocument()

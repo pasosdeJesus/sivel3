@@ -47,7 +47,7 @@ describe('Button', () => {
       render(
         <Button asChild>
           <a href="/test">Link</a>
-        </Button>
+        </Button>,
       )
       const link = screen.getByRole('link')
       expect(link).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe('Button', () => {
       render(
         <Button asChild onClick={onClick}>
           <div>Child</div>
-        </Button>
+        </Button>,
       )
       const child = screen.getByText('Child')
       fireEvent.click(child)

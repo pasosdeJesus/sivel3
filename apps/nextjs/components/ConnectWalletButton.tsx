@@ -1,18 +1,27 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useWallet } from '@/contexts/WalletContext';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { useState } from 'react'
+import { useWallet } from '@/contexts/WalletContext'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 
 export default function ConnectWalletButton() {
-  const { isConnected } = useWallet();
-  const [openPopover, setOpenPopover] = useState(false);
+  const { isConnected } = useWallet()
+  const [openPopover, setOpenPopover] = useState(false)
 
   return (
     <TooltipProvider>
@@ -26,14 +35,14 @@ export default function ConnectWalletButton() {
           authenticationStatus,
           mounted,
         }) => {
-          const ready = mounted && authenticationStatus !== 'loading';
-          const connected = ready && account && chain && isConnected;
+          const ready = mounted && authenticationStatus !== 'loading'
+          const connected = ready && account && chain && isConnected
 
           return (
             <div
               {...(!ready && {
                 'aria-hidden': true,
-                className: "opacity-0 pointer-events-none select-none"
+                className: 'opacity-0 pointer-events-none select-none',
               })}
             >
               {!connected ? (
@@ -90,16 +99,16 @@ export default function ConnectWalletButton() {
                         size="sm"
                         className="h-8 gap-2 px-3 bg-emerald-600 hover:bg-emerald-700"
                       >
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className="h-2 w-2 p-0 bg-green-500 border-green-500"
                         />
                         <span className="text-xs font-medium truncate max-w-[100px]">
                           {account.displayName}
                         </span>
                         {account.displayBalance && (
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className="text-[10px] font-normal bg-emerald-500/20 text-emerald-800"
                           >
                             {account.displayBalance}
@@ -111,14 +120,16 @@ export default function ConnectWalletButton() {
                       <div className="p-4">
                         <div className="space-y-3">
                           <div>
-                            <h4 className="text-sm font-semibold">Wallet conectada</h4>
+                            <h4 className="text-sm font-semibold">
+                              Wallet conectada
+                            </h4>
                             <p className="text-xs text-muted-foreground mt-1">
                               {account.displayName}
                             </p>
                           </div>
-                          
+
                           <Separator />
-                          
+
                           <div className="space-y-2">
                             <Button
                               variant="outline"
@@ -137,9 +148,9 @@ export default function ConnectWalletButton() {
                               🌐 Cambiar red
                             </Button>
                           </div>
-                          
+
                           <Separator />
-                          
+
                           <div className="pt-1">
                             <p className="text-xs text-muted-foreground">
                               Conexión Web3 para futuras funciones
@@ -152,9 +163,9 @@ export default function ConnectWalletButton() {
                 </div>
               )}
             </div>
-          );
+          )
         }}
       </ConnectButton.Custom>
     </TooltipProvider>
-  );
+  )
 }

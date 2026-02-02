@@ -5,16 +5,18 @@ import { describe, it, expect, vi } from 'vitest'
 
 // Mock @radix-ui/react-switch
 vi.mock('@radix-ui/react-switch', () => ({
-  Root: React.forwardRef(({ className, checked, disabled, ...props }: any, ref: any) => (
-    <button
-      ref={ref}
-      data-testid="switch-root"
-      className={className}
-      data-state={checked ? 'checked' : 'unchecked'}
-      disabled={disabled}
-      {...props}
-    />
-  )),
+  Root: React.forwardRef(
+    ({ className, checked, disabled, ...props }: any, ref: any) => (
+      <button
+        ref={ref}
+        data-testid="switch-root"
+        className={className}
+        data-state={checked ? 'checked' : 'unchecked'}
+        disabled={disabled}
+        {...props}
+      />
+    ),
+  ),
   Thumb: ({ className, ...props }: any) => (
     <span data-testid="switch-thumb" className={className} {...props} />
   ),

@@ -1,1 +1,1 @@
-declare module "@pasosdejesus/m";
+declare module '@pasosdejesus/m'

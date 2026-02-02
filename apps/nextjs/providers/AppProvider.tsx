@@ -19,10 +19,10 @@ import {
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createConfig, http,  WagmiProvider } from 'wagmi'
+import { createConfig, http, WagmiProvider } from 'wagmi'
 import { celo, celoSepolia } from 'wagmi/chains'
 
-import { WalletProvider } from '@/contexts/WalletContext';
+import { WalletProvider } from '@/contexts/WalletContext'
 
 interface AppProviderProps {
   children: React.ReactNode
@@ -59,27 +59,24 @@ const queryClient = new QueryClient()
 
 // Taking ideas of
 // https://github.com/0xRowdy/nextauth-siwe-route-handlers/blob/main/src/app/providers/web3-providers.tsx
-export function AppProvider({ 
-    children, 
-    autoConnect,
-    locale = 'en'
+export function AppProvider({
+  children,
+  autoConnect,
+  locale = 'en',
 }: AppProviderProps) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider theme={lightTheme()}>
-            <WalletProvider>
-              {children}
-            </WalletProvider>
-          </RainbowKitProvider>
+        <RainbowKitProvider theme={lightTheme()}>
+          <WalletProvider>{children}</WalletProvider>
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
-/*          theme={lightTheme({
+  /*          theme={lightTheme({
               accentColor: '#714ba6',
               accentColorForeground: 'white',
               borderRadius: 'small',
               fontStack: 'system',
               overlayBlur: 'none', */
-
 }

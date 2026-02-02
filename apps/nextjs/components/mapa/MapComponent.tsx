@@ -1,104 +1,130 @@
-'use client';
+'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import 'leaflet.markercluster';
-import { 
+import { useEffect, useRef, useState, useCallback } from 'react'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+import 'leaflet.markercluster'
+import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Navigation, Download, Layers, Filter, MapPin, Users, Calendar, FileText, Share2 } from 'lucide-react';
+  CardDescription,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Navigation,
+  Download,
+  Layers,
+  Filter,
+  MapPin,
+  Users,
+  Calendar,
+  FileText,
+  Share2,
+} from 'lucide-react'
 
 interface MapComponentProps {
-  center?: [number, number];
-  zoom?: number;
-  filtros?: any;
-  onCargarConteos?: (conteos: any) => void;
+  center?: [number, number]
+  zoom?: number
+  filtros?: any
+  onCargarConteos?: (conteos: any) => void
 }
 
 interface CasoDetalle {
-  id: string;
-  titulo: string;
-  hechos: string;
-  fecha: string;
-  hora: string;
-  departamento: string;
-  municipio: string;
-  centro_poblado: string;
-  lugar: string;
-  victimas: string[];
-  presponsables: string[];
+  id: string
+  titulo: string
+  hechos: string
+  fecha: string
+  hora: string
+  departamento: string
+  municipio: string
+  centro_poblado: string
+  lugar: string
+  victimas: string[]
+  presponsables: string[]
 }
 
-export default function MapComponent({ 
-  center = [4.6682, -74.071], 
+export default function MapComponent({
+  center = [4.6682, -74.071],
   zoom = 6,
   filtros = {},
-  onCargarConteos 
+  onCargarConteos,
 }: MapComponentProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<any>(null);
-  const infoRef = useRef<any>(null);
-  const filtrosAnterioresRef = useRef<any>({});
+  const mapRef = useRef<HTMLDivElement>(null)
+  const mapInstanceRef = useRef<L.Map | null>(null)
+  const markersRef = useRef<any>(null)
+  const infoRef = useRef<any>(null)
+  const filtrosAnterioresRef = useRef<any>({})
 
-  const [cargando, setCargando] = useState(true);
-  const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(null);
-  const [mostrarInfo, setMostrarInfo] = useState(false);
-  const [capasVisibles, setCapasVisibles] = useState<string[]>(['OpenStreetMap']);
+  const [cargando, setCargando] = useState(true)
+  const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(
+    null,
+  )
+  const [mostrarInfo, setMostrarInfo] = useState(false)
+  const [capasVisibles, setCapasVisibles] = useState<string[]>([
+    'OpenStreetMap',
+  ])
 
   // Inicializar mapa
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current || mapInstanceRef.current) return
 
     const map = L.map(mapRef.current, {
       zoomControl: false,
-      minZoom: 2
-    }).setView(center, zoom);
+      minZoom: 2,
+    }).setView(center, zoom)
 
     // Capas base (igual que Rails)
     const capasBase = {
-      "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; Contribuyentes de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }),
-      "Satelite (ArcGIS)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
-      "Oscuro (CartoDB)": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png')
-    };
+      OpenStreetMap: L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+          attribution:
+            '&copy; Contribuyentes de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        },
+      ),
+      'Satelite (ArcGIS)': L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ),
+      'Oscuro (CartoDB)': L.tileLayer(
+        'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+      ),
+    }
 
     // Capas superpuestas (igual que Rails)
     const capasSuperpuestas = {
-      "Transporte (OpenPtmap)": L.tileLayer('http://www.openptmap.org/tiles/{z}/{x}/{y}.png'),
-    };
+      'Transporte (OpenPtmap)': L.tileLayer(
+        'http://www.openptmap.org/tiles/{z}/{x}/{y}.png',
+      ),
+    }
 
     // Añadir capa por defecto
-    capasBase["OpenStreetMap"].addTo(map);
+    capasBase['OpenStreetMap'].addTo(map)
 
     // Control de capas
-    const controlCapas = L.control.layers(capasBase, capasSuperpuestas, {
-      position: 'topleft'
-    }).addTo(map);
+    const controlCapas = L.control
+      .layers(capasBase, capasSuperpuestas, {
+        position: 'topleft',
+      })
+      .addTo(map)
 
     // Control de zoom
-    L.control.zoom({ position: 'topleft' }).addTo(map);
+    L.control.zoom({ position: 'topleft' }).addTo(map)
 
     // Escala
-    L.control.scale({ imperial: false }).addTo(map);
+    L.control.scale({ imperial: false }).addTo(map)
 
     // Control de ubicación
-    const locateControl = new L.Control({ position: 'topleft' });
-    locateControl.onAdd = function() {
-      const div = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+    const locateControl = new L.Control({ position: 'topleft' })
+    locateControl.onAdd = function () {
+      const div = L.DomUtil.create('div', 'leaflet-control leaflet-bar')
       div.innerHTML = `
         <button 
           title="Mi ubicación"
@@ -106,86 +132,86 @@ export default function MapComponent({
         >
           <Navigation className="w-5 h-5" />
         </button>
-      `;
-      div.onclick = () => map.locate({setView: true, maxZoom: 13});
-      return div;
-    };
-    locateControl.addTo(map);
+      `
+      div.onclick = () => map.locate({ setView: true, maxZoom: 13 })
+      return div
+    }
+    locateControl.addTo(map)
 
     // Inicializar cluster de marcadores
     markersRef.current = (L as any).markerClusterGroup({
       showCoverageOnHover: false,
       spiderfyOnMaxZoom: true,
-      maxClusterRadius: 50
-    });
+      maxClusterRadius: 50,
+    })
 
-    map.addLayer(markersRef.current);
-    mapInstanceRef.current = map;
+    map.addLayer(markersRef.current)
+    mapInstanceRef.current = map
 
     // Cargar casos iniciales
-    cargarCasos();
+    cargarCasos()
 
     // Escuchar cambios en capas
     map.on('baselayerchange', (e: any) => {
-      setCapasVisibles([e.name]);
-    });
+      setCapasVisibles([e.name])
+    })
 
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
+        mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Cargar casos desde API
   const cargarCasos = useCallback(async (filtrosActuales?: any) => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current) return
 
-    setCargando(true);
+    setCargando(true)
     try {
-      let url = '/api/cases/datos-osm?';
-      const filtrosAUsar = filtrosActuales || filtros;
+      let url = '/api/cases/datos-osm?'
+      const filtrosAUsar = filtrosActuales || filtros
 
       Object.entries(filtros).forEach(([key, value]) => {
         if (value) {
-          url += `${key}=${value}&`;
+          url += `${key}=${value}&`
         }
-      });
+      })
 
-      const response = await fetch(url);
-      const datos = await response.json();
-      
+      const response = await fetch(url)
+      const datos = await response.json()
+
       // Actualizar conteos
       try {
-        const conteosUrl = `/api/cases/counts?${new URLSearchParams(filtros).toString()}`;
-        const conteosRes = await fetch(conteosUrl);
-        const conteosData = await conteosRes.json();
+        const conteosUrl = `/api/cases/counts?${new URLSearchParams(filtros).toString()}`
+        const conteosRes = await fetch(conteosUrl)
+        const conteosData = await conteosRes.json()
 
         if (onCargarConteos) {
-          onCargarConteos(conteosData);
+          onCargarConteos(conteosData)
         }
       } catch (error) {
-        console.error('Error cargando conteos:', error);
-      } 
-      
+        console.error('Error cargando conteos:', error)
+      }
+
       // Limpiar marcadores anteriores
-      markersRef.current?.clearLayers();
-      
-      const listaMarcadores: L.Marker[] = [];
-      const respuesta = datos.respuesta;
-      
+      markersRef.current?.clearLayers()
+
+      const listaMarcadores: L.Marker[] = []
+      const respuesta = datos.respuesta
+
       for (const codigo in respuesta) {
         if (respuesta.hasOwnProperty(codigo)) {
-          const caso = respuesta[codigo];
-          const lat = parseFloat(caso.latitud);
-          const lng = parseFloat(caso.longitud);
-          
-          if (isNaN(lat) || isNaN(lng)) continue;
-          
+          const caso = respuesta[codigo]
+          const lat = parseFloat(caso.latitud)
+          const lng = parseFloat(caso.longitud)
+
+          if (isNaN(lat) || isNaN(lng)) continue
+
           // Crear marcador simple (sin colores por categoría)
-          const marcador = L.marker([lat, lng]);
-          
+          const marcador = L.marker([lat, lng])
+
           // Popup simple igual a Rails
           marcador.bindPopup(`
             <div class="p-2 min-w-[200px]">
@@ -198,34 +224,33 @@ export default function MapComponent({
                 Ver detalles
               </button>
             </div>
-          `);
-          
+          `)
+
           // Al hacer clic
           marcador.on('click', async () => {
-            await cargarDetalleCaso(codigo);
-          });
-          
-          listaMarcadores.push(marcador);
+            await cargarDetalleCaso(codigo)
+          })
+
+          listaMarcadores.push(marcador)
         }
       }
-      
+
       // Añadir todos los marcadores al cluster
-      markersRef.current?.addLayers(listaMarcadores);
-      
+      markersRef.current?.addLayers(listaMarcadores)
     } catch (error) {
-      console.error('Error cargando casos:', error);
+      console.error('Error cargando casos:', error)
     } finally {
-      setCargando(false);
+      setCargando(false)
     }
-  }, []);
+  }, [])
 
   // Cargar detalle de caso
   const cargarDetalleCaso = async (codigo: string) => {
     try {
-      const response = await fetch(`/api/cases/${codigo}`);
-      const datos = await response.json();
-      const caso = datos.caso;
-      
+      const response = await fetch(`/api/cases/${codigo}`)
+      const datos = await response.json()
+      const caso = datos.caso
+
       setCasoSeleccionado({
         id: caso.id || codigo,
         titulo: caso.titulo || '',
@@ -237,31 +262,33 @@ export default function MapComponent({
         centro_poblado: caso.centro_poblado || '',
         lugar: caso.lugar || '',
         victimas: Array.isArray(caso.victimas) ? caso.victimas : [],
-        presponsables: Array.isArray(caso.presponsables) ? caso.presponsables : []
-      });
-      
-      setMostrarInfo(true);
-      
+        presponsables: Array.isArray(caso.presponsables)
+          ? caso.presponsables
+          : [],
+      })
+
+      setMostrarInfo(true)
     } catch (error) {
-      console.error('Error cargando detalle:', error);
+      console.error('Error cargando detalle:', error)
     }
-  };
+  }
 
   // Exportar GeoJSON
   const descargarCapaCasos = () => {
-    if (!markersRef.current) return;
-    
-    const geojson = markersRef.current.toGeoJSON();
-    const dataStr = "data:text/json;charset=utf-8," + 
-      encodeURIComponent(JSON.stringify(geojson));
-    
-    const link = document.createElement('a');
-    link.setAttribute("href", dataStr);
-    link.setAttribute("download", "casos.geojson");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
+    if (!markersRef.current) return
+
+    const geojson = markersRef.current.toGeoJSON()
+    const dataStr =
+      'data:text/json;charset=utf-8,' +
+      encodeURIComponent(JSON.stringify(geojson))
+
+    const link = document.createElement('a')
+    link.setAttribute('href', dataStr)
+    link.setAttribute('download', 'casos.geojson')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  }
 
   // Compartir
   const compartirMapa = async () => {
@@ -271,33 +298,34 @@ export default function MapComponent({
           title: 'Mapa de Casos - Noche y Niebla',
           text: 'Explora los casos documentados en el mapa interactivo',
           url: window.location.href,
-        });
+        })
       } catch (error) {
-        console.log('Error al compartir:', error);
+        console.log('Error al compartir:', error)
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Enlace copiado al portapapeles');
+      navigator.clipboard.writeText(window.location.href)
+      alert('Enlace copiado al portapapeles')
     }
-  };
+  }
 
   // Recargar casos cuando cambian filtros
   useEffect(() => {
-    const filtrosCambiaron = JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current);
+    const filtrosCambiaron =
+      JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current)
     if (mapInstanceRef.current && filtrosCambiaron) {
-      filtrosAnterioresRef.current = { ...filtros };
-      cargarCasos();
+      filtrosAnterioresRef.current = { ...filtros }
+      cargarCasos()
     }
-  }, [filtros]);
+  }, [filtros])
 
   return (
     <div className="relative h-full">
       {/* Mapa */}
-      <div 
-        ref={mapRef} 
+      <div
+        ref={mapRef}
         className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg border border-gray-300 relative z-10"
       />
-      
+
       {/* Overlay de carga */}
       {cargando && (
         <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20 rounded-lg">
@@ -308,7 +336,7 @@ export default function MapComponent({
           </div>
         </div>
       )}
-      
+
       {/* Panel de información del caso (similar a Rails) */}
       {mostrarInfo && casoSeleccionado && (
         <Card className="absolute top-4 right-4 w-80 max-h-[80vh] z-30 shadow-xl">
@@ -317,7 +345,9 @@ export default function MapComponent({
               <MapPin className="h-5 w-5" />
               Detalles del Caso
             </CardTitle>
-            <CardDescription>Información completa del caso seleccionado</CardDescription>
+            <CardDescription>
+              Información completa del caso seleccionado
+            </CardDescription>
             <button
               onClick={() => setMostrarInfo(false)}
               className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
@@ -325,17 +355,21 @@ export default function MapComponent({
               ×
             </button>
           </CardHeader>
-          
+
           <ScrollArea className="max-h-[60vh] px-4">
             <div className="space-y-4">
               {/* Descripción */}
               <div>
-                <h3 className="font-semibold text-lg mb-2">{casoSeleccionado.titulo}</h3>
-                <p className="text-sm text-gray-700">{casoSeleccionado.hechos}</p>
+                <h3 className="font-semibold text-lg mb-2">
+                  {casoSeleccionado.titulo}
+                </h3>
+                <p className="text-sm text-gray-700">
+                  {casoSeleccionado.hechos}
+                </p>
               </div>
-              
+
               <Separator />
-              
+
               {/* Datos básicos */}
               <div className="space-y-2 text-sm">
                 {casoSeleccionado.fecha && (
@@ -344,21 +378,21 @@ export default function MapComponent({
                     <span>Fecha: {casoSeleccionado.fecha}</span>
                   </div>
                 )}
-                
+
                 {casoSeleccionado.departamento && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-gray-500" />
                     <span>Departamento: {casoSeleccionado.departamento}</span>
                   </div>
                 )}
-                
+
                 {casoSeleccionado.municipio && (
                   <div>
                     <span className="text-gray-600">Municipio: </span>
                     <span>{casoSeleccionado.municipio}</span>
                   </div>
                 )}
-                
+
                 {casoSeleccionado.lugar && (
                   <div>
                     <span className="text-gray-600">Lugar: </span>
@@ -366,9 +400,9 @@ export default function MapComponent({
                   </div>
                 )}
               </div>
-              
+
               <Separator />
-              
+
               {/* Víctimas */}
               {casoSeleccionado.victimas.length > 0 && (
                 <div>
@@ -378,24 +412,28 @@ export default function MapComponent({
                   </h4>
                   <ul className="text-sm space-y-1">
                     {casoSeleccionado.victimas.map((victima, index) => (
-                      <li key={index} className="text-gray-700">{victima}</li>
+                      <li key={index} className="text-gray-700">
+                        {victima}
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
-              
+
               {/* Presuntos responsables */}
               {casoSeleccionado.presponsables.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Presuntos Responsables</h4>
                   <ul className="text-sm space-y-1">
                     {casoSeleccionado.presponsables.map((pr, index) => (
-                      <li key={index} className="text-gray-700">{pr}</li>
+                      <li key={index} className="text-gray-700">
+                        {pr}
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
-              
+
               {/* Acciones */}
               <div className="pt-4">
                 <div className="flex gap-2">
@@ -403,7 +441,9 @@ export default function MapComponent({
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => window.open(`/casos/${casoSeleccionado.id}`, '_blank')}
+                    onClick={() =>
+                      window.open(`/casos/${casoSeleccionado.id}`, '_blank')
+                    }
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Ver completo
@@ -412,27 +452,32 @@ export default function MapComponent({
               </div>
             </div>
           </ScrollArea>
-          
+
           <CardContent className="pt-4 border-t">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">Código: {casoSeleccionado.id}</span>
+              <span className="text-xs text-gray-500">
+                Código: {casoSeleccionado.id}
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
                   if (mapInstanceRef.current && casoSeleccionado) {
                     // Centrar en el caso
-                    const caso = Object.values(markersRef.current?._layers || {})
-                      .find((m: any) => m.options.title?.includes(casoSeleccionado.id));
-                    
+                    const caso = Object.values(
+                      markersRef.current?._layers || {},
+                    ).find((m: any) =>
+                      m.options.title?.includes(casoSeleccionado.id),
+                    )
+
                     if (caso) {
                       mapInstanceRef.current.setView(
                         (caso as L.Marker).getLatLng(),
-                        13
-                      );
+                        13,
+                      )
                     }
                   }
-                  setMostrarInfo(false);
+                  setMostrarInfo(false)
                 }}
               >
                 <Navigation className="h-4 w-4 mr-2" />
@@ -442,7 +487,7 @@ export default function MapComponent({
           </CardContent>
         </Card>
       )}
-      
+
       {/* Controles flotantes superiores */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">
         <Button
@@ -454,7 +499,7 @@ export default function MapComponent({
           <Share2 className="h-4 w-4 mr-2" />
           Compartir
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -465,7 +510,7 @@ export default function MapComponent({
           Exportar
         </Button>
       </div>
-      
+
       {/* Indicador de capa activa */}
       <div className="absolute bottom-4 left-4 z-20">
         <Badge variant="secondary" className="shadow-md">
@@ -474,5 +519,5 @@ export default function MapComponent({
         </Badge>
       </div>
     </div>
-  );
+  )
 }

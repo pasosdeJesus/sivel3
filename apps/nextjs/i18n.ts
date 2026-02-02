@@ -1,7 +1,7 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import Backend from 'i18next-http-backend'; // Para cargar archivos JSON
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import Backend from 'i18next-http-backend' // Para cargar archivos JSON
+import LanguageDetector from 'i18next-browser-languagedetector'
 import path from 'path'
 
 i18n
@@ -29,7 +29,7 @@ i18n
         : false,*/
     interpolation: {
       escapeValue: false, // React ya se encarga de escapar
-    }
-  });
+    },
+  })
 
-export default i18n;
+export default i18n

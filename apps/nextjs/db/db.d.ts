@@ -3,1468 +3,1473 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely'
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>
 
-export type Json = JsonValue;
+export type Json = JsonValue
 
-export type JsonArray = JsonValue[];
+export type JsonArray = JsonValue[]
 
 export type JsonObject = {
-  [x: string]: JsonValue | undefined;
-};
+  [x: string]: JsonValue | undefined
+}
 
-export type JsonPrimitive = boolean | number | string | null;
+export type JsonPrimitive = boolean | number | string | null
 
-export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive
 
-export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
 export interface ArInternalMetadata {
-  created_at: Timestamp;
-  key: string;
-  updated_at: Timestamp;
-  value: string | null;
+  created_at: Timestamp
+  key: string
+  updated_at: Timestamp
+  value: string | null
 }
 
 export interface Cben1 {
-  caso_id: number | null;
-  npersona: number | null;
-  persona_id: number | null;
-  total: string | null;
-  victima_id: number | null;
+  caso_id: number | null
+  npersona: number | null
+  persona_id: number | null
+  total: string | null
+  victima_id: number | null
 }
 
 export interface Cben2 {
-  caso_id: number | null;
-  centropoblado_divipola: number | null;
-  centropoblado_id: number | null;
-  centropoblado_nombre: string | null;
-  departamento_divipola: number | null;
-  departamento_id: number | null;
-  departamento_nombre: string | null;
-  municipio_divipola: number | null;
-  municipio_id: number | null;
-  municipio_nombre: string | null;
-  npersona: number | null;
-  persona_id: number | null;
-  total: string | null;
-  victima_id: number | null;
+  caso_id: number | null
+  centropoblado_divipola: number | null
+  centropoblado_id: number | null
+  centropoblado_nombre: string | null
+  departamento_divipola: number | null
+  departamento_id: number | null
+  departamento_nombre: string | null
+  municipio_divipola: number | null
+  municipio_id: number | null
+  municipio_nombre: string | null
+  npersona: number | null
+  persona_id: number | null
+  total: string | null
+  victima_id: number | null
 }
 
 export interface Cvt1 {
-  caso_id: number | null;
-  categoria: string | null;
-  categoria_id: number | null;
-  departamento_divipola: number | null;
-  departamento_nombre: string | null;
-  nomcategoria: string | null;
-  persona_id: number | null;
-  total: string | null;
-  tviolencia_id: string | null;
+  caso_id: number | null
+  categoria: string | null
+  categoria_id: number | null
+  departamento_divipola: number | null
+  departamento_nombre: string | null
+  nomcategoria: string | null
+  persona_id: number | null
+  total: string | null
+  tviolencia_id: string | null
 }
 
 export interface Heb412GenCampohc {
-  columna: string;
-  doc_id: number;
-  fila: number | null;
-  id: Generated<number>;
-  nombrecampo: string;
+  columna: string
+  doc_id: number
+  fila: number | null
+  id: Generated<number>
+  nombrecampo: string
 }
 
 export interface Heb412GenCampoplantillahcm {
-  columna: string | null;
-  id: Generated<number>;
-  nombrecampo: string | null;
-  plantillahcm_id: number | null;
+  columna: string | null
+  id: Generated<number>
+  nombrecampo: string | null
+  plantillahcm_id: number | null
 }
 
 export interface Heb412GenCampoplantillahcr {
-  columna: string | null;
-  fila: number | null;
-  id: Generated<Int8>;
-  nombrecampo: string | null;
-  plantillahcr_id: number | null;
+  columna: string | null
+  fila: number | null
+  id: Generated<Int8>
+  nombrecampo: string | null
+  plantillahcr_id: number | null
 }
 
 export interface Heb412GenCarpetaexclusiva {
-  carpeta: string | null;
-  created_at: Timestamp;
-  grupo_id: number | null;
-  id: Generated<Int8>;
-  updated_at: Timestamp;
+  carpeta: string | null
+  created_at: Timestamp
+  grupo_id: number | null
+  id: Generated<Int8>
+  updated_at: Timestamp
 }
 
 export interface Heb412GenDoc {
-  adjunto_content_type: string | null;
-  adjunto_file_name: string | null;
-  adjunto_file_size: Int8 | null;
-  adjunto_updated_at: Timestamp | null;
-  created_at: Timestamp;
-  descripcion: string | null;
-  dirpapa: number | null;
-  filainicial: number | null;
-  fuente: string | null;
-  id: Generated<number>;
-  licencia: string | null;
-  nombre: string | null;
-  nombremenu: string | null;
-  ruta: string | null;
-  tdoc_id: number | null;
-  tdoc_type: string | null;
-  tipodoc: string | null;
-  updated_at: Timestamp;
-  url: string | null;
-  vista: string | null;
+  adjunto_content_type: string | null
+  adjunto_file_name: string | null
+  adjunto_file_size: Int8 | null
+  adjunto_updated_at: Timestamp | null
+  created_at: Timestamp
+  descripcion: string | null
+  dirpapa: number | null
+  filainicial: number | null
+  fuente: string | null
+  id: Generated<number>
+  licencia: string | null
+  nombre: string | null
+  nombremenu: string | null
+  ruta: string | null
+  tdoc_id: number | null
+  tdoc_type: string | null
+  tipodoc: string | null
+  updated_at: Timestamp
+  url: string | null
+  vista: string | null
 }
 
 export interface Heb412GenFormularioPlantillahcm {
-  formulario_id: number | null;
-  plantillahcm_id: number | null;
+  formulario_id: number | null
+  plantillahcm_id: number | null
 }
 
 export interface Heb412GenFormularioPlantillahcr {
-  formulario_id: number | null;
-  id: Generated<Int8>;
-  plantillahcr_id: number | null;
+  formulario_id: number | null
+  id: Generated<Int8>
+  plantillahcr_id: number | null
 }
 
 export interface Heb412GenPlantilladoc {
-  fuente: string | null;
-  id: Generated<Int8>;
-  licencia: string | null;
-  nombremenu: string | null;
-  ruta: string | null;
-  vista: string | null;
+  fuente: string | null
+  id: Generated<Int8>
+  licencia: string | null
+  nombremenu: string | null
+  ruta: string | null
+  vista: string | null
 }
 
 export interface Heb412GenPlantillahcm {
-  filainicial: number;
-  fuente: string | null;
-  id: Generated<number>;
-  licencia: string | null;
-  nombremenu: string;
-  ruta: string;
-  vista: string;
+  filainicial: number
+  fuente: string | null
+  id: Generated<number>
+  licencia: string | null
+  nombremenu: string
+  ruta: string
+  vista: string
 }
 
 export interface Heb412GenPlantillahcr {
-  fuente: string | null;
-  id: Generated<Int8>;
-  licencia: string | null;
-  nombremenu: string | null;
-  ruta: string | null;
-  vista: string | null;
+  fuente: string | null
+  id: Generated<Int8>
+  licencia: string | null
+  nombremenu: string | null
+  ruta: string | null
+  vista: string | null
 }
 
 export interface Mr519GenCampo {
-  ancho: number | null;
-  ayudauso: string | null;
-  columna: number | null;
-  fila: number | null;
-  formulario_id: number;
-  id: Generated<Int8>;
-  nombre: string;
-  nombreinterno: string | null;
-  obligatorio: boolean | null;
-  tablabasica: string | null;
-  tipo: Generated<number>;
+  ancho: number | null
+  ayudauso: string | null
+  columna: number | null
+  fila: number | null
+  formulario_id: number
+  id: Generated<Int8>
+  nombre: string
+  nombreinterno: string | null
+  obligatorio: boolean | null
+  tablabasica: string | null
+  tipo: Generated<number>
 }
 
 export interface Mr519GenEncuestapersona {
-  adurl: string | null;
-  fecha: Timestamp | null;
-  id: Generated<Int8>;
-  persona_id: number | null;
-  planencuesta_id: number | null;
-  respuestafor_id: number | null;
+  adurl: string | null
+  fecha: Timestamp | null
+  id: Generated<Int8>
+  persona_id: number | null
+  planencuesta_id: number | null
+  respuestafor_id: number | null
 }
 
 export interface Mr519GenEncuestausuario {
-  fecha: Timestamp | null;
-  fechafin: Timestamp | null;
-  fechainicio: Timestamp;
-  id: Generated<Int8>;
-  respuestafor_id: number | null;
-  usuario_id: number;
+  fecha: Timestamp | null
+  fechafin: Timestamp | null
+  fechainicio: Timestamp
+  id: Generated<Int8>
+  respuestafor_id: number | null
+  usuario_id: number
 }
 
 export interface Mr519GenFormulario {
-  id: Generated<Int8>;
-  nombre: string;
-  nombreinterno: string | null;
+  id: Generated<Int8>
+  nombre: string
+  nombreinterno: string | null
 }
 
 export interface Mr519GenOpcioncs {
-  campo_id: number;
-  id: Generated<Int8>;
-  nombre: string;
-  valor: string;
+  campo_id: number
+  id: Generated<Int8>
+  nombre: string
+  valor: string
 }
 
 export interface Mr519GenPlanencuesta {
-  adurl: string | null;
-  created_at: Timestamp;
-  fechafin: Timestamp | null;
-  fechaini: Timestamp | null;
-  formulario_id: number | null;
-  id: Generated<Int8>;
-  plantillacorreoinv_id: number | null;
-  updated_at: Timestamp;
+  adurl: string | null
+  created_at: Timestamp
+  fechafin: Timestamp | null
+  fechaini: Timestamp | null
+  formulario_id: number | null
+  id: Generated<Int8>
+  plantillacorreoinv_id: number | null
+  updated_at: Timestamp
 }
 
 export interface Mr519GenRespuestafor {
-  fechacambio: Timestamp;
-  fechaini: Timestamp;
-  formulario_id: number | null;
-  id: Generated<Int8>;
+  fechacambio: Timestamp
+  fechaini: Timestamp
+  formulario_id: number | null
+  id: Generated<Int8>
 }
 
 export interface Mr519GenValorcampo {
-  campo_id: number;
-  id: Generated<Int8>;
-  respuestafor_id: number;
-  valor: string | null;
-  valorjson: Json | null;
+  campo_id: number
+  id: Generated<Int8>
+  respuestafor_id: number
+  valor: string | null
+  valorjson: Json | null
 }
 
 export interface MsipAnexo {
-  adjunto_content_type: string;
-  adjunto_file_name: string;
-  adjunto_file_size: number;
-  adjunto_updated_at: Timestamp | null;
-  created_at: Timestamp | null;
-  descripcion: string;
-  id: Generated<number>;
-  updated_at: Timestamp | null;
+  adjunto_content_type: string
+  adjunto_file_name: string
+  adjunto_file_size: number
+  adjunto_updated_at: Timestamp | null
+  created_at: Timestamp | null
+  descripcion: string
+  id: Generated<number>
+  updated_at: Timestamp | null
 }
 
 export interface MsipBitacora {
-  created_at: Timestamp;
-  detalle: Json | null;
-  fecha: Timestamp;
-  id: Generated<Int8>;
-  ip: string | null;
-  modelo: string | null;
-  modelo_id: number | null;
-  operacion: string | null;
-  params: string | null;
-  updated_at: Timestamp;
-  url: string | null;
-  usuario_id: number | null;
+  created_at: Timestamp
+  detalle: Json | null
+  fecha: Timestamp
+  id: Generated<Int8>
+  ip: string | null
+  modelo: string | null
+  modelo_id: number | null
+  operacion: string | null
+  params: string | null
+  updated_at: Timestamp
+  url: string | null
+  usuario_id: number | null
 }
 
 export interface MsipCentropoblado {
-  cplocal_cod: number | null;
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  latitud: number | null;
-  longitud: number | null;
-  municipio_id: number | null;
-  nombre: string | null;
-  observaciones: string | null;
-  svgcdalto: number | null;
-  svgcdancho: number | null;
-  svgcdx: number | null;
-  svgcdy: number | null;
-  svgrotx: number | null;
-  svgroty: number | null;
-  svgruta: string | null;
-  tcentropoblado_id: Generated<string>;
-  ultvigenciafin: Timestamp | null;
-  ultvigenciaini: Timestamp | null;
-  updated_at: Timestamp | null;
+  cplocal_cod: number | null
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  latitud: number | null
+  longitud: number | null
+  municipio_id: number | null
+  nombre: string | null
+  observaciones: string | null
+  svgcdalto: number | null
+  svgcdancho: number | null
+  svgcdx: number | null
+  svgcdy: number | null
+  svgrotx: number | null
+  svgroty: number | null
+  svgruta: string | null
+  tcentropoblado_id: Generated<string>
+  ultvigenciafin: Timestamp | null
+  ultvigenciaini: Timestamp | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipCentropobladoHistvigencia {
-  centropoblado_id: number | null;
-  cplocal_cod: number | null;
-  id: Generated<Int8>;
-  nombre: string | null;
-  observaciones: string | null;
-  tcentropoblado_id: string | null;
-  vigenciafin: Timestamp;
-  vigenciaini: Timestamp | null;
+  centropoblado_id: number | null
+  cplocal_cod: number | null
+  id: Generated<Int8>
+  nombre: string | null
+  observaciones: string | null
+  tcentropoblado_id: string | null
+  vigenciafin: Timestamp
+  vigenciaini: Timestamp | null
 }
 
 export interface MsipDepartamento {
-  catiso: string | null;
-  codiso: string | null;
-  codreg: number | null;
-  created_at: Timestamp | null;
-  deplocal_cod: number | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  latitud: number | null;
-  longitud: number | null;
-  nombre: string | null;
-  observaciones: string | null;
-  pais_id: number;
-  svgcdalto: number | null;
-  svgcdancho: number | null;
-  svgcdx: number | null;
-  svgcdy: number | null;
-  svgrotx: number | null;
-  svgroty: number | null;
-  svgruta: string | null;
-  ultvigenciafin: Timestamp | null;
-  ultvigenciaini: Timestamp | null;
-  updated_at: Timestamp | null;
+  catiso: string | null
+  codiso: string | null
+  codreg: number | null
+  created_at: Timestamp | null
+  deplocal_cod: number | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  latitud: number | null
+  longitud: number | null
+  nombre: string | null
+  observaciones: string | null
+  pais_id: number
+  svgcdalto: number | null
+  svgcdancho: number | null
+  svgcdx: number | null
+  svgcdy: number | null
+  svgrotx: number | null
+  svgroty: number | null
+  svgruta: string | null
+  ultvigenciafin: Timestamp | null
+  ultvigenciaini: Timestamp | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipDepartamentoHistvigencia {
-  catiso: number | null;
-  codiso: number | null;
-  codreg: number | null;
-  departamento_id: number | null;
-  deplocal_cod: number | null;
-  id: Generated<Int8>;
-  nombre: string | null;
-  observaciones: string | null;
-  vigenciafin: Timestamp;
-  vigenciaini: Timestamp | null;
+  catiso: number | null
+  codiso: number | null
+  codreg: number | null
+  departamento_id: number | null
+  deplocal_cod: number | null
+  id: Generated<Int8>
+  nombre: string | null
+  observaciones: string | null
+  vigenciafin: Timestamp
+  vigenciaini: Timestamp | null
 }
 
 export interface MsipEstadosol {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipEtiqueta {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string
+  updated_at: Timestamp | null
 }
 
 export interface MsipEtiquetaMunicipio {
-  etiqueta_id: Int8;
-  municipio_id: Int8;
+  etiqueta_id: Int8
+  municipio_id: Int8
 }
 
 export interface MsipEtiquetaPersona {
-  created_at: Timestamp;
-  etiqueta_id: number;
-  fecha: Timestamp;
-  id: Generated<Int8>;
-  observaciones: string | null;
-  persona_id: number;
-  updated_at: Timestamp;
-  usuario_id: number;
+  created_at: Timestamp
+  etiqueta_id: number
+  fecha: Timestamp
+  id: Generated<Int8>
+  observaciones: string | null
+  persona_id: number
+  updated_at: Timestamp
+  usuario_id: number
 }
 
 export interface MsipEtnia {
-  created_at: Timestamp;
-  descripcion: string | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  descripcion: string | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipFuenteprensa {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  tfuente: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  tfuente: string | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipGrupo {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipGrupoper {
-  anotaciones: string | null;
-  created_at: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  updated_at: Timestamp | null;
+  anotaciones: string | null
+  created_at: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  updated_at: Timestamp | null
 }
 
 export interface MsipGrupoUsuario {
-  grupo_id: number;
-  usuario_id: number;
+  grupo_id: number
+  usuario_id: number
 }
 
 export interface MsipMundepSinorden {
-  idlocal: number | null;
-  nombre: string | null;
+  idlocal: number | null
+  nombre: string | null
 }
 
 export interface MsipMunicipio {
-  codreg: number | null;
-  created_at: Timestamp | null;
-  departamento_id: number | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  latitud: number | null;
-  longitud: number | null;
-  munlocal_cod: number | null;
-  nombre: string | null;
-  observaciones: string | null;
-  svgcdalto: number | null;
-  svgcdancho: number | null;
-  svgcdx: number | null;
-  svgcdy: number | null;
-  svgrotx: number | null;
-  svgroty: number | null;
-  svgruta: string | null;
-  tipomun: string | null;
-  ultvigenciafin: Timestamp | null;
-  ultvigenciaini: Timestamp | null;
-  updated_at: Timestamp | null;
+  codreg: number | null
+  created_at: Timestamp | null
+  departamento_id: number | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  latitud: number | null
+  longitud: number | null
+  munlocal_cod: number | null
+  nombre: string | null
+  observaciones: string | null
+  svgcdalto: number | null
+  svgcdancho: number | null
+  svgcdx: number | null
+  svgcdy: number | null
+  svgrotx: number | null
+  svgroty: number | null
+  svgruta: string | null
+  tipomun: string | null
+  ultvigenciafin: Timestamp | null
+  ultvigenciaini: Timestamp | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipMunicipioHistvigencia {
-  codreg: number | null;
-  id: Generated<Int8>;
-  municipio_id: number | null;
-  munlocal_cod: number | null;
-  nombre: string | null;
-  observaciones: string | null;
-  vigenciafin: Timestamp;
-  vigenciaini: Timestamp | null;
+  codreg: number | null
+  id: Generated<Int8>
+  municipio_id: number | null
+  munlocal_cod: number | null
+  nombre: string | null
+  observaciones: string | null
+  vigenciafin: Timestamp
+  vigenciaini: Timestamp | null
 }
 
 export interface MsipOficina {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp | null>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp | null>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipOrgsocial {
-  created_at: Timestamp;
-  direccion: string | null;
-  fax: string | null;
-  fechadeshabilitacion: Timestamp | null;
-  grupoper_id: number;
-  id: Generated<Int8>;
-  pais_id: number | null;
-  telefono: string | null;
-  tipoorg_id: Generated<number>;
-  updated_at: Timestamp;
-  web: string | null;
+  created_at: Timestamp
+  direccion: string | null
+  fax: string | null
+  fechadeshabilitacion: Timestamp | null
+  grupoper_id: number
+  id: Generated<Int8>
+  pais_id: number | null
+  telefono: string | null
+  tipoorg_id: Generated<number>
+  updated_at: Timestamp
+  web: string | null
 }
 
 export interface MsipOrgsocialPersona {
-  cargo: string | null;
-  correo: string | null;
-  created_at: Timestamp;
-  id: Generated<Int8>;
-  orgsocial_id: number | null;
-  perfilorgsocial_id: number | null;
-  persona_id: number;
-  updated_at: Timestamp;
+  cargo: string | null
+  correo: string | null
+  created_at: Timestamp
+  id: Generated<Int8>
+  orgsocial_id: number | null
+  perfilorgsocial_id: number | null
+  persona_id: number
+  updated_at: Timestamp
 }
 
 export interface MsipOrgsocialSectororgsocial {
-  orgsocial_id: number | null;
-  sectororgsocial_id: number | null;
+  orgsocial_id: number | null
+  sectororgsocial_id: number | null
 }
 
 export interface MsipPais {
-  alfa2: string | null;
-  alfa3: string | null;
-  codiso: number | null;
-  created_at: Timestamp | null;
-  div1: string | null;
-  div2: string | null;
-  div3: string | null;
-  fechacreacion: Timestamp | null;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  latitud: number | null;
-  longitud: number | null;
-  nombre: string | null;
-  nombreiso_espanol: string | null;
-  nombreiso_frances: string | null;
-  nombreiso_ingles: string | null;
-  observaciones: string | null;
-  svgcdalto: number | null;
-  svgcdancho: number | null;
-  svgcdx: number | null;
-  svgcdy: number | null;
-  svgrotx: number | null;
-  svgroty: number | null;
-  svgruta: string | null;
-  ultvigenciafin: Timestamp | null;
-  ultvigenciaini: Timestamp | null;
-  updated_at: Timestamp | null;
+  alfa2: string | null
+  alfa3: string | null
+  codiso: number | null
+  created_at: Timestamp | null
+  div1: string | null
+  div2: string | null
+  div3: string | null
+  fechacreacion: Timestamp | null
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  latitud: number | null
+  longitud: number | null
+  nombre: string | null
+  nombreiso_espanol: string | null
+  nombreiso_frances: string | null
+  nombreiso_ingles: string | null
+  observaciones: string | null
+  svgcdalto: number | null
+  svgcdancho: number | null
+  svgcdx: number | null
+  svgcdy: number | null
+  svgrotx: number | null
+  svgroty: number | null
+  svgruta: string | null
+  ultvigenciafin: Timestamp | null
+  ultvigenciaini: Timestamp | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipPaisHistvigencia {
-  alfa2: string | null;
-  alfa3: string | null;
-  codcambio: string | null;
-  codiso: number | null;
-  id: Generated<Int8>;
-  pais_id: number | null;
-  vigenciafin: Timestamp;
-  vigenciaini: Timestamp | null;
+  alfa2: string | null
+  alfa3: string | null
+  codcambio: string | null
+  codiso: number | null
+  id: Generated<Int8>
+  pais_id: number | null
+  vigenciafin: Timestamp
+  vigenciaini: Timestamp | null
 }
 
 export interface MsipPerfilorgsocial {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipPersona {
-  anionac: number | null;
-  apellidos: string;
-  centropoblado_id: number | null;
-  created_at: Timestamp | null;
-  departamento_id: number | null;
-  dianac: number | null;
-  etnia_id: Generated<number>;
-  id: Generated<number>;
-  mesnac: number | null;
-  municipio_id: number | null;
-  nacionalde: number | null;
-  nombres: string;
-  numerodocumento: string | null;
-  pais_id: number | null;
-  sexo: string;
-  tdocumento_id: number | null;
-  updated_at: Timestamp | null;
+  anionac: number | null
+  apellidos: string
+  centropoblado_id: number | null
+  created_at: Timestamp | null
+  departamento_id: number | null
+  dianac: number | null
+  etnia_id: Generated<number>
+  id: Generated<number>
+  mesnac: number | null
+  municipio_id: number | null
+  nacionalde: number | null
+  nombres: string
+  numerodocumento: string | null
+  pais_id: number | null
+  sexo: string
+  tdocumento_id: number | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipPersonaTrelacion {
-  created_at: Timestamp | null;
-  id: Generated<number>;
-  observaciones: string | null;
-  persona1: number;
-  persona2: number;
-  trelacion_id: Generated<string>;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  id: Generated<number>
+  observaciones: string | null
+  persona1: number
+  persona2: number
+  trelacion_id: Generated<string>
+  updated_at: Timestamp | null
 }
 
 export interface MsipSectororgsocial {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipSolicitud {
-  created_at: Timestamp;
-  estadosol_id: number | null;
-  fecha: Timestamp;
-  id: Generated<Int8>;
-  solicitud: string | null;
-  updated_at: Timestamp;
-  usuario_id: number;
+  created_at: Timestamp
+  estadosol_id: number | null
+  fecha: Timestamp
+  id: Generated<Int8>
+  solicitud: string | null
+  updated_at: Timestamp
+  usuario_id: number
 }
 
 export interface MsipSolicitudUsuarionotificar {
-  solicitud_id: number | null;
-  usuarionotificar_id: number | null;
+  solicitud_id: number | null
+  usuarionotificar_id: number | null
 }
 
 export interface MsipTcentropoblado {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: string;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: string
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipTdocumento {
-  ayuda: string | null;
-  created_at: Timestamp | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  formatoregex: string | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  sigla: string;
-  updated_at: Timestamp | null;
+  ayuda: string | null
+  created_at: Timestamp | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  formatoregex: string | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  sigla: string
+  updated_at: Timestamp | null
 }
 
 export interface MsipTema {
-  alerta_exito_fondo: string | null;
-  alerta_exito_fuente: string | null;
-  alerta_problema_fondo: string | null;
-  alerta_problema_fuente: string | null;
-  btn_accion_fondo_fin: string | null;
-  btn_accion_fondo_ini: string | null;
-  btn_accion_fuente: string | null;
-  btn_peligro_fondo_fin: string | null;
-  btn_peligro_fondo_ini: string | null;
-  btn_peligro_fuente: string | null;
-  btn_primario_fondo_fin: string | null;
-  btn_primario_fondo_ini: string | null;
-  btn_primario_fuente: string | null;
-  color_flota_subitem_fondo: string | null;
-  color_flota_subitem_fuente: string | null;
-  color_fuente: string | null;
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  fondo: string | null;
-  fondo_lista: string | null;
-  id: Generated<Int8>;
-  nav_fin: string | null;
-  nav_fuente: string | null;
-  nav_ini: string | null;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  alerta_exito_fondo: string | null
+  alerta_exito_fuente: string | null
+  alerta_problema_fondo: string | null
+  alerta_problema_fuente: string | null
+  btn_accion_fondo_fin: string | null
+  btn_accion_fondo_ini: string | null
+  btn_accion_fuente: string | null
+  btn_peligro_fondo_fin: string | null
+  btn_peligro_fondo_ini: string | null
+  btn_peligro_fuente: string | null
+  btn_primario_fondo_fin: string | null
+  btn_primario_fondo_ini: string | null
+  btn_primario_fuente: string | null
+  color_flota_subitem_fondo: string | null
+  color_flota_subitem_fuente: string | null
+  color_fuente: string | null
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  fondo: string | null
+  fondo_lista: string | null
+  id: Generated<Int8>
+  nav_fin: string | null
+  nav_fuente: string | null
+  nav_ini: string | null
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipTipoorg {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipTrelacion {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: string;
-  inverso: string | null;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: string
+  inverso: string | null
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipTrivalente {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface MsipTsitio {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface MsipUbicacion {
-  caso_id: number;
-  centropoblado_id: number | null;
-  created_at: Timestamp | null;
-  departamento_id: number | null;
-  id: Generated<number>;
-  latitud: number | null;
-  longitud: number | null;
-  lugar: string | null;
-  municipio_id: number | null;
-  pais_id: number | null;
-  sitio: string | null;
-  tsitio_id: Generated<number>;
-  updated_at: Timestamp | null;
+  caso_id: number
+  centropoblado_id: number | null
+  created_at: Timestamp | null
+  departamento_id: number | null
+  id: Generated<number>
+  latitud: number | null
+  longitud: number | null
+  lugar: string | null
+  municipio_id: number | null
+  pais_id: number | null
+  sitio: string | null
+  tsitio_id: Generated<number>
+  updated_at: Timestamp | null
 }
 
 export interface MsipUbicacionpre {
-  centropoblado_id: number | null;
-  created_at: Timestamp;
-  departamento_id: number | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  latitud: number | null;
-  longitud: number | null;
-  lugar: string | null;
-  municipio_id: number | null;
-  nombre: string;
-  nombre_sin_pais: string | null;
-  observaciones: string | null;
-  pais_id: number;
-  sitio: string | null;
-  tsitio_id: number | null;
-  updated_at: Timestamp;
-  vereda_id: number | null;
+  centropoblado_id: number | null
+  created_at: Timestamp
+  departamento_id: number | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  latitud: number | null
+  longitud: number | null
+  lugar: string | null
+  municipio_id: number | null
+  nombre: string
+  nombre_sin_pais: string | null
+  observaciones: string | null
+  pais_id: number
+  sitio: string | null
+  tsitio_id: number | null
+  updated_at: Timestamp
+  vereda_id: number | null
 }
 
 export interface MsipVereda {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  latitud: number | null;
-  longitud: number | null;
-  municipio_id: number | null;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
-  verlocal_cod: number | null;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  latitud: number | null
+  longitud: number | null
+  municipio_id: number | null
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
+  verlocal_cod: number | null
 }
 
 export interface Nobelicas {
-  caso_id: number | null;
+  caso_id: number | null
 }
 
 export interface SchemaMigrations {
-  version: string;
+  version: string
 }
 
 export interface Sivel2GenActividadoficio {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenActo {
-  caso_id: number;
-  categoria_id: number;
-  created_at: Timestamp | null;
-  id: Generated<number>;
-  persona_id: number;
-  presponsable_id: number;
-  updated_at: Timestamp | null;
+  caso_id: number
+  categoria_id: number
+  created_at: Timestamp | null
+  id: Generated<number>
+  persona_id: number
+  presponsable_id: number
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenActocolectivo {
-  caso_id: number;
-  categoria_id: number;
-  created_at: Timestamp | null;
-  grupoper_id: number;
-  id: Generated<number>;
-  presponsable_id: number;
-  updated_at: Timestamp | null;
+  caso_id: number
+  categoria_id: number
+  created_at: Timestamp | null
+  grupoper_id: number
+  id: Generated<number>
+  presponsable_id: number
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenAnexoCaso {
-  anexo_id: number;
-  caso_id: number;
-  created_at: Timestamp | null;
-  fecha: Timestamp;
-  fechaffrecuente: Timestamp | null;
-  fotra_id: number | null;
-  fuenteprensa_id: number | null;
-  id: Generated<number>;
-  updated_at: Timestamp | null;
+  anexo_id: number
+  caso_id: number
+  created_at: Timestamp | null
+  fecha: Timestamp
+  fechaffrecuente: Timestamp | null
+  fotra_id: number | null
+  fuenteprensa_id: number | null
+  id: Generated<number>
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenAntecedente {
-  created_at: Timestamp | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenAntecedenteCaso {
-  antecedente_id: number;
-  caso_id: number;
+  antecedente_id: number
+  caso_id: number
 }
 
 export interface Sivel2GenAntecedenteCombatiente {
-  antecedente_id: number;
-  combatiente_id: number;
+  antecedente_id: number
+  combatiente_id: number
 }
 
 export interface Sivel2GenAntecedenteVictima {
-  antecedente_id: number;
-  victima_id: number;
+  antecedente_id: number
+  victima_id: number
 }
 
 export interface Sivel2GenAntecedenteVictimacolectiva {
-  antecedente_id: number;
-  victimacolectiva_id: number;
+  antecedente_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenCaso {
-  bienes: string | null;
-  created_at: Timestamp | null;
-  duracion: string | null;
-  fecha: Timestamp;
-  grconfiabilidad: string | null;
-  gresclarecimiento: string | null;
-  grimpunidad: string | null;
-  grinformacion: string | null;
-  hora: string | null;
-  id: Generated<number>;
-  intervalo_id: Generated<number | null>;
-  memo: string;
-  titulo: string | null;
-  ubicacion_id: number | null;
-  updated_at: Timestamp | null;
+  bienes: string | null
+  created_at: Timestamp | null
+  duracion: string | null
+  fecha: Timestamp
+  grconfiabilidad: string | null
+  gresclarecimiento: string | null
+  grimpunidad: string | null
+  grinformacion: string | null
+  hora: string | null
+  id: Generated<number>
+  intervalo_id: Generated<number | null>
+  memo: string
+  titulo: string | null
+  ubicacion_id: number | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoCategoriaPresponsable {
-  caso_presponsable_id: number | null;
-  categoria_id: number;
-  created_at: Timestamp | null;
-  id: Generated<number>;
-  updated_at: Timestamp | null;
+  caso_presponsable_id: number | null
+  categoria_id: number
+  created_at: Timestamp | null
+  id: Generated<number>
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoContexto {
-  caso_id: number;
-  contexto_id: number;
+  caso_id: number
+  contexto_id: number
 }
 
 export interface Sivel2GenCasoEtiqueta {
-  caso_id: number;
-  created_at: Timestamp | null;
-  etiqueta_id: number;
-  fecha: Timestamp;
-  id: Generated<number>;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
-  usuario_id: number;
+  caso_id: number
+  created_at: Timestamp | null
+  etiqueta_id: number
+  fecha: Timestamp
+  id: Generated<number>
+  observaciones: string | null
+  updated_at: Timestamp | null
+  usuario_id: number
 }
 
 export interface Sivel2GenCasoFotra {
-  anexo_caso_id: number | null;
-  anotacion: string | null;
-  caso_id: number;
-  created_at: Timestamp | null;
-  fecha: Timestamp;
-  fotra_id: number | null;
-  id: Generated<number>;
-  nombre: string;
-  tfuente: string | null;
-  ubicacionfisica: string | null;
-  updated_at: Timestamp | null;
+  anexo_caso_id: number | null
+  anotacion: string | null
+  caso_id: number
+  created_at: Timestamp | null
+  fecha: Timestamp
+  fotra_id: number | null
+  id: Generated<number>
+  nombre: string
+  tfuente: string | null
+  ubicacionfisica: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoFrontera {
-  caso_id: number;
-  created_at: Timestamp | null;
-  frontera_id: number;
-  updated_at: Timestamp | null;
+  caso_id: number
+  created_at: Timestamp | null
+  frontera_id: number
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoFuenteprensa {
-  anexo_caso_id: number | null;
-  caso_id: number;
-  clasificacion: string | null;
-  created_at: Timestamp | null;
-  fecha: Timestamp;
-  fuenteprensa_id: number;
-  id: Generated<number>;
-  ubicacion: string | null;
-  ubicacionfisica: string | null;
-  updated_at: Timestamp | null;
+  anexo_caso_id: number | null
+  caso_id: number
+  clasificacion: string | null
+  created_at: Timestamp | null
+  fecha: Timestamp
+  fuenteprensa_id: number
+  id: Generated<number>
+  ubicacion: string | null
+  ubicacionfisica: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoPresponsable {
-  bloque: string | null;
-  caso_id: number;
-  created_at: Timestamp | null;
-  frente: string | null;
-  id: Generated<number>;
-  otro: string | null;
-  presponsable_id: number;
-  subdivision: string | null;
-  tipo: Generated<number>;
-  updated_at: Timestamp | null;
+  bloque: string | null
+  caso_id: number
+  created_at: Timestamp | null
+  frente: string | null
+  id: Generated<number>
+  otro: string | null
+  presponsable_id: number
+  subdivision: string | null
+  tipo: Generated<number>
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCasoRegion {
-  caso_id: number;
-  region_id: number;
+  caso_id: number
+  region_id: number
 }
 
 export interface Sivel2GenCasoRespuestafor {
-  caso_id: number;
-  respuestafor_id: number;
+  caso_id: number
+  respuestafor_id: number
 }
 
 export interface Sivel2GenCasoSolicitud {
-  caso_id: number;
-  id: Generated<Int8>;
-  solicitud_id: number;
+  caso_id: number
+  id: Generated<Int8>
+  solicitud_id: number
 }
 
 export interface Sivel2GenCasoUsuario {
-  caso_id: number;
-  created_at: Timestamp | null;
-  fechainicio: Timestamp | null;
-  updated_at: Timestamp | null;
-  usuario_id: number;
+  caso_id: number
+  created_at: Timestamp | null
+  fechainicio: Timestamp | null
+  updated_at: Timestamp | null
+  usuario_id: number
 }
 
 export interface Sivel2GenCategoria {
-  contadaen: number | null;
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: number;
-  nombre: string | null;
-  observaciones: string | null;
-  pconsolidado_id: number | null;
-  supracategoria_id: number | null;
-  tipocat: Generated<string | null>;
-  updated_at: Timestamp | null;
+  contadaen: number | null
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: number
+  nombre: string | null
+  observaciones: string | null
+  pconsolidado_id: number | null
+  supracategoria_id: number | null
+  tipocat: Generated<string | null>
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenCombatiente {
-  alias: string | null;
-  caso_id: number | null;
-  created_at: Timestamp;
-  edad: number | null;
-  filiacion_id: Generated<number | null>;
-  id: Generated<number>;
-  nombre: string;
-  organizacion_id: Generated<number | null>;
-  organizacionarmada: Generated<number | null>;
-  profesion_id: Generated<number | null>;
-  rangoedad_id: Generated<number | null>;
-  resagresion_id: Generated<number>;
-  sectorsocial_id: Generated<number | null>;
-  sexo: Generated<string>;
-  updated_at: Timestamp;
-  vinculoestado_id: Generated<number | null>;
+  alias: string | null
+  caso_id: number | null
+  created_at: Timestamp
+  edad: number | null
+  filiacion_id: Generated<number | null>
+  id: Generated<number>
+  nombre: string
+  organizacion_id: Generated<number | null>
+  organizacionarmada: Generated<number | null>
+  profesion_id: Generated<number | null>
+  rangoedad_id: Generated<number | null>
+  resagresion_id: Generated<number>
+  sectorsocial_id: Generated<number | null>
+  sexo: Generated<string>
+  updated_at: Timestamp
+  vinculoestado_id: Generated<number | null>
 }
 
 export interface Sivel2GenConscaso1 {
-  caso_id: number | null;
-  fecha: Timestamp | null;
-  memo: string | null;
-  presponsables: string | null;
-  tipificacion: string | null;
-  ubicaciones: string | null;
-  victimas: string | null;
+  caso_id: number | null
+  fecha: Timestamp | null
+  memo: string | null
+  presponsables: string | null
+  tipificacion: string | null
+  ubicaciones: string | null
+  victimas: string | null
 }
 
 export interface Sivel2GenContexto {
-  created_at: Timestamp | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenContextovictima {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenContextovictimaVictima {
-  contextovictima_id: number;
-  victima_id: number;
+  contextovictima_id: number
+  victima_id: number
 }
 
 export interface Sivel2GenDepartamentoRegion {
-  departamento_id: number | null;
-  region_id: number | null;
+  departamento_id: number | null
+  region_id: number | null
 }
 
 export interface Sivel2GenEscolaridad {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenEstadocivil {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenEtniaVictimacolectiva {
-  etnia_id: Generated<number>;
-  victimacolectiva_id: number;
+  etnia_id: Generated<number>
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenFiliacion {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenFiliacionVictimacolectiva {
-  filiacion_id: number;
-  victimacolectiva_id: number;
+  filiacion_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenFotra {
-  created_at: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenFrontera {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenIglesia {
-  created_at: Timestamp | null;
-  descripcion: string | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  descripcion: string | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenIniciador {
-  caso_id: number | null;
-  fechainicio: Timestamp | null;
-  nusuario: string | null;
-  usuario_id: number | null;
+  caso_id: number | null
+  fechainicio: Timestamp | null
+  nusuario: string | null
+  usuario_id: number | null
 }
 
 export interface Sivel2GenIntervalo {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  rango: string;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  rango: string
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenMaternidad {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<Int8>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<Int8>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenMunicipioRegion {
-  municipio_id: number | null;
-  region_id: number | null;
+  municipio_id: number | null
+  region_id: number | null
 }
 
 export interface Sivel2GenObservadorFiltrodepartamento {
-  departamento_id: number | null;
-  usuario_id: number | null;
+  departamento_id: number | null
+  usuario_id: number | null
 }
 
 export interface Sivel2GenOrganizacion {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenOrganizacionVictimacolectiva {
-  organizacion_id: number;
-  victimacolectiva_id: number;
+  organizacion_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenOtraorgaVictima {
-  organizacion_id: number | null;
-  victima_id: number | null;
+  organizacion_id: number | null
+  victima_id: number | null
 }
 
 export interface Sivel2GenPconsolidado {
-  clasificacion: string;
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  peso: Generated<number | null>;
-  tipoviolencia: string;
-  updated_at: Timestamp | null;
+  clasificacion: string
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  peso: Generated<number | null>
+  tipoviolencia: string
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenPresponsable {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  papa_id: number | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  papa_id: number | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenProfesion {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenProfesionVictima {
-  id: Generated<Int8>;
-  profesion_id: Int8;
-  victima_id: Int8;
+  id: Generated<Int8>
+  profesion_id: Int8
+  victima_id: Int8
 }
 
 export interface Sivel2GenProfesionVictimacolectiva {
-  profesion_id: number;
-  victimacolectiva_id: number;
+  profesion_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenRangoedad {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  limiteinferior: Generated<number>;
-  limitesuperior: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  limiteinferior: Generated<number>
+  limitesuperior: Generated<number>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenRangoedadVictimacolectiva {
-  rangoedad_id: number;
-  victimacolectiva_id: number;
+  rangoedad_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenRegion {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenResagresion {
-  created_at: Timestamp;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  updated_at: Timestamp;
+  created_at: Timestamp
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  updated_at: Timestamp
 }
 
 export interface Sivel2GenSectorsocial {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenSectorsocialsecVictima {
-  sectorsocial_id: number | null;
-  victima_id: number | null;
+  sectorsocial_id: number | null
+  victima_id: number | null
 }
 
 export interface Sivel2GenSectorsocialVictimacolectiva {
-  sectorsocial_id: number;
-  victimacolectiva_id: number;
+  sectorsocial_id: number
+  victimacolectiva_id: number
 }
 
 export interface Sivel2GenSupracategoria {
-  codigo: number | null;
-  created_at: Timestamp | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string;
-  observaciones: string | null;
-  tviolencia_id: string;
-  updated_at: Timestamp | null;
+  codigo: number | null
+  created_at: Timestamp | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string
+  observaciones: string | null
+  tviolencia_id: string
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenTviolencia {
-  created_at: Timestamp | null;
-  fechacreacion: Timestamp;
-  fechadeshabilitacion: Timestamp | null;
-  id: string;
-  nombre: string;
-  nomcorto: string;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Timestamp
+  fechadeshabilitacion: Timestamp | null
+  id: string
+  nombre: string
+  nomcorto: string
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenVictima {
-  anotaciones: string | null;
-  caso_id: number;
-  created_at: Timestamp | null;
-  filiacion_id: Generated<number>;
-  hijos: number | null;
-  id: Generated<number>;
-  iglesia_id: Generated<number | null>;
-  organizacion_id: Generated<number>;
-  organizacionarmada: Generated<number>;
-  orientacionsexual: Generated<string>;
-  persona_id: number;
-  profesion_id: Generated<number>;
-  rangoedad_id: Generated<number>;
-  sectorsocial_id: Generated<number>;
-  updated_at: Timestamp | null;
-  vinculoestado_id: Generated<number>;
+  anotaciones: string | null
+  caso_id: number
+  created_at: Timestamp | null
+  filiacion_id: Generated<number>
+  hijos: number | null
+  id: Generated<number>
+  iglesia_id: Generated<number | null>
+  organizacion_id: Generated<number>
+  organizacionarmada: Generated<number>
+  orientacionsexual: Generated<string>
+  persona_id: number
+  profesion_id: Generated<number>
+  rangoedad_id: Generated<number>
+  sectorsocial_id: Generated<number>
+  updated_at: Timestamp | null
+  vinculoestado_id: Generated<number>
 }
 
 export interface Sivel2GenVictimacolectiva {
-  caso_id: number;
-  created_at: Timestamp | null;
-  grupoper_id: number;
-  id: Generated<number>;
-  organizacionarmada: Generated<number | null>;
-  personasaprox: number | null;
-  updated_at: Timestamp | null;
+  caso_id: number
+  created_at: Timestamp | null
+  grupoper_id: number
+  id: Generated<number>
+  organizacionarmada: Generated<number | null>
+  personasaprox: number | null
+  updated_at: Timestamp | null
 }
 
 export interface Sivel2GenVictimacolectivaVinculoestado {
-  victimacolectiva_id: number;
-  vinculoestado_id: number;
+  victimacolectiva_id: number
+  vinculoestado_id: number
 }
 
 export interface Sivel2GenVinculoestado {
-  created_at: Timestamp | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  nombre: string | null;
-  observaciones: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  nombre: string | null
+  observaciones: string | null
+  updated_at: Timestamp | null
 }
 
 export interface Usuario {
-  created_at: Timestamp | null;
-  current_sign_in_at: Timestamp | null;
-  current_sign_in_ip: string | null;
-  descripcion: string | null;
-  email: Generated<string>;
-  encrypted_password: Generated<string>;
-  failed_attempts: number | null;
-  fechacreacion: Generated<Timestamp>;
-  fechadeshabilitacion: Timestamp | null;
-  id: Generated<number>;
-  idioma: Generated<string>;
-  last_sign_in_at: Timestamp | null;
-  last_sign_in_ip: string | null;
-  locked_at: Timestamp | null;
-  nombre: string | null;
-  nusuario: string;
-  observadorffechafin: Timestamp | null;
-  observadorffechaini: Timestamp | null;
-  oficina_id: number | null;
-  password: Generated<string | null>;
-  remember_created_at: Timestamp | null;
-  reset_password_sent_at: Timestamp | null;
-  reset_password_token: string | null;
-  rol: Generated<number | null>;
-  sign_in_count: Generated<number>;
-  tema_id: number | null;
-  unlock_token: string | null;
-  updated_at: Timestamp | null;
+  created_at: Timestamp | null
+  current_sign_in_at: Timestamp | null
+  current_sign_in_ip: string | null
+  descripcion: string | null
+  email: Generated<string>
+  encrypted_password: Generated<string>
+  failed_attempts: number | null
+  fechacreacion: Generated<Timestamp>
+  fechadeshabilitacion: Timestamp | null
+  id: Generated<number>
+  idioma: Generated<string>
+  last_sign_in_at: Timestamp | null
+  last_sign_in_ip: string | null
+  locked_at: Timestamp | null
+  nombre: string | null
+  nusuario: string
+  observadorffechafin: Timestamp | null
+  observadorffechaini: Timestamp | null
+  oficina_id: number | null
+  password: Generated<string | null>
+  remember_created_at: Timestamp | null
+  reset_password_sent_at: Timestamp | null
+  reset_password_token: string | null
+  rol: Generated<number | null>
+  sign_in_count: Generated<number>
+  tema_id: number | null
+  unlock_token: string | null
+  updated_at: Timestamp | null
 }
 
 export interface DB {
-  ar_internal_metadata: ArInternalMetadata;
-  cben1: Cben1;
-  cben2: Cben2;
-  cvt1: Cvt1;
-  heb412_gen_campohc: Heb412GenCampohc;
-  heb412_gen_campoplantillahcm: Heb412GenCampoplantillahcm;
-  heb412_gen_campoplantillahcr: Heb412GenCampoplantillahcr;
-  heb412_gen_carpetaexclusiva: Heb412GenCarpetaexclusiva;
-  heb412_gen_doc: Heb412GenDoc;
-  heb412_gen_formulario_plantillahcm: Heb412GenFormularioPlantillahcm;
-  heb412_gen_formulario_plantillahcr: Heb412GenFormularioPlantillahcr;
-  heb412_gen_plantilladoc: Heb412GenPlantilladoc;
-  heb412_gen_plantillahcm: Heb412GenPlantillahcm;
-  heb412_gen_plantillahcr: Heb412GenPlantillahcr;
-  mr519_gen_campo: Mr519GenCampo;
-  mr519_gen_encuestapersona: Mr519GenEncuestapersona;
-  mr519_gen_encuestausuario: Mr519GenEncuestausuario;
-  mr519_gen_formulario: Mr519GenFormulario;
-  mr519_gen_opcioncs: Mr519GenOpcioncs;
-  mr519_gen_planencuesta: Mr519GenPlanencuesta;
-  mr519_gen_respuestafor: Mr519GenRespuestafor;
-  mr519_gen_valorcampo: Mr519GenValorcampo;
-  msip_anexo: MsipAnexo;
-  msip_bitacora: MsipBitacora;
-  msip_centropoblado: MsipCentropoblado;
-  msip_centropoblado_histvigencia: MsipCentropobladoHistvigencia;
-  msip_departamento: MsipDepartamento;
-  msip_departamento_histvigencia: MsipDepartamentoHistvigencia;
-  msip_estadosol: MsipEstadosol;
-  msip_etiqueta: MsipEtiqueta;
-  msip_etiqueta_municipio: MsipEtiquetaMunicipio;
-  msip_etiqueta_persona: MsipEtiquetaPersona;
-  msip_etnia: MsipEtnia;
-  msip_fuenteprensa: MsipFuenteprensa;
-  msip_grupo: MsipGrupo;
-  msip_grupo_usuario: MsipGrupoUsuario;
-  msip_grupoper: MsipGrupoper;
-  msip_mundep_sinorden: MsipMundepSinorden;
-  msip_municipio: MsipMunicipio;
-  msip_municipio_histvigencia: MsipMunicipioHistvigencia;
-  msip_oficina: MsipOficina;
-  msip_orgsocial: MsipOrgsocial;
-  msip_orgsocial_persona: MsipOrgsocialPersona;
-  msip_orgsocial_sectororgsocial: MsipOrgsocialSectororgsocial;
-  msip_pais: MsipPais;
-  msip_pais_histvigencia: MsipPaisHistvigencia;
-  msip_perfilorgsocial: MsipPerfilorgsocial;
-  msip_persona: MsipPersona;
-  msip_persona_trelacion: MsipPersonaTrelacion;
-  msip_sectororgsocial: MsipSectororgsocial;
-  msip_solicitud: MsipSolicitud;
-  msip_solicitud_usuarionotificar: MsipSolicitudUsuarionotificar;
-  msip_tcentropoblado: MsipTcentropoblado;
-  msip_tdocumento: MsipTdocumento;
-  msip_tema: MsipTema;
-  msip_tipoorg: MsipTipoorg;
-  msip_trelacion: MsipTrelacion;
-  msip_trivalente: MsipTrivalente;
-  msip_tsitio: MsipTsitio;
-  msip_ubicacion: MsipUbicacion;
-  msip_ubicacionpre: MsipUbicacionpre;
-  msip_vereda: MsipVereda;
-  nobelicas: Nobelicas;
-  schema_migrations: SchemaMigrations;
-  sivel2_gen_actividadoficio: Sivel2GenActividadoficio;
-  sivel2_gen_acto: Sivel2GenActo;
-  sivel2_gen_actocolectivo: Sivel2GenActocolectivo;
-  sivel2_gen_anexo_caso: Sivel2GenAnexoCaso;
-  sivel2_gen_antecedente: Sivel2GenAntecedente;
-  sivel2_gen_antecedente_caso: Sivel2GenAntecedenteCaso;
-  sivel2_gen_antecedente_combatiente: Sivel2GenAntecedenteCombatiente;
-  sivel2_gen_antecedente_victima: Sivel2GenAntecedenteVictima;
-  sivel2_gen_antecedente_victimacolectiva: Sivel2GenAntecedenteVictimacolectiva;
-  sivel2_gen_caso: Sivel2GenCaso;
-  sivel2_gen_caso_categoria_presponsable: Sivel2GenCasoCategoriaPresponsable;
-  sivel2_gen_caso_contexto: Sivel2GenCasoContexto;
-  sivel2_gen_caso_etiqueta: Sivel2GenCasoEtiqueta;
-  sivel2_gen_caso_fotra: Sivel2GenCasoFotra;
-  sivel2_gen_caso_frontera: Sivel2GenCasoFrontera;
-  sivel2_gen_caso_fuenteprensa: Sivel2GenCasoFuenteprensa;
-  sivel2_gen_caso_presponsable: Sivel2GenCasoPresponsable;
-  sivel2_gen_caso_region: Sivel2GenCasoRegion;
-  sivel2_gen_caso_respuestafor: Sivel2GenCasoRespuestafor;
-  sivel2_gen_caso_solicitud: Sivel2GenCasoSolicitud;
-  sivel2_gen_caso_usuario: Sivel2GenCasoUsuario;
-  sivel2_gen_categoria: Sivel2GenCategoria;
-  sivel2_gen_combatiente: Sivel2GenCombatiente;
-  sivel2_gen_conscaso1: Sivel2GenConscaso1;
-  sivel2_gen_contexto: Sivel2GenContexto;
-  sivel2_gen_contextovictima: Sivel2GenContextovictima;
-  sivel2_gen_contextovictima_victima: Sivel2GenContextovictimaVictima;
-  sivel2_gen_departamento_region: Sivel2GenDepartamentoRegion;
-  sivel2_gen_escolaridad: Sivel2GenEscolaridad;
-  sivel2_gen_estadocivil: Sivel2GenEstadocivil;
-  sivel2_gen_etnia_victimacolectiva: Sivel2GenEtniaVictimacolectiva;
-  sivel2_gen_filiacion: Sivel2GenFiliacion;
-  sivel2_gen_filiacion_victimacolectiva: Sivel2GenFiliacionVictimacolectiva;
-  sivel2_gen_fotra: Sivel2GenFotra;
-  sivel2_gen_frontera: Sivel2GenFrontera;
-  sivel2_gen_iglesia: Sivel2GenIglesia;
-  sivel2_gen_iniciador: Sivel2GenIniciador;
-  sivel2_gen_intervalo: Sivel2GenIntervalo;
-  sivel2_gen_maternidad: Sivel2GenMaternidad;
-  sivel2_gen_municipio_region: Sivel2GenMunicipioRegion;
-  sivel2_gen_observador_filtrodepartamento: Sivel2GenObservadorFiltrodepartamento;
-  sivel2_gen_organizacion: Sivel2GenOrganizacion;
-  sivel2_gen_organizacion_victimacolectiva: Sivel2GenOrganizacionVictimacolectiva;
-  sivel2_gen_otraorga_victima: Sivel2GenOtraorgaVictima;
-  sivel2_gen_pconsolidado: Sivel2GenPconsolidado;
-  sivel2_gen_presponsable: Sivel2GenPresponsable;
-  sivel2_gen_profesion: Sivel2GenProfesion;
-  sivel2_gen_profesion_victima: Sivel2GenProfesionVictima;
-  sivel2_gen_profesion_victimacolectiva: Sivel2GenProfesionVictimacolectiva;
-  sivel2_gen_rangoedad: Sivel2GenRangoedad;
-  sivel2_gen_rangoedad_victimacolectiva: Sivel2GenRangoedadVictimacolectiva;
-  sivel2_gen_region: Sivel2GenRegion;
-  sivel2_gen_resagresion: Sivel2GenResagresion;
-  sivel2_gen_sectorsocial: Sivel2GenSectorsocial;
-  sivel2_gen_sectorsocial_victimacolectiva: Sivel2GenSectorsocialVictimacolectiva;
-  sivel2_gen_sectorsocialsec_victima: Sivel2GenSectorsocialsecVictima;
-  sivel2_gen_supracategoria: Sivel2GenSupracategoria;
-  sivel2_gen_tviolencia: Sivel2GenTviolencia;
-  sivel2_gen_victima: Sivel2GenVictima;
-  sivel2_gen_victimacolectiva: Sivel2GenVictimacolectiva;
-  sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
-  sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
-  usuario: Usuario;
+  ar_internal_metadata: ArInternalMetadata
+  cben1: Cben1
+  cben2: Cben2
+  cvt1: Cvt1
+  heb412_gen_campohc: Heb412GenCampohc
+  heb412_gen_campoplantillahcm: Heb412GenCampoplantillahcm
+  heb412_gen_campoplantillahcr: Heb412GenCampoplantillahcr
+  heb412_gen_carpetaexclusiva: Heb412GenCarpetaexclusiva
+  heb412_gen_doc: Heb412GenDoc
+  heb412_gen_formulario_plantillahcm: Heb412GenFormularioPlantillahcm
+  heb412_gen_formulario_plantillahcr: Heb412GenFormularioPlantillahcr
+  heb412_gen_plantilladoc: Heb412GenPlantilladoc
+  heb412_gen_plantillahcm: Heb412GenPlantillahcm
+  heb412_gen_plantillahcr: Heb412GenPlantillahcr
+  mr519_gen_campo: Mr519GenCampo
+  mr519_gen_encuestapersona: Mr519GenEncuestapersona
+  mr519_gen_encuestausuario: Mr519GenEncuestausuario
+  mr519_gen_formulario: Mr519GenFormulario
+  mr519_gen_opcioncs: Mr519GenOpcioncs
+  mr519_gen_planencuesta: Mr519GenPlanencuesta
+  mr519_gen_respuestafor: Mr519GenRespuestafor
+  mr519_gen_valorcampo: Mr519GenValorcampo
+  msip_anexo: MsipAnexo
+  msip_bitacora: MsipBitacora
+  msip_centropoblado: MsipCentropoblado
+  msip_centropoblado_histvigencia: MsipCentropobladoHistvigencia
+  msip_departamento: MsipDepartamento
+  msip_departamento_histvigencia: MsipDepartamentoHistvigencia
+  msip_estadosol: MsipEstadosol
+  msip_etiqueta: MsipEtiqueta
+  msip_etiqueta_municipio: MsipEtiquetaMunicipio
+  msip_etiqueta_persona: MsipEtiquetaPersona
+  msip_etnia: MsipEtnia
+  msip_fuenteprensa: MsipFuenteprensa
+  msip_grupo: MsipGrupo
+  msip_grupo_usuario: MsipGrupoUsuario
+  msip_grupoper: MsipGrupoper
+  msip_mundep_sinorden: MsipMundepSinorden
+  msip_municipio: MsipMunicipio
+  msip_municipio_histvigencia: MsipMunicipioHistvigencia
+  msip_oficina: MsipOficina
+  msip_orgsocial: MsipOrgsocial
+  msip_orgsocial_persona: MsipOrgsocialPersona
+  msip_orgsocial_sectororgsocial: MsipOrgsocialSectororgsocial
+  msip_pais: MsipPais
+  msip_pais_histvigencia: MsipPaisHistvigencia
+  msip_perfilorgsocial: MsipPerfilorgsocial
+  msip_persona: MsipPersona
+  msip_persona_trelacion: MsipPersonaTrelacion
+  msip_sectororgsocial: MsipSectororgsocial
+  msip_solicitud: MsipSolicitud
+  msip_solicitud_usuarionotificar: MsipSolicitudUsuarionotificar
+  msip_tcentropoblado: MsipTcentropoblado
+  msip_tdocumento: MsipTdocumento
+  msip_tema: MsipTema
+  msip_tipoorg: MsipTipoorg
+  msip_trelacion: MsipTrelacion
+  msip_trivalente: MsipTrivalente
+  msip_tsitio: MsipTsitio
+  msip_ubicacion: MsipUbicacion
+  msip_ubicacionpre: MsipUbicacionpre
+  msip_vereda: MsipVereda
+  nobelicas: Nobelicas
+  schema_migrations: SchemaMigrations
+  sivel2_gen_actividadoficio: Sivel2GenActividadoficio
+  sivel2_gen_acto: Sivel2GenActo
+  sivel2_gen_actocolectivo: Sivel2GenActocolectivo
+  sivel2_gen_anexo_caso: Sivel2GenAnexoCaso
+  sivel2_gen_antecedente: Sivel2GenAntecedente
+  sivel2_gen_antecedente_caso: Sivel2GenAntecedenteCaso
+  sivel2_gen_antecedente_combatiente: Sivel2GenAntecedenteCombatiente
+  sivel2_gen_antecedente_victima: Sivel2GenAntecedenteVictima
+  sivel2_gen_antecedente_victimacolectiva: Sivel2GenAntecedenteVictimacolectiva
+  sivel2_gen_caso: Sivel2GenCaso
+  sivel2_gen_caso_categoria_presponsable: Sivel2GenCasoCategoriaPresponsable
+  sivel2_gen_caso_contexto: Sivel2GenCasoContexto
+  sivel2_gen_caso_etiqueta: Sivel2GenCasoEtiqueta
+  sivel2_gen_caso_fotra: Sivel2GenCasoFotra
+  sivel2_gen_caso_frontera: Sivel2GenCasoFrontera
+  sivel2_gen_caso_fuenteprensa: Sivel2GenCasoFuenteprensa
+  sivel2_gen_caso_presponsable: Sivel2GenCasoPresponsable
+  sivel2_gen_caso_region: Sivel2GenCasoRegion
+  sivel2_gen_caso_respuestafor: Sivel2GenCasoRespuestafor
+  sivel2_gen_caso_solicitud: Sivel2GenCasoSolicitud
+  sivel2_gen_caso_usuario: Sivel2GenCasoUsuario
+  sivel2_gen_categoria: Sivel2GenCategoria
+  sivel2_gen_combatiente: Sivel2GenCombatiente
+  sivel2_gen_conscaso1: Sivel2GenConscaso1
+  sivel2_gen_contexto: Sivel2GenContexto
+  sivel2_gen_contextovictima: Sivel2GenContextovictima
+  sivel2_gen_contextovictima_victima: Sivel2GenContextovictimaVictima
+  sivel2_gen_departamento_region: Sivel2GenDepartamentoRegion
+  sivel2_gen_escolaridad: Sivel2GenEscolaridad
+  sivel2_gen_estadocivil: Sivel2GenEstadocivil
+  sivel2_gen_etnia_victimacolectiva: Sivel2GenEtniaVictimacolectiva
+  sivel2_gen_filiacion: Sivel2GenFiliacion
+  sivel2_gen_filiacion_victimacolectiva: Sivel2GenFiliacionVictimacolectiva
+  sivel2_gen_fotra: Sivel2GenFotra
+  sivel2_gen_frontera: Sivel2GenFrontera
+  sivel2_gen_iglesia: Sivel2GenIglesia
+  sivel2_gen_iniciador: Sivel2GenIniciador
+  sivel2_gen_intervalo: Sivel2GenIntervalo
+  sivel2_gen_maternidad: Sivel2GenMaternidad
+  sivel2_gen_municipio_region: Sivel2GenMunicipioRegion
+  sivel2_gen_observador_filtrodepartamento: Sivel2GenObservadorFiltrodepartamento
+  sivel2_gen_organizacion: Sivel2GenOrganizacion
+  sivel2_gen_organizacion_victimacolectiva: Sivel2GenOrganizacionVictimacolectiva
+  sivel2_gen_otraorga_victima: Sivel2GenOtraorgaVictima
+  sivel2_gen_pconsolidado: Sivel2GenPconsolidado
+  sivel2_gen_presponsable: Sivel2GenPresponsable
+  sivel2_gen_profesion: Sivel2GenProfesion
+  sivel2_gen_profesion_victima: Sivel2GenProfesionVictima
+  sivel2_gen_profesion_victimacolectiva: Sivel2GenProfesionVictimacolectiva
+  sivel2_gen_rangoedad: Sivel2GenRangoedad
+  sivel2_gen_rangoedad_victimacolectiva: Sivel2GenRangoedadVictimacolectiva
+  sivel2_gen_region: Sivel2GenRegion
+  sivel2_gen_resagresion: Sivel2GenResagresion
+  sivel2_gen_sectorsocial: Sivel2GenSectorsocial
+  sivel2_gen_sectorsocial_victimacolectiva: Sivel2GenSectorsocialVictimacolectiva
+  sivel2_gen_sectorsocialsec_victima: Sivel2GenSectorsocialsecVictima
+  sivel2_gen_supracategoria: Sivel2GenSupracategoria
+  sivel2_gen_tviolencia: Sivel2GenTviolencia
+  sivel2_gen_victima: Sivel2GenVictima
+  sivel2_gen_victimacolectiva: Sivel2GenVictimacolectiva
+  sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado
+  sivel2_gen_vinculoestado: Sivel2GenVinculoestado
+  usuario: Usuario
 }

@@ -9,13 +9,28 @@ vi.mock('@radix-ui/react-slider', () => ({
     <div ref={ref} data-testid="slider-root" className={className} {...props} />
   )),
   Track: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="slider-track" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="slider-track"
+      className={className}
+      {...props}
+    />
   )),
   Range: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="slider-range" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="slider-range"
+      className={className}
+      {...props}
+    />
   )),
   Thumb: React.forwardRef(({ className, ...props }: any, ref: any) => (
-    <div ref={ref} data-testid="slider-thumb" className={className} {...props} />
+    <div
+      ref={ref}
+      data-testid="slider-thumb"
+      className={className}
+      {...props}
+    />
   )),
 }))
 

@@ -5,24 +5,32 @@ import { describe, it, expect, vi } from 'vitest'
 
 // Mock @radix-ui/react-checkbox
 vi.mock('@radix-ui/react-checkbox', () => ({
-  Root: React.forwardRef(({ className, checked, disabled, ...props }: any, ref: any) => (
-    <button
-      ref={ref}
-      data-testid="checkbox-root"
-      className={className}
-      data-state={checked ? 'checked' : 'unchecked'}
-      disabled={disabled}
-      {...props}
-    />
-  )),
+  Root: React.forwardRef(
+    ({ className, checked, disabled, ...props }: any, ref: any) => (
+      <button
+        ref={ref}
+        data-testid="checkbox-root"
+        className={className}
+        data-state={checked ? 'checked' : 'unchecked'}
+        disabled={disabled}
+        {...props}
+      />
+    ),
+  ),
   Indicator: ({ className, children }: any) => (
-    <div data-testid="checkbox-indicator" className={className}>{children}</div>
+    <div data-testid="checkbox-indicator" className={className}>
+      {children}
+    </div>
   ),
 }))
 
 // Mock lucide-react Check icon
 vi.mock('lucide-react', () => ({
-  Check: ({ className }: any) => <div data-testid="check-icon" className={className}>✓</div>,
+  Check: ({ className }: any) => (
+    <div data-testid="check-icon" className={className}>
+      ✓
+    </div>
+  ),
 }))
 
 import { Checkbox } from '@/components/ui/checkbox'

@@ -22,7 +22,6 @@ function getLocale(request: NextRequest): string {
 
   localeCache.set(cacheKey, locale);
   return locale;
-
 }
 
 export function middleware(request: NextRequest) {
