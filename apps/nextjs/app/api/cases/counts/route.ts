@@ -5,6 +5,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 
+// Definir tipo para los resultados de count
+interface CountResult {
+  count: string | number | bigint;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,9 +24,9 @@ export async function GET(req: NextRequest) {
     const categoriaId = searchParams.get('filtro[categoria_id]');
 
     // Consultas condicionales con filtros
-    let casoQuery = db.selectFrom('sivel2_gen_caso').select(sql`count(*)`.as('count'));
-    let victimaQuery = db.selectFrom('sivel2_gen_victima').select(sql`count(*)`.as('count'));
-    let actoQuery = db.selectFrom('sivel2_gen_acto').select(sql`count(*)`.as('count'));
+    let casoQuery = db.selectFrom('sivel2_gen_caso').select(sql<string>`count(*)`.as('count'));
+    let victimaQuery = db.selectFrom('sivel2_gen_victima').select(sql<string>`count(*)`.as('count'));
+    let actoQuery = db.selectFrom('sivel2_gen_acto').select(sql<string>`count(*)`.as('count'));
     
     // Aplicar filtros a la consulta de casos (para otros necesitaríamos joins)
     if (fechaini) {
@@ -33,30 +38,39 @@ export async function GET(req: NextRequest) {
 
     // Para victimas y actos necesitaríamos joins complejos con filtros
     // Por ahora devolvemos conteos totales
-    
+
     const [casosRes, victimasRes, actosRes, victimizacionesRes] = await Promise.all([
-      casoQuery.execute(),
-      victimaQuery.execute(),
-      actoQuery.execute(),
-      sql<any>`
-        SELECT COUNT(*) FROM (
-          SELECT DISTINCT categoria_id, persona_id, caso_id 
+      casoQuery.executeTakeFirst(),
+      victimaQuery.executeTakeFirst(),
+      actoQuery.executeTakeFirst(),
+      sql<{ count: string }>`
+      SELECT COUNT(*) as count FROM (
+        SELECT DISTINCT categoria_id, persona_id, caso_id 
           FROM sivel2_gen_acto
-        ) AS sub
-      `.execute(db)
+      ) AS sub
+      `.execute(db).then(res => res.rows[0] || { count: '0' })
     ]);
 
+    const toNumber = (countObj: { count?: string | number | bigint } | undefined): number => {
+      if (!countObj || !countObj.count) return 0;
+      const count = countObj.count;
+      return typeof count === 'string' ? parseInt(count, 10) : Number(count);
+    };
+
     return NextResponse.json({
-      casos: parseInt(casosRes[0]?.count || '0'),
-      victimas: parseInt(victimasRes[0]?.count || '0'),
-      actos: parseInt(actosRes[0]?.count || '0'),
-      victimizaciones: parseInt(victimizacionesRes.rows[0]?.count || '0')
+      casos: toNumber(casosRes),
+      victimas: toNumber(victimasRes),
+      actos: toNumber(actosRes),
+      victimizaciones: toNumber(victimizacionesRes)
     }, { status: 200 });
 
   } catch (error) {
     console.error("Error en conteos:", error);
     return NextResponse.json(
-      { error: 'Error al obtener conteos' },
+      { 
+        error: 'Error al obtener conteos',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
