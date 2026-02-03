@@ -247,10 +247,10 @@ export default function OSMMapPage() {
                 </div>
                 
                 {/* Fila 2: Departamentos, P. Responsable, Violencia */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {/* Departamento */}
                   <div className="space-y-2">
-                    <Label htmlFor="departamento" className="text-green-600">
+                    <Label htmlFor="departamento">
                       {t('department')}
                     </Label>
                     <Select 
@@ -274,7 +274,7 @@ export default function OSMMapPage() {
                   
                   {/* P. Responsable */}
                   <div className="space-y-2">
-                    <Label htmlFor="presponsable" className="text-red-600">
+                    <Label htmlFor="presponsable">
                       {t('allegedPerpetrator')}
                     </Label>
                     <Select 
@@ -298,7 +298,7 @@ export default function OSMMapPage() {
                   
                   {/* Violencia (Categoría) */}
                   <div className="space-y-2">
-                    <Label htmlFor="tvio" className="text-blue-600">
+                    <Label htmlFor="tvio">
                       {t('violence')}
                     </Label>
                     <Select 

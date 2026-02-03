@@ -25,12 +25,14 @@ export default function Footer({
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-gray-600">
             <p>
-              Desarrollado por{' '}
-              <a href="https://www.pasosdeJesus.org">Pasos de Jesús</a> (ver{' '}
-              <a href="">créditos</a>).
+            {lang == 'es' ? 'Desarrollado por ' : 'Developed by '}
+              <a href="https://www.pasosdeJesus.org">Pasos de Jesús</a> 
+              (<a href="https://gitlab.com/pasosdeJesus/sivel3/-/blob/main/CREDITOS.md">{lang == 'es' ? 'Ver Créditos' : 'See Credits'}</a>).
             </p>
             <p className="mt-1">
-              Datos abiertos de <a href="nocheyniebla.org">Noche y Niebla</a>
+              {lang == 'es' ? 'Muestra de datos abiertos de ' :
+               'Sample of open data from '}
+              <a href="nocheyniebla.org">Noche y Niebla</a>
             </p>
           </div>
 
@@ -41,14 +43,18 @@ export default function Footer({
                   variant="outline"
                   className="text-green-600 border-green-200"
                 >
-                  🔗 Wallet conectada
+               
+                  🔗  {lang == 'es' ? 'Billetera conectada' : 
+                    'Wallet connected'}
                 </Badge>
               ) : (
                 <Badge
                   variant="outline"
                   className="text-amber-600 border-amber-200"
                 >
-                  ⚠️ Conecta wallet para funciones avanzadas
+                  ⚠️ {lang == 'es' ? 
+                    ' Conecta una billetera web3 para funciones avanzadas' : 
+                    ' Connect a web3 wallet to have advanced functions'}
                 </Badge>
               ))}
 

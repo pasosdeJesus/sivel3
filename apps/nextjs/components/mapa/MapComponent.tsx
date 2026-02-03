@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Navigation,
@@ -212,7 +212,7 @@ export default function MapComponent({
           // Crear marcador simple (sin colores por categoría)
           const marcador = L.marker([lat, lng])
 
-          // Popup simple igual a Rails
+          /* Popup simple igual a Rails
           marcador.bindPopup(`
             <div class="p-2 min-w-[200px]">
               <h4 class="font-bold text-sm mb-1">${caso.titulo || 'Caso ' + codigo}</h4>
@@ -224,7 +224,7 @@ export default function MapComponent({
                 Ver detalles
               </button>
             </div>
-          `)
+          `) */
 
           // Al hacer clic
           marcador.on('click', async () => {
@@ -247,6 +247,21 @@ export default function MapComponent({
   // Cargar detalle de caso
   const cargarDetalleCaso = async (codigo: string) => {
     try {
+      setCasoSeleccionado({
+        id: 0,
+        titulo: '',
+        hechos: '',
+        fecha: '',
+        hora: '',
+        departamento: '',
+        municipio: '',
+        centro_poblado: '',
+        lugar: '',
+        victimas: [],
+        presponsables: [],
+      })
+      setMostrarInfo(true)
+
       const response = await fetch(`/api/cases/${codigo}`)
       const datos = await response.json()
       const caso = datos.caso
@@ -267,7 +282,6 @@ export default function MapComponent({
           : [],
       })
 
-      setMostrarInfo(true)
     } catch (error) {
       console.error('Error cargando detalle:', error)
     }
@@ -356,7 +370,7 @@ export default function MapComponent({
             </button>
           </CardHeader>
 
-          <ScrollArea className="max-h-[60vh] px-4">
+          <ScrollArea className="max-h-[60vh] px-4" style={{overflow: 'scroll'}}>
             <div className="space-y-4">
               {/* Descripción */}
               <div>
@@ -451,6 +465,7 @@ export default function MapComponent({
                 </div>
               </div>
             </div>
+            <ScrollBar orientation="vertical"/>
           </ScrollArea>
 
           <CardContent className="pt-4 border-t">

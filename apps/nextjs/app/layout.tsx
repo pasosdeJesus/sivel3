@@ -9,13 +9,19 @@ export const metadata: Metadata = {
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params
 }: Readonly<{
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }>) {
+
+  const { locale } = await params
+  const lang = typeof locale != "undefined" && 
+    ["en", "es"].includes(locale) ? locale : "en"
   return (
-    <html lang="en">
+    <html lang={lang}>
     <body className={inter.className}>
       {children}
     </body>

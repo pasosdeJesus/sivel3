@@ -1,5 +1,6 @@
 
-Ver sivel2/CREDITOS.md
+Esta versión se basa en la estructura de SIVeL 2,
+ver los [créditos de SIVeL 2](https://gitlab.com/pasosdeJesus/sivel2/-/blob/main/CREDITOS.md?ref_type=heads).
 
 El mayor agradecimiento a Dios trino, el de la Biblia, a quien dedicamos 
 este trabajo y a quien oramos para que no sea usado por estructuras armadas
