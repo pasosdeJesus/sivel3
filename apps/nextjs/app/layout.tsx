@@ -22,9 +22,9 @@ export default async function RootLayout({
     ["en", "es"].includes(locale) ? locale : "en"
   return (
     <html lang={lang}>
-    <body className={inter.className}>
-      {children}
-    </body>
+      <body className={inter.className}>
+        {children}
+      </body>
     </html>
   )
 }

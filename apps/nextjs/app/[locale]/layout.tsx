@@ -38,19 +38,12 @@ export default function LocaleLayout({
   }
   
   return (
-    <html
-      lang={locale}
-      className={`${dmSans.variable} ${dmMono.variable} antialiased`}
-    >
-      <body>
-        <I18nextProvider i18n={i18n}>
-          <LanguageSync locale={locale} />
-          <AppProvider locale={locale}>
-            <Layout>{children}</Layout>
-          </AppProvider>
-        </I18nextProvider>
-      </body>
-    </html>
+    <I18nextProvider i18n={i18n}>
+      <LanguageSync locale={locale} />
+      <AppProvider locale={locale}>
+        <Layout>{children}</Layout>
+      </AppProvider>
+    </I18nextProvider>
   )
 }
 
