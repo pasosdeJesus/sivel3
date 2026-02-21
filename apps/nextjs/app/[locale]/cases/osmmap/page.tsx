@@ -1,11 +1,9 @@
 'use client';
 
-import { Filter, Info } from 'lucide-react';
+import { Filter, Info, Heart } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useRouter, usePathname } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
 import { useParams } from 'next/navigation';
-import { useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,11 +17,64 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 
-// Componente dinámico del mapa
+// Textos de internacionalización
+const translations = {
+  en: {
+    counts: 'Counts',
+    totalsByFilters: 'Totals according to applied filters',
+    cases: 'Cases',
+    victims: 'Victims',
+    victimizations: 'Victimizations',
+    acts: 'Acts',
+    filters: 'Filters',
+    from: 'From',
+    to: 'To',
+    department: 'Department',
+    showAll: 'Show All',
+    allegedPerpetrator: 'Alleged Perpetrator',
+    violence: 'Violence',
+    filter: 'Filter',
+    connectWallet: 'Connect wallet for advanced features',
+    donation: 'Donation',
+    cause: 'Cause',
+    colombia: 'Colombia',
+    israel_palestine: 'Israel/Palestine',
+    donate: 'Donate',
+  },
+  es: {
+    counts: 'Conteos',
+    totalsByFilters: 'Totales según filtros aplicados',
+    cases: 'Casos',
+    victims: 'Víctimas',
+    victimizations: 'Victimizaciones',
+    acts: 'Actos',
+    filters: 'Filtros',
+    from: 'Desde',
+    to: 'Hasta',
+    department: 'Departamento',
+    showAll: 'Mostrar todos',
+    allegedPerpetrator: 'P. Responsable',
+    violence: 'Violencia',
+    filter: 'Filtrar',
+    connectWallet: 'Conecta la billetera para funciones avanzadas',
+    donation: 'Donación',
+    cause: 'Causa',
+    colombia: 'Colombia',
+    israel_palestine: 'Israel/Palestina',
+    donate: 'Donar',
+  }
+};
+
 const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ssr: false,
   loading: () => (
@@ -38,34 +89,15 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 });
 
 export default function OSMMapPage() {
-  const { t, i18n } = useTranslation('common');
-  console.log("OJO t=", t)
-  console.log("OJO i18n=", i18n)
-  const router = useRouter();
-  const pathname = usePathname();
   const params = useParams();
-  const currentLocale = params.locale as string || 'en'; // Obtiene el locale de la URL
-
-  const cambiarIdioma = (nuevoLocale: string) => {
-    const nuevaRuta = pathname.replace(`/${currentLocale}/`, `/${nuevoLocale}/`);
-    router.push(nuevaRuta);
-    // i18n.changeLanguage(nuevoLocale);
-  };
+  const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
+  const t = translations[currentLocale] || translations.en;
 
   const { isConnected } = useWallet();
-  const [cargando, setCargando] = useState(true);
-  const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // Conteos
-  const [conteos, setConteos] = useState({
-    casos: 0,
-    victimas: 0,
-    victimizaciones: 0,
-    actos: 0
-  });
-  
-  // Filtros básicos (igual que API Rails)
-  const [filtros, setFiltros] = useState({
+  const [counts, setCounts] = useState({ casos: 0, victimas: 0, victimizaciones: 0, actos: 0 });
+  const [filters, setFilters] = useState({
     'filtro[fechaini]': '',
     'filtro[fechafin]': '',
     'filtro[departamento_id]': '',
@@ -73,103 +105,54 @@ export default function OSMMapPage() {
     'filtro[categoria_id]': ''
   });
   
-  // Datos para selects
-  const [departamentos, setDepartamentos] = useState<Array<{id: string, nombre: string}>>([]);
-  const [categorias, setCategorias] = useState<Array<{id: string, nombre: string}>>([]);
-  const [presponsables, setPresponsables] = useState<Array<{id: string, nombre: string}>>([]);
+  const [departments, setDepartments] = useState<Array<{id: string, nombre: string}>>([]);
+  const [categories, setCategories] = useState<Array<{id: string, nombre: string}>>([]);
+  const [allegedPerpetrators, setAllegedPerpetrators] = useState<Array<{id: string, nombre: string}>>([]);
   
-  // Cargar datos iniciales
   useEffect(() => {
-    const cargarDatosIniciales = async () => {
-      setCargando(true);
-
+    const loadInitialData = async () => {
+      setLoading(true);
       try {
-        // Cargar opciones para selects (si existen endpoints)
         const [deptRes, catRes, presRes] = await Promise.all([
           fetch('/api/departments'),
           fetch('/api/categories'),
           fetch('/api/alleged-perpetrators')
         ]);
-
-        setDepartamentos(await deptRes.json());
-        setCategorias(await catRes.json());
-        setPresponsables(await presRes.json());
-
-
+        setDepartments(await deptRes.json());
+        setCategories(await catRes.json());
+        setAllegedPerpetrators(await presRes.json());
       } catch (error) {
-        console.error('Error cargando datos:', error);
-        setDepartamentos([{ id: '1', nombre: 'Cauca' }]);
-        setCategorias([{ id: '1', nombre: 'Desaparición' }]);
-        setPresponsables([{ id: '1', nombre: 'Grupo A' }]);
+        console.error('Error loading data:', error);
       } finally {
-        setCargando(false);
+        setLoading(false);
       }
     };
-    
-    cargarDatosIniciales();
+    loadInitialData();
   }, []);
   
-  // Manejar cambio de filtros
-  const handleFiltroChange = (key: string, value: string) => {
+  const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
-    setFiltros(prev => ({
-      ...prev,
-      [key]: value
-    }));
+    setFilters(prev => ({ ...prev, [key]: value }));
   };
   
-  // Aplicar filtros
-  const aplicarFiltros = () => {
-    console.log('Aplicando filtros:', filtros);
-    // Los filtros se pasan automáticamente al MapComponent
-  };
+  const applyFilters = () => console.log('Applying filters:', filters);
   
-  // Limpiar filtros
-  const limpiarFiltros = () => {
-    setFiltros({
-      'filtro[fechaini]': '',
-      'filtro[fechafin]': '',
-      'filtro[departamento_id]': '',
-      'filtro[presponsable_id]': '',
-      'filtro[categoria_id]': ''
-    });
-  };
-  
-  // Actualizar conteos desde el mapa
-  const handleCargarConteos = (nuevosConteos: any) => {
-    setConteos(nuevosConteos);
-  };
+  const handleCountsLoad = (newCounts: any) => setCounts(newCounts);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Selector de idioma en esquina superior derecha */}
-      <div className="absolute top-4 right-4 z-50">
-        <select 
-          value={currentLocale}
-          onChange={(e) => cambiarIdioma(e.target.value)}
-          className="px-3 py-1 border rounded-md bg-white text-sm"
-        >
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          {/* Agregar más idiomas después */}
-        </select>
-      </div>
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar izquierda - Conteos y Filtros */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Tarjeta de Conteos */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  📊 {t('counts')}
+                  📊 {t.counts}
                 </CardTitle>
-                <CardDescription>
-                  {t('totalsByFilters')}
-                </CardDescription>
+                <CardDescription>{t.totalsByFilters}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cargando ? (
+                {loading ? (
                   Array(4).fill(0).map((_, i) => (
                     <div key={i} className="space-y-2">
                       <Skeleton className="h-4 w-24" />
@@ -179,181 +162,133 @@ export default function OSMMapPage() {
                 ) : (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t('cases')}</span>
-                      <Badge variant="secondary">{conteos.casos.toLocaleString()}</Badge>
+                      <span className="text-sm font-medium text-gray-600">{t.cases}</span>
+                      <Badge variant="secondary">{counts.casos.toLocaleString()}</Badge>
                     </div>
-                    
                     <Separator />
-                    
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t('victims')}</span>
-                      <Badge variant="secondary">{conteos.victimas.toLocaleString()}</Badge>
+                      <span className="text-sm font-medium text-gray-600">{t.victims}</span>
+                      <Badge variant="secondary">{counts.victimas.toLocaleString()}</Badge>
                     </div>
-                    
                     <Separator />
-                    
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t('victimizations')}</span>
-                      <Badge variant="secondary">{conteos.victimizaciones.toLocaleString()}</Badge>
+                      <span className="text-sm font-medium text-gray-600">{t.victimizations}</span>
+                      <Badge variant="secondary">{counts.victimizaciones.toLocaleString()}</Badge>
                     </div>
-                    
                     <Separator />
-                    
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t('acts')}</span>
-                      <Badge variant="secondary">{conteos.actos.toLocaleString()}</Badge>
+                      <span className="text-sm font-medium text-gray-600">{t.acts}</span>
+                      <Badge variant="secondary">{counts.actos.toLocaleString()}</Badge>
                     </div>
                   </>
                 )}
               </CardContent>
             </Card>
             
-            {/* Tarjeta de Filtros */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Filter className="h-4 w-4" />
-                    {t('filters')}
+                  {t.filters}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Fila 1: Fechas */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="campo-desde" className="text-primary">
-                      {t('from')}
-                    </Label>
-                    <Input
-                      id="campo-desde"
-                      name="desde"
-                      type="date"
-                      value={filtros['filtro[fechaini]']}
-                      onChange={(e) => handleFiltroChange('filtro[fechaini]', e.target.value)}
-                    />
+                    <Label htmlFor="campo-desde" className="text-primary">{t.from}</Label>
+                    <Input id="campo-desde" type="date" value={filters['filtro[fechaini]']} onChange={(e) => handleFilterChange('filtro[fechaini]', e.target.value)} />
                   </div>
-                  
                   <div className="space-y-2">
-                    <Label htmlFor="campo-hasta" className="text-primary">
-                     {t('to')}
-                    </Label>
-                    <Input
-                      id="campo-hasta"
-                      name="hasta"
-                      type="date"
-                      value={filtros['filtro[fechafin]']}
-                      onChange={(e) => handleFiltroChange('filtro[fechafin]', e.target.value)}
-                    />
+                    <Label htmlFor="campo-hasta" className="text-primary">{t.to}</Label>
+                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterChange('filtro[fechafin]', e.target.value)} />
                   </div>
                 </div>
-                
-                {/* Fila 2: Departamentos, P. Responsable, Violencia */}
-                <div className="grid grid-cols-1 gap-4">
-                  {/* Departamento */}
-                  <div className="space-y-2">
-                    <Label htmlFor="departamento">
-                      {t('department')}
-                    </Label>
-                    <Select 
-                      value={filtros['filtro[departamento_id]']}
-                      onValueChange={(value) => handleFiltroChange('filtro[departamento_id]', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('showAll')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">{t('showAll')}</SelectItem>
-                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
-                        {departamentos.map(dept => (
-                          <SelectItem key={dept.id} value={dept.id}>
-                            {dept.nombre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* P. Responsable */}
-                  <div className="space-y-2">
-                    <Label htmlFor="presponsable">
-                      {t('allegedPerpetrator')}
-                    </Label>
-                    <Select 
-                      value={filtros['filtro[presponsable_id]']}
-                      onValueChange={(value) => handleFiltroChange('filtro[presponsable_id]', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('showAll')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">{t('showAll')}</SelectItem>
-                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
-                        {presponsables.map(pr => (
-                          <SelectItem key={pr.id} value={pr.id}>
-                            {pr.nombre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* Violencia (Categoría) */}
-                  <div className="space-y-2">
-                    <Label htmlFor="tvio">
-                      {t('violence')}
-                    </Label>
-                    <Select 
-                      value={filtros['filtro[categoria_id]']}
-                      onValueChange={(value) => handleFiltroChange('filtro[categoria_id]', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('showAll')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">{t('showAll')}</SelectItem>
-                        <SelectItem value="separator" disabled>-----------------------</SelectItem>
-                        {categorias.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.nombre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="department">{t.department}</Label>
+                  <Select value={filters['filtro[departamento_id]']} onValueChange={(v) => handleFilterChange('filtro[departamento_id]', v)}>
+                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">{t.showAll}</SelectItem>
+                      <Separator />
+                      {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.nombre}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-                
-                {/* Botón Filtrar */}
+                <div className="space-y-2">
+                  <Label htmlFor="presponsable">{t.allegedPerpetrator}</Label>
+                  <Select value={filters['filtro[presponsable_id]']} onValueChange={(v) => handleFilterChange('filtro[presponsable_id]', v)}>
+                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">{t.showAll}</SelectItem>
+                      <Separator />
+                      {allegedPerpetrators.map(p => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tvio">{t.violence}</Label>
+                  <Select value={filters['filtro[categoria_id]']} onValueChange={(v) => handleFilterChange('filtro[categoria_id]', v)}>
+                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">{t.showAll}</SelectItem>
+                      <Separator />
+                      {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex justify-center pt-4">
-                  <Button 
-                    onClick={aplicarFiltros}
-                    className="w-full md:w-auto px-8"
-                  >
-                    {t('filter')}
-                  </Button>
+                  <Button onClick={applyFilters} className="w-full md:w-auto px-8">{t.filter}</Button>
                 </div>
               </CardContent>
             </Card>
 
-                        
-            {/* Estado de wallet */}
+            {isConnected && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-red-500" />
+                    {t.donation}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cause">{t.cause}</Label>
+                    <Select defaultValue="colombia">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="colombia">{t.colombia}</SelectItem>
+                        <SelectItem value="israel_palestine">{t.israel_palestine}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full">
+                    {t.donate}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {!isConnected && (
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-amber-600 text-sm">
                     <Info className="h-4 w-4" />
-                    <span>{t('connectWallet')}</span>
+                    <span>{t.connectWallet}</span>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
           
-          {/* Contenido principal - Mapa */}
           <div className="lg:col-span-3">
             <Card>
               <CardContent className="p-0">
                 <MapComponent
-                  filtros={filtros}
-                  onCargarConteos={handleCargarConteos}
+                  filtros={filters}
+                  onCargarConteos={handleCountsLoad}
+                  isConnected={isConnected}
                 />
               </CardContent>
             </Card>

@@ -14,6 +14,7 @@
     pkgs.python311
     pkgs.python311Packages.pip
     pkgs.ruby_3_3
+    pkgs.perl
   ];
 
   # Sets environment variables in the workspace

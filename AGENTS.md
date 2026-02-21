@@ -21,6 +21,7 @@ You are to read and fully assimilate the following documents in order:
 5.  **[ARCHITECTURE.md]**: The technical context in which you operate.
 6.  **[CONTRIBUTING.md]**: The process workflows for collaboration.
 7.  **[apps/nextjs/README.md]**: Details of the Next.js application
+8.  Solo si estás operando en el entorno firebase lee [.idx/README.md]
 
 ### 2. Acknowledge Your Core Mandate
 
