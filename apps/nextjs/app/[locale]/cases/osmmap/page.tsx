@@ -27,8 +27,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 
-// Textos de internacionalización
-const translations = {
+// Tipo explícito para el objeto de traducciones
+const translations: { [key: string]: { [key: string]: string } } = {
   en: {
     counts: 'Counts',
     totalsByFilters: 'Totals according to applied filters',
