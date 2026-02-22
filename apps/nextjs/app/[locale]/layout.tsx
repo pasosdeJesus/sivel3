@@ -1,12 +1,8 @@
-'use client'
-
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
 import '@/app/globals.css'
-import Footer from '@/components/Footer'
-import Header from '@/components/Header'
-import { AppProvider } from '@/providers/AppProvider'
+import ClientLayout from '@/components/ClientLayout'
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
@@ -19,14 +15,14 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
 })
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params: { locale },
-}: Readonly<{
+}: {
   children: React.ReactNode
   params: { locale: string }
-}>) {
-  // Validar locale
+}) {
+  // Validar locale en el servidor
   if (!['en', 'es'].includes(locale)) {
     notFound()
   }
@@ -34,13 +30,7 @@ export default function LocaleLayout({
   return (
     <html lang={locale}>
       <body className={`${dmSans.variable} ${dmMono.variable} font-sans`}>
-        <AppProvider locale={locale}>
-          <div className="bg-gypsum overflow-hidden flex flex-col min-h-screen">
-            <Header lang={locale} />
-            <main role="main">{children}</main>
-            <Footer lang={locale} />
-          </div>
-        </AppProvider>
+        <ClientLayout locale={locale}>{children}</ClientLayout>
       </body>
     </html>
   )
