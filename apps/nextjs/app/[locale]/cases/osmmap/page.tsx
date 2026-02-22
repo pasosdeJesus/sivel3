@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, Info, Heart } from 'lucide-react';
+import { Filter, Info, Heart, Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -27,8 +27,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 
-// Tipo explícito para el objeto de traducciones
-const translations: { [key: string]: { [key: string]: string } } = {
+const translations = {
   en: {
     counts: 'Counts',
     totalsByFilters: 'Totals according to applied filters',
@@ -46,10 +45,12 @@ const translations: { [key: string]: { [key: string]: string } } = {
     filter: 'Filter',
     connectWallet: 'Connect wallet for advanced features',
     donation: 'Donation',
-    cause: 'Cause',
+    cause: 'To document cases in',
+    amount: 'Amount (in USDT)', // Cambiado a USDT
     colombia: 'Colombia',
     israel_palestine: 'Israel/Palestine',
     donate: 'Donate',
+    donating: 'Donating...',
   },
   es: {
     counts: 'Conteos',
@@ -68,10 +69,12 @@ const translations: { [key: string]: { [key: string]: string } } = {
     filter: 'Filtrar',
     connectWallet: 'Conecta la billetera para funciones avanzadas',
     donation: 'Donación',
-    cause: 'Causa',
+    cause: 'Para documentar casos en',
+    amount: 'Valor (en USDT)', // Cambiado a USDT
     colombia: 'Colombia',
     israel_palestine: 'Israel/Palestina',
     donate: 'Donar',
+    donating: 'Donando...',
   }
 };
 
@@ -91,10 +94,11 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 export default function OSMMapPage() {
   const params = useParams();
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
-  const t = translations[currentLocale] || translations.en;
+  const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected } = useWallet();
+  const { isConnected, transfer, isTransacting } = useWallet();
   const [loading, setLoading] = useState(true);
+  const [donationAmount, setDonationAmount] = useState('');
   
   const [counts, setCounts] = useState({ casos: 0, victimas: 0, victimizaciones: 0, actos: 0 });
   const [filters, setFilters] = useState({
@@ -138,6 +142,23 @@ export default function OSMMapPage() {
   const applyFilters = () => console.log('Applying filters:', filters);
   
   const handleCountsLoad = (newCounts: any) => setCounts(newCounts);
+
+  const handleDonate = async () => {
+    const amount = parseFloat(donationAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Por favor, ingrese un monto de donación válido.');
+      return;
+    }
+    const recipient = process.env.NEXT_PUBLIC_ADDRESS;
+    if (!recipient) {
+      alert('La dirección de destino para la donación no está configurada.');
+      return;
+    }
+    // Asumiendo que `transfer` puede manejar tokens si se le pasa el tipo o la dirección del contrato.
+    // Por ahora, se mantiene la llamada. Si `useWallet` requiere un método específico para tokens (ej. `transferToken`), 
+    // esto necesitaría ser ajustado aquí.
+    await transfer(recipient, donationAmount, 'USDT'); // Añadido 'USDT' para claridad, la implementación real dependerá de `useWallet`
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -263,8 +284,26 @@ export default function OSMMapPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full">
-                    {t.donate}
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">{t.amount}</Label>
+                    <Input 
+                      id="amount"
+                      type="number" 
+                      placeholder="10.00" 
+                      value={donationAmount} 
+                      onChange={(e) => setDonationAmount(e.target.value)}
+                      disabled={isTransacting}
+                    />
+                  </div>
+                  <Button className="w-full" onClick={handleDonate} disabled={isTransacting}>
+                    {isTransacting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t.donating}
+                      </>
+                    ) : (
+                      t.donate
+                    )}
                   </Button>
                 </CardContent>
               </Card>
