@@ -2,17 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } } // Corregido: sin Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params; // Corregido: sin await
+    const { id } = await params; // Restaurado: se requiere await
 
     // Proxy a Rails
     const railsUrl = `${process.env.NEXT_PUBLIC_API1}/casos/${id}.json`;
     const response = await fetch(railsUrl);
 
     if (!response.ok) {
-      // Si la respuesta del proxy no es exitosa, propaga el error
       const errorData = await response.text();
       return NextResponse.json(
         { error: `Error from Rails API: ${errorData}` },
