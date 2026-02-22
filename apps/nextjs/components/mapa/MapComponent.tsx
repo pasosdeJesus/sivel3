@@ -33,7 +33,7 @@ interface MapComponentProps {
   zoom?: number
   filtros?: any
   onCargarConteos?: (conteos: any) => void
-  isConnected?: boolean // Prop para saber si la billetera está conectada
+  isConnected?: boolean
 }
 
 interface CasoDetalle {
@@ -55,7 +55,7 @@ export default function MapComponent({
   zoom = 6,
   filtros = {},
   onCargarConteos,
-  isConnected = false, // Valor por defecto
+  isConnected = false,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -70,6 +70,32 @@ export default function MapComponent({
   const [capasVisibles, setCapasVisibles] = useState<string[]>([
     'OpenStreetMap',
   ])
+
+  const cargarDetalleCaso = useCallback(async (codigo: string) => {
+    setMostrarInfo(true)
+    setCasoSeleccionado(null)
+    try {
+      const response = await fetch(`/api/cases/${codigo}`)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const text = await response.text();
+      try {
+        const datos = JSON.parse(text);
+        setCasoSeleccionado(datos.caso);
+      } catch (e) {
+        console.error("Error al parsear JSON:", e);
+        console.error("Respuesta recibida del servidor:", text);
+        // Opcional: mostrar un error en la UI en lugar de cerrar
+      }
+
+    } catch (error) {
+      console.error('Error cargando detalle:', error)
+      setMostrarInfo(false) // Cerrar solo en caso de error de red
+    }
+  }, [])
 
   const cargarCasos = useCallback(async () => {
     if (!mapInstanceRef.current) return
@@ -116,7 +142,7 @@ export default function MapComponent({
     } finally {
       setCargando(false)
     }
-  }, [filtros, onCargarConteos])
+  }, [filtros, onCargarConteos, cargarDetalleCaso])
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
@@ -193,19 +219,6 @@ export default function MapComponent({
       cargarCasos();
     }
   }, [filtros, cargarCasos]);
-
-  const cargarDetalleCaso = async (codigo: string) => {
-    try {
-      setMostrarInfo(true)
-      setCasoSeleccionado(null)
-      const response = await fetch(`/api/cases/${codigo}`)
-      const datos = await response.json()
-      setCasoSeleccionado(datos.caso)
-    } catch (error) {
-      console.error('Error cargando detalle:', error)
-      setMostrarInfo(false)
-    }
-  }
 
   const descargarCapaCasos = () => {
     if (!markersRef.current) return
