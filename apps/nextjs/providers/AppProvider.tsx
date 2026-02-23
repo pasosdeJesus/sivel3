@@ -46,7 +46,7 @@ const connectors = connectorsForWallets(
 const config = createConfig({
   connectors,
   chains:
-    process.env.NEXT_PUBLIC_AUTH_URL == 'https://sivel.xyz'
+    process.env.NEXT_PUBLIC_NETWORK == 'celo'
       ? [celo]
       : [celoSepolia],
   transports: {
@@ -73,10 +73,4 @@ export function AppProvider({
       </QueryClientProvider>
     </WagmiProvider>
   )
-  /*          theme={lightTheme({
-              accentColor: '#714ba6',
-              accentColorForeground: 'white',
-              borderRadius: 'small',
-              fontStack: 'system',
-              overlayBlur: 'none', */
 }

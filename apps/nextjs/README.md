@@ -30,6 +30,20 @@ Political Violence Information System (SIVeL)
     # PostgreSQL superuser credentials (for local administrative tasks)
     PG_SUPERUSER=postgres
     PG_SUPERUSER_PASSWORD=
+    
+    # -- Web3 Configuration --
+
+    # WalletConnect Project ID (get yours from https://cloud.walletconnect.com/)
+    NEXT_PUBLIC_WC_PROJECT_ID=0123
+
+    # Application Name (displayed in wallet providers)
+    NEXT_PUBLIC_APPNAME="SIVeL 3"
+
+    # Celo Network Selection
+    # Determines the blockchain network for the application.
+    # Use 'celo' for the production environment.
+    # Use 'celoSepolia' for the development or testing environment.
+    NEXT_PUBLIC_NETWORK=celoSepolia
     ```
 
     **Important!** This database configuration is a starting point. You **must** verify that these values match your local system's setup. For example, the `PG_SUPERUSER` might be different (e.g., `postgres`, `user`, etc.) depending on your PostgreSQL installation. Adjust these variables as needed before proceeding.
