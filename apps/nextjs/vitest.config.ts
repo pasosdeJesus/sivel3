@@ -6,13 +6,8 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     setupFiles: ['tests/setup-env.ts'],
-    // Excluir la transformación del módulo problemático
-    transform: {
-      '^.+\\\.tsx?$': 'ts-jest',
-    },
-    deps: {
-      inline: [],
-      external: ['@pasosdejesus/m'],
-    },
+  },
+  resolve: {
+    preserveSymlinks: true,
   },
 })
