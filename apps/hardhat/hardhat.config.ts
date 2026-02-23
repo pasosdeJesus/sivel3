@@ -1,13 +1,11 @@
 import '@nomicfoundation/hardhat-toolbox';
 import '@nomicfoundation/hardhat-verify';
 import { config as dotEnvConfig } from 'dotenv';
-import { HardhatUserConfig } from 'hardhat/config';
-import { task } from "hardhat/config";
-import { task } from "hardhat/config";
+import { HardhatUserConfig, task } from 'hardhat/config';
+import path from 'path';
 
-
-dotEnvConfig();
-
+// Load the centralized .env file from the parent directory.
+dotEnvConfig({ path: path.resolve(__dirname, '../.env') });
 
 task("check-transfer", "Check token transfer from tx hash")
 .addParam("tx", "Transaction hash")
@@ -40,7 +38,9 @@ task("check-transfer", "Check token transfer from tx hash")
 
   for (const log of transferLogs) {
     const parsedLog = tokenContract.interface.parseLog(log);
-    console.log("Amount:", ethers.formatUnits(parsedLog.args.value, decimals));
+    if (parsedLog) {
+      console.log("Amount:", ethers.formatUnits(parsedLog.args.value, decimals));
+    }
   }
 });
 

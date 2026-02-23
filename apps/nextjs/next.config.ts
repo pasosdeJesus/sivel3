@@ -1,4 +1,9 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from 'next';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load the centralized .env file from the parent directory.
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const nextConfig: NextConfig = {
   typescript: {
