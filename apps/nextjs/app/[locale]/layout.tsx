@@ -15,13 +15,14 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
 })
 
-export default async function LocaleLayout({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode
-  params: { locale: string }
+export default async function LocaleLayout({ 
+  children, 
+  params 
+}: { 
+  children: React.ReactNode, 
+  params: { locale: string } 
 }) {
+  const { locale } = await params;
   // Validar locale en el servidor
   if (!['en', 'es'].includes(locale)) {
     notFound()

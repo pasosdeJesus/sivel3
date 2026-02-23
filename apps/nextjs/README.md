@@ -9,6 +9,7 @@ Political Violence Information System (SIVeL)
 - Node.js
 - pnpm
 - PostgreSQL (running service)
+- make
 
 ### Installation
 
@@ -35,8 +36,11 @@ Political Violence Information System (SIVeL)
 
 ## Available Commands
 
-- `pnpm test`: Runs the test suite with `vitest`.
-- `pnpm typecheck`: Type-checks the TypeScript code without emitting files.
+This project uses a `Makefile` for common development tasks.
+
+- **`make type`**: Type-checks the TypeScript code using `tsc --noEmit`. This is the recommended way to verify that all type definitions are correct after making changes.
+- **`pnpm test`**: Runs the test suite with `vitest`.
+
 
 ## CLI Usage
 
