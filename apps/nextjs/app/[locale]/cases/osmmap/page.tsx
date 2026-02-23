@@ -46,11 +46,13 @@ const translations = {
     connectWallet: 'Connect wallet for advanced features',
     donation: 'Donation',
     cause: 'To document cases in',
-    amount: 'Amount (in USDT)', // Cambiado a USDT
+    amount: 'Amount (in USDT)',
     colombia: 'Colombia',
     israel_palestine: 'Israel/Palestine',
     donate: 'Donate',
     donating: 'Donating...',
+    invalidAmount: 'Please enter a valid donation amount.',
+    noRecipient: 'The destination address for the donation is not configured.',
   },
   es: {
     counts: 'Conteos',
@@ -70,11 +72,13 @@ const translations = {
     connectWallet: 'Conecta la billetera para funciones avanzadas',
     donation: 'Donación',
     cause: 'Para documentar casos en',
-    amount: 'Valor (en USDT)', // Cambiado a USDT
+    amount: 'Valor (en USDT)',
     colombia: 'Colombia',
     israel_palestine: 'Israel/Palestina',
     donate: 'Donar',
     donating: 'Donando...',
+    invalidAmount: 'Por favor, ingrese un monto de donación válido.',
+    noRecipient: 'La dirección de destino para la donación no está configurada.',
   }
 };
 
@@ -96,7 +100,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, transfer, isTransacting } = useWallet();
+  const { isConnected, transferUSDT, isTransacting } = useWallet();
   const [loading, setLoading] = useState(true);
   const [donationAmount, setDonationAmount] = useState('');
   
@@ -146,18 +150,15 @@ export default function OSMMapPage() {
   const handleDonate = async () => {
     const amount = parseFloat(donationAmount);
     if (isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingrese un monto de donación válido.');
+      alert(t.invalidAmount);
       return;
     }
-    const recipient = process.env.NEXT_PUBLIC_ADDRESS;
+    const recipient = process.env.NEXT_PUBLIC_ADDRESS as `0x${string}`;
     if (!recipient) {
-      alert('La dirección de destino para la donación no está configurada.');
+      alert(t.noRecipient);
       return;
     }
-    // Asumiendo que `transfer` puede manejar tokens si se le pasa el tipo o la dirección del contrato.
-    // Por ahora, se mantiene la llamada. Si `useWallet` requiere un método específico para tokens (ej. `transferToken`), 
-    // esto necesitaría ser ajustado aquí.
-    await transfer(recipient, donationAmount, 'USDT'); // Añadido 'USDT' para claridad, la implementación real dependerá de `useWallet`
+    await transferUSDT(recipient, donationAmount);
   };
   
   return (
