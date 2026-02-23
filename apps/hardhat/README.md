@@ -1,16 +1,22 @@
 # sivel3 - Smart Contracts
 
-This directory contains the Hardhat development environment for the sivel3 project's smart contracts. It is structured as a template to facilitate the development, testing, and deployment of the project's future on-chain components.
+This directory contains the Hardhat development environment for the sivel3 project's smart contracts. These contracts form the on-chain backbone of our mission to create a transparent and sustainable ecosystem for human rights documentation.
 
-## Project Goal
+## Smart Contract Architecture
 
-The ultimate goal is to develop smart contracts that support the mission of sivel3. 
+Our architecture is designed to be modular and phased, allowing for secure and incremental development. The core components are:
 
-## Current Status: Mock Token
+1.  **`RegionalDonation.sol` (In Progress):** This is the heart of our sustainability model. This contract will allow anyone to donate funds (e.g., USDT) to specific, pre-approved geographic regions. It will serve as the treasury for on-the-ground operations.
 
-Currently, this directory contains a foundational piece for development and testing: a secure, OpenZeppelin-based mock USDT contract.
+2.  **`SBTs.sol` (Planned):** A Soul-Bound Token (SBT) contract for on-chain identity and role management. This will be used to issue non-transferable tokens that represent the official roles within our ecosystem: **Administrator**, **Documenter**, and **Publishing Validator**. This ensures clear accountability.
 
-- **`MockUSDT.sol`**: An ERC20 token used for testing in local or testnet environments. It includes an owner-only minting function to ensure controlled testing. For more specific details, please see **[MOCK_USDT_README.md](./MOCK_USDT_README.md)**.
+3.  **`CaseCertification.sol` (Planned):** This contract will provide the mechanism for creating an immutable, on-chain record of verified cases. After a case passes our rigorous 3-step verification process, its cryptographic hash will be stored permanently on the Celo blockchain via this contract.
+
+4.  **`Incentives.sol` (Planned):** This contract will manage the automated distribution of funds from the `RegionalDonation` contract. It will handle rewards for citizen witnesses who submit verified alerts and periodic stipends for the official Documenters and Validators, creating a sustainable economic loop.
+
+## Current Status: Foundational Development
+
+Currently, this directory contains a mock USDT contract (`MockUSDT.sol`) used for local and testnet development. For more details, see **[MOCK_USDT_README.md](./MOCK_USDT_README.md)**.
 
 ## Prerequisites
 

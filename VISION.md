@@ -44,7 +44,7 @@ The existing `sivel2` system, a robust Ruby on Rails application, currently serv
 
 ### Gradual Migration to Next.js
 
-We will progressively migrate case management functionalities to the new Next.js front-end. This transition will be methodical and cautious. New features for editing and visualizing cases will be developed, moving from the traditional, form-heavy approach of `sivel2` to more dynamic and intuitive interfaces—potentially evolving from the citizen alert mechanisms.
+We will progressively migrate case management functionalities to the new Next.js front-end. This transition includes not only the application logic but also the underlying scaffolding provided by the `msip` framework. This will be replaced by `@pasosdejesus/m`, our new Rails-style data layer for the JavaScript ecosystem. The transition will be methodical and cautious, moving from the traditional, form-heavy approach of `sivel2` to more dynamic and intuitive interfaces—potentially evolving from the citizen alert mechanisms.
 
 ### A Security-First Approach
 

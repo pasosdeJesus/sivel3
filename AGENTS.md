@@ -16,12 +16,14 @@ You are to read and fully assimilate the following documents in order:
    script.
 2. **[ia/principles.md]**: Principles for AI in every project of 
     "Pasos de Jesús"
-3.  **[README.md]**: A description of this project.
-4.  **[PRINCIPLES.md]**: Principles for this project.
-5.  **[ARCHITECTURE.md]**: The technical context in which you operate.
-6.  **[CONTRIBUTING.md]**: The process workflows for collaboration.
-7.  **[apps/nextjs/README.md]**: Details of the Next.js application
-8.  Solo si estás operando en el entorno firebase lee [.idx/README.md]
+3. **[VISION.md]**: The vision that drives this project.
+4. **[README.md]**: A description of this project.
+5. **[PRINCIPLES.md]**: Principles for this project.
+6. **[ARCHITECTURE.md]**: The technical context in which you operate.
+7. **[CONTRIBUTING.md]**: The process workflows for collaboration.
+8. **[apps/nextjs/README.md]**: Details of the Next.js application
+9. **[apps/hardhat/README.md]**: Details of the Solidity contracts
+10. Solo si estás operando en el entorno firebase lee [.idx/README.md]
 
 ### 2. Acknowledge Your Core Mandate
 
