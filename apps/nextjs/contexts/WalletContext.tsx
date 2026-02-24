@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { useAccount, useDisconnect, useChainId, useWriteContract } from 'wagmi'
 import { parseUnits } from 'viem'
 
-// ABI mínimo para una transferencia ERC20 (como USDT)
 const erc20Abi = [
   {
     "name": "transfer",
@@ -17,6 +16,31 @@ const erc20Abi = [
     "outputs": [
       { "type": "bool", "name": "" }
     ]
+  },
+  {
+    "name": "approve",
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "type": "address", "name": "spender" },
+      { "type": "uint256", "name": "amount" }
+    ],
+    "outputs": [
+      { "type": "bool", "name": "" }
+    ]
+  }
+] as const
+
+const regionalDonationAbi = [
+  {
+    "name": "donate",
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "type": "uint256", "name": "regionId" },
+      { "type": "uint256", "name": "amount" }
+    ],
+    "outputs": []
   }
 ] as const
 
@@ -25,7 +49,8 @@ interface WalletContextType {
   address: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
-  transferUSDT: (to: `0x${string}`, amount: string) => Promise<void>
+  approveUSDT: (spender: `0x${string}`, amount: string) => Promise<void>
+  donateToRegion: (regionId: number, amount: string) => Promise<void>
   isTransacting: boolean
   error: Error | null
 }
@@ -60,21 +85,35 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     })
   }, [isConnected, address, chainId])
 
-  const transferUSDT = useCallback(async (to: `0x${string}`, amount: string) => {
+  const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string) => {
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS as `0x${string}`
     if (!usdtContractAddress) {
       console.error("La dirección del contrato USDT no está configurada en las variables de entorno.")
       throw new Error("La dirección del contrato USDT no está configurada.")
     }
-
-    // USDT en Celo (y muchos otros) tiene 6 decimales.
     const amountInSmallestUnit = parseUnits(amount, 6)
 
     writeContract({
       address: usdtContractAddress,
       abi: erc20Abi,
-      functionName: 'transfer',
-      args: [to, amountInSmallestUnit],
+      functionName: 'approve',
+      args: [spender, amountInSmallestUnit],
+    })
+  }, [writeContract])
+
+  const donateToRegion = useCallback(async (regionId: number, amount: string) => {
+    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`
+    if (!regionalDonationContractAddress) {
+      console.error("La dirección del contrato RegionalDonation no está configurada en las variables de entorno.")
+      throw new Error("La dirección del contrato RegionalDonation no está configurada.")
+    }
+    const amountInSmallestUnit = parseUnits(amount, 6)
+
+    writeContract({
+      address: regionalDonationContractAddress,
+      abi: regionalDonationAbi,
+      functionName: 'donate',
+      args: [BigInt(regionId), amountInSmallestUnit],
     })
   }, [writeContract])
 
@@ -83,7 +122,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     address: state.address,
     chainId: state.chainId,
     disconnect,
-    transferUSDT,
+    approveUSDT,
+    donateToRegion,
     isTransacting: isPending,
     error,
   }

@@ -47,12 +47,13 @@ const translations = {
     donation: 'Donation',
     cause: 'To document cases in',
     amount: 'Amount (in USDT)',
-    colombia: 'Colombia',
-    israel_palestine: 'Israel/Palestine',
     donate: 'Donate',
     donating: 'Donating...',
+    approving: 'Approving...',
     invalidAmount: 'Please enter a valid donation amount.',
     noRecipient: 'The destination address for the donation is not configured.',
+    approve: 'Approve & Donate',
+    noContract: 'Donation contract not configured'
   },
   es: {
     counts: 'Conteos',
@@ -73,12 +74,13 @@ const translations = {
     donation: 'Donación',
     cause: 'Para documentar casos en',
     amount: 'Valor (en USDT)',
-    colombia: 'Colombia',
-    israel_palestine: 'Israel/Palestina',
     donate: 'Donar',
     donating: 'Donando...',
+    approving: 'Aprobando...',
     invalidAmount: 'Por favor, ingrese un monto de donación válido.',
     noRecipient: 'La dirección de destino para la donación no está configurada.',
+    approve: 'Aprobar y Donar',
+    noContract: 'El contrato de donaciones no está configurado'
   }
 };
 
@@ -95,14 +97,22 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ),
 });
 
+interface DonationRegion {
+  id: number;
+  name: string;
+}
+
 export default function OSMMapPage() {
   const params = useParams();
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, transferUSDT, isTransacting } = useWallet();
+  const { isConnected, approveUSDT, donateToRegion, isTransacting } = useWallet();
   const [loading, setLoading] = useState(true);
   const [donationAmount, setDonationAmount] = useState('');
+  const [donationRegions, setDonationRegions] = useState<DonationRegion[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [isApproving, setIsApproving] = useState(false);
   
   const [counts, setCounts] = useState({ casos: 0, victimas: 0, victimizaciones: 0, actos: 0 });
   const [filters, setFilters] = useState({
@@ -121,14 +131,20 @@ export default function OSMMapPage() {
     const loadInitialData = async () => {
       setLoading(true);
       try {
-        const [deptRes, catRes, presRes] = await Promise.all([
+        const [deptRes, catRes, presRes, regionRes] = await Promise.all([
           fetch('/api/departments'),
           fetch('/api/categories'),
-          fetch('/api/alleged-perpetrators')
+          fetch('/api/alleged-perpetrators'),
+          fetch(`/api/regions?locale=${currentLocale}`)
         ]);
         setDepartments(await deptRes.json());
         setCategories(await catRes.json());
         setAllegedPerpetrators(await presRes.json());
+        const regions = await regionRes.json();
+        setDonationRegions(regions);
+        if (regions.length > 0) {
+          setSelectedRegion(String(regions[0].id));
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -136,7 +152,7 @@ export default function OSMMapPage() {
       }
     };
     loadInitialData();
-  }, []);
+  }, [currentLocale]);
   
   const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
@@ -153,13 +169,33 @@ export default function OSMMapPage() {
       alert(t.invalidAmount);
       return;
     }
-    const recipient = process.env.NEXT_PUBLIC_ADDRESS as `0x${string}`;
-    if (!recipient) {
-      alert(t.noRecipient);
+
+    const contractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
+    if (!contractAddress) {
+      alert(t.noContract);
       return;
     }
-    await transferUSDT(recipient, donationAmount);
+
+    try {
+      setIsApproving(true);
+      await approveUSDT(contractAddress, donationAmount);
+      // The donation will be triggered by a useEffect waiting on the approval transaction
+    } catch (error) {
+      console.error(error);
+      setIsApproving(false);
+    }
   };
+
+  useEffect(() => {
+    if (isApproving && !isTransacting) {
+      // Approval finished, now donate
+      setIsApproving(false);
+      const amount = parseFloat(donationAmount);
+      const regionId = parseInt(selectedRegion, 10);
+      donateToRegion(regionId, amount.toString());
+    }
+  }, [isApproving, isTransacting]);
+
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -222,7 +258,7 @@ export default function OSMMapPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="campo-hasta" className="text-primary">{t.to}</Label>
-                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterChange('filtro[fechafin]', e.target.value)} />
+                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterchange('filtro[fechafin]', e.target.value)} />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -275,13 +311,14 @@ export default function OSMMapPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="cause">{t.cause}</Label>
-                    <Select defaultValue="colombia">
+                    <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="colombia">{t.colombia}</SelectItem>
-                        <SelectItem value="israel_palestine">{t.israel_palestine}</SelectItem>
+                        {donationRegions.map(region => (
+                          <SelectItem key={region.id} value={String(region.id)}>{region.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -293,17 +330,22 @@ export default function OSMMapPage() {
                       placeholder="10.00" 
                       value={donationAmount} 
                       onChange={(e) => setDonationAmount(e.target.value)}
-                      disabled={isTransacting}
+                      disabled={isTransacting || isApproving}
                     />
                   </div>
-                  <Button className="w-full" onClick={handleDonate} disabled={isTransacting}>
-                    {isTransacting ? (
+                  <Button className="w-full" onClick={handleDonate} disabled={isTransacting || isApproving}>
+                    {isApproving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t.approving}
+                      </>
+                    ) : isTransacting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {t.donating}
                       </>
                     ) : (
-                      t.donate
+                      t.approve
                     )}
                   </Button>
                 </CardContent>
