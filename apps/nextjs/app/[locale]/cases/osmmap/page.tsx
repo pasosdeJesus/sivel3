@@ -258,7 +258,7 @@ export default function OSMMapPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="campo-hasta" className="text-primary">{t.to}</Label>
-                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterchange('filtro[fechafin]', e.target.value)} />
+                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterChange('filtro[fechafin]', e.target.value)} />
                   </div>
                 </div>
                 <div className="space-y-2">
