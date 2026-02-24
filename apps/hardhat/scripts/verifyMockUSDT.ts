@@ -1,11 +1,13 @@
 import { ethers } from "hardhat";
+import dotenv from "dotenv"
+dotenv.config({ path: '../.env' })
 
 async function main() {
   // Get the MockUSDT address from environment variables
-  const mockUSDTAddress = process.env.MOCK_USDT_ADDRESS;
+  const mockUSDTAddress = process.env.PUBLIC_NEXT_MOCK_USDT_ADDRESS;
   
   if (!mockUSDTAddress) {
-    throw new Error("MOCK_USDT_ADDRESS not found in environment variables");
+    throw new Error("PUBLIC_NEXT_MOCK_USDT_ADDRESS not found in environment variables");
   }
   
   // Get the contract factory for MockUSDT
