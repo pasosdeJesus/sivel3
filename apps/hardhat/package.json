@@ -33,7 +33,7 @@
   "scripts": {
     "postinstall": "chmod +x sync-abis.mjs",
     "compile": "hardhat clean && hardhat compile && node sync-abis.mjs",
-    "tsc": "npx tsc -p . && mkdir -p dist/typechain-types/ && cp typechain-types/*.d.ts dist/typechain-types/",
+    "tsc": "node_modules/.bin/tsc -p . && mkdir -p dist/typechain-types/ && cp typechain-types/*.d.ts dist/typechain-types/",
     "build": "yarn compile && yarn tsc",
     "clean": "hardhat clean",
     "run:node": "hardhat node",
