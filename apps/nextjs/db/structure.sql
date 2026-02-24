@@ -2,13 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.5
--- Dumped by pg_dump version 17.5
+-- Dumped from database version 15.10
+-- Dumped by pg_dump version 15.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -2140,6 +2139,26 @@ ALTER SEQUENCE public.heb412_gen_plantillahcr_id_seq OWNED BY public.heb412_gen_
 
 
 --
+-- Name: kysely_migration; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.kysely_migration (
+    name character varying(255) NOT NULL,
+    "timestamp" character varying(255) NOT NULL
+);
+
+
+--
+-- Name: kysely_migration_lock; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.kysely_migration_lock (
+    id character varying(255) NOT NULL,
+    is_locked integer DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: mr519_gen_campo; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2813,11 +2832,11 @@ UNION
 --
 
 CREATE MATERIALIZED VIEW public.msip_mundep AS
- SELECT idlocal,
-    nombre,
-    to_tsvector('spanish'::regconfig, public.unaccent(nombre)) AS mundep
+ SELECT msip_mundep_sinorden.idlocal,
+    msip_mundep_sinorden.nombre,
+    to_tsvector('spanish'::regconfig, public.unaccent(msip_mundep_sinorden.nombre)) AS mundep
    FROM public.msip_mundep_sinorden
-  ORDER BY (nombre COLLATE public.es_co_utf_8)
+  ORDER BY (msip_mundep_sinorden.nombre COLLATE public.es_co_utf_8)
   WITH NO DATA;
 
 
@@ -3513,13 +3532,13 @@ ALTER SEQUENCE public.msip_vereda_id_seq OWNED BY public.msip_vereda.id;
 --
 
 CREATE MATERIALIZED VIEW public.napellidos AS
- SELECT apellido,
+ SELECT s.apellido,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.apellidos)::text), ' '::text)) AS apellido
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE (sivel2_gen_victima.persona_id = msip_persona.id)) s
-  GROUP BY apellido
+  GROUP BY s.apellido
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3529,13 +3548,13 @@ CREATE MATERIALIZED VIEW public.napellidos AS
 --
 
 CREATE MATERIALIZED VIEW public.nhombres AS
- SELECT nombre,
+ SELECT s.nombre,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.nombres)::text), ' '::text)) AS nombre
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE ((sivel2_gen_victima.persona_id = msip_persona.id) AND (msip_persona.sexo = 'M'::bpchar))) s
-  GROUP BY nombre
+  GROUP BY s.nombre
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3545,13 +3564,13 @@ CREATE MATERIALIZED VIEW public.nhombres AS
 --
 
 CREATE MATERIALIZED VIEW public.nmujeres AS
- SELECT nombre,
+ SELECT s.nombre,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.nombres)::text), ' '::text)) AS nombre
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE ((sivel2_gen_victima.persona_id = msip_persona.id) AND (msip_persona.sexo = 'F'::bpchar))) s
-  GROUP BY nombre
+  GROUP BY s.nombre
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3664,10 +3683,43 @@ UNION
 --
 
 CREATE MATERIALIZED VIEW public.persona_nomap AS
- SELECT id,
-    upper(btrim(((btrim((nombres)::text) || ' '::text) || btrim((apellidos)::text)))) AS nomap
+ SELECT msip_persona.id,
+    upper(btrim(((btrim((msip_persona.nombres)::text) || ' '::text) || btrim((msip_persona.apellidos)::text)))) AS nomap
    FROM public.msip_persona
   WITH NO DATA;
+
+
+--
+-- Name: region; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.region (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    name_es character varying(255) NOT NULL,
+    created_at timestamp without time zone DEFAULT '2026-02-24 00:34:54.793151'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 00:34:54.793151'::timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: region_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.region_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: region_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.region_id_seq OWNED BY public.region.id;
 
 
 --
@@ -4062,9 +4114,9 @@ CREATE TABLE public.sivel2_gen_presponsable (
 --
 
 CREATE VIEW public.sivel2_gen_conscaso1 AS
- SELECT id AS caso_id,
-    fecha,
-    memo,
+ SELECT caso.id AS caso_id,
+    caso.fecha,
+    caso.memo,
     array_to_string(ARRAY( SELECT (((COALESCE(departamento.nombre, ''::character varying))::text || ' / '::text) || (COALESCE(municipio.nombre, ''::character varying))::text)
            FROM ((public.msip_ubicacion ubicacion
              LEFT JOIN public.msip_departamento departamento ON ((ubicacion.departamento_id = departamento.id)))
@@ -4091,15 +4143,15 @@ CREATE VIEW public.sivel2_gen_conscaso1 AS
 --
 
 CREATE MATERIALIZED VIEW public.sivel2_gen_conscaso AS
- SELECT caso_id,
-    fecha,
-    memo,
-    ubicaciones,
-    victimas,
-    presponsables,
-    tipificacion,
+ SELECT sivel2_gen_conscaso1.caso_id,
+    sivel2_gen_conscaso1.fecha,
+    sivel2_gen_conscaso1.memo,
+    sivel2_gen_conscaso1.ubicaciones,
+    sivel2_gen_conscaso1.victimas,
+    sivel2_gen_conscaso1.presponsables,
+    sivel2_gen_conscaso1.tipificacion,
     now() AS ultimo_refresco,
-    to_tsvector('spanish'::regconfig, public.unaccent(((((((((((((caso_id || ' '::text) || replace(((fecha)::character varying)::text, '-'::text, ' '::text)) || ' '::text) || memo) || ' '::text) || ubicaciones) || ' '::text) || victimas) || ' '::text) || presponsables) || ' '::text) || tipificacion))) AS q
+    to_tsvector('spanish'::regconfig, public.unaccent(((((((((((((sivel2_gen_conscaso1.caso_id || ' '::text) || replace(((sivel2_gen_conscaso1.fecha)::character varying)::text, '-'::text, ' '::text)) || ' '::text) || sivel2_gen_conscaso1.memo) || ' '::text) || sivel2_gen_conscaso1.ubicaciones) || ' '::text) || sivel2_gen_conscaso1.victimas) || ' '::text) || sivel2_gen_conscaso1.presponsables) || ' '::text) || sivel2_gen_conscaso1.tipificacion))) AS q
    FROM public.sivel2_gen_conscaso1
   WITH NO DATA;
 
@@ -5258,6 +5310,13 @@ ALTER TABLE ONLY public.msip_vereda ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: region id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.region ALTER COLUMN id SET DEFAULT nextval('public.region_id_seq'::regclass);
+
+
+--
 -- Name: sivel2_gen_actividadoficio id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5454,6 +5513,22 @@ ALTER TABLE ONLY public.heb412_gen_plantillahcm
 
 ALTER TABLE ONLY public.heb412_gen_plantillahcr
     ADD CONSTRAINT heb412_gen_plantillahcr_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: kysely_migration_lock kysely_migration_lock_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.kysely_migration_lock
+    ADD CONSTRAINT kysely_migration_lock_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: kysely_migration kysely_migration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.kysely_migration
+    ADD CONSTRAINT kysely_migration_pkey PRIMARY KEY (name);
 
 
 --
@@ -5902,6 +5977,30 @@ ALTER TABLE ONLY public.msip_vereda
 
 ALTER TABLE ONLY public.sivel2_gen_pconsolidado
     ADD CONSTRAINT pconsolidado_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: region region_name_es_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_name_es_key UNIQUE (name_es);
+
+
+--
+-- Name: region region_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_name_key UNIQUE (name);
+
+
+--
+-- Name: region region_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_pkey PRIMARY KEY (id);
 
 
 --

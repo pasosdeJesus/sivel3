@@ -37,6 +37,8 @@ Developing in this IDX environment requires awareness of certain tool behaviors:
 
 *   **Invisible Configuration Files:** The IDE's file explorer and some of its API tools (`read_file`, `list_files`) may fail to correctly display or read dotfiles (e.g., `.env`). The `read_file` tool, for instance, might return an empty string for a file that contains data.
 
+*   **Inaccessible Dot-Directories:** Similarly, the `read_file` and `list_files` tools cannot reliably access files located inside directories whose names begin with a dot (e.g., `.config/`, `.vscode/`). The tool may report that the file is empty when it is not, leading to incorrect assumptions.
+
 *   **Reliable Solution:** Always use the terminal for critical file operations. This is the most reliable way to confirm file state.
     *   **To verify a file's existence and see its permissions:** `ls -la <path/to/file>`
     *   **To read a file's content:** `cat <path/to/file>`
