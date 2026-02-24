@@ -1,4 +1,7 @@
 #!/bin/sh
 
-. .env
-npx hardhat verify --network $NETWORK $DEPLOYED_AT $USDT_ADDRESS $CCOP_ADDRESS $GOODDOLLAR_ADDRESS
+. ../.env
+
+cmd="node_modules/.bin/hardhat verify --network $NEXT_PUBLIC_NETWORK $NEXT_PUBLIC_DEPLOYED_AT $NEXT_PUBLIC_USDT_ADDRESS $NEXT_PUBLIC_ADDRESS"
+echo $cmd
+eval $cmd
