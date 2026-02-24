@@ -102,20 +102,42 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
+<<<<<<< Updated upstream
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
+=======
+    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
+>>>>>>> Stashed changes
     if (!regionalDonationContractAddress) {
-      console.error("La dirección del contrato RegionalDonation no está configurada en las variables de entorno.")
-      throw new Error("La dirección del contrato RegionalDonation no está configurada.")
+      console.error("La dirección del contrato RegionalDonation no está configurada en las variables de entorno.");
+      throw new Error("La dirección del contrato RegionalDonation no está configurada.");
     }
-    const amountInSmallestUnit = parseUnits(amount, 6)
+    const amountInSmallestUnit = parseUnits(amount, 6);
 
     writeContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'donate',
       args: [BigInt(regionId), amountInSmallestUnit],
-    })
-  }, [writeContract])
+    });
+
+    try {
+      await fetch('/api/userevent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'donation',
+          amount: parseFloat(amount),
+          currency: 'USDT',
+          metadata: { regionId },
+        }),
+      });
+    } catch (error) {
+      console.error('Error sending donation event:', error);
+    }
+  }, [writeContract]);
+
 
   const value: WalletContextType = {
     isConnected: state.isConnected,

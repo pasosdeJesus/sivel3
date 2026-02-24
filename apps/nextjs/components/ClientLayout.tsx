@@ -1,6 +1,8 @@
+
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
+import { usePathname } from 'next/navigation';
 
 import Footer from './Footer'
 import Header from './Header'
@@ -12,6 +14,26 @@ interface ClientLayoutProps {
 }
 
 export default function ClientLayout({ children, locale }: ClientLayoutProps) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const sendVisitEvent = async () => {
+      try {
+        await fetch('/api/userevent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'visit', path: pathname }),
+        });
+      } catch (error) {
+        console.error('Error sending visit event:', error);
+      }
+    };
+
+    sendVisitEvent();
+  }, [pathname]);
+
   return (
     <AppProvider locale={locale}>
       <div className="bg-gypsum overflow-hidden flex flex-col min-h-screen">

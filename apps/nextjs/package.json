@@ -58,6 +58,7 @@
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.1",
     "react-leaflet": "^5.0.0",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
     "viem": "^2.45.1",
     "wagmi": "^2.19.5"
@@ -88,7 +89,9 @@
       "@parcel/watcher": "npm:@parcel/watcher-wasm",
       "rollup": "npm:@rollup/wasm-node",
       "lightningcss": "npm:lightningcss-wasm",
-      "@tailwindcss/oxide": "npm:@tailwindcss/oxide-wasm32-wasi"
+      "@tailwindcss/oxide": "npm:@tailwindcss/oxide-wasm32-wasi",
+      "zod": "3.23.8",
+      "use-sync-external-store": "1.2.0"
     },
     "onlyBuiltDependencies": [
       "@pasosdejesus/m",
