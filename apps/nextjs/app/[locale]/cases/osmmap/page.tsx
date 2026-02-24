@@ -53,7 +53,8 @@ const translations = {
     invalidAmount: 'Please enter a valid donation amount.',
     noRecipient: 'The destination address for the donation is not configured.',
     approve: 'Approve & Donate',
-    noContract: 'Donation contract not configured'
+    noContract: 'Donation contract not configured',
+    availableFunds: 'Available Funds'
   },
   es: {
     counts: 'Conteos',
@@ -80,7 +81,8 @@ const translations = {
     invalidAmount: 'Por favor, ingrese un monto de donación válido.',
     noRecipient: 'La dirección de destino para la donación no está configurada.',
     approve: 'Aprobar y Donar',
-    noContract: 'El contrato de donaciones no está configurado'
+    noContract: 'El contrato de donaciones no está configurado',
+    availableFunds: 'Fondos Disponibles'
   }
 };
 
@@ -112,6 +114,8 @@ export default function OSMMapPage() {
   const [donationAmount, setDonationAmount] = useState('');
   const [donationRegions, setDonationRegions] = useState<DonationRegion[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [regionBalance, setRegionBalance] = useState<string | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   
   const [counts, setCounts] = useState({ casos: 0, victimas: 0, victimizaciones: 0, actos: 0 });
@@ -141,7 +145,6 @@ export default function OSMMapPage() {
         setCategories(await catRes.json());
         setAllegedPerpetrators(await presRes.json());
         const regions = await regionRes.json();
-        console.log("OJO regions=", regions)
         setDonationRegions(regions);
         if (regions.length > 0) {
           setSelectedRegion(String(regions[0].id));
@@ -154,6 +157,21 @@ export default function OSMMapPage() {
     };
     loadInitialData();
   }, [currentLocale]);
+
+  useEffect(() => {
+    if (selectedRegion) {
+      setBalanceLoading(true);
+      fetch(`/api/regions/${selectedRegion}/balance`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.balance) {
+            setRegionBalance(data.balance);
+          }
+        })
+        .catch(error => console.error('Error fetching region balance:', error))
+        .finally(() => setBalanceLoading(false));
+    }
+  }, [selectedRegion]);
   
   const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
@@ -171,7 +189,7 @@ export default function OSMMapPage() {
       return;
     }
 
-    const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
+    const contractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
     if (!contractAddress) {
       alert(t.noContract);
       return;
@@ -317,11 +335,23 @@ export default function OSMMapPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {donationRegions != null && donationRegions.length > 0 && donationRegions.map(region => (
+                        {donationRegions.map(region => (
                           <SelectItem key={region.id} value={String(region.id)}>{region.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.availableFunds}</Label>
+                    <div className="text-sm font-semibold p-2 border rounded-md bg-gray-50">
+                      {balanceLoading ? (
+                        <Skeleton className="h-5 w-24" />
+                      ) : regionBalance !== null ? (
+                        `$${parseFloat(regionBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`
+                      ) : (
+                        '--'
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="amount">{t.amount}</Label>
