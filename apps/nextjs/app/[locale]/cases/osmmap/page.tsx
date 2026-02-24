@@ -141,6 +141,7 @@ export default function OSMMapPage() {
         setCategories(await catRes.json());
         setAllegedPerpetrators(await presRes.json());
         const regions = await regionRes.json();
+        console.log("OJO regions=", regions)
         setDonationRegions(regions);
         if (regions.length > 0) {
           setSelectedRegion(String(regions[0].id));
@@ -170,7 +171,7 @@ export default function OSMMapPage() {
       return;
     }
 
-    const contractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
+    const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
     if (!contractAddress) {
       alert(t.noContract);
       return;
@@ -316,7 +317,7 @@ export default function OSMMapPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {donationRegions.map(region => (
+                        {donationRegions != null && donationRegions.length > 0 && donationRegions.map(region => (
                           <SelectItem key={region.id} value={String(region.id)}>{region.name}</SelectItem>
                         ))}
                       </SelectContent>

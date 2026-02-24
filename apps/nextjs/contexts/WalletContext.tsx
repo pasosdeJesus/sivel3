@@ -86,7 +86,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [isConnected, address, chainId])
 
   const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string) => {
-    const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS as `0x${string}`
+    const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
     if (!usdtContractAddress) {
       console.error("La dirección del contrato USDT no está configurada en las variables de entorno.")
       throw new Error("La dirección del contrato USDT no está configurada.")
@@ -102,7 +102,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
-    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`
+    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     if (!regionalDonationContractAddress) {
       console.error("La dirección del contrato RegionalDonation no está configurada en las variables de entorno.")
       throw new Error("La dirección del contrato RegionalDonation no está configurada.")
