@@ -36,31 +36,16 @@ The entire system operates from **[https://sivel.xyz](https://sivel.xyz)**.
 | Component | Description |
 |-----------|-------------|
 | **Interactive Map** | Geospatial visualization of socio-political violence cases |
-| **Case Management** | Registration and consultation of documented cases |
-| **Victims Module** | Victim information management (with confidentiality protection) |
-| **Acts Module** | Documentation of specific violent acts |
+| **Case Management** | Registration and consultation of documented cases, victims, acts |
 | **Regional Donation System** | Celo smart contract enabling region-specific donations |
-| **Authentication** | Secure system for documenters and validators |
 
 ### 📊 Current Data:
 
-- **Documented cases:** ~500 cases from the first semester of 2025
+- **Documented cases:** ~500 cases from the first semester of 2025 in Colombia
 - **Source:** Open data from CINEP Human Rights Data Bank
 - **Active regions:** 2 (Colombia, Israel/Palestine*)
-- **NGOs using SIVeL 2:** 10+ organizations through the Network of Regional Data Banks
 
-\* *We are actively seeking local contacts in Israel/Palestine. If you work on human rights in the region, [contact us](mailto:email).*
-
-### 📈 Web Traffic (Last 12 Months: Mar 2025 - Feb 2026):
-
-| Metric | Total |
-|--------|-------|
-| **Visits** | 8,393 |
-| **Daily average** | 23 visits |
-| **Page views** | 155,195 |
-| **Data transferred** | 24.36 GB |
-
-*The digital tool is modest but stable, complementing the impact of print publications (semestral "Noche y Niebla" magazine with press conferences and media coverage).*
+\* *We are actively seeking local contacts in Israel/Palestine. If you work on human rights in the region, [contact us](mailto:vtamara@pasosdeJesus.org).*
 
 ---
 
@@ -85,10 +70,9 @@ sivel3/
 ├── apps/
 │ ├── nextjs/ # Modern frontend and Web3 integration
 │ └── hardhat/ # Solidity smart contracts (Celo)
-├── docs/
-│ ├── PRINCIPLES.md # Ethical principles
-│ ├── VISION.md # Strategic vision
-│ └── ARCHITECTURE.md # Technical documentation
+├── PRINCIPLES.md # Ethical principles
+├── VISION.md # Strategic vision
+├── ARCHITECTURE.md # Technical documentation
 └── README.md # This file
 ```
 
@@ -96,7 +80,7 @@ sivel3/
 
 ## 💡 Sustainability Model
 
-SIVeL 3 operates with a **decentralized donation model** through smart contracts on Celo. Funds are distributed as follows:
+Initially we propose to operate SIVeL 3 with a **decentralized donation model** through smart contracts on Celo. Funds are distributed as follows:
 
 | Recipient | % | Purpose |
 |-----------|---|---------|
@@ -150,15 +134,6 @@ SIVeL 3 is **open source** under the [ISC license](https://opensource.org/licens
 
 ---
 
-## 🙏 Acknowledgments
-
-- **Javier Giraldo, S.J.** , for the foundational principles of ethical documentation
-- **CINEP Human Rights Data Bank**, for decades of historical memory
-- **Network of Regional Data Banks**, for continuous collaboration
-- **OpenBSD/adJ community**, for the secure platform
-- **All documenters and victims** who trust us with their testimony
-
----
 
 ## 📬 Contact
 
