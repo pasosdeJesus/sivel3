@@ -1,37 +1,95 @@
 # SIVeL 3 - Project Principles
 
-For the development of SIVeL, we adhere to the following principles for handling information on political violence, as suggested by the Jesuit priest Javier Giraldo.
+> *"For I, the Lord, love justice; I hate robbery and iniquity"*
+> — **Isaiah 61:8**
+
+This verse is not decoration. It is the very reason for this project. The justice we document flows from the character of a God who loves justice and hates evil.
+
+---
+
+## Foundational Principles
+
+For the development of SIVeL, we adhere to the following principles for handling information on political violence, as suggested by Jesuit priest Javier Giraldo.
 
 ### 1. Maximum Accessibility
 
-To maximize accessibility, SIVeL 3 and its documentation are practially public domain (license ISC) and available on the internet at no cost. The software tools recommended and used to operate the platform are also public domain or use permissive open-source licenses (e.g., MIT, BSD, or GPL). Under no circumstances does the project rely on closed-source software or components that require royalty payments or restrict copying and redistribution.
+SIVeL 3 and its documentation are practically public domain (ISC license) and available on the internet at no cost. All recommended tools use open-source licenses (MIT, BSD, GPL). We do not rely on closed-source software.
 
 ### 2. Confidentiality of Information Sources
 
-Guaranteeing the confidentiality of information sources is paramount, especially in sensitive cases involving Human Rights (HR) violations, International Humanitarian Law (IHL), and Socio-Political Violence (SPV). We have prioritized security throughout the development of SIVeL 3.
+Guaranteeing the confidentiality of sources is paramount, especially in sensitive cases involving Human Rights (HR), International Humanitarian Law (IHL), and socio-political violence. Security is prioritized throughout development.
 
 ### 3. Non-Commercialization of Victim Information
 
-The personal information of victims is never to be commercialized. This is a foundational ethical commitment of the project. This principle is a key driver for our non-profit, donation-based funding model.
+Personal information of victims will never be commercialized. This is a foundational ethical commitment of the project, reflected in our donation-based funding model.
 
 ### 4. Alignment with International Humanitarian Law
 
-The categories of violence must correspond to the categories of International Humanitarian Law so as not to dilute the responsibility of the State.
+Violence categories must correspond to IHL categories to avoid diluting State responsibility.
 
 ---
 
 ## Security Practices
 
-To uphold the principle of source confidentiality, we have implemented the following security practices:
+*   **Open Source for Public Auditing:** All code is open and auditable by the community.
+*   **Continuous Security Audits:** Especially for smart contracts and backend services.
+*   **Recommended Secure Platform:** We contribute to the development of **`Aprendiendo de Jesús` (adJ)** , based on OpenBSD. In its default configuration, all databases and backups are encrypted.
+*   **Client-Side Security:** We strongly recommend users connect through secure operating systems (e.g., Ubuntu or other Linux distributions).
 
-*   **Open Source for Public Auditing:** The source code for all SIVeL 3 components is open and publicly available. We build on the legacy of our predecessors (SIVeL 1 and 2), which maintained an open invitation to the community to audit the source code and identify security flaws, sometimes with financial bounties. We intend to continue this tradition for SIVeL 3.
+---
 
-*   **Continuous Security Audits:** The platform's components, especially the smart contracts and backend services, are subject to rigorous security audits, both automated and manual.
+## Important Notice
 
-*   **Secure Recommended Platform:** We contribute to the development of the **`Aprendiendo de Jesús` (adJ)** operating system, which is based on OpenBSD. We recommend it as our official operating platform. In its default configuration, `adJ` ensures that all databases and backups for SIVeL are encrypted with a key provided at boot time. This means that in the event of physical server theft or illegitimate inspection, the data remains inaccessible if the machine is powered off.
+We define a critical security failure as one that can be exploited on the stable version of our software when operating on the recommended platform (default configuration of `adJ`, available at http://aprendiendo.pasosdeJesus.org).
 
-*   **Client-Side Security:** We strongly recommend that end-users connect to the platform using secure operating systems (e.g., Ubuntu or other Linux distributions) instead of platforms that may have a weaker security posture. Client-side security is a critical link in the chain of trust, and efforts on the server side would be futile without it.
+> *"Whoever is faithful in very little is also faithful in much" (Luke 16:10)*# SIVeL 3 - Project Principles
 
-### **Important Notice**
+> *"For I, the Lord, love justice; I hate robbery and iniquity"*
+> — **Isaiah 61:8**
 
-We define a critical security failure as one that can be exploited on the stable version of our software when it is operating on the recommended platform (i.e., the default configuration of the `Aprendiendo de Jesús` distribution, available at http://aprendiendo.pasosdeJesus.org).
+This verse is not decoration. It is the very reason for this project. The justice we document flows from the character of a God who loves justice and hates evil.
+
+---
+
+## Foundational Principles
+
+For the development of SIVeL, we adhere to the following principles for handling information on political violence, as suggested by Jesuit priest Javier Giraldo.
+
+### 1. Maximum Accessibility
+
+SIVeL 3 and its documentation are practically public domain (ISC license) and available on the internet at no cost. All recommended tools use open-source licenses (MIT, BSD, GPL). We do not rely on closed-source software.
+
+**Biblical foundation:** *"Freely you have received; freely give" (Matthew 10:8)*. The truth about suffering must not be commercialized.
+
+### 2. Confidentiality of Information Sources
+
+Guaranteeing the confidentiality of sources is paramount, especially in sensitive cases involving Human Rights (HR), International Humanitarian Law (IHL), and socio-political violence. Security is prioritized throughout development.
+
+**Biblical foundation:** *"A gossip betrays a confidence, but a trustworthy person keeps a secret" (Proverbs 11:13)*. The trust of those who risk their lives to testify is sacred.
+
+### 3. Non-Commercialization of Victim Information
+
+Personal information of victims will never be commercialized. This is a foundational ethical commitment of the project, reflected in our donation-based funding model.
+
+**Biblical foundation:** *"They sold their possessions and goods, and distributed them to anyone as they had need" (Acts 2:45)*. Resources should flow toward need, not toward accumulation.
+
+### 4. Alignment with International Humanitarian Law
+
+Violence categories must correspond to IHL categories to avoid diluting State responsibility.
+
+**Biblical foundation:** *"Every matter must be established by the testimony of two or three witnesses" (2 Corinthians 13:1)*. Truth requires clear and verifiable standards.
+
+---
+
+## Security Practices
+
+*   **Open Source for Public Auditing:** All code is open and auditable by the community.
+*   **Continuous Security Audits:** Especially for smart contracts and backend services.
+*   **Recommended Secure Platform:** We contribute to the development of **`Aprendiendo de Jesús` (adJ)** , based on OpenBSD. In its default configuration, all databases and backups are encrypted.
+*   **Client-Side Security:** We strongly recommend users connect through secure operating systems (e.g., Ubuntu or other Linux distributions).
+
+---
+
+## Important Notice
+
+We define a critical security failure as one that can be exploited on the stable version of our software when operating on the recommended platform (default configuration of `adJ`, available at http://aprendiendo.pasosdeJesus.org).
