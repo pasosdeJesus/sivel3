@@ -36,8 +36,4 @@ Violence categories must correspond to IHL categories to avoid diluting State re
 *   **Recommended Secure Platform:** We contribute to the development of **`Aprendiendo de Jesús` (adJ)** , based on OpenBSD. In its default configuration, all databases and backups are encrypted.
 *   **Client-Side Security:** We strongly recommend users connect through secure operating systems (e.g., Ubuntu or other Linux distributions).
 
----
-
-## Important Notice
-
 We define a critical security failure as one that can be exploited on the stable version of our software when operating on the recommended platform (default configuration of `adJ`, available at http://aprendiendo.pasosdeJesus.org).
