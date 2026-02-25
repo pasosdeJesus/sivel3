@@ -6,9 +6,13 @@ SIVeL 3 is a pioneering Web3 protocol designed to transform the ethical document
 
 This system empowers citizen witnesses by rewarding them for verified alerts, provides stabilizing stipends to a structured team of human rights documenters, and establishes an immutable, blockchain-certified record of events on the Celo network. Our mission is to foster a transparent, sustainable, and auditable cycle of ethical documentation, governed by clear editorial authority and powered by a decentralized, donation-based economic model.
 
+---
+
 ## The Solution: A Web3-Powered Ecosystem for Ethical Witnessing
 
 SIVeL 3 introduces a robust, three-tiered verification process to ensure the integrity of every documented case. This process is managed by a network of participants whose roles are defined by non-transferable Soul-Bound Tokens (SBTs), creating a system of clear accountability. The entire workflow is sustained by a unique **Regional Donation Contract**, which directs funds to the specific areas where they are needed most.
+
+---
 
 ## Core Components (Technical Deliverables)
 
@@ -19,6 +23,35 @@ SIVeL 3 introduces a robust, three-tiered verification process to ensure the int
 5.  **Automated Incentive Distribution:** An automated system that distributes rewards for verified citizen alerts and stipends for Documenters and Validators, paid directly from the funds held in the Regional Donation Contract.
 6.  **Public Education:** The creation of a public `learn.tg` course, "From Witness to Documenter: Introduction to SIVeL 3," to onboard and train new community members.
 
+---
+
+## Sustainability Model: Transparent Fund Distribution
+
+Our sustainability model is built on transparency and direct impact. Donations received through the Regional Donation Contract are distributed as follows:
+
+| Recipient | Percentage | Purpose |
+|-----------|------------|---------|
+| **Banco de Datos de Derechos Humanos del CINEP** (as Publishing Validator) | 25% | Supports the historical archive, academic verification, and long-term memory preservation |
+| **Pasos de Jesús** (Service Operator) | 25% | Hosting, development, updates, and continuous platform maintenance |
+| **Regional Documenters** | 40% | Stipends for field documentation work |
+| **Citizen Alert Rewards** | 10% | Incentives for verified citizen submissions |
+
+**Note:** If needed, the service operator (Pasos de Jesús) may also document cases in specific regions, receiving the corresponding documenter portion for that work in addition to their operator role.
+
+This decentralized funding mechanism is inherently scalable. As the project grows, new regions can be added to the donation contract, allowing the system to expand organically wherever there is a need for ethical witnessing and a community to support it.
+
+---
+
+## Governance and Validation Structure
+
+To ensure information integrity, the validation process follows this structure:
+
+1.  **Citizen Alerts:** Anyone with verified digital identity can submit geo-located alerts.
+2.  **Regional Documenters:** Trained professionals investigate and document cases.
+3.  **Publishing Validator:** The **Banco de Datos de Derechos Humanos del CINEP** serves as the final validator, applying their academic rigor and historical memory of over four decades. This function will be exercised by the Banco de Datos del CINEP as long as possible; should they be unable to assume it, partners with equivalent standards of rigor and commitment to truth will be sought.
+
+---
+
 ## Metrics for Success
 
 *   **System Integrity:** 1 Publishing Validator and at least 3 Documenters onboarded with SBTs and sustained by stipends from the donation contract.
@@ -28,11 +61,7 @@ SIVeL 3 introduces a robust, three-tiered verification process to ensure the int
 *   **Education:** A consistent number of students successfully completing the "From Witness to Documenter" course.
 *   **Platform Launch:** All functionality fully implemented and operational in production at sivel.xyz.
 
-## Sustainability & Scalability: A Community-Owned Model
-
-Our sustainability model is built on transparency and direct impact. By enabling region-specific donations, we empower individuals and organizations to support the documentation efforts they care about most. This creates a direct link between supporters and the on-the-ground impact.
-
-This decentralized funding mechanism is inherently scalable. As the project grows, new regions can be added to the donation contract, allowing the system to expand organically wherever there is a need for ethical witnessing and a community to support it. The long-term vision is a globally scalable, community-governed system that sets a new standard for decentralized, ethical, and sustainable human rights documentation.
+---
 
 ## Architectural Evolution: A Phased and Secure Transition
 
@@ -44,10 +73,16 @@ The existing `sivel2` system, a robust Ruby on Rails application, currently serv
 
 ### Gradual Migration to Next.js
 
-We will progressively migrate case management functionalities to the new Next.js front-end. This transition includes not only the application logic but also the underlying scaffolding provided by the `msip` framework. This will be replaced by `@pasosdejesus/m`, our new Rails-style data layer for the JavaScript ecosystem. The transition will be methodical and cautious, moving from the traditional, form-heavy approach of `sivel2` to more dynamic and intuitive interfaces—potentially evolving from the citizen alert mechanisms.
+We will progressively migrate case management functionalities to the new Next.js front-end. This transition includes not only the application logic but also the underlying scaffolding provided by the `msip` framework. This will be replaced by `@pasosdejesus/m`, our new Rails-style data layer for the JavaScript ecosystem.
 
 ### A Security-First Approach
 
-This migration is not merely a technical upgrade; it is a security-driven process. The stability and security of the `next.js` application will be rigorously evaluated on our recommended operating system, **adJ** (based on OpenBSD). We will leverage OpenBSD's advanced security features to contain and mitigate potential vulnerabilities, such as those that could lead to arbitrary code execution on the server.
+This migration is not merely a technical upgrade; it is a security-driven process. The stability and security of the `next.js` application will be rigorously evaluated on our recommended operating system, **adJ** (based on OpenBSD). We will leverage OpenBSD's advanced security features to contain and mitigate potential vulnerabilities.
 
 The final decision on the pace and scope of this transition will be guided by our commitment to ensuring the platform remains a secure and reliable tool for human rights documentation. The integrity of our data and the safety of our users are non-negotiable.
+
+---
+
+## Ethical Foundation
+
+While our technology is neutral, our team operates from a deep conviction in the inherent dignity of every human person—a dignity that precedes any legal or political framework. We welcome partners of all backgrounds who share this commitment to truth and justice.
