@@ -347,7 +347,7 @@ export default function MapComponent({
                         variant="outline"
                         size="sm"
                         className="w-full"
-                        onClick={() => window.open(`/casos/${casoSeleccionado.id}`, '_blank')}
+                        onClick={() => window.open(`https://base.nocheyniebla.org/casos/${casoSeleccionado.id}`, '_blank')}
                       >
                         <FileText className="h-4 w-4 mr-2" />
                         Ver Ficha Completa

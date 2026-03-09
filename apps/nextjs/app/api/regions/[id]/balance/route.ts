@@ -24,7 +24,7 @@ const regionalDonationAbi = [
   }
 ] as const;
 
-const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
+const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
 
 const publicClient = createPublicClient({
   chain: sepolia,

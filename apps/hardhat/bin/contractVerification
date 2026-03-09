@@ -2,6 +2,6 @@
 
 . ../.env
 
-cmd="node_modules/.bin/hardhat verify --network $NEXT_PUBLIC_NETWORK $NEXT_PUBLIC_DEPLOYED_AT $NEXT_PUBLIC_USDT_ADDRESS $NEXT_PUBLIC_ADDRESS"
+cmd="node_modules/.bin/hardhat verify --network $NEXT_PUBLIC_NETWORK $NEXT_PUBLIC_REGIONALDONATION_ADDRESS $NEXT_PUBLIC_USDT_ADDRESS $NEXT_PUBLIC_ADDRESS"
 echo $cmd
 eval $cmd
