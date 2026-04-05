@@ -2,27 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, formatUnits } from 'viem';
 import { sepolia } from 'viem/chains';
 
-const regionalDonationAbi = [
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "regionalBalances",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
+import regionalDonationAbi from '@/abis/RegionalDonation.json'
 
 const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
 
@@ -36,6 +16,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const regionId = parseInt(params.id, 10);
+  console.log("OJO balance regionId=", regionId)
 
   if (isNaN(regionId)) {
     return NextResponse.json({ error: 'Invalid region ID' }, { status: 400 });
@@ -47,15 +28,18 @@ export async function GET(
   }
 
   try {
+    console.log("Por llamar balance")
     const balance = await publicClient.readContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'regionalBalances',
       args: [BigInt(regionId)],
     });
+    console.log("balance=", balance)
 
     // USDT has 6 decimals
-    const balanceInUSD = formatUnits(balance, 6);
+    const balanceInUSD = formatUnits(balance as bigint, 6);
+    console.log("balanceInUSD=", balanceInUSD)
 
     return NextResponse.json({ balance: balanceInUSD });
   } catch (error) {
