@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, formatUnits } from 'viem';
-import { sepolia } from 'viem/chains';
+import { celoSepolia, celo } from 'viem/chains';
 
 import regionalDonationAbi from '@/abis/RegionalDonation.json'
 
 const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
 
 const publicClient = createPublicClient({
-  chain: sepolia,
+  chain: process.env.NEXT_PUBLIC_NETWORK == 'celoSepolia' ? celoSepolia : celo,
   transport: http(),
 });
 
@@ -28,6 +28,7 @@ export async function GET(
   }
 
   try {
+    console.log("OJO publicClient=", publicClient)
     console.log("Por llamar balance")
     const balance = await publicClient.readContract({
       address: regionalDonationContractAddress,
