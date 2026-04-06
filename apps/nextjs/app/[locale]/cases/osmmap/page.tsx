@@ -282,8 +282,8 @@ export default function OSMMapPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="department">{t.department}</Label>
-                  <Select value={filters['filtro[departamento_id]']} onValueChange={(v) => handleFilterChange('filtro[departamento_id]', v)}>
-                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <Select name="department" value={filters['filtro[departamento_id]']} onValueChange={(v) => handleFilterChange('filtro[departamento_id]', v)}>
+                    <SelectTrigger id="department"><SelectValue placeholder={t.showAll} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">{t.showAll}</SelectItem>
                       <Separator />
@@ -293,8 +293,8 @@ export default function OSMMapPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="presponsable">{t.allegedPerpetrator}</Label>
-                  <Select value={filters['filtro[presponsable_id]']} onValueChange={(v) => handleFilterChange('filtro[presponsable_id]', v)}>
-                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <Select name="presponsable" value={filters['filtro[presponsable_id]']} onValueChange={(v) => handleFilterChange('filtro[presponsable_id]', v)}>
+                    <SelectTrigger id="presponsable"><SelectValue placeholder={t.showAll} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">{t.showAll}</SelectItem>
                       <Separator />
@@ -304,8 +304,8 @@ export default function OSMMapPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tvio">{t.violence}</Label>
-                  <Select value={filters['filtro[categoria_id]']} onValueChange={(v) => handleFilterChange('filtro[categoria_id]', v)}>
-                    <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <Select name="tvio" value={filters['filtro[categoria_id]']} onValueChange={(v) => handleFilterChange('filtro[categoria_id]', v)}>
+                    <SelectTrigger id="tvio"><SelectValue placeholder={t.showAll} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">{t.showAll}</SelectItem>
                       <Separator />
