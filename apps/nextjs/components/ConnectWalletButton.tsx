@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 
 export default function ConnectWalletButton() {
-  const { isConnected } = useWallet()
+  const { isConnected, phoneNumber, isMiniPay } = useWallet()
   const [openPopover, setOpenPopover] = useState(false)
 
   return (
@@ -46,22 +46,24 @@ export default function ConnectWalletButton() {
               })}
             >
               {!connected ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={openConnectModal}
-                      variant="default"
-                      size="sm"
-                      className="gap-2"
-                    >
-                      <span className="text-lg">🔗</span>
-                      Conectar Wallet
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">Conectar wallet Web3 (opcional)</p>
-                  </TooltipContent>
-                </Tooltip>
+                isMiniPay ? null : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={openConnectModal}
+                        variant="default"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <span className="text-lg">🔗</span>
+                        Conectar Wallet
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Conectar wallet Web3 (opcional)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )
               ) : (
                 <div className="flex items-center gap-2">
                   {/* Botón de red con Badge */}
@@ -104,8 +106,16 @@ export default function ConnectWalletButton() {
                           className="h-2 w-2 p-0 bg-green-500 border-green-500"
                         />
                         <span className="text-xs font-medium truncate max-w-[100px]">
-                          {account.displayName}
+                          {isMiniPay && phoneNumber ? phoneNumber : account.displayName}
                         </span>
+                        {isMiniPay && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-normal bg-blue-500/20 text-blue-800"
+                          >
+                            📱 MiniPay
+                          </Badge>
+                        )}
                         {account.displayBalance && (
                           <Badge
                             variant="secondary"

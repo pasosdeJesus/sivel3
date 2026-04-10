@@ -1,1 +1,2 @@
-../node_modules/.pnpm/@pasosdejesus+m@https+++gitlab.com+api+v4+projects+pasosdeJesus%2Fm+repository+archive._29eace80dd4c0d92a2bdbcdcee9a1d5a/node_modules/@pasosdejesus/m/dist/m.js
+#!/usr/bin/env node
+import('@pasosdejesus/m/m');

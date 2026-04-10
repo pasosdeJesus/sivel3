@@ -43,17 +43,42 @@ const connectors = connectorsForWallets(
   },
 )
 
+// Detectar MiniPay
+const isMiniPay = typeof window !== 'undefined' && (window.ethereum as any)?.isMiniPay
+
+// Configuración base de transports
+const baseTransports = {
+  [celo.id]: http(),
+  [celoSepolia.id]: http(),
+}
+
 const config = createConfig({
   connectors,
   chains:
     process.env.NEXT_PUBLIC_NETWORK == 'celo'
       ? [celo]
       : [celoSepolia],
-  transports: {
-    [celo.id]: http(),
-    [celoSepolia.id]: http(),
-  },
+  transports: baseTransports,
 })
+
+// Para MiniPay, necesitamos interceptar y modificar las transacciones
+// Esto se hace a nivel de wallet client, no en http()
+if (isMiniPay && typeof window !== 'undefined') {
+  const originalEthSendTransaction = window.ethereum?.request
+  if (window.ethereum && originalEthSendTransaction) {
+    window.ethereum.request = async (request: { method: string; params?: any[] }) => {
+      // Forzar legacy transactions eliminando EIP-1559 params
+      if (request.method === 'eth_sendTransaction' && request.params) {
+        const tx = request.params[0]
+        if (tx.maxFeePerGas || tx.maxPriorityFeePerGas) {
+          delete tx.maxFeePerGas
+          delete tx.maxPriorityFeePerGas
+        }
+      }
+      return originalEthSendTransaction(request)
+    }
+  }
+}
 
 const queryClient = new QueryClient()
 

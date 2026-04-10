@@ -1,17 +1,25 @@
-# Contexto del Proyecto: sivel.xyz-des
+# Contexto del Proyecto: sivel3
 
 - **Branch:** main
-- **Repositorio:** git@gitlab.com:pasosdeJesus/sivel3
-- **Fecha:** 2026-04-08T22:22:53.358Z
-- **Ruta:** /var/www/htdocs/des/sivel.xyz-des
+- **Repositorio:** https://gitlab.com/pasosdeJesus/sivel3
+- **Fecha:** 2026-04-10T18:34:42.516Z
+- **Ruta:** /var/www/htdocs/sivel3
 
 ## Estructura de Directorios
 
 ```
 .
+./.git
+./.git/objects
+./.git/refs
+./.git/logs
+./.git/modules
+./.idx
 ./apps
-./apps/nextjs
 ./apps/hardhat
+./apps/nextjs
+./ia
+./ia/piedra_fundamental
 ./sivel2
 ./sivel2/.github
 ./sivel2/app
@@ -26,81 +34,42 @@
 ./sivel2/ref
 ./sivel2/scripts
 ./sivel2/test
-./sivel2/tmp
+./sivel2/.bundle
 ./sivel2/node_modules
-./.git
-./.git/objects
-./.git/refs
-./.git/logs
-./.git/modules
+./sivel2/tmp
 ./.pnpm-store
 ./.pnpm-store/v10
-./sivel2_3
-./sivel2_3/.github
-./sivel2_3/app
-./sivel2_3/archivos
-./sivel2_3/bin
-./sivel2_3/config
-./sivel2_3/db
-./sivel2_3/doc
-./sivel2_3/lib
-./sivel2_3/log
-./sivel2_3/public
-./sivel2_3/ref
-./sivel2_3/scripts
-./sivel2_3/test
-./sivel2_3/tmp
-./sivel2_3/node_modules
-./.idx
-./ia
-./ia/piedra_fundamental
-./bin
 ```
 
 ## Historial de Git (últimos 5 commits)
 
 ```
+2d58d0a contexto
+ apps/nextjs/bin/m          |    2 +-
+ apps/nextjs/package.json   |   35 +-
+ apps/nextjs/pnpm-lock.yaml | 2792 ++++++++++++++++------------------
+ contexto.md                | 3627 ++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 4912 insertions(+), 1544 deletions(-)
+b0a01ef Passing tests
+ apps/nextjs/package.json        |   5 +
+ apps/nextjs/pnpm-lock.yaml      | 494 +++++++++++++++++++++++++++++++++++++++-
+ apps/nextjs/tests/index.test.ts |   2 +-
+ 3 files changed, 498 insertions(+), 3 deletions(-)
+f4f20df Fix label for
+ apps/nextjs/app/[locale]/cases/osmmap/page.tsx | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+1d08070 talent id
+ apps/nextjs/app/layout.tsx | 3 +++
+ sivel2                     | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 69a3438 Fixes API with donation per region. Closes #6
  apps/nextjs/app/api/regions/[id]/balance/route.ts | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
-8744009 abi
- apps/hardhat/package.json                         |   1 +
- apps/hardhat/yarn.lock                            | 217 +++++++++++++++++++---
- apps/nextjs/app/api/regions/[id]/balance/route.ts |  28 +--
- apps/nextjs/bin/m                                 |   2 +-
- apps/nextjs/pnpm-lock.yaml                        |  72 ++++---
- sivel2                                            |   2 +-
- 6 files changed, 243 insertions(+), 79 deletions(-)
-9095ee6 Presenta iconos en mobil. Closes #1
- apps/hardhat/bin/contractVerification              |    2 +-
- apps/nextjs/.env.template                          |   31 +
- apps/nextjs/app/api/regions/[id]/balance/route.ts  |    2 +-
- apps/nextjs/bin/prod.sh                            |   12 +
- apps/nextjs/bin/start                              |    4 +
- apps/nextjs/components/mapa/MapComponent.tsx       |    2 +-
- apps/nextjs/public/en/cases/layers-2x.png          |  Bin 0 -> 1259 bytes
- apps/nextjs/public/en/cases/layers.png             |  Bin 0 -> 696 bytes
- apps/nextjs/public/en/cases/marker-icon-2x.png     |  Bin 0 -> 2464 bytes
- apps/nextjs/public/en/cases/marker-icon-orange.png | 1494 ++++++++++++++++++++
- apps/nextjs/public/en/cases/marker-icon-red.png    | 1494 ++++++++++++++++++++
- apps/nextjs/public/es/cases/layers-2x.png          |  Bin 0 -> 1259 bytes
- apps/nextjs/public/es/cases/layers.png             |  Bin 0 -> 696 bytes
- apps/nextjs/public/es/cases/marker-icon-2x.png     |  Bin 0 -> 2464 bytes
- apps/nextjs/public/es/cases/marker-icon-orange.png | 1494 ++++++++++++++++++++
- apps/nextjs/public/es/cases/marker-icon-red.png    | 1494 ++++++++++++++++++++
- sivel2                                             |    2 +-
- 17 files changed, 6027 insertions(+), 4 deletions(-)
-a4a6c75 Editar README.md
- README.md | 39 +++++++--------------------------------
- 1 file changed, 7 insertions(+), 32 deletions(-)
-ec93c55 Editar README.md
- README.md | 168 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 157 insertions(+), 11 deletions(-)
 ```
 
 ---
 
-___INICIO_ARCHIVO_20260408T222253___ .gitignore
+___INICIO_ARCHIVO_20260410T183442___ .gitignore
 
 ```
 # Logs
@@ -210,7 +179,7 @@ tsconfig.tsbuildinfo
 apps/hardhat/tmpart
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ .gitmodules
+___INICIO_ARCHIVO_20260410T183442___ .gitmodules
 
 ```
 [submodule "sivel2"]
@@ -218,7 +187,7 @@ ___INICIO_ARCHIVO_20260408T222253___ .gitmodules
 	url = https://gitlab.com/pasosdeJesus/sivel2
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ .idx/README.md
+___INICIO_ARCHIVO_20260410T183442___ .idx/README.md
 
 ```markdown
 # IDX Environment Guide for Development
@@ -281,7 +250,7 @@ When working with Nix files in this environment, it's helpful to understand the 
 | **Use Case** | Quick linting, pre-commit hooks | Actually building the environment, testing the logic |
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ .idx/dev.nix
+___INICIO_ARCHIVO_20260410T183442___ .idx/dev.nix
 
 ```
 # To learn more about how to use Nix to configure your environment
@@ -346,7 +315,7 @@ ___INICIO_ARCHIVO_20260408T222253___ .idx/dev.nix
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ .idx/startpg.sh
+___INICIO_ARCHIVO_20260410T183442___ .idx/startpg.sh
 
 ```bash
 #!/bin/sh
@@ -374,7 +343,7 @@ psql -d postgres -c "ALTER USER learntg WITH PASSWORD 'xyz';"
 
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ .idx/stoppg.sh
+___INICIO_ARCHIVO_20260410T183442___ .idx/stoppg.sh
 
 ```bash
 #!/bin/sh
@@ -383,7 +352,7 @@ pg_ctl -D /home/user/pg/data stop
 
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ AGENTS.md
+___INICIO_ARCHIVO_20260410T183442___ AGENTS.md
 
 ```markdown
 # AI Agent Directives
@@ -422,7 +391,7 @@ ultimate purpose of this project: to bring the Good News to the world
 through technology.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ ARCHITECTURE.md
+___INICIO_ARCHIVO_20260410T183442___ ARCHITECTURE.md
 
 ```markdown
 # SIVeL 3 - Project Architecture
@@ -554,7 +523,7 @@ The long-term vision is to gradually replace the case management functionalities
 This careful, security-focused transition ensures that SIVeL 3 can innovate and improve the user experience without compromising the integrity of its mission-critical data or the security of the platform.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ CREDITOS.md
+___INICIO_ARCHIVO_20260410T183442___ CREDITOS.md
 
 ```markdown
 
@@ -574,7 +543,7 @@ expuesto al infierno de fuego.
 Mateo 5:21-22
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ FUNDING.yml
+___INICIO_ARCHIVO_20260410T183442___ FUNDING.yml
 
 ```yaml
 patreon: pasosdeJesus
@@ -583,7 +552,7 @@ buy_me_a_coffee: vtamara
 
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ LICENCIA.md
+___INICIO_ARCHIVO_20260410T183442___ LICENCIA.md
 
 ```markdown
 Licencia ISC
@@ -609,7 +578,7 @@ Esta traducción se incluye con propósitos informativos, ver
 original en LICENSE.md
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ LICENSE.md
+___INICIO_ARCHIVO_20260410T183442___ LICENSE.md
 
 ```markdown
 ISC License
@@ -629,7 +598,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ Makefile
+___INICIO_ARCHIVO_20260410T183442___ Makefile
 
 ```
 .PHONY: test type
@@ -647,7 +616,7 @@ type:
 	@(cd apps/hardhat && $(MAKE) type)
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ PRINCIPLES.md
+___INICIO_ARCHIVO_20260410T183442___ PRINCIPLES.md
 
 ```markdown
 # SIVeL 3 - Project Principles
@@ -691,7 +660,7 @@ Violence categories must correspond to IHL categories to avoid diluting State re
 We define a critical security failure as one that can be exploited on the stable version of our software when operating on the recommended platform (default configuration of `adJ`, available at http://aprendiendo.pasosdeJesus.org).
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ README.md
+___INICIO_ARCHIVO_20260410T183442___ README.md
 
 ```markdown
 # SIVeL 3
@@ -842,7 +811,7 @@ SIVeL 3 is **open source** under the [ISC license](https://opensource.org/licens
 > *"For I, the Lord, love justice" (Isaiah 61:8)*
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ VISION.md
+___INICIO_ARCHIVO_20260410T183442___ VISION.md
 
 ```markdown
 # Vision: SIVeL 3 - A Donation-Driven Protocol for Ethical Witnessing
@@ -935,7 +904,7 @@ The final decision on the pace and scope of this transition will be guided by ou
 While our technology is neutral, our team operates from a deep conviction in the inherent dignity of every human person—a dignity that precedes any legal or political framework. We welcome partners of all backgrounds who share this commitment to truth and justice.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/.env.example
+___INICIO_ARCHIVO_20260410T183442___ apps/.env.example
 
 ```
 # ====================================================================
@@ -1012,7 +981,7 @@ DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@localhost/$PGDATABASE
 PORT=3029
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/MOCK_USDT_README.md
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/MOCK_USDT_README.md
 
 ```markdown
 # MockUSDT Token
@@ -1037,7 +1006,7 @@ The owner (deployer) has 1,000,000 tokens with 6 decimals.
 - Decimals: 6
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/Makefile
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/Makefile
 
 ```
 build:
@@ -1051,7 +1020,7 @@ test:
 
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/README.md
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/README.md
 
 ```markdown
 # sivel3 - Smart Contracts
@@ -1154,7 +1123,7 @@ yarn test
 The contract ABIs (Application Binary Interfaces) are essential for the frontend to interact with the smart contracts. This project is configured to sync them automatically to `../nextjs/abis/` every time you run `yarn build`. To run the sync manually, use `yarn sync:abis`.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/MusdtVerification
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/MusdtVerification
 
 ```
 #!/bin/sh
@@ -1163,7 +1132,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/MusdtVerification
 npx hardhat verify --network celoSepolia $MOCK_USDT_ADDRESS
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/approveDepositOwner
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/approveDepositOwner
 
 ```
 #!/bin/sh
@@ -1172,7 +1141,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/approveDepositOwner
 npx hardhat run scripts/approveDepositOwner.ts --network $NETWORK
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/contractVerification
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/contractVerification
 
 ```
 #!/bin/sh
@@ -1184,7 +1153,7 @@ echo $cmd
 eval $cmd
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/deployMockUSDT
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/deployMockUSDT
 
 ```
 #!/bin/sh
@@ -1193,7 +1162,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/deployMockUSDT
 node_modules/.bin/hardhat run scripts/deployMockUSDT.ts --network $NEXT_PUBLIC_NETWORK
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/deployRegionalDonations
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/deployRegionalDonations
 
 ```
 #!/bin/sh
@@ -1202,7 +1171,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/deployRegionalDonations
 node_modules/.bin/hardhat run scripts/deployRegionalDonations.ts --network $NEXT_PUBLIC_NETWORK
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/prepadJ.sh
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/prepadJ.sh
 
 ```bash
 #!/bin/sh
@@ -1221,7 +1190,7 @@ cp tmpart/index-sa.js node_modules/@nomicfoundation/solidity-analyzer/index.js
 yarn build
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/verifyMockUSDT
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/bin/verifyMockUSDT
 
 ```
 #!/bin/sh
@@ -1230,7 +1199,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/bin/verifyMockUSDT
 npx hardhat run scripts/verifyMockUSDT.ts --network $NEXT_PUBLIC_NETWORK
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/contracts/MockUSDT.sol
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/contracts/MockUSDT.sol
 
 ```
 // SPDX-License-Identifier: MIT
@@ -1250,7 +1219,7 @@ contract MockUSDT is ERC20, Ownable {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/contracts/RegionalDonation.sol
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/contracts/RegionalDonation.sol
 
 ```
 // SPDX-License-Identifier: MIT
@@ -1351,7 +1320,7 @@ contract RegionalDonation is Ownable, ReentrancyGuard {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/hardhat.config.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/hardhat.config.ts
 
 ```typescript
 import '@nomicfoundation/hardhat-toolbox';
@@ -1458,7 +1427,7 @@ const config: HardhatUserConfig = {
 export default config;
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/package.json
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/package.json
 
 ```json
 {
@@ -1512,7 +1481,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/package.json
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/approveDepositOwner.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/approveDepositOwner.ts
 
 ```typescript
 import { ethers } from "hardhat";
@@ -1539,7 +1508,7 @@ async function main() {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/deployAndSetRegions.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/deployAndSetRegions.ts
 
 ```typescript
 
@@ -1594,7 +1563,7 @@ main()
   });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/deployMockUSDT.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/deployMockUSDT.ts
 
 ```typescript
 import { ethers } from "hardhat";
@@ -1648,7 +1617,7 @@ main().catch((error) => {
 });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/deployRegionalDonations.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/deployRegionalDonations.ts
 
 ```typescript
 
@@ -1699,7 +1668,7 @@ main()
   });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/setRegions.js
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/setRegions.js
 
 ```javascript
 
@@ -1733,7 +1702,7 @@ main()
   });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/verifyDeployment.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/verifyDeployment.ts
 
 ```typescript
 import { ethers } from "hardhat";
@@ -1831,7 +1800,7 @@ main().catch((error) => {
 });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/scripts/verifyMockUSDT.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/scripts/verifyMockUSDT.ts
 
 ```typescript
 import { ethers } from "hardhat";
@@ -1890,7 +1859,7 @@ main().catch((error) => {
 });
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/sync-abis.mjs
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/sync-abis.mjs
 
 ```
 #!/usr/bin/env node
@@ -1979,7 +1948,7 @@ try {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/tsconfig.json
+___INICIO_ARCHIVO_20260410T183442___ apps/hardhat/tsconfig.json
 
 ```json
 {
@@ -2011,7 +1980,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/hardhat/tsconfig.json
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/.config/kysely.config.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/.config/kysely.config.ts
 
 ```typescript
 import 'dotenv/config'
@@ -2052,7 +2021,7 @@ export function newKyselyPostgresql() {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/.env.template
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/.env.template
 
 ```
 NEXT_PUBLIC_APPNAME='SIVEL 3'
@@ -2088,13 +2057,13 @@ NEXT_PUBLIC_SELF_ENDPOINT="https://sivel.xyz:9001/api/self-verify"
 NEXT_PUBLIC_EXPLORER_TX=https://celo-sepolia.blockscout.com/tx/
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/.prettieignore
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/.prettieignore
 
 ```
 .next
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/.prettierrc.json
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/.prettierrc.json
 
 ```json
 {
@@ -2103,7 +2072,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/.prettierrc.json
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/Makefile
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/Makefile
 
 ```
 
@@ -2132,7 +2101,7 @@ prod:
 
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/README.md
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/README.md
 
 ```markdown
 # sivel3
@@ -2220,7 +2189,7 @@ Creates a new role and database using the variables from `.env`.
 - `tsconfig.json`: TypeScript configuration.
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/abis/MockUSDT.json
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/abis/MockUSDT.json
 
 ```json
 [
@@ -2638,7 +2607,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/abis/MockUSDT.json
 ]
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/abis/RegionalDonation.json
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/abis/RegionalDonation.json
 
 ```json
 [
@@ -2945,7 +2914,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/abis/RegionalDonation.json
 ]
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/[locale]/layout.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/[locale]/layout.tsx
 
 ```tsx
 import { DM_Sans, DM_Mono } from 'next/font/google'
@@ -2988,7 +2957,7 @@ export default async function LocaleLayout({
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/[locale]/page.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/[locale]/page.tsx
 
 ```tsx
 import { redirect } from 'next/navigation';
@@ -3001,7 +2970,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/alleged-perpetrators/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/alleged-perpetrators/route.ts
 
 ```typescript
 "use server"
@@ -3035,7 +3004,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/cases/[id]/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/cases/[id]/route.ts
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
@@ -3072,7 +3041,7 @@ export async function GET(
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/cases/counts/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/cases/counts/route.ts
 
 ```typescript
 "use server"
@@ -3154,7 +3123,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/cases/datos-osm/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/cases/datos-osm/route.ts
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
@@ -3191,7 +3160,7 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/cases/geojson/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/cases/geojson/route.ts
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
@@ -3225,7 +3194,7 @@ export async function GET() {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/categories/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/categories/route.ts
 
 ```typescript
 "use server"
@@ -3267,7 +3236,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/departments/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/departments/route.ts
 
 ```typescript
 "use server"
@@ -3303,7 +3272,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/regions/[id]/balance/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/regions/[id]/balance/route.ts
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
@@ -3358,7 +3327,7 @@ export async function GET(
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/api/regions/route.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/api/regions/route.ts
 
 ```typescript
 "use server"
@@ -3391,7 +3360,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/layout.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/layout.tsx
 
 ```tsx
 import { redirect } from 'next/navigation';
@@ -3418,6 +3387,9 @@ export default async function RootLayout({
     ["en", "es"].includes(locale) ? locale : "en"
   return (
     <html lang={lang}>
+      <head>
+        <meta name="talentapp:project_verification" content="f6b919387e34e3d13e8d6569e6c9899cedb623bd1d4a901885f2fd4f43e60df63214ab0b2451f93892729bffba84fec96cec9555461a6fb625e4c30f72020cda"/>
+      </head>
       <body className={inter.className}>
         {children}
       </body>
@@ -3426,7 +3398,7 @@ export default async function RootLayout({
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/app/page.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/app/page.tsx
 
 ```tsx
 import { redirect } from 'next/navigation'
@@ -3436,7 +3408,7 @@ export default function HomePage() {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/bin/dev
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/bin/dev
 
 ```
 #!/bin/sh
@@ -3448,7 +3420,7 @@ echo $cmd
 eval $cmd
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/bin/prod.sh
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/bin/prod.sh
 
 ```bash
 #!/bin/sh
@@ -3465,7 +3437,7 @@ if (test "$d2" = "") then {
 su vtamara -c "cd $d2; make >> prod.log 2>&1 ; ./bin/start >> prod.log 2>&1 &"
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/bin/start
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/bin/start
 
 ```
 #!/bin/sh
@@ -3474,7 +3446,7 @@ ___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/bin/start
 node_modules/next/dist/bin/next start -p${PORT}
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/components/ClientLayout.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/components/ClientLayout.tsx
 
 ```tsx
 'use client'
@@ -3503,7 +3475,7 @@ export default function ClientLayout({ children, locale }: ClientLayoutProps) {
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/components/Footer.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/components/Footer.tsx
 
 ```tsx
 // components/Footer.tsx
@@ -3576,7 +3548,7 @@ export default function Footer({
 }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/components/ui/skeleton.tsx
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/components/ui/skeleton.tsx
 
 ```tsx
 import { cn } from '@/lib/utils'
@@ -3596,32 +3568,15 @@ function Skeleton({
 export { Skeleton }
 ```
 
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/lib/utils.ts
-
-```typescript
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-```
-
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/postcss.config.mjs
-
-```
-const config = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-}
-
-export default config
-```
-
-___INICIO_ARCHIVO_20260408T222253___ apps/nextjs/src/index.ts
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/src/index.ts
 
 ```typescript
 console.log('¡Hola, mundo!')
+```
+
+___INICIO_ARCHIVO_20260410T183442___ apps/nextjs/types/pasosdejesus__m.d.ts
+
+```typescript
+declare module '@pasosdejesus/m'
 ```
 
