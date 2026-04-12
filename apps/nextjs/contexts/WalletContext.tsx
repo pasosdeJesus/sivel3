@@ -76,7 +76,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { connect, connectors } = useConnect()
   const chainId = useChainId()
   const { data: hash, error, isPending, writeContract } = useWriteContract()
-  const { isMiniPay, phoneNumber } = useMiniPay()
+  const { isMiniPay, phoneNumber, isConnected: isMiniPayConnected, address: miniPayAddress } = useMiniPay()
+  
+  // Sincronizar el estado de MiniPay con el estado de wagmi
+  const effectiveIsConnected = isConnected || (isMiniPay && isMiniPayConnected)
+  const effectiveAddress = address || miniPayAddress
 
   const [state, setState] = useState({
     isConnected: false,
@@ -161,8 +165,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [writeContract])
 
   const value: WalletContextType = {
-    isConnected: state.isConnected,
-    address: state.address,
+    isConnected: effectiveIsConnected,
+    address: effectiveAddress || state.address,
     chainId: state.chainId,
     disconnect,
     approveUSDT,
