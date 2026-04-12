@@ -11,13 +11,13 @@ interface LogEntry {
 }
 
 export function MiniPayDebugger() {
-  const { isMiniPay, isConnecting, isConnected, phoneNumber, address } = useMiniPay()
+  const { isMiniPay, isConnecting, isConnected, phoneNumber, address, debugLogs } = useMiniPay()
   const { isConnected: wagmiConnected, address: wagmiAddress } = useAccount()
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [isVisible, setIsVisible] = useState(false)
   
   // Versión para depuración
-  const DEBUG_VERSION = 'v2.0.0-auto-connect'
+  const DEBUG_VERSION = 'v3.0.0-with-hook-logs'
   
   useEffect(() => {
     addLog(`🐞 MiniPay Debugger ${DEBUG_VERSION}`, 'info')
@@ -31,6 +31,15 @@ export function MiniPayDebugger() {
       type
     }])
   }
+
+  // Mostrar logs internos del hook
+  useEffect(() => {
+    if (debugLogs && debugLogs.length > 0) {
+      debugLogs.forEach(log => {
+        addLog(log, 'info')
+      })
+    }
+  }, [debugLogs])
 
   useEffect(() => {
     if (!isMiniPay) return

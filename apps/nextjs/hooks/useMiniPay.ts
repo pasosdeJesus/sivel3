@@ -10,129 +10,144 @@ interface MiniPayInfo {
   isConnecting: boolean
   isConnected: boolean
   address: `0x${string}` | null
+  debugLogs: string[]
 }
 
 export function useMiniPay(): MiniPayInfo {
-  // Log inmediato para confirmar que el hook se está ejecutando
-  if (typeof window !== 'undefined') {
-    console.log('🚀 [MiniPay] Hook useMiniPay INIT - v2.0.0')
-  }
+  const HOOK_VERSION = 'v3.0.0-debug-logs'
   
   const [isMiniPay, setIsMiniPay] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
   
   const { connectAsync } = useConnect()
   const { address, isConnected } = useAccount()
   
-  // Log para ver estados iniciales
-  if (typeof window !== 'undefined') {
-    console.log('📊 [MiniPay] Estados iniciales - isConnected:', isConnected, 'address:', address)
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString()
+    const logMsg = `[${timestamp}] ${message}`
+    console.log(logMsg)
+    setDebugLogs(prev => [...prev, logMsg])
   }
-
+  
+  addLog(`🚀 Hook ${HOOK_VERSION} iniciado`)
+  addLog(`📱 User Agent: ${navigator.userAgent.substring(0, 80)}...`)
+  
   useEffect(() => {
-    // Solo ejecutar en cliente
+    addLog('🔍 useEffect ejecutándose...')
+    
     if (typeof window === 'undefined') {
-      console.log('🔍 [MiniPay] No estamos en el navegador')
+      addLog('❌ No estamos en navegador')
       return
     }
-
+    
     const ethereum = window.ethereum as any
+    addLog(`🔍 window.ethereum existe? ${!!ethereum}`)
     
-    console.log('🔍 [MiniPay] Iniciando detección...')
-    console.log('🔍 [MiniPay] window.ethereum existe?', !!ethereum)
-    
-    if (ethereum) {
-      console.log('🔍 [MiniPay] isMiniPay flag:', ethereum.isMiniPay)
-      console.log('🔍 [MiniPay] chainId:', ethereum.chainId)
+    if (!ethereum) {
+      addLog('❌ No hay proveedor Ethereum')
+      return
     }
     
-    // Detectar MiniPay
-    const isMiniPayEnv = ethereum?.isMiniPay === true
-    console.log('🔍 [MiniPay] ¿Es MiniPay?', isMiniPayEnv)
+    const isMiniPayEnv = ethereum.isMiniPay === true
+    addLog(`🔍 isMiniPay flag: ${isMiniPayEnv}`)
     setIsMiniPay(isMiniPayEnv)
     
     if (!isMiniPayEnv) {
-      console.log('🔍 [MiniPay] No es MiniPay, saliendo...')
+      addLog('❌ No es MiniPay, saliendo')
       return
     }
     
-    console.log('✅ [MiniPay] MiniPay detectado correctamente')
+    addLog('✅ MiniPay detectado correctamente')
     
-    // FUNCIÓN AUTO-CONEXIÓN INMEDIATA
-    const performAutoConnect = async () => {
-      console.log('🔄 [MiniPay] Iniciando auto-conexión INMEDIATA...')
+    // Si ya está conectado, solo obtener número
+    if (isConnected && address) {
+      addLog(`✅ Ya conectado: ${address}`)
+      ethereum.request({ method: 'minipay_getPhoneNumber' })
+        .then((res: { phoneNumber: string }) => {
+          if (res?.phoneNumber) {
+            addLog(`📞 Número: ${res.phoneNumber}`)
+            setPhoneNumber(res.phoneNumber)
+          }
+        })
+        .catch((err: Error) => addLog(`❌ Error obteniendo número: ${err.message}`))
+      return
+    }
+    
+    // Auto-conectar
+    const autoConnect = async () => {
+      addLog('🔄 Iniciando auto-conexión...')
       setIsConnecting(true)
+      
       try {
-        // PASO 1: Forzar la red a Celo Sepolia (44787)
-        const targetChainId = '0x1a4b' // 44787 en hex
+        // Forzar red a Celo Sepolia (44787)
+        const targetChainId = '0x1a4b'
         const currentChainId = await ethereum.request({ method: 'eth_chainId' })
-        console.log('🔍 [MiniPay] ChainId actual:', currentChainId, 'Target:', targetChainId)
+        addLog(`🔍 ChainId actual: ${currentChainId}, target: ${targetChainId}`)
         
         if (currentChainId !== targetChainId) {
-          console.log('🔄 [MiniPay] Cambiando de red...')
+          addLog('🔄 Cambiando de red...')
           try {
             await ethereum.request({
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: targetChainId }]
             })
-            console.log('✅ [MiniPay] Red cambiada exitosamente')
-          } catch (switchError) {
-            console.error('❌ [MiniPay] Error cambiando de red:', switchError)
+            addLog('✅ Red cambiada')
+          } catch (err: any) {
+            addLog(`❌ Error cambiando red: ${err.message}`)
           }
         }
         
-        // PASO 2: Solicitar cuentas
-        console.log('🔄 [MiniPay] Solicitando cuentas...')
+        // Solicitar cuentas
+        addLog('🔄 Solicitando cuentas...')
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-        console.log('✅ [MiniPay] Cuentas obtenidas:', accounts)
+        addLog(`✅ Cuentas obtenidas: ${JSON.stringify(accounts)}`)
         
         if (!accounts || accounts.length === 0) {
           throw new Error('No se obtuvieron cuentas')
         }
         
-        // PASO 3: Conectar usando wagmi (solo si no está conectado)
-        if (!isConnected && !address) {
-          console.log('🔄 [MiniPay] Conectando con injected connector...')
-          try {
-            await connectAsync({ connector: injected() })
-            console.log('✅ [MiniPay] connectAsync completado')
-          } catch (connectErr) {
-            console.error('❌ [MiniPay] Error en connectAsync:', connectErr)
-            // No fallamos, ya tenemos las cuentas
-          }
-        }
-        
-        // PASO 4: Obtener número de teléfono
-        console.log('🔍 [MiniPay] Obteniendo número de teléfono...')
+        // Conectar con wagmi
+        addLog('🔄 Conectando con injected connector...')
         try {
-          const result = await ethereum.request({ method: 'minipay_getPhoneNumber' }) as { phoneNumber: string }
-          console.log('✅ [MiniPay] Número obtenido:', result?.phoneNumber)
-          if (result?.phoneNumber) setPhoneNumber(result.phoneNumber)
-        } catch (phoneErr) {
-          console.warn('❌ [MiniPay] Error obteniendo número:', phoneErr)
+          await connectAsync({ connector: injected() })
+          addLog('✅ connectAsync completado')
+        } catch (err: any) {
+          addLog(`⚠️ connectAsync falló: ${err.message}`)
         }
         
-        console.log('🎉 [MiniPay] Auto-conexión completada')
-      } catch (err) {
-        console.error('❌ [MiniPay] Error durante auto-conexión:', err)
-        if (err instanceof Error) {
-          console.error('❌ [MiniPay] Mensaje:', err.message)
+        // Obtener número de teléfono
+        addLog('🔄 Obteniendo número de teléfono...')
+        try {
+          const result = await ethereum.request({ method: 'minipay_getPhoneNumber' })
+          addLog(`📞 Resultado: ${JSON.stringify(result)}`)
+          if (result && typeof result === 'object' && 'phoneNumber' in result) {
+            const phone = (result as { phoneNumber: string }).phoneNumber
+            addLog(`📞 Número: ${phone}`)
+            setPhoneNumber(phone)
+          }
+        } catch (err: any) {
+          addLog(`❌ Error obteniendo número: ${err.message}`)
         }
+        
+        addLog('🎉 Auto-conexión completada')
+      } catch (err: any) {
+        addLog(`❌ Error: ${err.message}`)
       } finally {
         setIsConnecting(false)
       }
     }
     
-    // Ejecutar inmediatamente
-    performAutoConnect()
-  }, []) // Dependencias vacías - solo ejecutar una vez al montar
+    autoConnect()
+  }, [])
 
   return {
     isMiniPay,
     phoneNumber,
     isConnecting,
     isConnected,
-    address: address || null
+    address: address || null,
+    debugLogs
   }
 }
