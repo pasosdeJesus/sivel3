@@ -13,12 +13,22 @@ interface MiniPayInfo {
 }
 
 export function useMiniPay(): MiniPayInfo {
+  // Log inmediato para confirmar que el hook se está ejecutando
+  if (typeof window !== 'undefined') {
+    console.log('🚀 [MiniPay] Hook useMiniPay INIT - v2.0.0')
+  }
+  
   const [isMiniPay, setIsMiniPay] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   
   const { connectAsync } = useConnect()
   const { address, isConnected } = useAccount()
+  
+  // Log para ver estados iniciales
+  if (typeof window !== 'undefined') {
+    console.log('📊 [MiniPay] Estados iniciales - isConnected:', isConnected, 'address:', address)
+  }
 
   useEffect(() => {
     // Solo ejecutar en cliente

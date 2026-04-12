@@ -15,6 +15,14 @@ export function MiniPayDebugger() {
   const { isConnected: wagmiConnected, address: wagmiAddress } = useAccount()
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [isVisible, setIsVisible] = useState(false)
+  
+  // Versión para depuración
+  const DEBUG_VERSION = 'v2.0.0-auto-connect'
+  
+  useEffect(() => {
+    addLog(`🐞 MiniPay Debugger ${DEBUG_VERSION}`, 'info')
+    addLog(`📱 User Agent: ${navigator.userAgent.substring(0, 80)}...`, 'info')
+  }, [])
 
   const addLog = (message: string, type: LogEntry['type'] = 'info') => {
     setLogs(prev => [...prev, {
