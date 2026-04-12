@@ -49,52 +49,74 @@ export function useMiniPay(): MiniPayInfo {
     
     console.log('✅ [MiniPay] MiniPay detectado correctamente')
     
-    // Si ya está conectado por wagmi, solo obtener phone number
-    if (isConnected && address) {
-      console.log('✅ [MiniPay] Ya conectado, address:', address)
-      console.log('🔍 [MiniPay] Obteniendo número de teléfono...')
-      ethereum.request({ method: 'minipay_getPhoneNumber' })
-        .then((res: { phoneNumber: string }) => {
-          console.log('✅ [MiniPay] Número obtenido:', res?.phoneNumber)
-          if (res?.phoneNumber) setPhoneNumber(res.phoneNumber)
-        })
-        .catch((err: Error) => console.warn('❌ [MiniPay] Error obteniendo número:', err))
-      return
-    }
-    
-    // Auto-conectar sin interacción del usuario
-    const autoConnect = async () => {
-      console.log('🔄 [MiniPay] Iniciando auto-conexión...')
+    // FUNCIÓN AUTO-CONEXIÓN INMEDIATA
+    const performAutoConnect = async () => {
+      console.log('🔄 [MiniPay] Iniciando auto-conexión INMEDIATA...')
       setIsConnecting(true)
       try {
-        console.log('🔄 [MiniPay] Solicitando cuentas a eth_requestAccounts...')
+        // PASO 1: Forzar la red a Celo Sepolia (44787)
+        const targetChainId = '0x1a4b' // 44787 en hex
+        const currentChainId = await ethereum.request({ method: 'eth_chainId' })
+        console.log('🔍 [MiniPay] ChainId actual:', currentChainId, 'Target:', targetChainId)
+        
+        if (currentChainId !== targetChainId) {
+          console.log('🔄 [MiniPay] Cambiando de red...')
+          try {
+            await ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: targetChainId }]
+            })
+            console.log('✅ [MiniPay] Red cambiada exitosamente')
+          } catch (switchError) {
+            console.error('❌ [MiniPay] Error cambiando de red:', switchError)
+          }
+        }
+        
+        // PASO 2: Solicitar cuentas
+        console.log('🔄 [MiniPay] Solicitando cuentas...')
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
         console.log('✅ [MiniPay] Cuentas obtenidas:', accounts)
         
-        console.log('🔄 [MiniPay] Conectando con injected connector...')
-        await connectAsync({ connector: injected() })
-        console.log('✅ [MiniPay] connectAsync completado')
+        if (!accounts || accounts.length === 0) {
+          throw new Error('No se obtuvieron cuentas')
+        }
         
+        // PASO 3: Conectar usando wagmi (solo si no está conectado)
+        if (!isConnected && !address) {
+          console.log('🔄 [MiniPay] Conectando con injected connector...')
+          try {
+            await connectAsync({ connector: injected() })
+            console.log('✅ [MiniPay] connectAsync completado')
+          } catch (connectErr) {
+            console.error('❌ [MiniPay] Error en connectAsync:', connectErr)
+            // No fallamos, ya tenemos las cuentas
+          }
+        }
+        
+        // PASO 4: Obtener número de teléfono
         console.log('🔍 [MiniPay] Obteniendo número de teléfono...')
-        const result = await ethereum.request({ method: 'minipay_getPhoneNumber' }) as { phoneNumber: string }
-        console.log('✅ [MiniPay] Número obtenido:', result?.phoneNumber)
-        if (result?.phoneNumber) setPhoneNumber(result.phoneNumber)
+        try {
+          const result = await ethereum.request({ method: 'minipay_getPhoneNumber' }) as { phoneNumber: string }
+          console.log('✅ [MiniPay] Número obtenido:', result?.phoneNumber)
+          if (result?.phoneNumber) setPhoneNumber(result.phoneNumber)
+        } catch (phoneErr) {
+          console.warn('❌ [MiniPay] Error obteniendo número:', phoneErr)
+        }
         
-        console.log('🎉 [MiniPay] Conexión exitosa completa')
+        console.log('🎉 [MiniPay] Auto-conexión completada')
       } catch (err) {
         console.error('❌ [MiniPay] Error durante auto-conexión:', err)
         if (err instanceof Error) {
           console.error('❌ [MiniPay] Mensaje:', err.message)
-          console.error('❌ [MiniPay] Stack:', err.stack)
         }
       } finally {
         setIsConnecting(false)
-        console.log('🔍 [MiniPay] Estado final - isConnecting:', false)
       }
     }
     
-    autoConnect()
-  }, [connectAsync, isConnected, address])
+    // Ejecutar inmediatamente
+    performAutoConnect()
+  }, []) // Dependencias vacías - solo ejecutar una vez al montar
 
   return {
     isMiniPay,
