@@ -162,17 +162,45 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     const amountInSmallestUnit = parseUnits(amount, 6)
     
-    // Según documentación oficial de MiniPay, usar writeContract de wagmi
-    // No hacer llamadas directas a window.ethereum.request
-    logger.info('Usando wagmi writeContract (recomendado por MiniPay docs)...', 'Donate')
+    // Para MiniPay, usar viem directamente (más confiable que wagmi)
+    if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
+      logger.info('MiniPay detectado, usando viem para transacción directa...', 'Donate')
+      try {
+        const { createWalletClient, custom, parseEther } = await import('viem')
+        const { celoSepolia } = await import('viem/chains')
+        
+        const walletClient = createWalletClient({
+          chain: celoSepolia,
+          transport: custom(window.ethereum)
+        })
+        
+        const [address] = await walletClient.getAddresses()
+        logger.info(`Wallet address: ${address}`, 'Donate')
+        
+        const hash = await walletClient.writeContract({
+          address: regionalDonationContractAddress,
+          abi: regionalDonationAbi,
+          functionName: 'donate',
+          args: [BigInt(regionId), amountInSmallestUnit],
+          account: address,
+        })
+        
+        logger.success(`Transacción enviada con viem. Hash: ${hash}`, 'Donate')
+        return
+      } catch (viemErr: any) {
+        logger.error(`Viem falló: ${viemErr.message}`, 'Donate')
+        // Fallback a wagmi
+      }
+    }
     
+    // Fallback a wagmi para otras wallets
+    logger.info('Usando wagmi writeContract...', 'Donate')
     writeContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'donate',
       args: [BigInt(regionId), amountInSmallestUnit],
     })
-    
     logger.info('Transacción enviada, esperando confirmación...', 'Donate')
   }, [writeContract, isMiniPay])
 
