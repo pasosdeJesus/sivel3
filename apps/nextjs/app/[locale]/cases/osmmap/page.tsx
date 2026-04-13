@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
+import { logger } from '@/lib/logger';
 
 const translations = {
   en: {
@@ -184,22 +185,31 @@ export default function OSMMapPage() {
 
   const handleDonate = async () => {
     const amount = parseFloat(donationAmount);
+    logger.info(`handleDonate llamado - Amount: ${donationAmount}, Region: ${selectedRegion}`, 'DonatePage')
+    
     if (isNaN(amount) || amount <= 0) {
+      logger.error(`Monto inválido: ${donationAmount}`, 'DonatePage')
       alert(t.invalidAmount);
       return;
     }
 
     const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
+    logger.info(`Contract address from env: ${contractAddress}`, 'DonatePage')
+    
     if (!contractAddress) {
+      logger.error('Contract address no configurada', 'DonatePage')
       alert(t.noContract);
       return;
     }
 
     try {
+      logger.info('Iniciando approveUSDT...', 'DonatePage')
       setIsApproving(true);
       await approveUSDT(contractAddress, donationAmount);
+      logger.success('approveUSDT completado, esperando transacción...', 'DonatePage')
       // The donation will be triggered by a useEffect waiting on the approval transaction
     } catch (error) {
+      logger.error(`Error en approveUSDT: ${error}`, 'DonatePage')
       console.error(error);
       setIsApproving(false);
     }

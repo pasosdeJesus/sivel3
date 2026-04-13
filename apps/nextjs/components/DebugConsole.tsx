@@ -8,6 +8,19 @@ export function DebugConsole() {
   const { logs, logger, isEnabled } = useLogger()
   const [isVisible, setIsVisible] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+  const [forceUpdate, setForceUpdate] = useState(0)
+  
+  // Forzar actualización periódica para capturar logs
+  useEffect(() => {
+    if (!isEnabled) return
+    const interval = setInterval(() => {
+      setForceUpdate(prev => prev + 1)
+    }, 500)
+    return () => clearInterval(interval)
+  }, [isEnabled])
+  
+  // Refrescar logs periódicamente
+  const currentLogs = isEnabled ? logger.getLogs() : logs
 
   // Si la consola flotante no está activada, no renderizar nada
   if (!isEnabled) {
@@ -80,13 +93,13 @@ export function DebugConsole() {
       {/* Body */}
       {!isMinimized && (
         <div className="h-80 overflow-y-auto p-3 space-y-1 font-mono text-xs">
-          {logs.length === 0 && (
+          {currentLogs.length === 0 && (
             <div className="text-gray-500 text-center py-4">
               No logs yet. Acciones generarán mensajes aquí.
             </div>
           )}
-          {logs.map((log, i) => (
-            <div key={i} className={`border-l-2 pl-2 ${getLevelColor(log.level)}`}>
+          {currentLogs.map((log, i) => (
+            <div key={log.id || i} className={`border-l-2 pl-2 ${getLevelColor(log.level)}`}>
               <span className="text-gray-500">[{log.timestamp}]</span>
               {log.source && <span className="text-gray-600 ml-1">[{log.source}]</span>}
               <span className="ml-1">{getLevelIcon(log.level)}</span>

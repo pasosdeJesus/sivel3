@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { useAccount, useDisconnect, useChainId, useWriteContract, useConnect } from 'wagmi'
 import { parseUnits } from 'viem'
 import { useMiniPay } from '@/hooks/useMiniPay'
+import { logger } from '@/lib/logger'
 
 const erc20Abi = [
   {
@@ -151,22 +152,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     
-    console.log("🔍 [Donate] Contract address:", regionalDonationContractAddress)
-    console.log("🔍 [Donate] Region ID:", regionId)
-    console.log("🔍 [Donate] Amount:", amount)
-    console.log("🔍 [Donate] isMiniPay:", isMiniPay)
+    logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}`, 'Donate')
+    logger.info(`Contract address: ${regionalDonationContractAddress}`, 'Donate')
+    logger.info(`isMiniPay: ${isMiniPay}`, 'Donate')
     
     if (!regionalDonationContractAddress) {
-      const errorMsg = "❌ Donation contract not configured. Set NEXT_PUBLIC_REGIONALDONATION_ADDRESS in .env"
-      console.error(errorMsg)
+      const errorMsg = "Donation contract not configured. Set NEXT_PUBLIC_REGIONALDONATION_ADDRESS in .env"
+      logger.error(errorMsg, 'Donate')
       throw new Error(errorMsg)
     }
     
     const amountInSmallestUnit = parseUnits(amount, 6)
+    logger.info(`Amount in smallest unit: ${amountInSmallestUnit}`, 'Donate')
     
-    // Si es MiniPay, intentar transacción directa (fallback si wagmi falla)
+    // Si es MiniPay, intentar transacción directa
     if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
-      console.log("🔄 [Donate] Usando MiniPay direct fallback...")
+      logger.info('Usando MiniPay direct fallback...', 'Donate')
       try {
         const ethereum = window.ethereum as any
         
@@ -174,7 +175,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         // Keccak256("donate(uint256,uint256)") primeros 4 bytes: 0x8e4af87d
         const functionSelector = '0x8e4af87d'
         
-        // Convertir parámetros a hex (32 bytes cada uno, little-endian)
+        // Convertir parámetros a hex (32 bytes cada uno)
         const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
         const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
         
@@ -188,8 +189,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           value: '0x0',
         }
         
-        console.log("🔄 [Donate] Enviando transacción MiniPay...")
-        console.log("📝 [Donate] TX params:", transactionParameters)
+        logger.info('Enviando transacción MiniPay...', 'Donate')
+        logger.debug(`TX params: ${JSON.stringify(transactionParameters)}`, 'Donate')
         
         // Intentar con el método estándar de MiniPay
         const txHash = await ethereum.request({
@@ -197,22 +198,24 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           params: [transactionParameters],
         })
         
-        console.log("✅ [Donate] Transacción MiniPay enviada. Hash:", txHash)
+        logger.success(`Transacción MiniPay enviada. Hash: ${txHash}`, 'Donate')
         return
-      } catch (miniPayErr) {
-        console.error("❌ [Donate] Fallback MiniPay falló:", miniPayErr)
+      } catch (miniPayErr: any) {
+        logger.error(`MiniPay direct falló: ${miniPayErr.message}`, 'Donate')
+        if (miniPayErr.code) logger.error(`Código de error: ${miniPayErr.code}`, 'Donate')
         // Continuar con wagmi
       }
     }
     
     // Usar wagmi normalmente
-    console.log("🔄 [Donate] Usando wagmi writeContract...")
+    logger.info('Usando wagmi writeContract...', 'Donate')
     writeContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'donate',
       args: [BigInt(regionId), amountInSmallestUnit],
     })
+    logger.info('writeContract llamado', 'Donate')
   }, [writeContract, isMiniPay, effectiveAddress])
 
   const value: WalletContextType = {
