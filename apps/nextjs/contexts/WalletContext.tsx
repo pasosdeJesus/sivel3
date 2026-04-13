@@ -150,19 +150,70 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
+    
+    console.log("🔍 [Donate] Contract address:", regionalDonationContractAddress)
+    console.log("🔍 [Donate] Region ID:", regionId)
+    console.log("🔍 [Donate] Amount:", amount)
+    console.log("🔍 [Donate] isMiniPay:", isMiniPay)
+    
     if (!regionalDonationContractAddress) {
-      console.error("La dirección del contrato RegionalDonation no está configurada en las variables de entorno.")
-      throw new Error("La dirección del contrato RegionalDonation no está configurada.")
+      const errorMsg = "❌ Donation contract not configured. Set NEXT_PUBLIC_REGIONALDONATION_ADDRESS in .env"
+      console.error(errorMsg)
+      throw new Error(errorMsg)
     }
+    
     const amountInSmallestUnit = parseUnits(amount, 6)
-
+    
+    // Si es MiniPay, intentar transacción directa (fallback si wagmi falla)
+    if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
+      console.log("🔄 [Donate] Usando MiniPay direct fallback...")
+      try {
+        const ethereum = window.ethereum as any
+        
+        // Calcular el selector de función para 'donate(uint256,uint256)'
+        // Keccak256("donate(uint256,uint256)") primeros 4 bytes: 0x8e4af87d
+        const functionSelector = '0x8e4af87d'
+        
+        // Convertir parámetros a hex (32 bytes cada uno, little-endian)
+        const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
+        const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
+        
+        // Data completa: selector + params
+        const data = functionSelector + regionIdHex + amountHex
+        
+        const transactionParameters = {
+          from: effectiveAddress,
+          to: regionalDonationContractAddress,
+          data: data,
+          value: '0x0',
+        }
+        
+        console.log("🔄 [Donate] Enviando transacción MiniPay...")
+        console.log("📝 [Donate] TX params:", transactionParameters)
+        
+        // Intentar con el método estándar de MiniPay
+        const txHash = await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [transactionParameters],
+        })
+        
+        console.log("✅ [Donate] Transacción MiniPay enviada. Hash:", txHash)
+        return
+      } catch (miniPayErr) {
+        console.error("❌ [Donate] Fallback MiniPay falló:", miniPayErr)
+        // Continuar con wagmi
+      }
+    }
+    
+    // Usar wagmi normalmente
+    console.log("🔄 [Donate] Usando wagmi writeContract...")
     writeContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'donate',
       args: [BigInt(regionId), amountInSmallestUnit],
     })
-  }, [writeContract])
+  }, [writeContract, isMiniPay, effectiveAddress])
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,

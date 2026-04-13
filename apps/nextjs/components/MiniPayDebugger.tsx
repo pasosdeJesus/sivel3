@@ -17,7 +17,20 @@ export function MiniPayDebugger() {
   const [isVisible, setIsVisible] = useState(false)
   
   // Versión para depuración
-  const DEBUG_VERSION = 'v3.0.0-with-hook-logs'
+  const DEBUG_VERSION = 'v3.1.0-toggle-f12'
+  
+  // Detectar tecla F12 para mostrar/ocultar
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'F12') {
+        event.preventDefault()
+        setIsVisible(prev => !prev)
+        addLog(`🔧 Debugger toggled (${!isVisible ? 'visible' : 'hidden'})`, 'info')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isVisible])
   
   useEffect(() => {
     addLog(`🐞 MiniPay Debugger ${DEBUG_VERSION}`, 'info')
@@ -45,7 +58,11 @@ export function MiniPayDebugger() {
     if (!isMiniPay) return
     
     addLog('🔍 MiniPay detectado', 'success')
-    setIsVisible(true)
+    // Solo auto-mostrar si no hay preferencia guardada
+    const wasHidden = localStorage.getItem('miniPayDebuggerHidden')
+    if (wasHidden !== 'true') {
+      setIsVisible(true)
+    }
   }, [isMiniPay])
 
   useEffect(() => {
@@ -66,7 +83,10 @@ export function MiniPayDebugger() {
       <div className="flex justify-between items-center p-3 bg-gray-800 border-b border-gray-700">
         <span className="text-sm font-mono font-bold">🐞 MiniPay Debug</span>
         <button 
-          onClick={() => setIsVisible(false)}
+          onClick={() => {
+            setIsVisible(false)
+            localStorage.setItem('miniPayDebuggerHidden', 'true')
+          }}
           className="text-gray-400 hover:text-white text-xl leading-none"
         >
           ×
