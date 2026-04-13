@@ -162,34 +162,66 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     const amountInSmallestUnit = parseUnits(amount, 6)
     
-    // Para MiniPay, usar viem directamente (más confiable que wagmi)
+    // Para MiniPay: usar sendAsync (método compatible con versiones antiguas de Web3)
     if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
-      logger.info('MiniPay detectado, usando viem para transacción directa...', 'Donate')
+      logger.info('MiniPay detectado, usando sendAsync para transacción directa...', 'Donate')
       try {
-        const { createWalletClient, custom, parseEther } = await import('viem')
-        const { celoSepolia } = await import('viem/chains')
+        const ethereum = window.ethereum as any
         
-        const walletClient = createWalletClient({
-          chain: celoSepolia,
-          transport: custom(window.ethereum)
+        // Calcular el selector de función 'donate(uint256,uint256)'
+        const functionSelector = '0x8e4af87d'
+        const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
+        const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
+        const data = functionSelector + regionIdHex + amountHex
+        
+        const txParams = {
+          from: effectiveAddress,
+          to: regionalDonationContractAddress,
+          data: data,
+          value: '0x0',
+        }
+        
+        logger.info('Enviando transacción con sendAsync...', 'Donate')
+        logger.debug(`TX params: ${JSON.stringify(txParams)}`, 'Donate')
+        
+        // Usar sendAsync (método antiguo que MiniPay podría soportar)
+        const txHash = await new Promise((resolve, reject) => {
+          ethereum.sendAsync({
+            method: 'eth_sendTransaction',
+            params: [txParams],
+          }, (err: any, result: any) => {
+            if (err) {
+              reject(err)
+            } else if (result.error) {
+              reject(new Error(result.error.message))
+            } else {
+              resolve(result.result)
+            }
+          })
         })
         
-        const [address] = await walletClient.getAddresses()
-        logger.info(`Wallet address: ${address}`, 'Donate')
-        
-        const hash = await walletClient.writeContract({
-          address: regionalDonationContractAddress,
-          abi: regionalDonationAbi,
-          functionName: 'donate',
-          args: [BigInt(regionId), amountInSmallestUnit],
-          account: address,
-        })
-        
-        logger.success(`Transacción enviada con viem. Hash: ${hash}`, 'Donate')
+        logger.success(`Transacción MiniPay enviada con sendAsync. Hash: ${txHash}`, 'Donate')
         return
-      } catch (viemErr: any) {
-        logger.error(`Viem falló: ${viemErr.message}`, 'Donate')
-        // Fallback a wagmi
+      } catch (sendAsyncErr: any) {
+        logger.error(`sendAsync falló: ${sendAsyncErr.message}`, 'Donate')
+        // Intentar con método alternativo
+        try {
+          const ethereum = window.ethereum as any
+          logger.info('Intentando método alternativo: send...', 'Donate')
+          const txHash = await new Promise((resolve, reject) => {
+            ethereum.send({
+              method: 'eth_sendTransaction',
+              params: [txParams],
+            }, (err: any, result: any) => {
+              if (err) reject(err)
+              else resolve(result.result)
+            })
+          })
+          logger.success(`Transacción MiniPay enviada con send. Hash: ${txHash}`, 'Donate')
+          return
+        } catch (sendErr: any) {
+          logger.error(`send también falló: ${sendErr.message}`, 'Donate')
+        }
       }
     }
     
