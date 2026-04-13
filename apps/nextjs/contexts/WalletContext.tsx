@@ -150,87 +150,31 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
-    // LOG INMEDIATO - visible incluso antes de cualquier condición
-    console.log(`🚨🚨🚨 DONATE_TO_REGION INICIADO - Region: ${regionId}, Amount: ${amount}, isMiniPay: ${isMiniPay}`)
-    logger.info(`🚨 DONATE_TO_REGION - Region: ${regionId}, Amount: ${amount}`, 'Donate')
+    logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}, isMiniPay: ${isMiniPay}`, 'Donate')
     
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     
-    logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}`, 'Donate')
-    logger.info(`Contract address: ${regionalDonationContractAddress}`, 'Donate')
-    logger.info(`isMiniPay: ${isMiniPay}`, 'Donate')
-    
     if (!regionalDonationContractAddress) {
-      const errorMsg = "Donation contract not configured. Set NEXT_PUBLIC_REGIONALDONATION_ADDRESS in .env"
+      const errorMsg = "Donation contract not configured"
       logger.error(errorMsg, 'Donate')
       throw new Error(errorMsg)
     }
     
     const amountInSmallestUnit = parseUnits(amount, 6)
-    logger.info(`Amount in smallest unit: ${amountInSmallestUnit}`, 'Donate')
     
-    // Si es MiniPay, intentar transacción directa
-    if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
-      logger.info('Usando MiniPay direct fallback...', 'Donate')
-      try {
-        const ethereum = window.ethereum as any
-        
-        // Calcular el selector de función para 'donate(uint256,uint256)'
-        // Keccak256("donate(uint256,uint256)") primeros 4 bytes: 0x8e4af87d
-        const functionSelector = '0x8e4af87d'
-        
-        // Convertir parámetros a hex (32 bytes cada uno)
-        const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
-        const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
-        
-        // Data completa: selector + params
-        const data = functionSelector + regionIdHex + amountHex
-        
-        const transactionParameters = {
-          from: effectiveAddress,
-          to: regionalDonationContractAddress,
-          data: data,
-          value: '0x0',
-        }
-        
-        logger.info('Enviando transacción MiniPay...', 'Donate')
-        logger.debug(`TX params: ${JSON.stringify(transactionParameters)}`, 'Donate')
-        
-        // Según documentación oficial de MiniPay, usar ethereum.request directamente
-        // El error '_request' puede deberse a que el provider no está listo
-        // Esperar un poco para asegurar que el provider está inicializado
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Verificar que ethereum.request existe
-        if (typeof ethereum.request !== 'function') {
-          logger.error('ethereum.request no es una función', 'Donate')
-          throw new Error('MiniPay provider no está completamente inicializado')
-        }
-        
-        const txHash = await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [transactionParameters],
-        })
-        
-        logger.success(`Transacción MiniPay enviada. Hash: ${txHash}`, 'Donate')
-        return
-      } catch (miniPayErr: any) {
-        logger.error(`MiniPay direct falló: ${miniPayErr.message}`, 'Donate')
-        if (miniPayErr.code) logger.error(`Código de error: ${miniPayErr.code}`, 'Donate')
-        // Continuar con wagmi
-      }
-    }
+    // Según documentación oficial de MiniPay, usar writeContract de wagmi
+    // No hacer llamadas directas a window.ethereum.request
+    logger.info('Usando wagmi writeContract (recomendado por MiniPay docs)...', 'Donate')
     
-    // Usar wagmi normalmente
-    logger.info('Usando wagmi writeContract...', 'Donate')
     writeContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'donate',
       args: [BigInt(regionId), amountInSmallestUnit],
     })
-    logger.info('writeContract llamado', 'Donate')
-  }, [writeContract, isMiniPay, effectiveAddress])
+    
+    logger.info('Transacción enviada, esperando confirmación...', 'Donate')
+  }, [writeContract, isMiniPay])
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
