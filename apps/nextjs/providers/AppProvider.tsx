@@ -23,11 +23,18 @@ import { createConfig, http, WagmiProvider } from 'wagmi'
 import { celo, celoSepolia } from 'wagmi/chains'
 
 import { WalletProvider } from '@/contexts/WalletContext'
+import { useAutoConnect } from '@/hooks/useAutoConnect'
 
 interface AppProviderProps {
   children: React.ReactNode
   autoConnect?: boolean
   locale?: string
+}
+
+// Componente interno que usa useAutoConnect
+function AppContent({ children }: { children: React.ReactNode }) {
+  useAutoConnect()
+  return <>{children}</>
 }
 
 const connectors = connectorsForWallets(
@@ -93,7 +100,9 @@ export function AppProvider({
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={lightTheme()}>
-          <WalletProvider>{children}</WalletProvider>
+          <WalletProvider>
+            <AppContent>{children}</AppContent>
+          </WalletProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
