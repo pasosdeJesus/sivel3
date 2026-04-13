@@ -196,7 +196,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         logger.info('Enviando transacción MiniPay...', 'Donate')
         logger.debug(`TX params: ${JSON.stringify(transactionParameters)}`, 'Donate')
         
-        // Intentar con el método estándar de MiniPay
+        // Según documentación oficial de MiniPay, usar ethereum.request directamente
+        // El error '_request' puede deberse a que el provider no está listo
+        // Esperar un poco para asegurar que el provider está inicializado
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Verificar que ethereum.request existe
+        if (typeof ethereum.request !== 'function') {
+          logger.error('ethereum.request no es una función', 'Donate')
+          throw new Error('MiniPay provider no está completamente inicializado')
+        }
+        
         const txHash = await ethereum.request({
           method: 'eth_sendTransaction',
           params: [transactionParameters],
