@@ -3,7 +3,7 @@
 import { Filter, Info, Heart, Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -159,20 +159,38 @@ export default function OSMMapPage() {
     loadInitialData();
   }, [currentLocale]);
 
+  // Función para cargar el balance
+  const fetchBalance = (regionId: string) => {
+    setBalanceLoading(true);
+    fetch(`/api/regions/${regionId}/balance`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.balance) {
+          setRegionBalance(data.balance);
+          logger.info(`Balance actualizado: ${data.balance} USDT`, 'Balance');
+        }
+      })
+      .catch(error => logger.error(`Error fetching region balance: ${error}`, 'Balance'))
+      .finally(() => setBalanceLoading(false));
+  };
+
+  // Cargar balance cuando cambia la región seleccionada
   useEffect(() => {
     if (selectedRegion) {
-      setBalanceLoading(true);
-      fetch(`/api/regions/${selectedRegion}/balance`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.balance) {
-            setRegionBalance(data.balance);
-          }
-        })
-        .catch(error => console.error('Error fetching region balance:', error))
-        .finally(() => setBalanceLoading(false));
+      fetchBalance(selectedRegion);
     }
   }, [selectedRegion]);
+
+  // Refrescar balance después de una transacción (cuando isTransacting pasa de true a false)
+  const prevIsTransactingRef = useRef(isTransacting);
+  useEffect(() => {
+    // Si estaba transactando y ya no, refrescar balance
+    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion) {
+      logger.info('Transacción completada, refrescando balance...', 'Balance');
+      fetchBalance(selectedRegion);
+    }
+    prevIsTransactingRef.current = isTransacting;
+  }, [isTransacting, selectedRegion]);
   
   const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
