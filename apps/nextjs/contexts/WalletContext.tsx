@@ -133,7 +133,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     autoConnectMiniPay()
   }, [isMiniPay, isConnected])
 
-  const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string) => {
+  const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string): Promise<`0x${string}`> => {
     logger.info(`approveUSDT llamado - Spender: ${spender}, Amount: ${amount}`, 'Approve')
     
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
@@ -155,13 +155,25 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
     
     logger.info('Calling writeContract for approve...', 'Approve')
-    writeContract({
-      address: usdtContractAddress,
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [spender, amountInSmallestUnit],
+    
+    // Devolver una promesa que se resuelve cuando la transacción es confirmada
+    return new Promise((resolve, reject) => {
+      writeContract({
+        address: usdtContractAddress,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [spender, amountInSmallestUnit],
+      }, {
+        onSuccess: (hash) => {
+          logger.success(`approve transaction confirmed! Hash: ${hash}`, 'Approve')
+          resolve(hash)
+        },
+        onError: (error) => {
+          logger.error(`approve transaction failed: ${error.message}`, 'Approve')
+          reject(error)
+        }
+      })
     })
-    logger.info('approve transaction submitted', 'Approve')
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {

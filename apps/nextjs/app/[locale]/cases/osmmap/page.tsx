@@ -116,7 +116,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, approveUSDT, donateToRegion, isTransacting } = useWallet();
+  const { isConnected, approveUSDT, donateToRegion, isTransacting, isMiniPay } = useWallet();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [donationAmount, setDonationAmount] = useState('');
@@ -231,28 +231,43 @@ export default function OSMMapPage() {
       logger.info('Iniciando approveUSDT...', 'DonatePage')
       setIsApproving(true);
       
-      // Toast de aprobación
-      toast({
-        title: t.approving,
-        description: 'Por favor, confirma la transacción en tu wallet',
-      })
+      // En MiniPay, usar alert nativa (más confiable que toast)
+      // En desktop, solo toast (la wallet ya muestra su propio popup)
+      if (isMiniPay) {
+        alert('🟡 Aprobación iniciada. Confirma la transacción en MiniPay cuando aparezca el popup.')
+      }
       
       await approveUSDT(contractAddress, donationAmount);
       logger.success('approveUSDT transaction submitted', 'DonatePage')
       
-      // Pequeña pausa para que el usuario vea que se envió
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // En MiniPay: preguntar si continuar después de la aprobación
+      // En desktop: esperar 2 segundos (la wallet ya manejó la confirmación)
+      if (isMiniPay) {
+        const userConfirmed = confirm('✅ Aprobación confirmada. ¿Deseas continuar con la donación?')
+        if (!userConfirmed) {
+          setIsApproving(false)
+          return
+        }
+      } else {
+        // Pequeña pausa en desktop para dar tiempo a que la wallet procese
+        logger.info('Esperando 2 segundos para que la wallet procese...', 'DonatePage')
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
       
       logger.info('Procediendo con la donación...', 'DonatePage')
       const amount = parseFloat(donationAmount);
       const regionId = parseInt(selectedRegion, 10);
       await donateToRegion(regionId, amount.toString());
       
-      // Toast final de éxito
-      toast({
-        title: t.donateSuccess || '🎉 ¡Donación completada!',
-        description: `Se donaron ${donationAmount} USDT a la región seleccionada`,
-      })
+      // Alerta solo en MiniPay (desktop: toast)
+      if (isMiniPay) {
+        alert(`🎉 ¡Donación completada! Se donaron ${donationAmount} USDT a la región seleccionada.`)
+      } else {
+        toast({
+          title: t.donateSuccess || '🎉 ¡Donación completada!',
+          description: `Se donaron ${donationAmount} USDT a la región seleccionada`,
+        })
+      }
       
       logger.success('Donación completada', 'DonatePage')
     } catch (error) {
