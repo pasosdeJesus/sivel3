@@ -27,7 +27,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { logger } from '@/lib/logger';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 const translations = {
   en: {
@@ -116,6 +117,7 @@ export default function OSMMapPage() {
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
   const { isConnected, approveUSDT, donateToRegion, isTransacting } = useWallet();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [donationAmount, setDonationAmount] = useState('');
   const [donationRegions, setDonationRegions] = useState<DonationRegion[]>([]);
@@ -229,30 +231,29 @@ export default function OSMMapPage() {
       logger.info('Iniciando approveUSDT...', 'DonatePage')
       setIsApproving(true);
       
-      // Mostrar toast de aprobación
-      const toastId = toast.loading(t.approving, {
+      // Toast de aprobación
+      toast({
+        title: t.approving,
         description: 'Por favor, confirma la transacción en tu wallet',
       })
       
       await approveUSDT(contractAddress, donationAmount);
       logger.success('approveUSDT transaction submitted', 'DonatePage')
       
-      // Actualizar toast: esperando confirmación
-      toast.update(toastId, {
-        render: t.waitingForConfirmation || 'Esperando confirmación...',
+      // Toast de espera
+      toast({
+        title: t.waitingForConfirmation || 'Esperando confirmación...',
         description: 'La transacción está siendo procesada (3-5 segundos)',
-        isLoading: true,
       })
       
-      // Esperar un momento para que la transacción se mine (en MiniPay puede ser rápido)
+      // Esperar un momento para que la transacción se mine
       logger.info('Esperando 3 segundos para que la aprobación se confirme...', 'DonatePage')
       await new Promise(resolve => setTimeout(resolve, 3000))
       
-      // Actualizar toast: procediendo con donación
-      toast.update(toastId, {
-        render: t.donating,
+      // Toast de donación
+      toast({
+        title: t.donating,
         description: 'Enviando donación al contrato...',
-        isLoading: true,
       })
       
       logger.info('Procediendo con la donación...', 'DonatePage')
@@ -261,7 +262,8 @@ export default function OSMMapPage() {
       await donateToRegion(regionId, amount.toString());
       
       // Toast final de éxito
-      toast.success(t.donateSuccess || '¡Donación completada!', {
+      toast({
+        title: t.donateSuccess || '🎉 ¡Donación completada!',
         description: `Se donaron ${donationAmount} USDT a la región seleccionada`,
       })
       
