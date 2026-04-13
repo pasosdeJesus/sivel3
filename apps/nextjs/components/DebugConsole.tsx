@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLogger } from '@/lib/logger'
 import { Terminal, X, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
 
