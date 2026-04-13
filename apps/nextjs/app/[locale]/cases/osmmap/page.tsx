@@ -54,7 +54,7 @@ const translations = {
     noRecipient: 'The destination address for the donation is not configured.',
     approve: 'Approve & Donate',
     noContract: 'Donation contract not configured',
-    availableFunds: 'Available Funds'
+    availableFunds: '💰 Regional Balance'
   },
   es: {
     counts: 'Conteos',
@@ -82,7 +82,7 @@ const translations = {
     noRecipient: 'La dirección de destino para la donación no está configurada.',
     approve: 'Aprobar y Donar',
     noContract: 'El contrato de donaciones no está configurado',
-    availableFunds: 'Fondos Disponibles'
+    availableFunds: '💰 Balance Regional'
   }
 };
 
