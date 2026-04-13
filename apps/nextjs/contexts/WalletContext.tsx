@@ -134,19 +134,34 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [isMiniPay, isConnected])
 
   const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string) => {
+    logger.info(`approveUSDT llamado - Spender: ${spender}, Amount: ${amount}`, 'Approve')
+    
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
     if (!usdtContractAddress) {
-      console.error("La dirección del contrato USDT no está configurada en las variables de entorno.")
+      logger.error("USDT contract address not configured", 'Approve')
       throw new Error("La dirección del contrato USDT no está configurada.")
     }
+    
+    logger.info(`USDT contract address: ${usdtContractAddress}`, 'Approve')
+    logger.info(`Spender (RegionalDonation): ${spender}`, 'Approve')
+    
     const amountInSmallestUnit = parseUnits(amount, 6)
-
+    logger.info(`Amount in smallest unit: ${amountInSmallestUnit.toString()}`, 'Approve')
+    
+    // Verificar que el spender sea el contrato correcto
+    const expectedContract = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
+    if (spender.toLowerCase() !== expectedContract?.toLowerCase()) {
+      logger.error(`Spender mismatch! Got: ${spender}, Expected: ${expectedContract}`, 'Approve')
+    }
+    
+    logger.info('Calling writeContract for approve...', 'Approve')
     writeContract({
       address: usdtContractAddress,
       abi: erc20Abi,
       functionName: 'approve',
       args: [spender, amountInSmallestUnit],
     })
+    logger.info('approve transaction submitted', 'Approve')
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {

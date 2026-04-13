@@ -27,6 +27,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { logger } from '@/lib/logger';
+import { toast } from 'sonner';
 
 const translations = {
   en: {
@@ -55,7 +56,9 @@ const translations = {
     noRecipient: 'The destination address for the donation is not configured.',
     approve: 'Approve & Donate',
     noContract: 'Donation contract not configured',
-    availableFunds: '💰 Regional Balance'
+    availableFunds: '💰 Regional Balance',
+    waitingForConfirmation: 'Waiting for confirmation...',
+    donateSuccess: '🎉 Donation completed!'
   },
   es: {
     counts: 'Conteos',
@@ -83,7 +86,9 @@ const translations = {
     noRecipient: 'La dirección de destino para la donación no está configurada.',
     approve: 'Aprobar y Donar',
     noContract: 'El contrato de donaciones no está configurado',
-    availableFunds: '💰 Balance Regional'
+    availableFunds: '💰 Balance Regional',
+    waitingForConfirmation: 'Esperando confirmación...',
+    donateSuccess: '🎉 ¡Donación completada!'
   }
 };
 
@@ -223,12 +228,48 @@ export default function OSMMapPage() {
     try {
       logger.info('Iniciando approveUSDT...', 'DonatePage')
       setIsApproving(true);
+      
+      // Mostrar toast de aprobación
+      const toastId = toast.loading(t.approving, {
+        description: 'Por favor, confirma la transacción en tu wallet',
+      })
+      
       await approveUSDT(contractAddress, donationAmount);
-      logger.success('approveUSDT completado, esperando transacción...', 'DonatePage')
-      // The donation will be triggered by a useEffect waiting on the approval transaction
+      logger.success('approveUSDT transaction submitted', 'DonatePage')
+      
+      // Actualizar toast: esperando confirmación
+      toast.update(toastId, {
+        render: t.waitingForConfirmation || 'Esperando confirmación...',
+        description: 'La transacción está siendo procesada (3-5 segundos)',
+        isLoading: true,
+      })
+      
+      // Esperar un momento para que la transacción se mine (en MiniPay puede ser rápido)
+      logger.info('Esperando 3 segundos para que la aprobación se confirme...', 'DonatePage')
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      // Actualizar toast: procediendo con donación
+      toast.update(toastId, {
+        render: t.donating,
+        description: 'Enviando donación al contrato...',
+        isLoading: true,
+      })
+      
+      logger.info('Procediendo con la donación...', 'DonatePage')
+      const amount = parseFloat(donationAmount);
+      const regionId = parseInt(selectedRegion, 10);
+      await donateToRegion(regionId, amount.toString());
+      
+      // Toast final de éxito
+      toast.success(t.donateSuccess || '¡Donación completada!', {
+        description: `Se donaron ${donationAmount} USDT a la región seleccionada`,
+      })
+      
+      logger.success('Donación completada', 'DonatePage')
     } catch (error) {
-      logger.error(`Error en approveUSDT: ${error}`, 'DonatePage')
+      logger.error(`Error en proceso de donación: ${error}`, 'DonatePage')
       console.error(error);
+    } finally {
       setIsApproving(false);
     }
   };
