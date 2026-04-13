@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useLogger } from '@/lib/logger'
-import { Terminal, X, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
+import { Terminal, X, ChevronUp, ChevronDown, Trash2, Copy } from 'lucide-react'
 
 export function DebugConsole() {
   const { logs, logger, isEnabled } = useLogger()
@@ -79,7 +79,7 @@ export function DebugConsole() {
             className="text-gray-400 hover:text-blue-400"
             title="Copiar logs"
           >
-            <Terminal className="h-4 w-4" />
+            <Copy className="h-4 w-4" />
           </button>
           <button
             onClick={() => logger.clear()}
