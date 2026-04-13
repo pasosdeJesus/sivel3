@@ -180,21 +180,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     // Para MiniPay: usar sendAsync (método compatible con versiones antiguas de Web3)
     if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
       logger.info('MiniPay detectado, usando sendAsync para transacción directa...', 'Donate')
+      
+      // Calcular parámetros de transacción fuera del try-catch
+      const functionSelector = '0x8e4af87d'
+      const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
+      const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
+      const data = functionSelector + regionIdHex + amountHex
+      
+      const txParams = {
+        from: effectiveAddress,
+        to: regionalDonationContractAddress,
+        data: data,
+        value: '0x0',
+      }
+      
       try {
         const ethereum = window.ethereum as any
-        
-        // Calcular el selector de función 'donate(uint256,uint256)'
-        const functionSelector = '0x8e4af87d'
-        const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
-        const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
-        const data = functionSelector + regionIdHex + amountHex
-        
-        const txParams = {
-          from: effectiveAddress,
-          to: regionalDonationContractAddress,
-          data: data,
-          value: '0x0',
-        }
         
         logger.info('Enviando transacción con sendAsync...', 'Donate')
         logger.debug(`TX params: ${JSON.stringify(txParams)}`, 'Donate')

@@ -240,21 +240,8 @@ export default function OSMMapPage() {
       await approveUSDT(contractAddress, donationAmount);
       logger.success('approveUSDT transaction submitted', 'DonatePage')
       
-      // Toast de espera
-      toast({
-        title: t.waitingForConfirmation || 'Esperando confirmación...',
-        description: 'La transacción está siendo procesada (3-5 segundos)',
-      })
-      
-      // Esperar un momento para que la transacción se mine
-      logger.info('Esperando 3 segundos para que la aprobación se confirme...', 'DonatePage')
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Toast de donación
-      toast({
-        title: t.donating,
-        description: 'Enviando donación al contrato...',
-      })
+      // Pequeña pausa para que el usuario vea que se envió
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       logger.info('Procediendo con la donación...', 'DonatePage')
       const amount = parseFloat(donationAmount);

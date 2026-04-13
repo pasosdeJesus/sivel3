@@ -112,7 +112,7 @@ export function DebugConsole() {
             </div>
           )}
           {currentLogs.map((log, i) => (
-            <div key={log.id || i} className={`border-l-2 pl-2 ${getLevelColor(log.level)}`}>
+            <div key={i} className={`border-l-2 pl-2 ${getLevelColor(log.level)}`}>
               <span className="text-gray-500">[{log.timestamp}]</span>
               {log.source && <span className="text-gray-600 ml-1">[{log.source}]</span>}
               <span className="ml-1">{getLevelIcon(log.level)}</span>
