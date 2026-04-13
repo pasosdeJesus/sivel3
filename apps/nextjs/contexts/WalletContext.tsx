@@ -150,6 +150,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [writeContract])
 
   const donateToRegion = useCallback(async (regionId: number, amount: string) => {
+    // LOG INMEDIATO - visible incluso antes de cualquier condición
+    console.log(`🚨🚨🚨 DONATE_TO_REGION INICIADO - Region: ${regionId}, Amount: ${amount}, isMiniPay: ${isMiniPay}`)
+    logger.info(`🚨 DONATE_TO_REGION - Region: ${regionId}, Amount: ${amount}`, 'Donate')
+    
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     
     logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}`, 'Donate')
