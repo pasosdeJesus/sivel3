@@ -29,6 +29,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import confetti from 'canvas-confetti';
 
 const translations = {
   en: {
@@ -59,7 +60,9 @@ const translations = {
     noContract: 'Donation contract not configured',
     availableFunds: '💰 Regional Balance',
     waitingForConfirmation: 'Waiting for confirmation...',
-    donateSuccess: '🎉 Donation completed!'
+    donateSuccess: '🎉 Donation completed!',
+    thanksTitle: '🙏 Thank you for your donation!',
+    thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.'
   },
   es: {
     counts: 'Conteos',
@@ -89,7 +92,9 @@ const translations = {
     noContract: 'El contrato de donaciones no está configurado',
     availableFunds: '💰 Balance Regional',
     waitingForConfirmation: 'Esperando confirmación...',
-    donateSuccess: '🎉 ¡Donación completada!'
+    donateSuccess: '🎉 ¡Donación completada!',
+    thanksTitle: '🙏 ¡Gracias por tu donación!',
+    thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.'
   }
 };
 
@@ -193,11 +198,38 @@ export default function OSMMapPage() {
   useEffect(() => {
     // Si estaba transactando y ya no, refrescar balance
     if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion) {
-      logger.info('Transacción completada, refrescando balance...', 'Balance');
-      fetchBalance(selectedRegion);
+      logger.info('Transacción completada, mostrando agradecimiento...', 'Balance');
+      
+      // Disparar confeti
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
+      });
+      
+      // Obtener nombre de la región
+      const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
+                        (currentLocale === 'es' ? 'la región' : 'the region');
+      
+      // Mostrar toast internacionalizado
+      toast({
+        title: t.thanksTitle,
+        description: t.thanksMessage
+          .replace('{{region}}', regionName)
+          .replace('{{amount}}', donationAmount),
+        duration: 4000,
+      });
+      
+      logger.info('Esperando 3 segundos para refrescar balance...', 'Balance');
+      // Esperar 3 segundos para que la red actualice el estado del contrato
+      setTimeout(() => {
+        logger.info('Refrescando balance después de delay...', 'Balance');
+        fetchBalance(selectedRegion);
+      }, 3000);
     }
     prevIsTransactingRef.current = isTransacting;
-  }, [isTransacting, selectedRegion]);
+  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale]);
   
   const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
