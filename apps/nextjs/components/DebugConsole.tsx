@@ -69,6 +69,19 @@ export function DebugConsole() {
         </span>
         <div className="flex gap-2">
           <button
+            onClick={() => {
+              const logsText = currentLogs.map(log => 
+                `[${log.timestamp}][${log.source || 'App'}]${log.level === 'error' ? '❌' : log.level === 'success' ? '✅' : '📢'}${log.message}`
+              ).join('\n')
+              navigator.clipboard.writeText(logsText)
+              logger.success('Logs copiados al portapapeles', 'DebugConsole')
+            }}
+            className="text-gray-400 hover:text-blue-400"
+            title="Copiar logs"
+          >
+            <Terminal className="h-4 w-4" />
+          </button>
+          <button
             onClick={() => logger.clear()}
             className="text-gray-400 hover:text-yellow-400"
             title="Limpiar logs"
