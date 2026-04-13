@@ -14,12 +14,13 @@ interface MiniPayInfo {
 }
 
 export function useMiniPay(): MiniPayInfo {
-  const HOOK_VERSION = 'v3.0.0-debug-logs'
+  const HOOK_VERSION = 'v3.0.1-fixed-loop'
   
   const [isMiniPay, setIsMiniPay] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   const [debugLogs, setDebugLogs] = useState<string[]>([])
+  const [initialized, setInitialized] = useState(false)
   
   const { connectAsync } = useConnect()
   const { address, isConnected } = useAccount()
@@ -31,8 +32,14 @@ export function useMiniPay(): MiniPayInfo {
     setDebugLogs(prev => [...prev, logMsg])
   }
   
-  addLog(`🚀 Hook ${HOOK_VERSION} iniciado`)
-  addLog(`📱 User Agent: ${navigator.userAgent.substring(0, 80)}...`)
+  // Solo ejecutar logs iniciales una vez
+  useEffect(() => {
+    if (!initialized) {
+      addLog(`🚀 Hook ${HOOK_VERSION} iniciado`)
+      addLog(`📱 User Agent: ${navigator.userAgent.substring(0, 80)}...`)
+      setInitialized(true)
+    }
+  }, [initialized])
   
   useEffect(() => {
     addLog('🔍 useEffect ejecutándose...')
@@ -140,7 +147,7 @@ export function useMiniPay(): MiniPayInfo {
     }
     
     autoConnect()
-  }, [])
+  }, []) // Solo una vez
 
   return {
     isMiniPay,
