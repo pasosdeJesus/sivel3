@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 interface MiniPayInfo {
   isMiniPay: boolean
@@ -8,7 +9,6 @@ interface MiniPayInfo {
   isConnecting: boolean
   isConnected: boolean
   address: `0x${string}` | null
-  debugLogs: string[]
 }
 
 export function useMiniPay(): MiniPayInfo {
@@ -17,91 +17,78 @@ export function useMiniPay(): MiniPayInfo {
   const [isConnecting, setIsConnecting] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [address, setAddress] = useState<`0x${string}` | null>(null)
-  const [debugLogs, setDebugLogs] = useState<string[]>([])
-  
-  const addLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString()
-    const logMsg = `[${timestamp}] ${message}`
-    console.log(logMsg)
-    setDebugLogs(prev => [...prev, logMsg])
-  }
   
   useEffect(() => {
     const initMiniPay = async () => {
-      addLog('🔍 Iniciando detección de MiniPay...')
+      logger.info('Iniciando detección de MiniPay...', 'MiniPay')
       
       if (typeof window === 'undefined') {
-        addLog('❌ No estamos en navegador')
+        logger.error('No estamos en navegador', 'MiniPay')
         return
       }
       
       const ethereum = (window as any).ethereum
-      addLog(`🔍 window.ethereum existe? ${!!ethereum}`)
+      logger.info(`window.ethereum existe? ${!!ethereum}`, 'MiniPay')
       
       if (!ethereum) {
-        addLog('❌ No hay proveedor Ethereum')
+        logger.error('No hay proveedor Ethereum', 'MiniPay')
         return
       }
       
       const isMiniPayEnv = ethereum.isMiniPay === true
-      addLog(`🔍 isMiniPay flag: ${isMiniPayEnv}`)
+      logger.info(`isMiniPay flag: ${isMiniPayEnv}`, 'MiniPay')
       setIsMiniPay(isMiniPayEnv)
       
       if (!isMiniPayEnv) {
-        addLog('❌ No es MiniPay, saliendo')
+        logger.info('No es MiniPay, saliendo', 'MiniPay')
         return
       }
       
-      addLog('✅ MiniPay detectado')
+      logger.success('MiniPay detectado', 'MiniPay')
       setIsConnecting(true)
       
       try {
-        // En MiniPay, la cuenta ya está disponible sin necesidad de eth_requestAccounts
-        // Intentar obtener la cuenta de diferentes maneras
+        // Obtener cuenta
         let account: string | null = null
         
-        // Método 1: selectedAddress
         if (ethereum.selectedAddress) {
           account = ethereum.selectedAddress
-          addLog(`✅ Cuenta desde selectedAddress: ${account}`)
+          logger.success(`Cuenta desde selectedAddress: ${account}`, 'MiniPay')
         }
         
-        // Método 2: _state.accounts
         if (!account && ethereum._state?.accounts?.[0]) {
           account = ethereum._state.accounts[0]
-          addLog(`✅ Cuenta desde _state.accounts: ${account}`)
+          logger.success(`Cuenta desde _state.accounts: ${account}`, 'MiniPay')
         }
         
-        // Método 3: eth_accounts (sin request, solo lectura)
         if (!account && ethereum._accounts?.[0]) {
           account = ethereum._accounts[0]
-          addLog(`✅ Cuenta desde _accounts: ${account}`)
+          logger.success(`Cuenta desde _accounts: ${account}`, 'MiniPay')
         }
         
-        // Método 4: eth_requestAccounts (si está disponible)
         if (!account) {
           try {
-            addLog('🔄 Intentando eth_requestAccounts...')
+            logger.info('Intentando eth_requestAccounts...', 'MiniPay')
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
             if (accounts && accounts[0]) {
               account = accounts[0]
-              addLog(`✅ eth_requestAccounts devolvió: ${account}`)
+              logger.success(`eth_requestAccounts devolvió: ${account}`, 'MiniPay')
             }
           } catch (err: any) {
-            addLog(`⚠️ eth_requestAccounts falló: ${err.message}`)
+            logger.warning(`eth_requestAccounts falló: ${err.message}`, 'MiniPay')
           }
         }
         
         if (account) {
           setAddress(account as `0x${string}`)
           setIsConnected(true)
-          addLog(`✅ MiniPay conectado - Address: ${account}`)
+          logger.success(`MiniPay conectado - Address: ${account}`, 'MiniPay')
         } else {
-          addLog('❌ No se pudo obtener ninguna cuenta')
+          logger.error('No se pudo obtener ninguna cuenta', 'MiniPay')
         }
         
         // Obtener número de teléfono
-        addLog('🔄 Obteniendo número de teléfono...')
+        logger.info('Obteniendo número de teléfono...', 'MiniPay')
         try {
           let phoneResult: any = null
           
@@ -114,23 +101,21 @@ export function useMiniPay(): MiniPayInfo {
             })
           }
           
-          addLog(`📞 Respuesta phone: ${JSON.stringify(phoneResult)}`)
-          
           if (phoneResult && phoneResult.phoneNumber) {
             setPhoneNumber(phoneResult.phoneNumber)
-            addLog(`📞 Número: ${phoneResult.phoneNumber}`)
+            logger.success(`Número: ${phoneResult.phoneNumber}`, 'MiniPay')
           } else if (typeof phoneResult === 'string') {
             setPhoneNumber(phoneResult)
-            addLog(`📞 Número (string): ${phoneResult}`)
+            logger.success(`Número (string): ${phoneResult}`, 'MiniPay')
           } else {
-            addLog('⚠️ No se pudo obtener número de teléfono')
+            logger.warning('No se pudo obtener número de teléfono', 'MiniPay')
           }
         } catch (err: any) {
-          addLog(`❌ Error obteniendo número: ${err.message}`)
+          logger.error(`Error obteniendo número: ${err.message}`, 'MiniPay')
         }
         
       } catch (err: any) {
-        addLog(`❌ Error general: ${err.message}`)
+        logger.error(`Error general: ${err.message}`, 'MiniPay')
       } finally {
         setIsConnecting(false)
       }
@@ -145,6 +130,5 @@ export function useMiniPay(): MiniPayInfo {
     isConnecting,
     isConnected,
     address,
-    debugLogs
   }
 }

@@ -189,7 +189,7 @@ export default function OSMMapPage() {
       return;
     }
 
-    const contractAddress = process.env.NEXT_PUBLIC_REGIONAL_DONATION_CONTRACT_ADDRESS as `0x${string}`;
+    const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
     if (!contractAddress) {
       alert(t.noContract);
       return;
