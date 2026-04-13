@@ -189,19 +189,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     const amountInSmallestUnit = parseUnits(amount, 6)
     
-    // Codificar los datos de la función donate(uint256,uint256)
-    const { encodeFunctionData } = await import('viem')
-    const data = encodeFunctionData({
-      abi: regionalDonationAbi,
-      functionName: 'donate',
-      args: [BigInt(regionId), amountInSmallestUnit]
-    })
-    
-    logger.info(`Data encodeada: ${data}`, 'Donate')
-    
-    // Para MiniPay: usar sendTransaction (método estándar de EIP-1193)
+    // Para MiniPay: usar sendTransaction directo
     if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
-      logger.info('MiniPay detectado, usando sendTransaction...', 'Donate')
+      logger.info('MiniPay detectado, usando sendTransaction directo...', 'Donate')
+      
+      // Codificar los datos de la función donate(uint256,uint256)
+      const { encodeFunctionData } = await import('viem')
+      const data = encodeFunctionData({
+        abi: regionalDonationAbi,
+        functionName: 'donate',
+        args: [BigInt(regionId), amountInSmallestUnit]
+      })
+      
+      logger.info(`Data encodeada: ${data}`, 'Donate')
       
       const txParams = {
         from: effectiveAddress,
@@ -213,7 +213,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       try {
         const ethereum = window.ethereum as any
         
-        // Verificar que request existe (MiniPay debería tenerlo según docs)
         if (typeof ethereum.request !== 'function') {
           logger.error('ethereum.request no es una función', 'Donate')
           throw new Error('MiniPay provider no está completamente inicializado')
@@ -226,48 +225,35 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         })
         
         logger.success(`Transacción enviada. Hash: ${txHash}`, 'Donate')
-        
-        // Esperar confirmación (opcional, pero mejora UX)
-        logger.info('Esperando confirmación de la transacción...', 'Donate')
-        const receipt = await new Promise((resolve) => {
-          const checkReceipt = setInterval(async () => {
-            try {
-              const tx = await ethereum.request({
-                method: 'eth_getTransactionReceipt',
-                params: [txHash]
-              })
-              if (tx) {
-                clearInterval(checkReceipt)
-                resolve(tx)
-              }
-            } catch (e) {
-              // Continuar esperando
-            }
-          }, 2000)
-        })
-        
-        logger.success(`Transacción confirmada. Receipt: ${JSON.stringify(receipt)}`, 'Donate')
-        return
+        return txHash
       } catch (sendErr: any) {
         logger.error(`sendTransaction falló: ${sendErr.message}`, 'Donate')
-        if (sendErr.code) logger.error(`Código de error: ${sendErr.code}`, 'Donate')
         throw sendErr
       }
     }
     
-    // Para desktop: usar sendTransaction de wagmi (más elegante)
-    logger.info('Usando sendTransaction de wagmi...', 'Donate')
-    const { sendTransactionAsync } = await import('wagmi/actions')
-    const { config } = await import('@/providers/AppProvider')
+    // Para wallets normales: usar writeContract (igual que approve)
+    logger.info('Usando writeContract para donate...', 'Donate')
     
-    const hash = await sendTransactionAsync(config, {
-      to: regionalDonationContractAddress,
-      data: data,
-      value: 0n,
+    // Devolver una promesa que se resuelve cuando la transacción es confirmada
+    return new Promise((resolve, reject) => {
+      writeContract({
+        address: regionalDonationContractAddress,
+        abi: regionalDonationAbi,
+        functionName: 'donate',
+        args: [BigInt(regionId), amountInSmallestUnit],
+      }, {
+        onSuccess: (hash) => {
+          logger.success(`donate transaction confirmed! Hash: ${hash}`, 'Donate')
+          resolve(hash)
+        },
+        onError: (error) => {
+          logger.error(`donate transaction failed: ${error.message}`, 'Donate')
+          reject(error)
+        }
+      })
     })
-    
-    logger.success(`Transacción enviada con wagmi. Hash: ${hash}`, 'Donate')
-  }, [effectiveAddress, isMiniPay])
+  }, [effectiveAddress, isMiniPay, writeContract])
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
