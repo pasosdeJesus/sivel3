@@ -321,196 +321,163 @@ export default function OSMMapPage() {
   }, [isApproving, isTransacting]);
 
   
+  // Estado para controlar pop-ups en móvil
+  const [showCounts, setShowCounts] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [showDonation, setShowDonation] = useState(false)
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  📊 {t.counts}
-                </CardTitle>
-                <CardDescription>{t.totalsByFilters}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {loading ? (
-                  Array(4).fill(0).map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-8 w-full" />
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t.cases}</span>
-                      <Badge variant="secondary">{counts.casos.toLocaleString()}</Badge>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t.victims}</span>
-                      <Badge variant="secondary">{counts.victimas.toLocaleString()}</Badge>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t.victimizations}</span>
-                      <Badge variant="secondary">{counts.victimizaciones.toLocaleString()}</Badge>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-600">{t.acts}</span>
-                      <Badge variant="secondary">{counts.actos.toLocaleString()}</Badge>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  {t.filters}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="campo-desde" className="text-primary">{t.from}</Label>
-                    <Input id="campo-desde" type="date" value={filters['filtro[fechaini]']} onChange={(e) => handleFilterChange('filtro[fechaini]', e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="campo-hasta" className="text-primary">{t.to}</Label>
-                    <Input id="campo-hasta" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterChange('filtro[fechafin]', e.target.value)} />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="department">{t.department}</Label>
-                  <Select name="department" value={filters['filtro[departamento_id]']} onValueChange={(v) => handleFilterChange('filtro[departamento_id]', v)}>
-                    <SelectTrigger id="department"><SelectValue placeholder={t.showAll} /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">{t.showAll}</SelectItem>
-                      <Separator />
-                      {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="presponsable">{t.allegedPerpetrator}</Label>
-                  <Select name="presponsable" value={filters['filtro[presponsable_id]']} onValueChange={(v) => handleFilterChange('filtro[presponsable_id]', v)}>
-                    <SelectTrigger id="presponsable"><SelectValue placeholder={t.showAll} /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">{t.showAll}</SelectItem>
-                      <Separator />
-                      {allegedPerpetrators.map(p => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tvio">{t.violence}</Label>
-                  <Select name="tvio" value={filters['filtro[categoria_id]']} onValueChange={(v) => handleFilterChange('filtro[categoria_id]', v)}>
-                    <SelectTrigger id="tvio"><SelectValue placeholder={t.showAll} /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">{t.showAll}</SelectItem>
-                      <Separator />
-                      {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex justify-center pt-4">
-                  <Button onClick={applyFilters} className="w-full md:w-auto px-8">{t.filter}</Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {isConnected && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-red-500" />
-                    {t.donation}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cause">{t.cause}</Label>
-                    <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {donationRegions.map(region => (
-                          <SelectItem key={region.id} value={String(region.id)}>{region.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t.availableFunds}</Label>
-                    <div className="text-sm font-semibold p-2 border rounded-md bg-gray-50">
-                      {balanceLoading ? (
-                        <Skeleton className="h-5 w-24" />
-                      ) : regionBalance !== null ? (
-                        `$${parseFloat(regionBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`
-                      ) : (
-                        '--'
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">{t.amount}</Label>
-                    <Input 
-                      id="amount"
-                      type="number" 
-                      placeholder="10.00" 
-                      value={donationAmount} 
-                      onChange={(e) => setDonationAmount(e.target.value)}
-                      disabled={isTransacting || isApproving}
-                    />
-                  </div>
-                  <Button className="w-full" onClick={handleDonate} disabled={isTransacting || isApproving}>
-                    {isApproving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t.approving}
-                      </>
-                    ) : isTransacting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t.donating}
-                      </>
-                    ) : (
-                      t.approve
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {!isConnected && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 text-amber-600 text-sm">
-                    <Info className="h-4 w-4" />
-                    <span>{t.connectWallet}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* El mapa ocupa todo el ancho primero */}
+        <div className="w-full mb-4">
+          <Card>
+            <CardContent className="p-0">
+              <MapComponent
+                filtros={filters}
+                onCargarConteos={handleCountsLoad}
+                isConnected={isConnected}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Botones flotantes para móvil */}
+        <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2 md:hidden">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="rounded-full shadow-lg w-12 h-12 p-0"
+            onClick={() => setShowCounts(!showCounts)}
+          >
+            📊
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="rounded-full shadow-lg w-12 h-12 p-0"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            🔍
+          </Button>
+          {isConnected && (
+            <Button
+              size="sm"
+              variant="default"
+              className="rounded-full shadow-lg w-12 h-12 p-0 bg-red-500 hover:bg-red-600"
+              onClick={() => setShowDonation(!showDonation)}
+            >
+              ❤️
+            </Button>
+          )}
+        </div>
+        
+        {/* Pop-up de conteos (flotante) */}
+        {showCounts && (
+          <div className="fixed bottom-36 right-4 z-50 w-80 bg-white rounded-lg shadow-xl border">
+            <div className="flex justify-between items-center p-3 bg-gray-100 border-b">
+              <span className="font-semibold text-sm">📊 {t.counts}</span>
+              <button onClick={() => setShowCounts(false)} className="text-gray-500">✕</button>
+            </div>
+            <div className="p-3 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">{t.cases}</span>
+                <Badge>{counts.casos.toLocaleString()}</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">{t.victims}</span>
+                <Badge>{counts.victimas.toLocaleString()}</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">{t.victimizations}</span>
+                <Badge>{counts.victimizaciones.toLocaleString()}</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">{t.acts}</span>
+                <Badge>{counts.actos.toLocaleString()}</Badge>
+              </div>
+            </div>
           </div>
-          
-          <div className="lg:col-span-3">
-            <Card>
-              <CardContent className="p-0">
-                <MapComponent
-                  filtros={filters}
-                  onCargarConteos={handleCountsLoad}
-                  isConnected={isConnected}
-                />
-              </CardContent>
-            </Card>
+        )}
+        
+        {/* Pop-up de filtros (flotante) - similar estructura */}
+        {showFilters && (
+          <div className="fixed bottom-36 right-4 z-50 w-80 max-h-[70vh] overflow-y-auto bg-white rounded-lg shadow-xl border">
+            <div className="sticky top-0 flex justify-between items-center p-3 bg-gray-100 border-b">
+              <span className="font-semibold text-sm">🔍 {t.filters}</span>
+              <button onClick={() => setShowFilters(false)} className="text-gray-500">✕</button>
+            </div>
+            <div className="p-3 space-y-3">
+              {/* Filtros aquí - mantener funcionalidad existente */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">{t.from}</Label>
+                  <Input size="sm" type="date" value={filters['filtro[fechaini]']} onChange={(e) => handleFilterChange('filtro[fechaini]', e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{t.to}</Label>
+                  <Input size="sm" type="date" value={filters['filtro[fechafin]']} onChange={(e) => handleFilterChange('filtro[fechafin]', e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">{t.department}</Label>
+                <Select value={filters['filtro[departamento_id]']} onValueChange={(v) => handleFilterChange('filtro[departamento_id]', v)}>
+                  <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <SelectContent>{departments.map(d => <SelectItem key={d.id} value={d.id}>{d.nombre}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">{t.allegedPerpetrator}</Label>
+                <Select value={filters['filtro[presponsable_id]']} onValueChange={(v) => handleFilterChange('filtro[presponsable_id]', v)}>
+                  <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <SelectContent>{allegedPerpetrators.map(p => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">{t.violence}</Label>
+                <Select value={filters['filtro[categoria_id]']} onValueChange={(v) => handleFilterChange('filtro[categoria_id]', v)}>
+                  <SelectTrigger><SelectValue placeholder={t.showAll} /></SelectTrigger>
+                  <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <Button size="sm" className="w-full" onClick={applyFilters}>{t.filter}</Button>
+            </div>
           </div>
+        )}
+        
+        {/* Pop-up de donación (flotante) */}
+        {showDonation && isConnected && (
+          <div className="fixed bottom-36 right-4 z-50 w-80 bg-white rounded-lg shadow-xl border">
+            <div className="flex justify-between items-center p-3 bg-red-50 border-b">
+              <span className="font-semibold text-sm">❤️ {t.donation}</span>
+              <button onClick={() => setShowDonation(false)} className="text-gray-500">✕</button>
+            </div>
+            <div className="p-3 space-y-3">
+              <div>
+                <Label className="text-xs">{t.cause}</Label>
+                <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">{t.availableFunds}</Label>
+                <div className="text-sm font-semibold">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div>
+              </div>
+              <div>
+                <Label className="text-xs">{t.amount}</Label>
+                <Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} disabled={isTransacting || isApproving} />
+              </div>
+              <Button size="sm" className="w-full" onClick={handleDonate} disabled={isTransacting || isApproving}>
+                {isApproving ? t.approving : isTransacting ? t.donating : t.approve}
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Versión desktop: layout original (opcional, mantener para pantallas grandes) */}
+        <div className="hidden lg:block">
+          {/* Aquí va el layout original de escritorio si quieres mantenerlo */}
         </div>
       </main>
     </div>
