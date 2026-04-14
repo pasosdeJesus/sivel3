@@ -51,7 +51,7 @@ interface WalletContextType {
   address: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
-  approveUSDT: (spender: `0x${string}`, amount: string) => Promise<void>
+  approveUSDT: (spender: `0x${string}`, amount: string) => Promise<`0x${string}`>
   donateToRegion: (regionId: number, amount: string) => Promise<void>
   isTransacting: boolean
   error: Error | null
@@ -148,7 +148,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const amountInSmallestUnit = parseUnits(amount, 6)
     logger.info(`Amount in smallest unit: ${amountInSmallestUnit.toString()}`, 'Approve')
     
-    // Verificar que el spender sea el contrato correcto
     const expectedContract = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
     if (spender.toLowerCase() !== expectedContract?.toLowerCase()) {
       logger.error(`Spender mismatch! Got: ${spender}, Expected: ${expectedContract}`, 'Approve')
@@ -156,7 +155,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     logger.info('Calling writeContract for approve...', 'Approve')
     
-    // Devolver una promesa que se resuelve cuando la transacción es confirmada
     return new Promise((resolve, reject) => {
       writeContract({
         address: usdtContractAddress,
