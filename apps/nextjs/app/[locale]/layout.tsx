@@ -29,10 +29,6 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale}>
-      <body className={`${dmSans.variable} ${dmMono.variable} font-sans`}>
-        <ClientLayout locale={locale}>{children}</ClientLayout>
-      </body>
-    </html>
+    <ClientLayout locale={locale}>{children}</ClientLayout>
   )
 }
