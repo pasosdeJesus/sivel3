@@ -76,6 +76,11 @@ export default function OSMMapPage() {
     }
   });
   
+  // Limpiar monto después de donar
+  const clearDonationAmount = () => {
+    setDonationAmount('');
+  };
+  
   // Función para refrescar balance después de donar (con confetti y toast)
   const refreshBalanceAfterDonation = () => {
     if (selectedRegion) {
@@ -135,7 +140,7 @@ export default function OSMMapPage() {
     onApplyFilters: applyFilters,
     onRegionChange: setSelectedRegion,
     onAmountChange: setDonationAmount,
-    onDonate: () => handleDonate(donationAmount, selectedRegion),
+    onDonate: () => handleDonate(donationAmount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount),
     onRefreshBalance: refreshBalanceAfterDonation,
     t,
     MapComponent,
