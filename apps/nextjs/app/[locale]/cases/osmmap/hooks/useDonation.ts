@@ -28,11 +28,13 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
     const amount = parseFloat(donationAmount);
     logger.info(`handleDonate llamado - Amount: ${donationAmount}, Region: ${selectedRegion}`, 'DonatePage');
     
-    // La validación ya se hace en el botón (disabled), así que no es necesario alertar aquí
+    // Validación: si el monto es inválido, no hacer nada (el botón debería estar deshabilitado)
     if (isNaN(amount) || amount <= 0) {
-      logger.error(`Monto inválido: ${donationAmount} (esto no debería ocurrir porque el botón está deshabilitado)`, 'DonatePage');
+      logger.error(`Monto inválido: ${donationAmount} - ignorando`, 'DonatePage');
       return;
     }
+    
+    logger.info(`Procesando donación de ${amount} USDT a región ${selectedRegion}`, 'DonatePage');
 
     const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
     logger.info(`Contract address from env: ${contractAddress}`, 'DonatePage');
