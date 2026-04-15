@@ -28,9 +28,9 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
     const amount = parseFloat(donationAmount);
     logger.info(`handleDonate llamado - Amount: ${donationAmount}, Region: ${selectedRegion}`, 'DonatePage');
     
+    // La validación ya se hace en el botón (disabled), así que no es necesario alertar aquí
     if (isNaN(amount) || amount <= 0) {
-      logger.error(`Monto inválido: ${donationAmount}`, 'DonatePage');
-      alert(t.invalidAmount);
+      logger.error(`Monto inválido: ${donationAmount} (esto no debería ocurrir porque el botón está deshabilitado)`, 'DonatePage');
       return;
     }
 
