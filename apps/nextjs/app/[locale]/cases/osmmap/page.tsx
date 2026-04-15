@@ -71,10 +71,15 @@ export default function OSMMapPage() {
     }
   });
 
-  // Refrescar balance después de una transacción
+  // Refrescar balance después de una transacción (solo para donate, no para approve)
   const prevIsTransactingRef = useRef(isTransacting);
+  const hasDonatedRef = useRef(false);
+  
   useEffect(() => {
-    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion) {
+    // Solo ejecutar cuando la transacción de DONATE termina (no la de approve)
+    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion && !hasDonatedRef.current) {
+      hasDonatedRef.current = true;
+      
       confetti({
         particleCount: 150,
         spread: 70,
@@ -95,6 +100,10 @@ export default function OSMMapPage() {
       
       setTimeout(() => {
         fetchBalance(selectedRegion);
+        // Reset after 5 seconds to allow next donation
+        setTimeout(() => {
+          hasDonatedRef.current = false;
+        }, 5000);
       }, 3000);
     }
     prevIsTransactingRef.current = isTransacting;
@@ -116,8 +125,8 @@ export default function OSMMapPage() {
           </Card>
         </div>
 
-        {/* Botones flotantes para móvil */}
-        <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
+        {/* Versión móvil: botones flotantes */}
+        <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2 lg:hidden">
           <CountsPopover 
             counts={counts}
             labelCases={t.cases}
@@ -125,6 +134,7 @@ export default function OSMMapPage() {
             labelVictimizations={t.victimizations}
             labelActs={t.acts}
             title={t.counts}
+            variant="mobile"
           />
           <FiltersPopover 
             filters={filters}
@@ -142,6 +152,7 @@ export default function OSMMapPage() {
               filter: t.filter,
               showAll: t.showAll
             }}
+            variant="mobile"
           />
           <DonationPopover 
             isConnected={isConnected}
@@ -162,7 +173,70 @@ export default function OSMMapPage() {
               approving: t.approving,
               donating: t.donating
             }}
+            variant="mobile"
           />
+        </div>
+
+        {/* Versión desktop: cards visibles */}
+        <div className="hidden lg:block">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1 space-y-6">
+              <CountsPopover 
+                counts={counts}
+                labelCases={t.cases}
+                labelVictims={t.victims}
+                labelVictimizations={t.victimizations}
+                labelActs={t.acts}
+                title={t.counts}
+                totalsByFilters={t.totalsByFilters}
+                variant="desktop"
+              />
+              <FiltersPopover 
+                filters={filters}
+                departments={departments}
+                allegedPerpetrators={allegedPerpetrators}
+                categories={categories}
+                onFilterChange={handleFilterChange}
+                onApplyFilters={applyFilters}
+                labels={{
+                  from: t.from,
+                  to: t.to,
+                  department: t.department,
+                  allegedPerpetrator: t.allegedPerpetrator,
+                  violence: t.violence,
+                  filter: t.filter,
+                  showAll: t.showAll
+                }}
+                variant="desktop"
+              />
+              {isConnected && (
+                <DonationPopover 
+                  isConnected={isConnected}
+                  selectedRegion={selectedRegion}
+                  donationAmount={donationAmount}
+                  regionBalance={regionBalance}
+                  donationRegions={donationRegions}
+                  onRegionChange={setSelectedRegion}
+                  onAmountChange={setDonationAmount}
+                  onDonate={() => handleDonate(donationAmount, selectedRegion)}
+                  isTransacting={isTransacting}
+                  isApproving={isApproving}
+                  labels={{
+                    cause: t.cause,
+                    availableFunds: t.availableFunds,
+                    amount: t.amount,
+                    approve: t.approve,
+                    approving: t.approving,
+                    donating: t.donating
+                  }}
+                  variant="desktop"
+                />
+              )}
+            </div>
+            <div className="lg:col-span-3">
+              {/* El mapa ya está arriba, no duplicar */}
+            </div>
+          </div>
         </div>
       </main>
     </div>
