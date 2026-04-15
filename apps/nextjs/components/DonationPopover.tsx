@@ -28,8 +28,15 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
 
   if (!isConnected) return null
 
-  // Versión desktop: layout 3 filas × 3 columnas
+  // Versión desktop: layout 3 filas × 3 columnas (con estado local)
   if (variant === 'desktop') {
+    const [localAmount, setLocalAmount] = useState(donationAmount);
+    
+    // Sincronizar cuando el padre cambia (ej: después de limpiar)
+    useEffect(() => {
+      setLocalAmount(donationAmount);
+    }, [donationAmount]);
+    
     return (
       <Card>
         <CardHeader className="pb-2">
@@ -64,31 +71,31 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               <Input 
                 type="number" 
                 placeholder="10.00" 
-                value={donationAmount} 
+                value={localAmount} 
                 onChange={(e) => {
                   const newValue = e.target.value;
-                  console.log('🔍 [DonationPopover] Input onChange:', newValue);
-                  onAmountChange(newValue);
+                  setLocalAmount(newValue);
+                  // No actualizamos el padre hasta que se done
                 }} 
                 disabled={isTransacting || isApproving}
                 className="flex-1"
               />
               <Button 
                 onClick={async () => {
-                  console.log('🔍 [DonationPopover] Botón clickeado - isTransacting:', isTransacting, 'isApproving:', isApproving);
+                  // Actualizar el padre con el monto local antes de donar
+                  onAmountChange(localAmount);
+                  console.log('🔍 [DonationPopover] Botón clickeado - Monto:', localAmount);
                   await onDonate();
-                  console.log('🔍 [DonationPopover] onDonate completado - isTransacting:', isTransacting, 'isApproving:', isApproving);
+                  console.log('🔍 [DonationPopover] onDonate completado');
                   if (onRefreshBalance) {
                     console.log('🔍 [DonationPopover] Ejecutando onRefreshBalance en 3 segundos...');
                     setTimeout(() => {
                       console.log('🔍 [DonationPopover] Llamando a onRefreshBalance ahora');
                       onRefreshBalance();
                     }, 3000);
-                  } else {
-                    console.log('🔍 [DonationPopover] ❌ onRefreshBalance NO está definido!');
                   }
                 }}
-                disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
+                disabled={isTransacting || isApproving || !localAmount || parseFloat(localAmount) <= 0}
                 className="whitespace-nowrap"
               >
                 {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
