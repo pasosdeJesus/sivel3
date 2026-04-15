@@ -16,35 +16,42 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const regionId = parseInt(params.id, 10);
-  console.log("OJO balance regionId=", regionId)
+  console.log("🔍 [Balance API] Región:", regionId)
 
   if (isNaN(regionId)) {
     return NextResponse.json({ error: 'Invalid region ID' }, { status: 400 });
   }
 
   if (!regionalDonationContractAddress) {
-    console.error("La dirección del contrato RegionalDonation no está configurada.");
+    console.error("❌ [Balance API] Contrato no configurado");
     return NextResponse.json({ error: 'Donation contract not configured' }, { status: 500 });
   }
 
   try {
-    console.log("OJO publicClient=", publicClient)
-    console.log("Por llamar balance")
+    // Forzar actualización agregando timestamp para evitar caché
+    const cacheBuster = Date.now();
+    console.log(`🔍 [Balance API] Consultando balance con cacheBuster: ${cacheBuster}`);
+    
     const balance = await publicClient.readContract({
       address: regionalDonationContractAddress,
       abi: regionalDonationAbi,
       functionName: 'regionalBalances',
       args: [BigInt(regionId)],
     });
-    console.log("balance=", balance)
-
-    // USDT has 6 decimals
+    
     const balanceInUSD = formatUnits(balance as bigint, 6);
-    console.log("balanceInUSD=", balanceInUSD)
+    console.log(`✅ [Balance API] Balance región ${regionId}: ${balanceInUSD} USDT`);
 
-    return NextResponse.json({ balance: balanceInUSD });
+    // Agregar headers para evitar caché
+    return NextResponse.json({ balance: balanceInUSD, timestamp: cacheBuster }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   } catch (error) {
-    console.error('Error fetching region balance:', error);
+    console.error('❌ [Balance API] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch balance' }, { status: 500 });
   }
 }

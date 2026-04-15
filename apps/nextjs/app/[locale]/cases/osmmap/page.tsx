@@ -71,171 +71,191 @@ export default function OSMMapPage() {
     }
   });
 
-  // Refrescar balance después de una transacción (solo para donate, no para approve)
+  // Refrescar balance después de la transacción de DONATE
   const prevIsTransactingRef = useRef(isTransacting);
-  const hasDonatedRef = useRef(false);
+  const lastDonationRef = useRef<string>('');
   
   useEffect(() => {
-    // Solo ejecutar cuando la transacción de DONATE termina (no la de approve)
-    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion && !hasDonatedRef.current) {
-      hasDonatedRef.current = true;
+    // Solo ejecutar cuando la transacción de DONATE termina
+    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion) {
+      // Crear un identificador único para esta donación
+      const donationId = `${selectedRegion}-${donationAmount}-${Date.now()}`;
       
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
-      });
+      // Evitar duplicados
+      if (lastDonationRef.current === donationId) return;
+      lastDonationRef.current = donationId;
       
-      const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
-                        (currentLocale === 'es' ? 'la región' : 'the region');
-      
-      toast({
-        title: t.thanksTitle,
-        description: t.thanksMessage
-          .replace('{{region}}', regionName)
-          .replace('{{amount}}', donationAmount),
-        duration: 4000,
-      });
-      
+      // Pequeño delay para asegurar que es la transacción de donate (no approve)
       setTimeout(() => {
-        fetchBalance(selectedRegion);
-        // Reset after 5 seconds to allow next donation
-        setTimeout(() => {
-          hasDonatedRef.current = false;
-        }, 5000);
-      }, 3000);
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
+        });
+        
+        const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
+                          (currentLocale === 'es' ? 'la región' : 'the region');
+        
+        toast({
+          title: t.thanksTitle,
+          description: t.thanksMessage
+            .replace('{{region}}', regionName)
+            .replace('{{amount}}', donationAmount),
+          duration: 4000,
+        });
+        
+        // Reintentar balance varias veces
+        const tryFetchBalance = (retries = 5) => {
+          fetchBalance(selectedRegion);
+          if (retries > 0 && regionBalance === '0') {
+            setTimeout(() => tryFetchBalance(retries - 1), 2000);
+          }
+        };
+        setTimeout(() => tryFetchBalance(5), 3000);
+      }, 500);
     }
     prevIsTransactingRef.current = isTransacting;
-  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale, fetchBalance]);
+  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale, fetchBalance, regionBalance]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <main className="container mx-auto px-4 py-6">
-        {/* El mapa ocupa todo el ancho */}
-        <div className="w-full mb-4">
-          <Card>
-            <CardContent className="p-0">
-              <MapComponent
-                filtros={filters}
-                onCargarConteos={handleCountsLoad}
+        {/* Versión móvil: solo mapa + botones flotantes */}
+        <div className="lg:hidden">
+          <div className="w-full mb-4">
+            <Card>
+              <CardContent className="p-0">
+                <MapComponent
+                  filtros={filters}
+                  onCargarConteos={handleCountsLoad}
+                  isConnected={isConnected}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Botones flotantes para móvil */}
+          <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
+            <CountsPopover 
+              counts={counts}
+              labelCases={t.cases}
+              labelVictims={t.victims}
+              labelVictimizations={t.victimizations}
+              labelActs={t.acts}
+              title={t.counts}
+              variant="mobile"
+            />
+            <FiltersPopover 
+              filters={filters}
+              departments={departments}
+              allegedPerpetrators={allegedPerpetrators}
+              categories={categories}
+              onFilterChange={handleFilterChange}
+              onApplyFilters={applyFilters}
+              labels={{
+                from: t.from,
+                to: t.to,
+                department: t.department,
+                allegedPerpetrator: t.allegedPerpetrator,
+                violence: t.violence,
+                filter: t.filter,
+                showAll: t.showAll
+              }}
+              variant="mobile"
+            />
+            <DonationPopover 
+              isConnected={isConnected}
+              selectedRegion={selectedRegion}
+              donationAmount={donationAmount}
+              regionBalance={regionBalance}
+              donationRegions={donationRegions}
+              onRegionChange={setSelectedRegion}
+              onAmountChange={setDonationAmount}
+              onDonate={() => handleDonate(donationAmount, selectedRegion)}
+              isTransacting={isTransacting}
+              isApproving={isApproving}
+              labels={{
+                cause: t.cause,
+                availableFunds: t.availableFunds,
+                amount: t.amount,
+                approve: t.approve,
+                approving: t.approving,
+                donating: t.donating
+              }}
+              variant="mobile"
+            />
+          </div>
+        </div>
+
+        {/* Versión desktop: grid con cards a la izquierda y mapa a la derecha */}
+        <div className="hidden lg:grid lg:grid-cols-4 gap-6">
+          {/* Cards - columna izquierda */}
+          <div className="space-y-6">
+            <CountsPopover 
+              counts={counts}
+              labelCases={t.cases}
+              labelVictims={t.victims}
+              labelVictimizations={t.victimizations}
+              labelActs={t.acts}
+              title={t.counts}
+              totalsByFilters={t.totalsByFilters}
+              variant="desktop"
+            />
+            <FiltersPopover 
+              filters={filters}
+              departments={departments}
+              allegedPerpetrators={allegedPerpetrators}
+              categories={categories}
+              onFilterChange={handleFilterChange}
+              onApplyFilters={applyFilters}
+              labels={{
+                from: t.from,
+                to: t.to,
+                department: t.department,
+                allegedPerpetrator: t.allegedPerpetrator,
+                violence: t.violence,
+                filter: t.filter,
+                showAll: t.showAll
+              }}
+              variant="desktop"
+            />
+            {isConnected && (
+              <DonationPopover 
                 isConnected={isConnected}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Versión móvil: botones flotantes */}
-        <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2 lg:hidden">
-          <CountsPopover 
-            counts={counts}
-            labelCases={t.cases}
-            labelVictims={t.victims}
-            labelVictimizations={t.victimizations}
-            labelActs={t.acts}
-            title={t.counts}
-            variant="mobile"
-          />
-          <FiltersPopover 
-            filters={filters}
-            departments={departments}
-            allegedPerpetrators={allegedPerpetrators}
-            categories={categories}
-            onFilterChange={handleFilterChange}
-            onApplyFilters={applyFilters}
-            labels={{
-              from: t.from,
-              to: t.to,
-              department: t.department,
-              allegedPerpetrator: t.allegedPerpetrator,
-              violence: t.violence,
-              filter: t.filter,
-              showAll: t.showAll
-            }}
-            variant="mobile"
-          />
-          <DonationPopover 
-            isConnected={isConnected}
-            selectedRegion={selectedRegion}
-            donationAmount={donationAmount}
-            regionBalance={regionBalance}
-            donationRegions={donationRegions}
-            onRegionChange={setSelectedRegion}
-            onAmountChange={setDonationAmount}
-            onDonate={() => handleDonate(donationAmount, selectedRegion)}
-            isTransacting={isTransacting}
-            isApproving={isApproving}
-            labels={{
-              cause: t.cause,
-              availableFunds: t.availableFunds,
-              amount: t.amount,
-              approve: t.approve,
-              approving: t.approving,
-              donating: t.donating
-            }}
-            variant="mobile"
-          />
-        </div>
-
-        {/* Versión desktop: cards visibles */}
-        <div className="hidden lg:block">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1 space-y-6">
-              <CountsPopover 
-                counts={counts}
-                labelCases={t.cases}
-                labelVictims={t.victims}
-                labelVictimizations={t.victimizations}
-                labelActs={t.acts}
-                title={t.counts}
-                totalsByFilters={t.totalsByFilters}
-                variant="desktop"
-              />
-              <FiltersPopover 
-                filters={filters}
-                departments={departments}
-                allegedPerpetrators={allegedPerpetrators}
-                categories={categories}
-                onFilterChange={handleFilterChange}
-                onApplyFilters={applyFilters}
+                selectedRegion={selectedRegion}
+                donationAmount={donationAmount}
+                regionBalance={regionBalance}
+                donationRegions={donationRegions}
+                onRegionChange={setSelectedRegion}
+                onAmountChange={setDonationAmount}
+                onDonate={() => handleDonate(donationAmount, selectedRegion)}
+                isTransacting={isTransacting}
+                isApproving={isApproving}
                 labels={{
-                  from: t.from,
-                  to: t.to,
-                  department: t.department,
-                  allegedPerpetrator: t.allegedPerpetrator,
-                  violence: t.violence,
-                  filter: t.filter,
-                  showAll: t.showAll
+                  cause: t.cause,
+                  availableFunds: t.availableFunds,
+                  amount: t.amount,
+                  approve: t.approve,
+                  approving: t.approving,
+                  donating: t.donating
                 }}
                 variant="desktop"
               />
-              {isConnected && (
-                <DonationPopover 
+            )}
+          </div>
+          
+          {/* Mapa - columna derecha (ocupa 3 columnas) */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardContent className="p-0">
+                <MapComponent
+                  filtros={filters}
+                  onCargarConteos={handleCountsLoad}
                   isConnected={isConnected}
-                  selectedRegion={selectedRegion}
-                  donationAmount={donationAmount}
-                  regionBalance={regionBalance}
-                  donationRegions={donationRegions}
-                  onRegionChange={setSelectedRegion}
-                  onAmountChange={setDonationAmount}
-                  onDonate={() => handleDonate(donationAmount, selectedRegion)}
-                  isTransacting={isTransacting}
-                  isApproving={isApproving}
-                  labels={{
-                    cause: t.cause,
-                    availableFunds: t.availableFunds,
-                    amount: t.amount,
-                    approve: t.approve,
-                    approving: t.approving,
-                    donating: t.donating
-                  }}
-                  variant="desktop"
                 />
-              )}
-            </div>
-            <div className="lg:col-span-3">
-              {/* El mapa ya está arriba, no duplicar */}
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
