@@ -21,7 +21,8 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
   const handleDonate = async (
     donationAmount: string,
     selectedRegion: string,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    onRefreshBalance?: () => void
   ) => {
     const amount = parseFloat(donationAmount);
     logger.info(`handleDonate llamado - Amount: ${donationAmount}, Region: ${selectedRegion}`, 'DonatePage');
@@ -78,6 +79,9 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
       
       logger.success('Donación completada', 'DonatePage');
       if (onSuccess) onSuccess();
+      if (onRefreshBalance) {
+        setTimeout(() => onRefreshBalance(), 3000);
+      }
     } catch (error) {
       logger.error(`Error en proceso de donación: ${error}`, 'DonatePage');
       console.error(error);

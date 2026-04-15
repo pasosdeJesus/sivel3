@@ -16,13 +16,14 @@ interface DonationPopoverProps {
   onRegionChange: (value: string) => void
   onAmountChange: (value: string) => void
   onDonate: () => void
+  onRefreshBalance?: () => void
   isTransacting: boolean
   isApproving: boolean
   labels: { cause: string; availableFunds: string; amount: string; approve: string; donateTitle?: string; approving: string; donating: string }
   variant?: 'mobile' | 'desktop'
 }
 
-export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, isTransacting, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
+export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   if (!isConnected) return null
@@ -64,12 +65,20 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                 type="number" 
                 placeholder="10.00" 
                 value={donationAmount} 
-                onChange={(e) => onAmountChange(e.target.value)} 
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  onAmountChange(newValue);
+                }} 
                 disabled={isTransacting || isApproving}
                 className="flex-1"
               />
               <Button 
-                onClick={onDonate} 
+                onClick={async () => {
+                  await onDonate();
+                  if (onRefreshBalance) {
+                    setTimeout(() => onRefreshBalance(), 3000);
+                  }
+                }} 
                 disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
                 className="whitespace-nowrap"
               >
@@ -102,8 +111,13 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
           <div className="p-3 space-y-3">
             <div><Label className="text-xs">{labels.cause}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
             <div><Label className="text-xs">{labels.availableFunds}</Label><div className="text-lg font-bold text-green-600">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
-            <div><Label className="text-xs">{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => onAmountChange(e.target.value)} disabled={isTransacting || isApproving} /></div>
-            <Button size="sm" className="w-full" onClick={onDonate} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
+            <div><Label className="text-xs">{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => { const newValue = e.target.value; onAmountChange(newValue); }} disabled={isTransacting || isApproving} /></div>
+            <Button size="sm" className="w-full" onClick={async () => {
+              await onDonate();
+              if (onRefreshBalance) {
+                setTimeout(() => onRefreshBalance(), 3000);
+              }
+            }} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
           </div>
         </div>
       )}

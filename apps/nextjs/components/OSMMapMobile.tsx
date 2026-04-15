@@ -23,6 +23,7 @@ interface OSMMapMobileProps {
   onRegionChange: (value: string) => void;
   onAmountChange: (value: string) => void;
   onDonate: () => void;
+  onRefreshBalance?: () => void;
   t: any;
   MapComponent: React.ComponentType<any>;
   filtersObj: any;
@@ -47,6 +48,7 @@ export function OSMMapMobile({
   onRegionChange,
   onAmountChange,
   onDonate,
+  onRefreshBalance,
   t,
   MapComponent,
   filtersObj,
@@ -105,6 +107,7 @@ export function OSMMapMobile({
           onRegionChange={onRegionChange}
           onAmountChange={onAmountChange}
           onDonate={onDonate}
+          onRefreshBalance={onRefreshBalance}
           isTransacting={isTransacting}
           isApproving={isApproving}
           labels={{

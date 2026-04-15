@@ -23,6 +23,7 @@ interface OSMMapDesktopProps {
   onRegionChange: (value: string) => void;
   onAmountChange: (value: string) => void;
   onDonate: () => void;
+  onRefreshBalance?: () => void;
   t: any;
   MapComponent: React.ComponentType<any>;
   filtersObj: any;
@@ -47,6 +48,7 @@ export function OSMMapDesktop({
   onRegionChange,
   onAmountChange,
   onDonate,
+  onRefreshBalance,
   t,
   MapComponent,
   filtersObj,
@@ -107,7 +109,8 @@ export function OSMMapDesktop({
             donationRegions={donationRegions}
             onRegionChange={onRegionChange}
             onAmountChange={onAmountChange}
-            onDonate={onDonate}
+            onDonate={() => onDonate()}
+            onRefreshBalance={onRefreshBalance}
             isTransacting={isTransacting}
             isApproving={isApproving}
             labels={{

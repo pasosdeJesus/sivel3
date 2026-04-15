@@ -68,6 +68,13 @@ export default function OSMMapPage() {
       donateSuccess: t.donateSuccess
     }
   });
+  
+  // Función para refrescar balance después de donar (especialmente en móvil)
+  const refreshBalanceAfterDonation = () => {
+    if (selectedRegion) {
+      fetchBalance(selectedRegion);
+    }
+  };
 
   // Refrescar balance después de una transacción
   const prevIsTransactingRef = useRef(isTransacting);
