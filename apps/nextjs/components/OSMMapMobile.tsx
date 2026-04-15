@@ -112,6 +112,7 @@ export function OSMMapMobile({
             availableFunds: t.availableFunds,
             amount: t.amount,
             approve: t.approve,
+            donateTitle: t.donateTitle || t.approve,
             approving: t.approving,
             donating: t.donating
           }}

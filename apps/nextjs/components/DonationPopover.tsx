@@ -18,7 +18,7 @@ interface DonationPopoverProps {
   onDonate: () => void
   isTransacting: boolean
   isApproving: boolean
-  labels: { cause: string; availableFunds: string; amount: string; approve: string; approving: string; donating: string }
+  labels: { cause: string; availableFunds: string; amount: string; approve: string; donateTitle?: string; approving: string; donating: string }
   variant?: 'mobile' | 'desktop'
 }
 
@@ -32,7 +32,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">❤️ {labels.approve}</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">❤️ {labels.donateTitle || labels.approve}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Fila 1: Títulos */}
@@ -101,7 +101,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
           </div>
           <div className="p-3 space-y-3">
             <div><Label className="text-xs">{labels.cause}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
-            <div><Label className="text-xs">{labels.availableFunds}</Label><div className="text-sm font-semibold">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
+            <div><Label className="text-xs">{labels.availableFunds}</Label><div className="text-lg font-bold text-green-600">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
             <div><Label className="text-xs">{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => onAmountChange(e.target.value)} disabled={isTransacting || isApproving} /></div>
             <Button size="sm" className="w-full" onClick={onDonate} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
           </div>
