@@ -27,7 +27,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
 
   if (!isConnected) return null
 
-  // Versión desktop: card completa siempre visible
+  // Versión desktop: card sin input box, balance en misma línea
   if (variant === 'desktop') {
     return (
       <Card>
@@ -36,9 +36,21 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
         </CardHeader>
         <CardContent className="space-y-4">
           <div><Label>{labels.cause}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
-          <div><Label>{labels.availableFunds}</Label><div className="text-sm font-semibold p-2 border rounded-md bg-gray-50">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
-          <div><Label>{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => onAmountChange(e.target.value)} disabled={isTransacting || isApproving} /></div>
-          <Button className="w-full" onClick={onDonate} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
+          <div className="flex justify-between items-center">
+            <span className="font-medium">{labels.availableFunds}</span>
+            <span className="text-lg font-bold text-green-600">
+              {regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={onDonate} 
+              disabled={isTransacting || isApproving}
+              className="flex-1"
+            >
+              {isApproving ? labels.approving : isTransacting ? labels.donating : `${labels.approve} (10 USDT)`}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )

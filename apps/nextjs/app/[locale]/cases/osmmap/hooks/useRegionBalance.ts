@@ -21,7 +21,7 @@ export function useRegionBalance(selectedRegion: string | null) {
             logger.info(`Balance aún en 0, reintentando en ${delay}ms... (${retryCount} intentos restantes)`, 'Balance');
             setTimeout(() => attempt(retryCount - 1), delay);
           } else {
-            logger.warn(`Balance sigue en 0 después de reintentos`, 'Balance');
+            logger.info(`⚠️ Balance sigue en 0 después de reintentos`, 'Balance');
             setBalanceLoading(false);
           }
         })

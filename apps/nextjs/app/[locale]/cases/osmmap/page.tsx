@@ -4,18 +4,16 @@ import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/components/ui/use-toast';
 import confetti from 'canvas-confetti';
-import { CountsPopover } from '@/components/CountsPopover';
-import { FiltersPopover } from '@/components/FiltersPopover';
-import { DonationPopover } from '@/components/DonationPopover';
 import { translations } from './locales/osmmap';
 import { useRegionBalance } from './hooks/useRegionBalance';
 import { useDonation } from './hooks/useDonation';
 import { useOSMMapData } from './hooks/useOSMMapData';
+import { OSMMapDesktop } from '@/components/OSMMapDesktop';
+import { OSMMapMobile } from '@/components/OSMMapMobile';
 
 const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ssr: false,
@@ -71,192 +69,85 @@ export default function OSMMapPage() {
     }
   });
 
-  // Refrescar balance después de la transacción de DONATE
+  // Refrescar balance después de una transacción
   const prevIsTransactingRef = useRef(isTransacting);
-  const lastDonationRef = useRef<string>('');
+  const hasDonatedRef = useRef(false);
   
   useEffect(() => {
-    // Solo ejecutar cuando la transacción de DONATE termina
-    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion) {
-      // Crear un identificador único para esta donación
-      const donationId = `${selectedRegion}-${donationAmount}-${Date.now()}`;
+    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion && !hasDonatedRef.current) {
+      hasDonatedRef.current = true;
       
-      // Evitar duplicados
-      if (lastDonationRef.current === donationId) return;
-      lastDonationRef.current = donationId;
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
+      });
       
-      // Pequeño delay para asegurar que es la transacción de donate (no approve)
+      const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
+                        (currentLocale === 'es' ? 'la región' : 'the region');
+      
+      toast({
+        title: t.thanksTitle,
+        description: t.thanksMessage
+          .replace('{{region}}', regionName)
+          .replace('{{amount}}', donationAmount),
+        duration: 4000,
+      });
+      
       setTimeout(() => {
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
-        });
-        
-        const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
-                          (currentLocale === 'es' ? 'la región' : 'the region');
-        
-        toast({
-          title: t.thanksTitle,
-          description: t.thanksMessage
-            .replace('{{region}}', regionName)
-            .replace('{{amount}}', donationAmount),
-          duration: 4000,
-        });
-        
-        // Reintentar balance varias veces
-        const tryFetchBalance = (retries = 5) => {
-          fetchBalance(selectedRegion);
-          if (retries > 0 && regionBalance === '0') {
-            setTimeout(() => tryFetchBalance(retries - 1), 2000);
-          }
-        };
-        setTimeout(() => tryFetchBalance(5), 3000);
-      }, 500);
+        fetchBalance(selectedRegion);
+        setTimeout(() => {
+          hasDonatedRef.current = false;
+        }, 5000);
+      }, 3000);
     }
     prevIsTransactingRef.current = isTransacting;
-  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale, fetchBalance, regionBalance]);
+  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale, fetchBalance]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
+        <Skeleton className="h-12 w-12 rounded-full" />
+      </div>
+    );
+  }
+
+  const commonProps = {
+    counts,
+    filters,
+    departments,
+    categories,
+    allegedPerpetrators,
+    donationRegions,
+    selectedRegion,
+    donationAmount,
+    regionBalance,
+    isConnected,
+    isTransacting,
+    isApproving,
+    onFilterChange: handleFilterChange,
+    onApplyFilters: applyFilters,
+    onRegionChange: setSelectedRegion,
+    onAmountChange: setDonationAmount,
+    onDonate: () => handleDonate(donationAmount, selectedRegion),
+    t,
+    MapComponent,
+    filtersObj: filters,
+    handleCountsLoad
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <main className="container mx-auto px-4 py-6">
-        {/* Versión móvil: solo mapa + botones flotantes */}
+        {/* Versión móvil */}
         <div className="lg:hidden">
-          <div className="w-full mb-4">
-            <Card>
-              <CardContent className="p-0">
-                <MapComponent
-                  filtros={filters}
-                  onCargarConteos={handleCountsLoad}
-                  isConnected={isConnected}
-                />
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Botones flotantes para móvil */}
-          <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
-            <CountsPopover 
-              counts={counts}
-              labelCases={t.cases}
-              labelVictims={t.victims}
-              labelVictimizations={t.victimizations}
-              labelActs={t.acts}
-              title={t.counts}
-              variant="mobile"
-            />
-            <FiltersPopover 
-              filters={filters}
-              departments={departments}
-              allegedPerpetrators={allegedPerpetrators}
-              categories={categories}
-              onFilterChange={handleFilterChange}
-              onApplyFilters={applyFilters}
-              labels={{
-                from: t.from,
-                to: t.to,
-                department: t.department,
-                allegedPerpetrator: t.allegedPerpetrator,
-                violence: t.violence,
-                filter: t.filter,
-                showAll: t.showAll
-              }}
-              variant="mobile"
-            />
-            <DonationPopover 
-              isConnected={isConnected}
-              selectedRegion={selectedRegion}
-              donationAmount={donationAmount}
-              regionBalance={regionBalance}
-              donationRegions={donationRegions}
-              onRegionChange={setSelectedRegion}
-              onAmountChange={setDonationAmount}
-              onDonate={() => handleDonate(donationAmount, selectedRegion)}
-              isTransacting={isTransacting}
-              isApproving={isApproving}
-              labels={{
-                cause: t.cause,
-                availableFunds: t.availableFunds,
-                amount: t.amount,
-                approve: t.approve,
-                approving: t.approving,
-                donating: t.donating
-              }}
-              variant="mobile"
-            />
-          </div>
+          <OSMMapMobile {...commonProps} />
         </div>
 
-        {/* Versión desktop: grid con cards a la izquierda y mapa a la derecha */}
-        <div className="hidden lg:grid lg:grid-cols-4 gap-6">
-          {/* Cards - columna izquierda */}
-          <div className="space-y-6">
-            <CountsPopover 
-              counts={counts}
-              labelCases={t.cases}
-              labelVictims={t.victims}
-              labelVictimizations={t.victimizations}
-              labelActs={t.acts}
-              title={t.counts}
-              totalsByFilters={t.totalsByFilters}
-              variant="desktop"
-            />
-            <FiltersPopover 
-              filters={filters}
-              departments={departments}
-              allegedPerpetrators={allegedPerpetrators}
-              categories={categories}
-              onFilterChange={handleFilterChange}
-              onApplyFilters={applyFilters}
-              labels={{
-                from: t.from,
-                to: t.to,
-                department: t.department,
-                allegedPerpetrator: t.allegedPerpetrator,
-                violence: t.violence,
-                filter: t.filter,
-                showAll: t.showAll
-              }}
-              variant="desktop"
-            />
-            {isConnected && (
-              <DonationPopover 
-                isConnected={isConnected}
-                selectedRegion={selectedRegion}
-                donationAmount={donationAmount}
-                regionBalance={regionBalance}
-                donationRegions={donationRegions}
-                onRegionChange={setSelectedRegion}
-                onAmountChange={setDonationAmount}
-                onDonate={() => handleDonate(donationAmount, selectedRegion)}
-                isTransacting={isTransacting}
-                isApproving={isApproving}
-                labels={{
-                  cause: t.cause,
-                  availableFunds: t.availableFunds,
-                  amount: t.amount,
-                  approve: t.approve,
-                  approving: t.approving,
-                  donating: t.donating
-                }}
-                variant="desktop"
-              />
-            )}
-          </div>
-          
-          {/* Mapa - columna derecha (ocupa 3 columnas) */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardContent className="p-0">
-                <MapComponent
-                  filtros={filters}
-                  onCargarConteos={handleCountsLoad}
-                  isConnected={isConnected}
-                />
-              </CardContent>
-            </Card>
-          </div>
+        {/* Versión desktop */}
+        <div className="hidden lg:block">
+          <OSMMapDesktop {...commonProps} />
         </div>
       </main>
     </div>
