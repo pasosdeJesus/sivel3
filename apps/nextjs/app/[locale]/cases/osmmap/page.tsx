@@ -78,7 +78,9 @@ export default function OSMMapPage() {
   
   // Limpiar monto después de donar
   const clearDonationAmount = () => {
+    console.log('🔍 [clearDonationAmount] Limpiando monto, valor actual:', donationAmount);
     setDonationAmount('');
+    console.log('🔍 [clearDonationAmount] setDonationAmount ejecutado');
   };
   
   // Función para refrescar balance después de donar (con confetti y toast)

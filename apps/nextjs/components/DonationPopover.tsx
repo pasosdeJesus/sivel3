@@ -67,6 +67,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                 value={donationAmount} 
                 onChange={(e) => {
                   const newValue = e.target.value;
+                  console.log('🔍 [DonationPopover] Input onChange:', newValue);
                   onAmountChange(newValue);
                 }} 
                 disabled={isTransacting || isApproving}
