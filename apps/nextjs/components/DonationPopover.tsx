@@ -15,7 +15,7 @@ interface DonationPopoverProps {
   donationRegions: Array<{ id: number; name: string }>
   onRegionChange: (value: string) => void
   onAmountChange: (value: string) => void
-  onDonate: () => void
+  onDonate: (amount: string) => void
   onRefreshBalance?: () => void
   isTransacting: boolean
   isApproving: boolean
@@ -92,11 +92,11 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               />
               <Button 
                 onClick={async () => {
-                  console.log('🔍 [DonationPopover] Desktop - Monto:', desktopLocalAmount)
-                  // Pasar el monto local directamente, no depender del estado del padre
-                  onAmountChange(desktopLocalAmount)
+                  const amount = desktopLocalAmount
+                  console.log('🔍 [DonationPopover] Desktop - Monto:', amount)
+                  onAmountChange(amount)
                   await new Promise(resolve => setTimeout(resolve, 100))
-                  await onDonate()
+                  await onDonate(amount)
                   if (onRefreshBalance) {
                     setTimeout(() => onRefreshBalance(), 3000)
                   }
@@ -150,7 +150,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               console.log('🔍 [DonationPopover] Mobile - Monto:', amountToDonate)
               onAmountChange(amountToDonate)
               await new Promise(resolve => setTimeout(resolve, 100))
-              await onDonate()
+              await onDonate(amountToDonate)
               if (onRefreshBalance) {
                 setTimeout(() => onRefreshBalance(), 3000)
               }

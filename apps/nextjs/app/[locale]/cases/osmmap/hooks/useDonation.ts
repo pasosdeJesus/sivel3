@@ -25,16 +25,19 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
     onRefreshBalance?: () => void,
     onClearAmount?: () => void
   ) => {
-    const amount = parseFloat(donationAmount);
-    logger.info(`handleDonate llamado - Amount: ${donationAmount}, Region: ${selectedRegion}`, 'DonatePage');
+    // Asegurar que donationAmount sea string y tenga valor
+    const amountStr = String(donationAmount || '');
+    const amount = parseFloat(amountStr);
     
-    // Validación: si el monto es inválido, no hacer nada (el botón debería estar deshabilitado)
-    if (isNaN(amount) || amount <= 0) {
-      logger.error(`Monto inválido: ${donationAmount} - ignorando`, 'DonatePage');
+    logger.info(`🔍 [useDonation] handleDonate - Amount recibido: "${donationAmount}" (parsed: ${amount})`, 'DonatePage');
+    
+    // Validación estricta
+    if (!amountStr || amountStr.trim() === '' || isNaN(amount) || amount <= 0) {
+      logger.error(`❌ [useDonation] Monto inválido: "${donationAmount}" - ignorando`, 'DonatePage');
       return;
     }
     
-    logger.info(`Procesando donación de ${amount} USDT a región ${selectedRegion}`, 'DonatePage');
+    logger.info(`✅ [useDonation] Procesando donación de ${amount} USDT a región ${selectedRegion}`, 'DonatePage');
 
     const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
     logger.info(`Contract address from env: ${contractAddress}`, 'DonatePage');

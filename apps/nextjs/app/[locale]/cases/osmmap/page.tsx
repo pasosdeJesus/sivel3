@@ -142,7 +142,7 @@ export default function OSMMapPage() {
     onApplyFilters: applyFilters,
     onRegionChange: setSelectedRegion,
     onAmountChange: setDonationAmount,
-    onDonate: () => handleDonate(donationAmount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount),
+    onDonate: (amount: string) => handleDonate(amount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount),
     onRefreshBalance: refreshBalanceAfterDonation,
     t,
     MapComponent,

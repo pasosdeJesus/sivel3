@@ -22,7 +22,7 @@ interface OSMMapMobileProps {
   onApplyFilters: () => void;
   onRegionChange: (value: string) => void;
   onAmountChange: (value: string) => void;
-  onDonate: () => void;
+  onDonate: (amount: string) => Promise<void>;
   onRefreshBalance?: () => void;
   t: any;
   MapComponent: React.ComponentType<any>;
