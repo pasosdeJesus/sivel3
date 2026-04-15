@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -82,9 +82,11 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               />
               <Button 
                 onClick={async () => {
-                  // Actualizar el padre con el monto local antes de donar
-                  onAmountChange(localAmount);
                   console.log('🔍 [DonationPopover] Botón clickeado - Monto:', localAmount);
+                  // Actualizar el padre con el monto local
+                  onAmountChange(localAmount);
+                  // Pequeña pausa para asegurar que el padre actualice
+                  await new Promise(resolve => setTimeout(resolve, 50));
                   await onDonate();
                   console.log('🔍 [DonationPopover] onDonate completado');
                   if (onRefreshBalance) {
@@ -107,13 +109,21 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
     )
   }
 
-  // Versión móvil: botón flotante con pop-up
-  const [localAmount, setLocalAmount] = useState(donationAmount);
+  // Versión móvil: botón flotante con pop-up (usando ref para evitar re-renders)
+  const localAmountRef = useRef(donationAmount);
+  const [localAmountState, setLocalAmountState] = useState(donationAmount);
   
   // Sincronizar cuando el padre cambia (ej: después de limpiar)
   useEffect(() => {
-    setLocalAmount(donationAmount);
+    localAmountRef.current = donationAmount;
+    setLocalAmountState(donationAmount);
   }, [donationAmount]);
+  
+  const handleAmountChange = (newValue: string) => {
+    localAmountRef.current = newValue;
+    setLocalAmountState(newValue);
+    // No actualizamos el padre hasta que se done
+  };
   
   return (
     <>
@@ -137,27 +147,25 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
             <div><Label className="text-xs">{labels.amount}</Label><Input 
               type="number" 
               placeholder="10.00" 
-              value={localAmount} 
+              value={localAmountState} 
               onChange={(e) => { 
-                const newValue = e.target.value; 
-                setLocalAmount(newValue);
-                onAmountChange(newValue);
+                handleAmountChange(e.target.value);
               }} 
               disabled={isTransacting || isApproving} 
             /></div>
             <Button size="sm" className="w-full" onClick={async () => {
+              // Usar el valor del ref para donar
+              const amountToDonate = localAmountRef.current;
+              onAmountChange(amountToDonate);
+              await new Promise(resolve => setTimeout(resolve, 50));
               await onDonate();
-              console.log('🔍 [DonationPopover-mobile] onDonate completado, onRefreshBalance existe?', !!onRefreshBalance);
+              console.log('🔍 [DonationPopover-mobile] onDonate completado');
               if (onRefreshBalance) {
-                console.log('🔍 [DonationPopover-mobile] Ejecutando onRefreshBalance en 3 segundos...');
-                setTimeout(() => {
-                  console.log('🔍 [DonationPopover-mobile] Llamando a onRefreshBalance ahora');
-                  onRefreshBalance();
-                }, 3000);
-              } else {
-                console.log('🔍 [DonationPopover-mobile] ❌ onRefreshBalance NO está definido!');
+                setTimeout(() => onRefreshBalance(), 3000);
               }
-            }} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
+            }} disabled={isTransacting || isApproving || !localAmountRef.current || parseFloat(localAmountRef.current) <= 0}>
+              {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
+            </Button>
           </div>
         </div>
       )}
