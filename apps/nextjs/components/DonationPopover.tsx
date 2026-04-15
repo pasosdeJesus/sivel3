@@ -75,11 +75,19 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               />
               <Button 
                 onClick={async () => {
+                  console.log('🔍 [DonationPopover] Botón clickeado - isTransacting:', isTransacting, 'isApproving:', isApproving);
                   await onDonate();
+                  console.log('🔍 [DonationPopover] onDonate completado - isTransacting:', isTransacting, 'isApproving:', isApproving);
                   if (onRefreshBalance) {
-                    setTimeout(() => onRefreshBalance(), 5000);
+                    console.log('🔍 [DonationPopover] Ejecutando onRefreshBalance en 3 segundos...');
+                    setTimeout(() => {
+                      console.log('🔍 [DonationPopover] Llamando a onRefreshBalance ahora');
+                      onRefreshBalance();
+                    }, 3000);
+                  } else {
+                    console.log('🔍 [DonationPopover] ❌ onRefreshBalance NO está definido!');
                   }
-                }} 
+                }}
                 disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
                 className="whitespace-nowrap"
               >

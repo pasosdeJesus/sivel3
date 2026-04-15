@@ -89,6 +89,12 @@ export function useDonation({ approveUSDT, donateToRegion, isTransacting, isMini
       console.error(error);
     } finally {
       setIsApproving(false);
+      console.log('🔍 [useDonation] setIsApproving(false) ejecutado');
+      // Forzar reset adicional después de 5 segundos por si acaso
+      setTimeout(() => {
+        setIsApproving(false);
+        console.log('🔍 [useDonation] Forzando setIsApproving(false) después de 5s');
+      }, 5000);
     }
   };
 

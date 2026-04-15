@@ -77,6 +77,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { connect, connectors } = useConnect()
   const chainId = useChainId()
   const { data: hash, error, isPending, writeContract } = useWriteContract()
+  
+  // Log para depurar isTransacting
+  console.log('🔍 [WalletContext] isPending (isTransacting):', isPending);
   const { isMiniPay, phoneNumber, isConnected: isMiniPayConnected, address: miniPayAddress } = useMiniPay()
   
   // Sincronizar el estado de MiniPay con el estado de wagmi
