@@ -27,7 +27,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
 
   if (!isConnected) return null
 
-  // Versión desktop: card sin input box, balance en misma línea
+  // Versión desktop: card con input box y balance en misma línea
   if (variant === 'desktop') {
     return (
       <Card>
@@ -42,13 +42,21 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               {regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}
             </span>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={onDonate} 
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input 
+              type="number" 
+              placeholder="10.00" 
+              value={donationAmount} 
+              onChange={(e) => onAmountChange(e.target.value)} 
               disabled={isTransacting || isApproving}
               className="flex-1"
+            />
+            <Button 
+              onClick={onDonate} 
+              disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
+              className="whitespace-nowrap"
             >
-              {isApproving ? labels.approving : isTransacting ? labels.donating : `${labels.approve} (10 USDT)`}
+              {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
             </Button>
           </div>
         </CardContent>

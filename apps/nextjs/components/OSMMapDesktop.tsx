@@ -53,9 +53,9 @@ export function OSMMapDesktop({
   handleCountsLoad
 }: OSMMapDesktopProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Columna izquierda: Conteos + Filtros */}
-      <div className="lg:col-span-1 space-y-6">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Columna izquierda: Conteos + Filtros (ancho fijo máximo 300px) */}
+      <div className="lg:w-[300px] lg:flex-shrink-0 space-y-6">
         <CountsPopover 
           counts={counts}
           labelCases={t.cases}
@@ -86,8 +86,8 @@ export function OSMMapDesktop({
         />
       </div>
 
-      {/* Columna derecha: Mapa + Donación (ancha) */}
-      <div className="lg:col-span-2 space-y-6">
+      {/* Columna derecha: Mapa + Donación (resto del ancho) */}
+      <div className="flex-1 space-y-6">
         <Card>
           <CardContent className="p-0">
             <MapComponent
