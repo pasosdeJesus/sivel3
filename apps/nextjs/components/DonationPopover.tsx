@@ -24,33 +24,47 @@ interface DonationPopoverProps {
 }
 
 export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
+  // ============================================
+  // TODOS LOS HOOKS AL INICIO (mismo orden siempre)
+  // ============================================
   const [isOpen, setIsOpen] = useState(false)
+  
+  // Desktop: estado local para el monto
+  const [desktopLocalAmount, setDesktopLocalAmount] = useState(donationAmount)
+  
+  // Mobile: ref y estado para evitar re-renders
+  const mobileLocalAmountRef = useRef(donationAmount)
+  const [mobileLocalAmountState, setMobileLocalAmountState] = useState(donationAmount)
+  
+  // Efectos de sincronización (siempre se ejecutan, aunque no se usen en una rama)
+  useEffect(() => {
+    setDesktopLocalAmount(donationAmount)
+  }, [donationAmount])
+  
+  useEffect(() => {
+    mobileLocalAmountRef.current = donationAmount
+    setMobileLocalAmountState(donationAmount)
+  }, [donationAmount])
 
+  // ============================================
+  // RENDERIZADO CONDICIONAL
+  // ============================================
   if (!isConnected) return null
 
-  // Versión desktop: layout 3 filas × 3 columnas (con estado local)
+  // Versión desktop
   if (variant === 'desktop') {
-    const [localAmount, setLocalAmount] = useState(donationAmount);
-    
-    // Sincronizar cuando el padre cambia (ej: después de limpiar)
-    useEffect(() => {
-      setLocalAmount(donationAmount);
-    }, [donationAmount]);
-    
     return (
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">❤️ {labels.donateTitle || labels.approve}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Fila 1: Títulos */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-sm font-medium text-gray-600">{labels.cause}</div>
             <div className="text-sm font-medium text-gray-600">{labels.availableFunds}</div>
             <div className="text-sm font-medium text-gray-600">{labels.amount}</div>
           </div>
           
-          {/* Fila 2: Contenido */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <Select value={selectedRegion} onValueChange={onRegionChange}>
               <SelectTrigger>
@@ -71,33 +85,22 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               <Input 
                 type="number" 
                 placeholder="10.00" 
-                value={localAmount} 
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setLocalAmount(newValue);
-                  // No actualizamos el padre hasta que se done
-                }} 
+                value={desktopLocalAmount} 
+                onChange={(e) => setDesktopLocalAmount(e.target.value)} 
                 disabled={isTransacting || isApproving}
                 className="flex-1"
               />
               <Button 
                 onClick={async () => {
-                  console.log('🔍 [DonationPopover] Botón clickeado - Monto:', localAmount);
-                  // Actualizar el padre con el monto local
-                  onAmountChange(localAmount);
-                  // Pequeña pausa para asegurar que el padre actualice
-                  await new Promise(resolve => setTimeout(resolve, 50));
-                  await onDonate();
-                  console.log('🔍 [DonationPopover] onDonate completado');
+                  console.log('🔍 [DonationPopover] Desktop - Monto:', desktopLocalAmount)
+                  onAmountChange(desktopLocalAmount)
+                  await new Promise(resolve => setTimeout(resolve, 50))
+                  await onDonate()
                   if (onRefreshBalance) {
-                    console.log('🔍 [DonationPopover] Ejecutando onRefreshBalance en 3 segundos...');
-                    setTimeout(() => {
-                      console.log('🔍 [DonationPopover] Llamando a onRefreshBalance ahora');
-                      onRefreshBalance();
-                    }, 3000);
+                    setTimeout(() => onRefreshBalance(), 3000)
                   }
                 }}
-                disabled={isTransacting || isApproving || !localAmount || parseFloat(localAmount) <= 0}
+                disabled={isTransacting || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) <= 0}
                 className="whitespace-nowrap"
               >
                 {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
@@ -109,21 +112,11 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
     )
   }
 
-  // Versión móvil: botón flotante con pop-up (usando ref para evitar re-renders)
-  const localAmountRef = useRef(donationAmount);
-  const [localAmountState, setLocalAmountState] = useState(donationAmount);
-  
-  // Sincronizar cuando el padre cambia (ej: después de limpiar)
-  useEffect(() => {
-    localAmountRef.current = donationAmount;
-    setLocalAmountState(donationAmount);
-  }, [donationAmount]);
-  
-  const handleAmountChange = (newValue: string) => {
-    localAmountRef.current = newValue;
-    setLocalAmountState(newValue);
-    // No actualizamos el padre hasta que se done
-  };
+  // Versión móvil
+  const handleMobileAmountChange = (newValue: string) => {
+    mobileLocalAmountRef.current = newValue
+    setMobileLocalAmountState(newValue)
+  }
   
   return (
     <>
@@ -147,23 +140,20 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
             <div><Label className="text-xs">{labels.amount}</Label><Input 
               type="number" 
               placeholder="10.00" 
-              value={localAmountState} 
-              onChange={(e) => { 
-                handleAmountChange(e.target.value);
-              }} 
+              value={mobileLocalAmountState} 
+              onChange={(e) => handleMobileAmountChange(e.target.value)} 
               disabled={isTransacting || isApproving} 
             /></div>
             <Button size="sm" className="w-full" onClick={async () => {
-              // Usar el valor del ref para donar
-              const amountToDonate = localAmountRef.current;
-              onAmountChange(amountToDonate);
-              await new Promise(resolve => setTimeout(resolve, 50));
-              await onDonate();
-              console.log('🔍 [DonationPopover-mobile] onDonate completado');
+              const amountToDonate = mobileLocalAmountRef.current
+              console.log('🔍 [DonationPopover] Mobile - Monto:', amountToDonate)
+              onAmountChange(amountToDonate)
+              await new Promise(resolve => setTimeout(resolve, 50))
+              await onDonate()
               if (onRefreshBalance) {
-                setTimeout(() => onRefreshBalance(), 3000);
+                setTimeout(() => onRefreshBalance(), 3000)
               }
-            }} disabled={isTransacting || isApproving || !localAmountRef.current || parseFloat(localAmountRef.current) <= 0}>
+            }} disabled={isTransacting || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) <= 0}>
               {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
             </Button>
           </div>
