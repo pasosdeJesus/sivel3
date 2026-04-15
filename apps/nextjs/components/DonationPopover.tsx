@@ -27,37 +27,55 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
 
   if (!isConnected) return null
 
-  // Versión desktop: card con input box y balance en misma línea
+  // Versión desktop: layout 3 filas × 3 columnas
   if (variant === 'desktop') {
     return (
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">❤️ {labels.approve}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div><Label>{labels.cause}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
-          <div className="flex justify-between items-center">
-            <span className="font-medium">{labels.availableFunds}</span>
-            <span className="text-lg font-bold text-green-600">
-              {regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}
-            </span>
+          {/* Fila 1: Títulos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-sm font-medium text-gray-600">{labels.cause}</div>
+            <div className="text-sm font-medium text-gray-600">{labels.availableFunds}</div>
+            <div className="text-sm font-medium text-gray-600">{labels.amount}</div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input 
-              type="number" 
-              placeholder="10.00" 
-              value={donationAmount} 
-              onChange={(e) => onAmountChange(e.target.value)} 
-              disabled={isTransacting || isApproving}
-              className="flex-1"
-            />
-            <Button 
-              onClick={onDonate} 
-              disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
-              className="whitespace-nowrap"
-            >
-              {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
-            </Button>
+          
+          {/* Fila 2: Contenido */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <Select value={selectedRegion} onValueChange={onRegionChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {donationRegions.map(r => (
+                  <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <div className="text-xl font-bold text-green-600">
+              {regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}
+            </div>
+            
+            <div className="flex gap-2">
+              <Input 
+                type="number" 
+                placeholder="10.00" 
+                value={donationAmount} 
+                onChange={(e) => onAmountChange(e.target.value)} 
+                disabled={isTransacting || isApproving}
+                className="flex-1"
+              />
+              <Button 
+                onClick={onDonate} 
+                disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}
+                className="whitespace-nowrap"
+              >
+                {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
