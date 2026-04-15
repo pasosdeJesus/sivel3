@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useWallet } from '@/contexts/WalletContext'
+import { useState, useEffect } from 'react'
 
 interface FooterProps {
   lang?: string
@@ -18,6 +19,11 @@ export default function Footer({
   showWalletStatus = true,
 }: FooterProps) {
   const { isConnected } = useWallet()
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <footer className="mt-8 border-t border-gray-200 bg-white py-6">
@@ -37,8 +43,8 @@ export default function Footer({
           </div>
 
           <div className="flex items-center gap-4">
-            {showWalletStatus &&
-              (isConnected ? (
+            {showWalletStatus && mounted && (
+              isConnected ? (
                 <Badge
                   variant="outline"
                   className="text-green-600 border-green-200"
@@ -56,7 +62,13 @@ export default function Footer({
                     ' Conecta una billetera web3 para funciones avanzadas' : 
                     ' Connect a web3 wallet to have advanced functions'}
                 </Badge>
-              ))}
+              )
+            )}
+            {showWalletStatus && !mounted && (
+              <Badge variant="outline" className="text-gray-400 border-gray-200">
+                ⏳ {lang == 'es' ? 'Cargando...' : 'Loading...'}
+              </Badge>
+            )}
 
             <Badge variant="secondary">OpenStreetMap</Badge>
             <Badge variant="secondary">Celo Network</Badge>
