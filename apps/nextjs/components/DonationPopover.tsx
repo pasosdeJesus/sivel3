@@ -114,8 +114,15 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
             <div><Label className="text-xs">{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => { const newValue = e.target.value; onAmountChange(newValue); }} disabled={isTransacting || isApproving} /></div>
             <Button size="sm" className="w-full" onClick={async () => {
               await onDonate();
+              console.log('🔍 [DonationPopover-mobile] onDonate completado, onRefreshBalance existe?', !!onRefreshBalance);
               if (onRefreshBalance) {
-                setTimeout(() => onRefreshBalance(), 3000);
+                console.log('🔍 [DonationPopover-mobile] Ejecutando onRefreshBalance en 3 segundos...');
+                setTimeout(() => {
+                  console.log('🔍 [DonationPopover-mobile] Llamando a onRefreshBalance ahora');
+                  onRefreshBalance();
+                }, 3000);
+              } else {
+                console.log('🔍 [DonationPopover-mobile] ❌ onRefreshBalance NO está definido!');
               }
             }} disabled={isTransacting || isApproving}>{isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}</Button>
           </div>
