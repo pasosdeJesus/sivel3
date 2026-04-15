@@ -55,6 +55,13 @@ export default function OSMMapPage() {
 
   // Balance regional
   const { regionBalance, balanceLoading, fetchBalance } = useRegionBalance(selectedRegion);
+  
+  // Cargar balance inicial cuando hay región seleccionada
+  useEffect(() => {
+    if (selectedRegion) {
+      fetchBalance(selectedRegion);
+    }
+  }, [selectedRegion, fetchBalance]);
 
   // Donación
   const { isApproving, handleDonate } = useDonation({
@@ -69,21 +76,10 @@ export default function OSMMapPage() {
     }
   });
   
-  // Función para refrescar balance después de donar (especialmente en móvil)
+  // Función para refrescar balance después de donar (con confetti y toast)
   const refreshBalanceAfterDonation = () => {
     if (selectedRegion) {
-      fetchBalance(selectedRegion);
-    }
-  };
-
-  // Refrescar balance después de una transacción
-  const prevIsTransactingRef = useRef(isTransacting);
-  const hasDonatedRef = useRef(false);
-  
-  useEffect(() => {
-    if (prevIsTransactingRef.current === true && isTransacting === false && selectedRegion && !hasDonatedRef.current) {
-      hasDonatedRef.current = true;
-      
+      // Confetti
       confetti({
         particleCount: 150,
         spread: 70,
@@ -91,6 +87,7 @@ export default function OSMMapPage() {
         colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
       });
       
+      // Toast de agradecimiento
       const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
                         (currentLocale === 'es' ? 'la región' : 'the region');
       
@@ -102,15 +99,16 @@ export default function OSMMapPage() {
         duration: 4000,
       });
       
+      // Refrescar balance después de 3 segundos
       setTimeout(() => {
         fetchBalance(selectedRegion);
-        setTimeout(() => {
-          hasDonatedRef.current = false;
-        }, 5000);
       }, 3000);
     }
-    prevIsTransactingRef.current = isTransacting;
-  }, [isTransacting, selectedRegion, donationAmount, donationRegions, toast, t.thanksTitle, t.thanksMessage, currentLocale, fetchBalance]);
+  };
+
+  // El refresh de balance ahora lo maneja DonationPopover con onRefreshBalance
+  // Solo mantenemos confetti y toast para desktop (pero DonationPopover ya los tiene)
+  // Este efecto se elimina para evitar duplicación
 
   if (loading) {
     return (

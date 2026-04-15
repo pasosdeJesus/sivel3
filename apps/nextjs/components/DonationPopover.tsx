@@ -76,7 +76,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                 onClick={async () => {
                   await onDonate();
                   if (onRefreshBalance) {
-                    setTimeout(() => onRefreshBalance(), 3000);
+                    setTimeout(() => onRefreshBalance(), 5000);
                   }
                 }} 
                 disabled={isTransacting || isApproving || !donationAmount || parseFloat(donationAmount) <= 0}

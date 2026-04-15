@@ -38,12 +38,9 @@ export function useRegionBalance(selectedRegion: string | null) {
     attempt(retries);
   }, []);
 
-  // Cargar balance cuando cambia la región
-  useEffect(() => {
-    if (selectedRegion) {
-      fetchBalance(selectedRegion);
-    }
-  }, [selectedRegion, fetchBalance]);
+  // No cargar balance automáticamente al cambiar la región
+  // El balance se carga explícitamente desde el componente padre
+  // Esto evita refrescos duplicados durante transacciones
 
   return {
     regionBalance,
