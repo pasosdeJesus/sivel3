@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -101,6 +101,13 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
   }
 
   // Versión móvil: botón flotante con pop-up
+  const [localAmount, setLocalAmount] = useState(donationAmount);
+  
+  // Sincronizar cuando el padre cambia (ej: después de limpiar)
+  useEffect(() => {
+    setLocalAmount(donationAmount);
+  }, [donationAmount]);
+  
   return (
     <>
       <Button
@@ -120,7 +127,17 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
           <div className="p-3 space-y-3">
             <div><Label className="text-xs">{labels.cause}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
             <div><Label className="text-xs">{labels.availableFunds}</Label><div className="text-lg font-bold text-green-600">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
-            <div><Label className="text-xs">{labels.amount}</Label><Input type="number" placeholder="10.00" value={donationAmount} onChange={(e) => { const newValue = e.target.value; onAmountChange(newValue); }} disabled={isTransacting || isApproving} /></div>
+            <div><Label className="text-xs">{labels.amount}</Label><Input 
+              type="number" 
+              placeholder="10.00" 
+              value={localAmount} 
+              onChange={(e) => { 
+                const newValue = e.target.value; 
+                setLocalAmount(newValue);
+                onAmountChange(newValue);
+              }} 
+              disabled={isTransacting || isApproving} 
+            /></div>
             <Button size="sm" className="w-full" onClick={async () => {
               await onDonate();
               console.log('🔍 [DonationPopover-mobile] onDonate completado, onRefreshBalance existe?', !!onRefreshBalance);
