@@ -1,21 +1,10 @@
-import { redirect } from 'next/navigation';
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-
-export const metadata: Metadata = {
-  title: 'SIVEL 3',
-  description: 'Information System of Political Violence',
-}
-
-const inter = Inter({ subsets: ['latin'] })
-
-// RootLayout para toda la aplicación (incluyendo raíz y rutas con locale)
 import { Inter } from 'next/font/google'
 import '@/app/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'SIVEL 3',
   description: 'Information System of Political Violence',
 }
