@@ -14,12 +14,21 @@ export default async function RootLayout({
   params
 }: Readonly<{
   children: React.ReactNode
-  params: Promise<{ locale: string }>
+  params?: Promise<{ locale: string }>
 }>) {
 
-  const { locale } = await params
-  const lang = typeof locale != "undefined" && 
-    ["en", "es"].includes(locale) ? locale : "en"
+  let lang = 'en';
+  if (params) {
+    try {
+      const { locale } = await params;
+      if (locale && ['en', 'es'].includes(locale)) {
+        lang = locale;
+      }
+    } catch (e) {
+      // Si no hay params (raíz), usar 'en'
+    }
+  }
+  
   return (
     <html lang={lang}>
       <head>
