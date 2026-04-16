@@ -90,8 +90,8 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Stats placeholder - se pueden conectar a datos reales después */}
-        <div className="max-w-4xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        {/* Stats - casos y regiones */}
+        <div className="max-w-4xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
           <div className="p-6 bg-white rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-blue-600">~500</div>
             <div className="text-gray-600 mt-2">{content.stats.cases}</div>
@@ -99,10 +99,6 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
           <div className="p-6 bg-white rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-blue-600">2</div>
             <div className="text-gray-600 mt-2">{content.stats.regions}</div>
-          </div>
-          <div className="p-6 bg-white rounded-xl shadow-sm">
-            <div className="text-3xl font-bold text-blue-600">850+</div>
-            <div className="text-gray-600 mt-2">{content.stats.donations}</div>
           </div>
         </div>
 
