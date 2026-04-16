@@ -27,6 +27,11 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // La raíz (/) se maneja en app/page.tsx, no la toca el middleware
+  if (pathname === '/') {
+    return NextResponse.next()
+  }
+  
   // Verificar si ya tiene locale
   const pathnameHasLocale = locales.some(
     locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
