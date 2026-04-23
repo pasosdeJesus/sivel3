@@ -318,8 +318,34 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       
       logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
       return txHash
-    } catch (err) {
-      logMsg(`❌ Error: ${err}`)
+    } catch (err: any) {
+      logMsg(`❌ Error detectado en donateWithData:`)
+      
+      // Intentar extraer información útil del error
+      if (err?.message) {
+        logMsg(`   Mensaje: ${err.message}`)
+      }
+      if (err?.code) {
+        logMsg(`   Código: ${err.code}`)
+      }
+      if (err?.data) {
+        logMsg(`   Data: ${JSON.stringify(err.data)}`)
+      }
+      if (err?.stack) {
+        logMsg(`   Stack: ${err.stack.substring(0, 200)}...`)
+      }
+      
+      // Si el error es un objeto, intentar serializarlo
+      if (typeof err === 'object' && err !== null) {
+        try {
+          const serialized = JSON.stringify(err, Object.getOwnPropertyNames(err))
+          logMsg(`   Serializado: ${serialized.substring(0, 300)}`)
+        } catch (e) {
+          logMsg(`   No se pudo serializar el error`)
+        }
+      }
+      
+      logMsg(`   Error original: ${String(err)}`)
       throw err
     }
   }, [effectiveAddress])
