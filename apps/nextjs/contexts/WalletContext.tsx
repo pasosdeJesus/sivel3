@@ -53,6 +53,7 @@ interface WalletContextType {
   disconnect: () => void
   approveUSDT: (spender: `0x${string}`, amount: string) => Promise<`0x${string}`>
   donateToRegion: (regionId: number, amount: string) => Promise<void>
+  donateWithData: (regionId: number, amount: string) => Promise<string>
   isTransacting: boolean
   error: Error | null
   // Nuevas propiedades para MiniPay
@@ -177,7 +178,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     })
   }, [writeContract])
 
-  const donateToRegion = useCallback(async (regionId: number, amount: string) => {
+  // Función legacy para wallets tradicionales
+  const donateToRegion = useCallback(async (regionId: number, amount: string): Promise<void> => {
     logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}, isMiniPay: ${isMiniPay}`, 'Donate')
     
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
@@ -190,53 +192,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     
     const amountInSmallestUnit = parseUnits(amount, 6)
     
-    // Para MiniPay: usar sendTransaction directo
-    if (isMiniPay && typeof window !== 'undefined' && window.ethereum) {
-      logger.info('MiniPay detectado, usando sendTransaction directo...', 'Donate')
-      
-      // Codificar los datos de la función donate(uint256,uint256)
-      const { encodeFunctionData } = await import('viem')
-      const data = encodeFunctionData({
-        abi: regionalDonationAbi,
-        functionName: 'donate',
-        args: [BigInt(regionId), amountInSmallestUnit]
-      })
-      
-      logger.info(`Data encodeada: ${data}`, 'Donate')
-      
-      const txParams = {
-        from: effectiveAddress,
-        to: regionalDonationContractAddress,
-        data: data,
-        value: '0x0',
-      }
-      
-      try {
-        const ethereum = window.ethereum as any
-        
-        if (typeof ethereum.request !== 'function') {
-          logger.error('ethereum.request no es una función', 'Donate')
-          throw new Error('MiniPay provider no está completamente inicializado')
-        }
-        
-        logger.info('Enviando transacción con eth_sendTransaction...', 'Donate')
-        const txHash = await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [txParams],
-        })
-        
-        logger.success(`Transacción enviada. Hash: ${txHash}`, 'Donate')
-        return txHash
-      } catch (sendErr: any) {
-        logger.error(`sendTransaction falló: ${sendErr.message}`, 'Donate')
-        throw sendErr
-      }
-    }
-    
-    // Para wallets normales: usar writeContract (igual que approve)
+    // Para wallets normales: usar writeContract
     logger.info('Usando writeContract para donate...', 'Donate')
     
-    // Devolver una promesa que se resuelve cuando la transacción es confirmada
     return new Promise((resolve, reject) => {
       writeContract({
         address: regionalDonationContractAddress,
@@ -244,9 +202,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         functionName: 'donate',
         args: [BigInt(regionId), amountInSmallestUnit],
       }, {
-        onSuccess: (hash) => {
-          logger.success(`donate transaction confirmed! Hash: ${hash}`, 'Donate')
-          resolve(hash)
+        onSuccess: () => {
+          logger.success(`donate transaction confirmed!`, 'Donate')
+          resolve()
         },
         onError: (error) => {
           logger.error(`donate transaction failed: ${error.message}`, 'Donate')
@@ -254,7 +212,91 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       })
     })
-  }, [effectiveAddress, isMiniPay, writeContract])
+  }, [writeContract])
+
+  // NUEVA FUNCIÓN: MiniPay con backend (transferencia USDT + assignDonation)
+  const donateWithData = useCallback(async (regionId: number, amount: string) => {
+    const logMsg = (msg: string) => {
+      console.log(`🔍 [donateWithData] ${msg}`)
+      logger.info(msg, 'Donate')
+    }
+    
+    logMsg(`Iniciando - Región: ${regionId}, Monto: ${amount}`)
+    
+    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
+    const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
+    
+    if (!regionalDonationContractAddress || !usdtContractAddress) {
+      const errorMsg = "Contract addresses not configured"
+      logMsg(`❌ ${errorMsg}`)
+      throw new Error(errorMsg)
+    }
+    
+    logMsg(`✅ Contract addresses: USDT=${usdtContractAddress}, Donation=${regionalDonationContractAddress}`)
+    
+    const amountInSmallestUnit = parseUnits(amount, 6)
+    logMsg(`Monto en unidades pequeñas: ${amountInSmallestUnit.toString()}`)
+    
+    // Codificar el data con el regionId (32 bytes)
+    const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
+    logMsg(`RegionId hex: ${regionIdHex}`)
+    
+    // Codificar transferencia ERC-20: transfer(address to, uint256 amount)
+    const transferSelector = '0xa9059cbb'
+    const toHex = regionalDonationContractAddress.slice(2).toLowerCase().padStart(64, '0')
+    const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
+    const transferData = transferSelector + toHex + amountHex + regionIdHex
+    
+    logMsg(`Transfer data (primeros 100 chars): ${transferData.substring(0, 100)}...`)
+    
+    if (typeof window === 'undefined' || !window.ethereum) {
+      logMsg(`❌ No hay wallet disponible`)
+      throw new Error('No wallet provider available')
+    }
+    
+    const ethereum = window.ethereum as any
+    const txParams = {
+      from: effectiveAddress,
+      to: usdtContractAddress,
+      data: transferData,
+      value: '0x0',
+    }
+    
+    try {
+      logMsg(`🔄 Enviando transacción a MiniPay...`)
+      const txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+      })
+      
+      logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
+      
+      // Llamar al backend para asignar la donación
+      logMsg(`🔄 Llamando al backend para asignar donación...`)
+      const response = await fetch('/api/donations/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          regionId,
+          donor: effectiveAddress,
+          amount,
+          txHash,
+        }),
+      })
+      
+      const result = await response.json()
+      if (!response.ok) {
+        logMsg(`❌ Backend error: ${result.error}`)
+        throw new Error(result.error || 'Error al asignar donación')
+      }
+      
+      logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
+      return txHash
+    } catch (err) {
+      logMsg(`❌ Error: ${err}`)
+      throw err
+    }
+  }, [effectiveAddress])
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
@@ -263,6 +305,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     disconnect,
     approveUSDT,
     donateToRegion,
+    donateWithData,
     isTransacting: isPending,
     error,
     isMiniPay,

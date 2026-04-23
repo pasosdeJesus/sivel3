@@ -33,7 +33,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, approveUSDT, donateToRegion, isTransacting, isMiniPay } = useWallet();
+  const { isConnected, approveUSDT, donateToRegion, donateWithData, isTransacting, isMiniPay } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -125,6 +125,13 @@ export default function OSMMapPage() {
     );
   }
 
+  // Seleccionar la función de donación según el tipo de wallet
+  const donateFunction = isMiniPay 
+    ? async (amount: string) => {
+        await donateWithData(parseInt(selectedRegion, 10), amount);
+      }
+    : (amount: string) => handleDonate(amount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount);
+  
   const commonProps = {
     counts,
     filters,
@@ -142,7 +149,7 @@ export default function OSMMapPage() {
     onApplyFilters: applyFilters,
     onRegionChange: setSelectedRegion,
     onAmountChange: setDonationAmount,
-    onDonate: (amount: string) => handleDonate(amount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount),
+    onDonate: donateFunction,
     onRefreshBalance: refreshBalanceAfterDonation,
     t,
     MapComponent,
