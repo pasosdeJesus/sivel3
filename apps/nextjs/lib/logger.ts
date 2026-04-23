@@ -1,3 +1,5 @@
+'use client'
+
 // lib/logger.ts
 // Sistema de logging unificado para SIVeL 3
 
