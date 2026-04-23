@@ -1,5 +1,7 @@
 
 import { ethers } from "hardhat";
+import dotenv from "dotenv"
+dotenv.config({ path: '../.env' })
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -7,25 +9,19 @@ async function main() {
     `Deploying and setting up contracts with the account: ${deployer.address}`
   );
 
-  // Deploy MockUSDT contract
-  const mockUSDTFactory = await ethers.getContractFactory("MockUSDT");
-  const mockUSDT = await mockUSDTFactory.deploy();
-  await mockUSDT.waitForDeployment();
-  const mockUSDTAddress = await mockUSDT.getAddress();
-  console.log(`MockUSDT contract deployed to: ${mockUSDTAddress}`);
-
   // Deploy RegionalDonation contract
   const regionalDonationFactory = await ethers.getContractFactory(
-    "RegionalDonation"
+    "SIVeL3RegionalDonationV2"
   );
+  console.log("usdt_address=", process.env.NEXT_PUBLIC_USDT_ADDRESS)
   const regionalDonation = await regionalDonationFactory.deploy(
-    mockUSDTAddress,
+    process.env.NEXT_PUBLIC_USDT_ADDRESS,
     deployer.address
   );
   await regionalDonation.waitForDeployment();
   const regionalDonationAddress = await regionalDonation.getAddress();
   console.log(
-    `RegionalDonation contract deployed to: ${regionalDonationAddress}`
+    `SIVeL3RegionalDonationV2 contract deployed to: ${regionalDonationAddress}`
   );
 
   // Set the regions

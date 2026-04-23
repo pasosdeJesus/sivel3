@@ -1,4 +1,0 @@
-#!/bin/sh
-
-. ../.env
-node_modules/.bin/hardhat run scripts/deployRegionalDonations.ts --network $NEXT_PUBLIC_NETWORK

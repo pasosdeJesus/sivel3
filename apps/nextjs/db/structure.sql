@@ -2,12 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.10
--- Dumped by pg_dump version 15.10
+\restrict gr2eOFEqpAQaPXCYBW4QYnfvaQsyAPHn7j98enN8xju1TcevaJxju6SAChDKnDC
+
+-- Dumped from database version 17.9
+-- Dumped by pg_dump version 17.9
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -2832,11 +2835,11 @@ UNION
 --
 
 CREATE MATERIALIZED VIEW public.msip_mundep AS
- SELECT msip_mundep_sinorden.idlocal,
-    msip_mundep_sinorden.nombre,
-    to_tsvector('spanish'::regconfig, public.unaccent(msip_mundep_sinorden.nombre)) AS mundep
+ SELECT idlocal,
+    nombre,
+    to_tsvector('spanish'::regconfig, public.unaccent(nombre)) AS mundep
    FROM public.msip_mundep_sinorden
-  ORDER BY (msip_mundep_sinorden.nombre COLLATE public.es_co_utf_8)
+  ORDER BY (nombre COLLATE public.es_co_utf_8)
   WITH NO DATA;
 
 
@@ -3532,13 +3535,13 @@ ALTER SEQUENCE public.msip_vereda_id_seq OWNED BY public.msip_vereda.id;
 --
 
 CREATE MATERIALIZED VIEW public.napellidos AS
- SELECT s.apellido,
+ SELECT apellido,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.apellidos)::text), ' '::text)) AS apellido
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE (sivel2_gen_victima.persona_id = msip_persona.id)) s
-  GROUP BY s.apellido
+  GROUP BY apellido
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3548,13 +3551,13 @@ CREATE MATERIALIZED VIEW public.napellidos AS
 --
 
 CREATE MATERIALIZED VIEW public.nhombres AS
- SELECT s.nombre,
+ SELECT nombre,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.nombres)::text), ' '::text)) AS nombre
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE ((sivel2_gen_victima.persona_id = msip_persona.id) AND (msip_persona.sexo = 'M'::bpchar))) s
-  GROUP BY s.nombre
+  GROUP BY nombre
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3564,13 +3567,13 @@ CREATE MATERIALIZED VIEW public.nhombres AS
 --
 
 CREATE MATERIALIZED VIEW public.nmujeres AS
- SELECT s.nombre,
+ SELECT nombre,
     count(*) AS frec
    FROM ( SELECT public.divarr(string_to_array(btrim((msip_persona.nombres)::text), ' '::text)) AS nombre
            FROM public.msip_persona,
             public.sivel2_gen_victima
           WHERE ((sivel2_gen_victima.persona_id = msip_persona.id) AND (msip_persona.sexo = 'F'::bpchar))) s
-  GROUP BY s.nombre
+  GROUP BY nombre
   ORDER BY (count(*))
   WITH NO DATA;
 
@@ -3683,8 +3686,8 @@ UNION
 --
 
 CREATE MATERIALIZED VIEW public.persona_nomap AS
- SELECT msip_persona.id,
-    upper(btrim(((btrim((msip_persona.nombres)::text) || ' '::text) || btrim((msip_persona.apellidos)::text)))) AS nomap
+ SELECT id,
+    upper(btrim(((btrim((nombres)::text) || ' '::text) || btrim((apellidos)::text)))) AS nomap
    FROM public.msip_persona
   WITH NO DATA;
 
@@ -3697,8 +3700,8 @@ CREATE TABLE public.region (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     name_es character varying(255) NOT NULL,
-    created_at timestamp without time zone DEFAULT '2026-02-24 00:34:54.793151'::timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2026-02-24 00:34:54.793151'::timestamp without time zone NOT NULL
+    created_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL
 );
 
 
@@ -4114,9 +4117,9 @@ CREATE TABLE public.sivel2_gen_presponsable (
 --
 
 CREATE VIEW public.sivel2_gen_conscaso1 AS
- SELECT caso.id AS caso_id,
-    caso.fecha,
-    caso.memo,
+ SELECT id AS caso_id,
+    fecha,
+    memo,
     array_to_string(ARRAY( SELECT (((COALESCE(departamento.nombre, ''::character varying))::text || ' / '::text) || (COALESCE(municipio.nombre, ''::character varying))::text)
            FROM ((public.msip_ubicacion ubicacion
              LEFT JOIN public.msip_departamento departamento ON ((ubicacion.departamento_id = departamento.id)))
@@ -4143,15 +4146,15 @@ CREATE VIEW public.sivel2_gen_conscaso1 AS
 --
 
 CREATE MATERIALIZED VIEW public.sivel2_gen_conscaso AS
- SELECT sivel2_gen_conscaso1.caso_id,
-    sivel2_gen_conscaso1.fecha,
-    sivel2_gen_conscaso1.memo,
-    sivel2_gen_conscaso1.ubicaciones,
-    sivel2_gen_conscaso1.victimas,
-    sivel2_gen_conscaso1.presponsables,
-    sivel2_gen_conscaso1.tipificacion,
+ SELECT caso_id,
+    fecha,
+    memo,
+    ubicaciones,
+    victimas,
+    presponsables,
+    tipificacion,
     now() AS ultimo_refresco,
-    to_tsvector('spanish'::regconfig, public.unaccent(((((((((((((sivel2_gen_conscaso1.caso_id || ' '::text) || replace(((sivel2_gen_conscaso1.fecha)::character varying)::text, '-'::text, ' '::text)) || ' '::text) || sivel2_gen_conscaso1.memo) || ' '::text) || sivel2_gen_conscaso1.ubicaciones) || ' '::text) || sivel2_gen_conscaso1.victimas) || ' '::text) || sivel2_gen_conscaso1.presponsables) || ' '::text) || sivel2_gen_conscaso1.tipificacion))) AS q
+    to_tsvector('spanish'::regconfig, public.unaccent(((((((((((((caso_id || ' '::text) || replace(((fecha)::character varying)::text, '-'::text, ' '::text)) || ' '::text) || memo) || ' '::text) || ubicaciones) || ' '::text) || victimas) || ' '::text) || presponsables) || ' '::text) || tipificacion))) AS q
    FROM public.sivel2_gen_conscaso1
   WITH NO DATA;
 
@@ -5030,6 +5033,41 @@ CREATE TABLE public.sivel2_gen_vinculoestado (
 
 
 --
+-- Name: userevent; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.userevent (
+    id integer NOT NULL,
+    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
+    type text NOT NULL,
+    path text,
+    amount numeric,
+    currency text,
+    metadata jsonb
+);
+
+
+--
+-- Name: userevent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.userevent_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: userevent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.userevent_id_seq OWNED BY public.userevent.id;
+
+
+--
 -- Name: heb412_gen_campohc id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5377,6 +5415,13 @@ ALTER TABLE ONLY public.sivel2_gen_profesion_victima ALTER COLUMN id SET DEFAULT
 --
 
 ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextval('public.sivel2_gen_resagresion_id_seq'::regclass);
+
+
+--
+-- Name: userevent id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userevent ALTER COLUMN id SET DEFAULT nextval('public.userevent_id_seq'::regclass);
 
 
 --
@@ -6500,6 +6545,14 @@ ALTER TABLE ONLY public.sivel2_gen_tviolencia
 
 
 --
+-- Name: userevent userevent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userevent
+    ADD CONSTRAINT userevent_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: usuario usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7147,19 +7200,11 @@ CREATE TRIGGER tras_crear_o_actualizar_ubicacionpre BEFORE INSERT OR UPDATE OF p
 
 
 --
--- Name: sivel2_gen_supracategoria $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: msip_centropoblado $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_supracategoria
-    ADD CONSTRAINT "$1" FOREIGN KEY (tviolencia_id) REFERENCES public.sivel2_gen_tviolencia(id);
-
-
---
--- Name: sivel2_gen_victimacolectiva $1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_victimacolectiva
-    ADD CONSTRAINT "$1" FOREIGN KEY (organizacionarmada) REFERENCES public.sivel2_gen_presponsable(id);
+ALTER TABLE ONLY public.msip_centropoblado
+    ADD CONSTRAINT "$1" FOREIGN KEY (tcentropoblado_id) REFERENCES public.msip_tcentropoblado(id);
 
 
 --
@@ -7171,10 +7216,10 @@ ALTER TABLE ONLY public.sivel2_gen_caso
 
 
 --
--- Name: sivel2_gen_caso_presponsable $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_fotra $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
+ALTER TABLE ONLY public.sivel2_gen_caso_fotra
     ADD CONSTRAINT "$1" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
 
 
@@ -7187,14 +7232,6 @@ ALTER TABLE ONLY public.sivel2_gen_caso_frontera
 
 
 --
--- Name: sivel2_gen_victima $1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_victima
-    ADD CONSTRAINT "$1" FOREIGN KEY (profesion_id) REFERENCES public.sivel2_gen_profesion(id);
-
-
---
 -- Name: sivel2_gen_caso_fuenteprensa $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7203,27 +7240,35 @@ ALTER TABLE ONLY public.sivel2_gen_caso_fuenteprensa
 
 
 --
--- Name: sivel2_gen_caso_fotra $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_presponsable $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_fotra
+ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
     ADD CONSTRAINT "$1" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
 
 
 --
--- Name: msip_centropoblado $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_supracategoria $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.msip_centropoblado
-    ADD CONSTRAINT "$1" FOREIGN KEY (tcentropoblado_id) REFERENCES public.msip_tcentropoblado(id);
+ALTER TABLE ONLY public.sivel2_gen_supracategoria
+    ADD CONSTRAINT "$1" FOREIGN KEY (tviolencia_id) REFERENCES public.sivel2_gen_tviolencia(id);
 
 
 --
--- Name: sivel2_gen_caso_presponsable $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_victima $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
-    ADD CONSTRAINT "$2" FOREIGN KEY (presponsable_id) REFERENCES public.sivel2_gen_presponsable(id);
+ALTER TABLE ONLY public.sivel2_gen_victima
+    ADD CONSTRAINT "$1" FOREIGN KEY (profesion_id) REFERENCES public.sivel2_gen_profesion(id);
+
+
+--
+-- Name: sivel2_gen_victimacolectiva $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_victimacolectiva
+    ADD CONSTRAINT "$1" FOREIGN KEY (organizacionarmada) REFERENCES public.sivel2_gen_presponsable(id);
 
 
 --
@@ -7235,26 +7280,18 @@ ALTER TABLE ONLY public.sivel2_gen_caso_categoria_presponsable
 
 
 --
+-- Name: sivel2_gen_caso_fotra $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_caso_fotra
+    ADD CONSTRAINT "$2" FOREIGN KEY (fotra_id) REFERENCES public.sivel2_gen_fotra(id);
+
+
+--
 -- Name: sivel2_gen_caso_frontera $2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sivel2_gen_caso_frontera
-    ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
-
-
---
--- Name: sivel2_gen_victima $2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_victima
-    ADD CONSTRAINT "$2" FOREIGN KEY (rangoedad_id) REFERENCES public.sivel2_gen_rangoedad(id);
-
-
---
--- Name: sivel2_gen_caso_usuario $2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_caso_usuario
     ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
 
 
@@ -7267,11 +7304,27 @@ ALTER TABLE ONLY public.sivel2_gen_caso_fuenteprensa
 
 
 --
--- Name: sivel2_gen_caso_fotra $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_presponsable $2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_fotra
-    ADD CONSTRAINT "$2" FOREIGN KEY (fotra_id) REFERENCES public.sivel2_gen_fotra(id);
+ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
+    ADD CONSTRAINT "$2" FOREIGN KEY (presponsable_id) REFERENCES public.sivel2_gen_presponsable(id);
+
+
+--
+-- Name: sivel2_gen_caso_usuario $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_caso_usuario
+    ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
+
+
+--
+-- Name: sivel2_gen_victima $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_victima
+    ADD CONSTRAINT "$2" FOREIGN KEY (rangoedad_id) REFERENCES public.sivel2_gen_rangoedad(id);
 
 
 --
@@ -8661,4 +8714,6 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict gr2eOFEqpAQaPXCYBW4QYnfvaQsyAPHn7j98enN8xju1TcevaJxju6SAChDKnDC
 
