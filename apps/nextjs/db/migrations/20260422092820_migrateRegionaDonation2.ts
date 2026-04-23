@@ -69,6 +69,9 @@ export async function up(db: Kysely<any>): Promise<void> {
         console.log(`   emergencyWithdraw tx: ${tx}`)
         await publicClient.waitForTransactionReceipt({ hash: tx })
         console.log('   ✅ Contrato V1 drenado')
+    } else if (oldBalances[1] > 0n || oldBalances[2] > 0n) {
+      console.log('   Ya fue drenado')
+      return
     } else {
         console.log('   No hay fondos en el contrato V1')
     }
