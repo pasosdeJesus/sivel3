@@ -262,12 +262,38 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       value: '0x0',
     }
     
+    // Detectar MiniPay para usar el método correcto
+    const isMiniPayEnv = ethereum.isMiniPay === true
+    
     try {
-      logMsg(`🔄 Enviando transacción a MiniPay...`)
-      const txHash = await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [txParams],
-      })
+      logMsg(`🔄 Enviando transacción a ${isMiniPayEnv ? 'MiniPay' : 'wallet'}...`)
+      let txHash: string
+      
+      if (isMiniPayEnv && typeof ethereum.send === 'function') {
+        // MiniPay usa send en lugar de request
+        logMsg(`📱 Usando ethereum.send para MiniPay...`)
+        txHash = await ethereum.send({
+          method: 'eth_sendTransaction',
+          params: [txParams],
+        })
+      } else if (typeof ethereum.request === 'function') {
+        txHash = await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [txParams],
+        })
+      } else {
+        // Fallback: usar sendAsync (legacy)
+        logMsg(`⚠️ Usando sendAsync como fallback...`)
+        txHash = await new Promise((resolve, reject) => {
+          ethereum.sendAsync({
+            method: 'eth_sendTransaction',
+            params: [txParams],
+          }, (err: any, result: any) => {
+            if (err) reject(err)
+            else resolve(result.result)
+          })
+        })
+      }
       
       logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
       
