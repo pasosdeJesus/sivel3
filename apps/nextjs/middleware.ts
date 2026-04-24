@@ -27,8 +27,11 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // La raíz (/) se maneja en app/page.tsx, no la toca el middleware
-  if (pathname === '/') {
+  // EXCLUIR rutas de API y assets de Next.js (inmediatamente, antes de cualquier lógica)
+  if (pathname === '/' || 
+      pathname.startsWith('/api/') || 
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/favicon.ico')) {
     return NextResponse.next()
   }
   
@@ -40,14 +43,15 @@ export function middleware(request: NextRequest) {
   if (pathnameHasLocale) return NextResponse.next()
   
   // Redirigir agregando locale
-  const locale = getLocale(request)
-  // IMPORTANTE: Asegurar que la redirección no cree bucles
-  // Si la ruta ya comienza con /api o /_next, no redirigir
-  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
-    return NextResponse.next()
+  let locale: string
+  try {
+    locale = getLocale(request)
+  } catch (err) {
+    console.error('Middleware locale detection failed:', err)
+    locale = defaultLocale
   }
-  request.nextUrl.pathname = `/${locale}${pathname}`
   
+  request.nextUrl.pathname = `/${locale}${pathname}`
   return NextResponse.redirect(request.nextUrl, { status: 302 })
 }
 
