@@ -91,25 +91,86 @@ export async function donate(params: DonateParams): Promise<string> {
     
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
     
-    // Llamar al backend para asignar la donación
-    logMsg(`🔄 Llamando al backend para asignar donación...`)
-    const response = await fetch('/api/donations/assign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        regionId,
-        donor: effectiveAddress,
-        amount,
-        txHash,
-      }),
-    })
+    // ESPERAR CONFIRMACIÓN (hasta 10 segundos)
+    logMsg(`⏳ Esperando confirmación de la transacción...`)
+    let confirmed = false
     
-    const result = await response.json()
-    if (!response.ok) {
-      logMsg(`❌ Backend error: ${result.error}`)
-      throw new Error(result.error || 'Error al asignar donación')
+    for (let i = 0; i < 15; i++) {
+      try {
+        const receipt = await ethereum.request({
+          method: 'eth_getTransactionReceipt',
+          params: [txHash],
+        })
+        if (receipt) {
+          confirmed = true
+          logMsg(`✅ Transacción confirmada en bloque ${receipt.blockNumber}`)
+          break
+        }
+      } catch (err) {
+        // No hacer nada, solo esperar
+      }
+      await new Promise(r => setTimeout(r, 1000))
     }
     
+    if (!confirmed) {
+      logMsg(`⚠️ No se pudo confirmar la transacción después de 15 segundos, continuando de todos modos...`)
+    }
+    
+    // Llamar al backend para asignar la donación (con reintentos)
+    logMsg(`🔄 Llamando al backend para asignar donación...`)
+    let backendResponse: Response | null = null
+    let lastError: string = ''
+    
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        backendResponse = await fetch('/api/donations/assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            regionId,
+            donor: effectiveAddress,
+            amount,
+            txHash,
+          }),
+        })
+        
+        if (backendResponse.ok) break
+        
+        const errorText = await backendResponse.text()
+        lastError = `HTTP ${backendResponse.status}: ${errorText}`
+        logMsg(`⚠️ Intento ${attempt}/5 falló: ${lastError}`)
+      } catch (err: any) {
+        lastError = err.message
+        logMsg(`⚠️ Intento ${attempt}/5 error: ${lastError}`)
+      }
+      
+      if (attempt < 5) await new Promise(r => setTimeout(r, 2000))
+    }
+    
+    if (!backendResponse || !backendResponse.ok) {
+      // Mensaje de error detallado para el usuario
+      const errorMsg = `⚠️ ERROR EN LA DONACIÓN ⚠️\n\n` +
+        `La transferencia de USDT se realizó correctamente (hash: ${txHash.substring(0, 16)}...), ` +
+        `pero NO se pudo asignar a la región ${regionId}.\n\n` +
+        `Motivo: ${lastError}\n\n` +
+        `📋 Datos para soporte:\n` +
+        `- Región: ${regionId}\n` +
+        `- Monto: ${amount} USDT\n` +
+        `- Donante: ${effectiveAddress}\n` +
+        `- Hash: ${txHash}\n\n` +
+        `Por favor, contacta al equipo con estos datos para que asignen manualmente tu donación.\n` +
+        `Los fondos están seguros en el contrato.`
+      
+      logMsg(`❌ ${errorMsg}`)
+      
+      if (typeof window !== 'undefined') {
+        alert(errorMsg)
+      }
+      
+      throw new Error('Backend assignment failed after retries')
+    }
+    
+    const result = await backendResponse.json()
     logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
     return txHash
   } catch (err: any) {
