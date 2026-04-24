@@ -51,35 +51,30 @@ export async function donate(params: DonateParams): Promise<string> {
     value: '0x0',
   }
   
-  const isMiniPayEnv = ethereum.isMiniPay === true
+  /**
+   * NOTA: Uso de ethereum.send (Abril 2026)
+   * 
+   * Durante la integración de MiniPay, se descubrió que:
+   * - MiniPay NO soporta ethereum.request (error: Cannot read properties of undefined (reading '_request'))
+   * - MiniPay SÍ soporta ethereum.send
+   * 
+   * Para mantener un solo flujo que funcione en todas las wallets (MiniPay, MetaMask, OneKey, etc.),
+   * se decidió usar ethereum.send como método unificado.
+   * 
+   * Referencia: https://github.com/pasosdeJesus/sivel3/issues/24
+   * Fecha de la prueba: 21 de abril de 2026
+   */
+  if (typeof ethereum.send !== 'function') {
+    logMsg(`❌ ethereum.send no está disponible. MiniPay requiere este método.`)
+    throw new Error('Wallet provider no compatible: se requiere ethereum.send (MiniPay no soporta ethereum.request)')
+  }
   
   try {
-    logMsg(`🔄 Enviando transacción a ${isMiniPayEnv ? 'MiniPay' : 'wallet'}...`)
-    let txHash: string
-    
-    if (isMiniPayEnv && typeof ethereum.send === 'function') {
-      logMsg(`📱 Usando ethereum.send para MiniPay...`)
-      txHash = await ethereum.send({
-        method: 'eth_sendTransaction',
-        params: [txParams],
-      })
-    } else if (typeof ethereum.request === 'function') {
-      txHash = await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [txParams],
-      })
-    } else {
-      logMsg(`⚠️ Usando sendAsync como fallback...`)
-      txHash = await new Promise((resolve, reject) => {
-        ethereum.sendAsync({
-          method: 'eth_sendTransaction',
-          params: [txParams],
-        }, (err: any, result: any) => {
-          if (err) reject(err)
-          else resolve(result.result)
-        })
-      })
-    }
+    logMsg(`🔄 Enviando transacción...`)
+    const txHash = await ethereum.send({
+      method: 'eth_sendTransaction',
+      params: [txParams],
+    })
     
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
     
