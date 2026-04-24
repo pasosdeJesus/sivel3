@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, getContract } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
-import { logger } from '@/lib/logger'
+
+// Logger simple para el servidor (no usar el logger del cliente)
+const serverLog = {
+  info: (...args: any[]) => console.log('[INFO]', ...args),
+  error: (...args: any[]) => console.error('[ERROR]', ...args),
+  success: (...args: any[]) => console.log('[SUCCESS]', ...args),
+  warn: (...args: any[]) => console.warn('[WARN]', ...args),
+}
 
 // ABIs
 const ERC20_ABI = [
@@ -73,7 +80,7 @@ async function verifyTransferAndGetRegion(
       // Tomar los últimos 64 caracteres (32 bytes) después de '0x'
       const regionIdHex = dataHex.length >= 66 ? '0x' + dataHex.slice(-64) : '0x0'
       regionId = parseInt(regionIdHex, 16)
-      logger.info(`RegionId extraído del data: ${regionId} (hex: ${regionIdHex})`, 'DonationAssign')
+      serverLog.info(`RegionId extraído del data: ${regionId} (hex: ${regionIdHex})`)
     }
 
     // Buscar eventos Transfer de USDT
@@ -138,7 +145,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { regionId, donor, amount, txHash } = body
 
-    logger.info(`Solicitud de asignación de donación: región=${regionId}, donor=${donor}, amount=${amount}, txHash=${txHash}`, 'DonationAssign')
+    serverLog.info(`Solicitud de asignación de donación: región=${regionId}, donor=${donor}, amount=${amount}, txHash=${txHash}`)
 
     // Validar parámetros
     if (!regionId || !donor || !amount || !txHash) {
@@ -207,7 +214,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    logger.error(`Error en POST /api/donations/assign: ${error}`, 'DonationAssign')
+    serverLog.error(`Error en POST /api/donations/assign: ${error}`)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
