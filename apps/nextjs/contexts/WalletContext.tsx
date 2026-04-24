@@ -5,6 +5,7 @@ import { useAccount, useDisconnect, useChainId, useWriteContract, useConnect } f
 import { parseUnits } from 'viem'
 import { useMiniPay } from '@/hooks/useMiniPay'
 import { logger } from '@/lib/logger'
+import { donate as donateFn } from '@/lib/donate'
 
 const erc20Abi = [
   {
@@ -51,9 +52,7 @@ interface WalletContextType {
   address: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
-  approveUSDT: (spender: `0x${string}`, amount: string) => Promise<`0x${string}`>
-  donateToRegion: (regionId: number, amount: string) => Promise<void>
-  donateWithData: (regionId: number, amount: string) => Promise<string>
+  donate: (regionId: number, amount: string) => Promise<string>
   isTransacting: boolean
   error: Error | null
   // Nuevas propiedades para MiniPay
@@ -214,140 +213,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     })
   }, [writeContract])
 
-  // NUEVA FUNCIÓN: MiniPay con backend (transferencia USDT + assignDonation)
-  const donateWithData = useCallback(async (regionId: number, amount: string) => {
-    const logMsg = (msg: string) => {
-      console.log(`🔍 [donateWithData] ${msg}`)
-      logger.info(msg, 'Donate')
-    }
-    
-    logMsg(`Iniciando - Región: ${regionId}, Monto: ${amount}`)
-    
+  // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
+  const donate = useCallback(async (regionId: number, amount: string) => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
     
     if (!regionalDonationContractAddress || !usdtContractAddress) {
-      const errorMsg = "Contract addresses not configured"
-      logMsg(`❌ ${errorMsg}`)
-      throw new Error(errorMsg)
+      throw new Error('Contract addresses not configured')
     }
     
-    logMsg(`✅ Contract addresses: USDT=${usdtContractAddress}, Donation=${regionalDonationContractAddress}`)
-    
-    const amountInSmallestUnit = parseUnits(amount, 6)
-    logMsg(`Monto en unidades pequeñas: ${amountInSmallestUnit.toString()}`)
-    
-    // Codificar el data con el regionId (32 bytes)
-    const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
-    logMsg(`RegionId hex: ${regionIdHex}`)
-    
-    // Codificar transferencia ERC-20: transfer(address to, uint256 amount)
-    const transferSelector = '0xa9059cbb'
-    const toHex = regionalDonationContractAddress.slice(2).toLowerCase().padStart(64, '0')
-    const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
-    const transferData = transferSelector + toHex + amountHex + regionIdHex
-    
-    logMsg(`Transfer data (primeros 100 chars): ${transferData.substring(0, 100)}...`)
-    
-    if (typeof window === 'undefined' || !window.ethereum) {
-      logMsg(`❌ No hay wallet disponible`)
-      throw new Error('No wallet provider available')
+    if (!effectiveAddress) {
+      throw new Error('Wallet not connected')
     }
     
-    const ethereum = window.ethereum as any
-    const txParams = {
-      from: effectiveAddress,
-      to: usdtContractAddress,
-      data: transferData,
-      value: '0x0',
-    }
-    
-    // Detectar MiniPay para usar el método correcto
-    const isMiniPayEnv = ethereum.isMiniPay === true
-    
-    try {
-      logMsg(`🔄 Enviando transacción a ${isMiniPayEnv ? 'MiniPay' : 'wallet'}...`)
-      let txHash: string
-      
-      if (isMiniPayEnv && typeof ethereum.send === 'function') {
-        // MiniPay usa send en lugar de request
-        logMsg(`📱 Usando ethereum.send para MiniPay...`)
-        txHash = await ethereum.send({
-          method: 'eth_sendTransaction',
-          params: [txParams],
-        })
-      } else if (typeof ethereum.request === 'function') {
-        txHash = await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [txParams],
-        })
-      } else {
-        // Fallback: usar sendAsync (legacy)
-        logMsg(`⚠️ Usando sendAsync como fallback...`)
-        txHash = await new Promise((resolve, reject) => {
-          ethereum.sendAsync({
-            method: 'eth_sendTransaction',
-            params: [txParams],
-          }, (err: any, result: any) => {
-            if (err) reject(err)
-            else resolve(result.result)
-          })
-        })
-      }
-      
-      logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
-      
-      // Llamar al backend para asignar la donación
-      logMsg(`🔄 Llamando al backend para asignar donación...`)
-      const response = await fetch('/api/donations/assign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          regionId,
-          donor: effectiveAddress,
-          amount,
-          txHash,
-        }),
-      })
-      
-      const result = await response.json()
-      if (!response.ok) {
-        logMsg(`❌ Backend error: ${result.error}`)
-        throw new Error(result.error || 'Error al asignar donación')
-      }
-      
-      logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
-      return txHash
-    } catch (err: any) {
-      logMsg(`❌ Error detectado en donateWithData:`)
-      
-      // Intentar extraer información útil del error
-      if (err?.message) {
-        logMsg(`   Mensaje: ${err.message}`)
-      }
-      if (err?.code) {
-        logMsg(`   Código: ${err.code}`)
-      }
-      if (err?.data) {
-        logMsg(`   Data: ${JSON.stringify(err.data)}`)
-      }
-      if (err?.stack) {
-        logMsg(`   Stack: ${err.stack.substring(0, 200)}...`)
-      }
-      
-      // Si el error es un objeto, intentar serializarlo
-      if (typeof err === 'object' && err !== null) {
-        try {
-          const serialized = JSON.stringify(err, Object.getOwnPropertyNames(err))
-          logMsg(`   Serializado: ${serialized.substring(0, 300)}`)
-        } catch (e) {
-          logMsg(`   No se pudo serializar el error`)
-        }
-      }
-      
-      logMsg(`   Error original: ${String(err)}`)
-      throw err
-    }
+    return donateFn({
+      regionId,
+      amount,
+      effectiveAddress,
+      usdtContractAddress,
+      regionalDonationContractAddress,
+    })
   }, [effectiveAddress])
 
   const value: WalletContextType = {
@@ -355,9 +240,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     address: effectiveAddress || state.address,
     chainId: state.chainId,
     disconnect,
-    approveUSDT,
-    donateToRegion,
-    donateWithData,
+    donate,
     isTransacting: isPending,
     error,
     isMiniPay,

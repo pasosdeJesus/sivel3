@@ -19,7 +19,7 @@ importers:
         version: 0.8.3
       '@pasosdejesus/m':
         specifier: gitlab:pasosdeJesus/m
-        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=a68c71cec82bca8b8a5cb3ff817f64d090e1cca8(@types/node@24.12.2)
+        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=6d0ab82aafd4f0cc3109392b5725f92e37e157c4(@types/node@24.12.2)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -955,9 +955,9 @@ packages:
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=a68c71cec82bca8b8a5cb3ff817f64d090e1cca8':
-    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=a68c71cec82bca8b8a5cb3ff817f64d090e1cca8}
-    version: 0.3.12
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=6d0ab82aafd4f0cc3109392b5725f92e37e157c4':
+    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=6d0ab82aafd4f0cc3109392b5725f92e37e157c4}
+    version: 0.3.15
     hasBin: true
 
   '@paulmillr/qr@0.2.1':
@@ -3204,8 +3204,8 @@ packages:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
     engines: {node: '>=0.10.0'}
 
-  hono@4.12.14:
-    resolution: {integrity: sha512-am5zfg3yu6sqn5yjKBNqhnTX7Cv+m00ox+7jbaKkrLMRJ4rAdldd1xPd/JzbBWspqaQv6RSTrgFN95EsfhC+7w==}
+  hono@4.12.15:
+    resolution: {integrity: sha512-qM0jDhFEaCBb4TxoW7f53Qrpv9RBiayUHo0S52JudprkhvpjIrGoU1mnnr29Fvd1U335ZFPZQY1wlkqgfGXyLg==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@6.0.0:
@@ -3759,8 +3759,8 @@ packages:
     resolution: {integrity: sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==}
     engines: {node: '>=18'}
 
-  nypm@0.6.5:
-    resolution: {integrity: sha512-K6AJy1GMVyfyMXRVB88700BJqNUkByijGJM8kEHpLdcAt+vSQAVfkWWHYzuRXHSY6xA2sNc5RjTj0p9rE2izVQ==}
+  nypm@0.6.6:
+    resolution: {integrity: sha512-vRyr0r4cbBapw07Xw8xrj9Teq3o7MUD35rSaTcanDbW+aK2XHDgJFiU6ZTj2GBw7Q12ysdsyFss+Vdz4hQ0Y6Q==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5790,7 +5790,7 @@ snapshots:
 
   '@panva/hkdf@1.2.1': {}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=a68c71cec82bca8b8a5cb3ff817f64d090e1cca8(@types/node@24.12.2)':
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=6d0ab82aafd4f0cc3109392b5725f92e37e157c4(@types/node@24.12.2)':
     dependencies:
       dotenv: 17.4.2
       execa: 9.6.1
@@ -8928,7 +8928,7 @@ snapshots:
     dependencies:
       parse-passwd: 1.0.0
 
-  hono@4.12.14: {}
+  hono@4.12.15: {}
 
   html-encoding-sniffer@6.0.0(@noble/hashes@1.8.0):
     dependencies:
@@ -9178,7 +9178,7 @@ snapshots:
       consola: 3.4.2
       jiti: 2.6.1
       kysely: 0.28.16
-      nypm: 0.6.5
+      nypm: 0.6.6
       ofetch: 1.5.1
       pathe: 2.0.3
       pkg-types: 2.3.0
@@ -9420,7 +9420,7 @@ snapshots:
       path-key: 4.0.0
       unicorn-magic: 0.3.0
 
-  nypm@0.6.5:
+  nypm@0.6.6:
     dependencies:
       citty: 0.2.2
       pathe: 2.0.3
@@ -9759,7 +9759,7 @@ snapshots:
   porto@0.2.35(@tanstack/react-query@5.100.1(react@19.2.5))(@types/react@19.2.14)(@wagmi/core@2.22.1(@tanstack/query-core@5.100.1)(@types/react@19.2.14)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.100.1)(@tanstack/react-query@5.100.1(react@19.2.5))(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.5)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)):
     dependencies:
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.100.1)(@types/react@19.2.14)(react@19.2.5)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.5))(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))
-      hono: 4.12.14
+      hono: 4.12.15
       idb-keyval: 6.2.2
       mipd: 0.0.7(typescript@5.9.3)
       ox: 0.9.17(typescript@5.9.3)(zod@4.3.6)

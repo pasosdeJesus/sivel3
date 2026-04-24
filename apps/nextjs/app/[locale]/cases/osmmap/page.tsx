@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
@@ -10,7 +10,6 @@ import { useToast } from '@/components/ui/use-toast';
 import confetti from 'canvas-confetti';
 import { translations } from './locales/osmmap';
 import { useRegionBalance } from './hooks/useRegionBalance';
-import { useDonation } from './hooks/useDonation';
 import { useOSMMapData } from './hooks/useOSMMapData';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
@@ -33,7 +32,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, approveUSDT, donateToRegion, donateWithData, isTransacting, isMiniPay } = useWallet();
+  const { isConnected, donate, isTransacting } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -63,30 +62,9 @@ export default function OSMMapPage() {
     }
   }, [selectedRegion, fetchBalance]);
 
-  // Donación
-  const { isApproving, handleDonate } = useDonation({
-    approveUSDT,
-    donateToRegion,
-    isTransacting,
-    isMiniPay,
-    t: {
-      invalidAmount: t.invalidAmount,
-      noContract: t.noContract,
-      donateSuccess: t.donateSuccess
-    }
-  });
-  
-  // Limpiar monto después de donar
-  const clearDonationAmount = () => {
-    console.log('🔍 [clearDonationAmount] Limpiando monto, valor actual:', donationAmount);
-    setDonationAmount('');
-    console.log('🔍 [clearDonationAmount] setDonationAmount ejecutado');
-  };
-  
   // Función para refrescar balance después de donar (con confetti y toast)
   const refreshBalanceAfterDonation = () => {
     if (selectedRegion) {
-      // Confetti
       confetti({
         particleCount: 150,
         spread: 70,
@@ -94,7 +72,6 @@ export default function OSMMapPage() {
         colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
       });
       
-      // Toast de agradecimiento
       const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
                         (currentLocale === 'es' ? 'la región' : 'the region');
       
@@ -106,6 +83,9 @@ export default function OSMMapPage() {
         duration: 4000,
       });
       
+      // Limpiar monto después de donar
+      setDonationAmount('');
+      
       // Refrescar balance después de 3 segundos
       setTimeout(() => {
         fetchBalance(selectedRegion);
@@ -113,9 +93,14 @@ export default function OSMMapPage() {
     }
   };
 
-  // El refresh de balance ahora lo maneja DonationPopover con onRefreshBalance
-  // Solo mantenemos confetti y toast para desktop (pero DonationPopover ya los tiene)
-  // Este efecto se elimina para evitar duplicación
+  // Función de donación unificada
+  const onDonate = async (amount: string) => {
+    await donate(parseInt(selectedRegion, 10), amount);
+    refreshBalanceAfterDonation();
+  };
+
+  // isApproving ya no es necesario (flujo de una transacción)
+  const isApproving = false;
 
   if (loading) {
     return (
@@ -125,13 +110,6 @@ export default function OSMMapPage() {
     );
   }
 
-  // Seleccionar la función de donación según el tipo de wallet
-  const donateFunction = isMiniPay 
-    ? async (amount: string) => {
-        await donateWithData(parseInt(selectedRegion, 10), amount);
-      }
-    : (amount: string) => handleDonate(amount, selectedRegion, undefined, refreshBalanceAfterDonation, clearDonationAmount);
-  
   const commonProps = {
     counts,
     filters,
@@ -149,7 +127,7 @@ export default function OSMMapPage() {
     onApplyFilters: applyFilters,
     onRegionChange: setSelectedRegion,
     onAmountChange: setDonationAmount,
-    onDonate: donateFunction,
+    onDonate,
     onRefreshBalance: refreshBalanceAfterDonation,
     t,
     MapComponent,
