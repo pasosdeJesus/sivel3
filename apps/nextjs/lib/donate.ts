@@ -3,6 +3,7 @@
 
 import { parseUnits } from 'viem'
 import { logger } from './logger'
+import { safeStringify, debugLog } from './debug'
 
 export interface DonateParams {
   regionId: number
@@ -72,18 +73,52 @@ export async function donate(params: DonateParams): Promise<string> {
   try {
     let txHash: string
     
+    let rawHash: any
     if (isMiniPay && typeof ethereum.send === 'function') {
       logMsg(`📱 Usando ethereum.send (MiniPay)...`)
-      txHash = await ethereum.send({
+      rawHash = await ethereum.send({
         method: 'eth_sendTransaction',
         params: [txParams],
       })
+      
+      // Depuración: serializar la respuesta usando debugLog
+      debugLog('MiniPay Response', rawHash)
+      logMsg(`📦 Respuesta MiniPay (tipo: ${typeof rawHash}): ${safeStringify(rawHash)}`)
+      
+      // Intentar extraer el hash de diferentes propiedades
+      if (typeof rawHash === 'string') {
+        txHash = rawHash
+      } else if (typeof rawHash === 'object' && rawHash !== null) {
+        // Buscar propiedades comunes donde puede estar el hash
+        if (rawHash.result) {
+          txHash = rawHash.result
+        } else if (rawHash.hash) {
+          txHash = rawHash.hash
+        } else if (rawHash.transactionHash) {
+          txHash = rawHash.transactionHash
+        } else if (rawHash.txHash) {
+          txHash = rawHash.txHash
+        } else {
+          // Si no encontramos el hash, mostrar la estructura completa usando safeStringify
+          const serialized = safeStringify(rawHash)
+          debugLog('MiniPay Unknown Response', rawHash)
+          logMsg(`❌ No se pudo extraer hash. Respuesta completa: ${serialized}`)
+          throw new Error(`Formato inesperado de MiniPay. Respuesta: ${serialized.substring(0, 200)}`)
+        }
+      } else {
+        debugLog('MiniPay Invalid Type', { type: typeof rawHash, value: rawHash })
+        throw new Error(`Tipo de respuesta inesperado: ${typeof rawHash}`)
+      }
+      
+      debugLog('MiniPay Extracted Hash', { hash: txHash })
+      logMsg(`📱 Hash extraído: ${txHash}`)
     } else if (typeof ethereum.request === 'function') {
       logMsg(`🔄 Usando ethereum.request (MetaMask/OneKey)...`)
       txHash = await ethereum.request({
         method: 'eth_sendTransaction',
         params: [txParams],
       })
+      logMsg(`✅ Hash: ${txHash}`)
     } else {
       logMsg(`⚠️ No se encontró método compatible`)
       throw new Error('Wallet no compatible: ni send ni request disponibles')
@@ -91,12 +126,13 @@ export async function donate(params: DonateParams): Promise<string> {
     
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
     
-    // ESPERAR CONFIRMACIÓN (hasta 10 segundos)
+    // ESPERAR CONFIRMACIÓN (hasta 15 segundos)
     logMsg(`⏳ Esperando confirmación de la transacción...`)
     let confirmed = false
     
     for (let i = 0; i < 15; i++) {
       try {
+        // Usar fetch directo para evitar problemas con el objeto txHash
         const receipt = await ethereum.request({
           method: 'eth_getTransactionReceipt',
           params: [txHash],
