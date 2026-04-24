@@ -52,29 +52,42 @@ export async function donate(params: DonateParams): Promise<string> {
   }
   
   /**
-   * NOTA: Uso de ethereum.send (Abril 2026)
+   * NOTA: Métodos de transacción según wallet (Abril 2026)
    * 
    * Durante la integración de MiniPay, se descubrió que:
    * - MiniPay NO soporta ethereum.request (error: Cannot read properties of undefined (reading '_request'))
    * - MiniPay SÍ soporta ethereum.send
    * 
-   * Para mantener un solo flujo que funcione en todas las wallets (MiniPay, MetaMask, OneKey, etc.),
-   * se decidió usar ethereum.send como método unificado.
+   * Por otro lado:
+   * - MetaMask NO soporta ethereum.send sin callback (error: does not support synchronous methods)
+   * - MetaMask SÍ soporta ethereum.request
+   * 
+   * Por tanto, debemos detectar la wallet y usar el método apropiado.
    * 
    * Referencia: https://github.com/pasosdeJesus/sivel3/issues/24
-   * Fecha de la prueba: 21 de abril de 2026
+   * Fecha de las pruebas: 21-24 de abril de 2026
    */
-  if (typeof ethereum.send !== 'function') {
-    logMsg(`❌ ethereum.send no está disponible. MiniPay requiere este método.`)
-    throw new Error('Wallet provider no compatible: se requiere ethereum.send (MiniPay no soporta ethereum.request)')
-  }
+  const isMiniPay = ethereum.isMiniPay === true
   
   try {
-    logMsg(`🔄 Enviando transacción...`)
-    const txHash = await ethereum.send({
-      method: 'eth_sendTransaction',
-      params: [txParams],
-    })
+    let txHash: string
+    
+    if (isMiniPay && typeof ethereum.send === 'function') {
+      logMsg(`📱 Usando ethereum.send (MiniPay)...`)
+      txHash = await ethereum.send({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+      })
+    } else if (typeof ethereum.request === 'function') {
+      logMsg(`🔄 Usando ethereum.request (MetaMask/OneKey)...`)
+      txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+      })
+    } else {
+      logMsg(`⚠️ No se encontró método compatible`)
+      throw new Error('Wallet no compatible: ni send ni request disponibles')
+    }
     
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
     
