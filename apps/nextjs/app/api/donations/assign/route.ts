@@ -67,7 +67,7 @@ async function verifyTransferAndGetRegion(
     const receipt = await publicClient.getTransactionReceipt({ hash: txHash as `0x${string}` })
     
     if (!receipt || !tx) {
-      logger.error(`Transacción no encontrada: ${txHash}`, 'DonationAssign')
+      serverLog.error(`Transacción no encontrada: ${txHash}`)
       return { isValid: false, regionId: null }
     }
 
@@ -91,13 +91,13 @@ async function verifyTransferAndGetRegion(
     )
 
     if (!transferLog) {
-      logger.error(`No se encontró evento Transfer en la transacción: ${txHash}`, 'DonationAssign')
+      serverLog.error(`No se encontró evento Transfer en la transacción: ${txHash}`)
       return { isValid: false, regionId: null }
     }
 
     // Decodificar el evento Transfer (verificar que topics existan)
     if (!transferLog.topics || transferLog.topics.length < 3) {
-      logger.error(`Evento Transfer con topics insuficientes: ${txHash}`, 'DonationAssign')
+      serverLog.error(`Evento Transfer con topics insuficientes: ${txHash}`)
       return { isValid: false, regionId: null }
     }
     
@@ -105,7 +105,7 @@ async function verifyTransferAndGetRegion(
     const topic2 = transferLog.topics[2]
     
     if (!topic1 || !topic2) {
-      logger.error(`Topics de Transfer incompletos: ${txHash}`, 'DonationAssign')
+      serverLog.error(`Topics de Transfer incompletos: ${txHash}`)
       return { isValid: false, regionId: null }
     }
     
@@ -116,8 +116,8 @@ async function verifyTransferAndGetRegion(
 
     const expectedAmountBigInt = BigInt(Math.floor(parseFloat(expectedAmount) * 1_000_000))
 
-    logger.info(`Verificando transferencia - From: ${from}, To: ${to}, Value: ${value}`, 'DonationAssign')
-    logger.info(`Esperado - Donor: ${expectedDonor}, Contract: ${expectedContract}, Amount: ${expectedAmountBigInt}`, 'DonationAssign')
+    serverLog.info(`Verificando transferencia - From: ${from}, To: ${to}, Value: ${value}`)
+    serverLog.info(`Esperado - Donor: ${expectedDonor}, Contract: ${expectedContract}, Amount: ${expectedAmountBigInt}`)
 
     // Verificar transferencia
     const isValid = from.toLowerCase() === expectedDonor.toLowerCase() &&
@@ -125,17 +125,17 @@ async function verifyTransferAndGetRegion(
                     value === expectedAmountBigInt
 
     if (isValid && regionId !== null && (regionId === 1 || regionId === 2)) {
-      logger.success(`Transferencia verificada correctamente: ${txHash} - Región ${regionId}`, 'DonationAssign')
+      serverLog.success(`Transferencia verificada correctamente: ${txHash} - Región ${regionId}`)
       return { isValid: true, regionId }
     } else if (isValid && (regionId === null || (regionId !== 1 && regionId !== 2))) {
-      logger.error(`Región inválida en data: ${regionId}`, 'DonationAssign')
+      serverLog.error(`Región inválida en data: ${regionId}`)
       return { isValid: false, regionId: null }
     }
 
-    logger.error(`Transferencia inválida: ${txHash}`, 'DonationAssign')
+    serverLog.error(`Transferencia inválida: ${txHash}`)
     return { isValid: false, regionId: null }
   } catch (error) {
-    logger.error(`Error verificando transferencia: ${error}`, 'DonationAssign')
+    serverLog.error(`Error verificando transferencia: ${error}`)
     return { isValid: false, regionId: null }
   }
 }
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
 
     // Usar la región extraída del data (ignorar la que envió el frontend por seguridad)
     const finalRegionId = extractedRegionId || parseInt(regionId, 10)
-    logger.info(`Región final para asignación: ${finalRegionId}`, 'DonationAssign')
+    serverLog.info(`Región final para asignación: ${finalRegionId}`)
 
     // Conectar al contrato V2
     const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Llamar a assignDonation con la región extraída
-    logger.info(`Llamando a assignDonation en el contrato...`, 'DonationAssign')
+    serverLog.info(`Llamando a assignDonation en el contrato...`)
     const hash = await contract.write.assignDonation([
       BigInt(finalRegionId),
       donor as `0x${string}`,
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
       txHash as `0x${string}`,
     ])
 
-    logger.success(`Donación asignada correctamente. TX: ${hash}`, 'DonationAssign')
+    serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
 
     return NextResponse.json({
       success: true,
