@@ -76,14 +76,33 @@ export async function up(db: Kysely<any>): Promise<void> {
         console.log('   No hay fondos en el contrato V1')
     }
 
-    // 3. Transferir USDT al nuevo contrato
-    const ownerBalance = await usdt.read.balanceOf([account.address]) as bigint
-    if (ownerBalance > 0n) {
-        console.log(`🔄 Transfiriendo ${formatUnits(ownerBalance, 6)} USDT al contrato V2...`)
-        const tx = await usdt.write.transfer([NEW_CONTRACT, ownerBalance])
+    // 3. Transferir AL NUEVO CONTRATO solo los fondos correspondientes a las regiones
+    // NOTA: Después de emergencyWithdraw, los fondos del contrato viejo están en la wallet del owner
+    // Pero NO debemos transferir todo el balance del owner, solo los fondos de las regiones
+    
+    // Calcular el total de balances regionales
+    let totalOldBalance = 0n
+    for (const balance of Object.values(oldBalances)) {
+        totalOldBalance += balance
+    }
+    
+    console.log(`💰 Fondos a transferir al nuevo contrato: ${formatUnits(totalOldBalance, 6)} USDT (total de balances regionales)`)
+    
+    if (totalOldBalance > 0n) {
+        // Verificar que el owner tenga suficientes fondos
+        const ownerBalance = await usdt.read.balanceOf([account.address]) as bigint
+        if (ownerBalance < totalOldBalance) {
+            console.error(`⚠️ El owner tiene ${formatUnits(ownerBalance, 6)} USDT, pero se necesitan ${formatUnits(totalOldBalance, 6)}`)
+            throw new Error('Fondos insuficientes del owner para la migración')
+        }
+        
+        console.log(`🔄 Transfiriendo ${formatUnits(totalOldBalance, 6)} USDT al contrato V2...`)
+        const tx = await usdt.write.transfer([NEW_CONTRACT, totalOldBalance])
         console.log(`   transfer tx: ${tx}`)
         await publicClient.waitForTransactionReceipt({ hash: tx })
         console.log('   ✅ USDT transferido')
+    } else {
+        console.log('   No hay fondos que transferir')
     }
 
     // 4. Establecer balances en el nuevo contrato
