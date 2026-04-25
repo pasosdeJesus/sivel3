@@ -3698,8 +3698,8 @@ CREATE TABLE public.region (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     name_es character varying(255) NOT NULL,
-    created_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL
+    created_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL
 );
 
 
@@ -5031,41 +5031,6 @@ CREATE TABLE public.sivel2_gen_vinculoestado (
 
 
 --
--- Name: userevent; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.userevent (
-    id integer NOT NULL,
-    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
-    type text NOT NULL,
-    path text,
-    amount numeric,
-    currency text,
-    metadata jsonb
-);
-
-
---
--- Name: userevent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.userevent_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: userevent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.userevent_id_seq OWNED BY public.userevent.id;
-
-
---
 -- Name: heb412_gen_campohc id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5413,13 +5378,6 @@ ALTER TABLE ONLY public.sivel2_gen_profesion_victima ALTER COLUMN id SET DEFAULT
 --
 
 ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextval('public.sivel2_gen_resagresion_id_seq'::regclass);
-
-
---
--- Name: userevent id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.userevent ALTER COLUMN id SET DEFAULT nextval('public.userevent_id_seq'::regclass);
 
 
 --
@@ -6540,14 +6498,6 @@ ALTER TABLE ONLY public.msip_trelacion
 
 ALTER TABLE ONLY public.sivel2_gen_tviolencia
     ADD CONSTRAINT tipo_violencia_pkey PRIMARY KEY (id);
-
-
---
--- Name: userevent userevent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.userevent
-    ADD CONSTRAINT userevent_pkey PRIMARY KEY (id);
 
 
 --

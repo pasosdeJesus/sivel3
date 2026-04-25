@@ -23,8 +23,6 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Numeric = ColumnType<string, number | string, number | string>;
-
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface ArInternalMetadata {
@@ -1318,16 +1316,6 @@ export interface Sivel2GenVinculoestado {
   updated_at: Timestamp | null;
 }
 
-export interface Userevent {
-  amount: Numeric | null;
-  currency: string | null;
-  id: Generated<number>;
-  metadata: Json | null;
-  path: string | null;
-  timestamp: Generated<Timestamp>;
-  type: string;
-}
-
 export interface Usuario {
   created_at: Timestamp | null;
   current_sign_in_at: Timestamp | null;
@@ -1487,6 +1475,5 @@ export interface DB {
   sivel2_gen_victimacolectiva: Sivel2GenVictimacolectiva;
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
-  userevent: Userevent;
   usuario: Usuario;
 }
