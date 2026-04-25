@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, getContract } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
+import { incrementLearningPoints } from '@/lib/learningPoints'
+import { newKyselyPostgresql } from '@/.config/kysely.config'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -204,15 +206,33 @@ export async function POST(request: NextRequest) {
       BigInt(Math.floor(parseFloat(amount) * 1_000_000)),
       txHash as `0x${string}`,
     ])
-
+    
     serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
+
+    // ============================================================
+    // Incrementar Learning Points en learn.tg (no bloquea la respuesta)
+    // ============================================================
+    try {
+      const learnDb = newKyselyPostgresql()
+      serverLog.info(`Incrementando Learning Points para ${donor}...`)
+      const lpResult = await incrementLearningPoints(learnDb, donor, txHash, 1)
+      
+      if (lpResult.success) {
+        serverLog.success(`Learning Points incrementados: ${lpResult.message}`)
+      } else {
+        serverLog.warn(`No se pudieron incrementar Learning Points: ${lpResult.message}`)
+        // No fallamos la respuesta principal
+      }
+    } catch (lpError) {
+      serverLog.error(`Error en incrementLearningPoints: ${lpError}`)
+      // No fallamos la respuesta principal
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Donación asignada correctamente',
       txHash: hash,
     })
-
   } catch (error) {
     serverLog.error(`Error en POST /api/donations/assign: ${error}`)
     return NextResponse.json(
