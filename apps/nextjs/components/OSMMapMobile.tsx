@@ -17,6 +17,7 @@ interface OSMMapMobileProps {
   regionBalance: string | null;
   isConnected: boolean;
   isTransacting: boolean;
+  isProcessing: boolean;
   isApproving: boolean;
   onFilterChange: (key: string, value: string) => void;
   onApplyFilters: () => void;
@@ -42,6 +43,7 @@ export function OSMMapMobile({
   regionBalance,
   isConnected,
   isTransacting,
+  isProcessing,
   isApproving,
   onFilterChange,
   onApplyFilters,
@@ -110,6 +112,7 @@ export function OSMMapMobile({
           onDonate={onDonate}
           onRefreshBalance={onRefreshBalance}
           isTransacting={isTransacting}
+          isProcessing={isProcessing}
           isApproving={isApproving}
           labels={{
             cause: t.cause,

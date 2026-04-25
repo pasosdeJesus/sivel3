@@ -32,7 +32,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, donate, isTransacting } = useWallet();
+  const { isConnected, donate, isTransacting, isProcessing } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -122,6 +122,7 @@ export default function OSMMapPage() {
     regionBalance,
     isConnected,
     isTransacting,
+    isProcessing,
     isApproving,
     onFilterChange: handleFilterChange,
     onApplyFilters: applyFilters,

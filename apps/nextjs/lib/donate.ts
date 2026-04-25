@@ -126,33 +126,8 @@ export async function donate(params: DonateParams): Promise<string> {
     
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
     
-    // ESPERAR CONFIRMACIÓN (hasta 15 segundos)
-    logMsg(`⏳ Esperando confirmación de la transacción...`)
-    let confirmed = false
-    
-    for (let i = 0; i < 15; i++) {
-      try {
-        // Usar fetch directo para evitar problemas con el objeto txHash
-        const receipt = await ethereum.request({
-          method: 'eth_getTransactionReceipt',
-          params: [txHash],
-        })
-        if (receipt) {
-          confirmed = true
-          logMsg(`✅ Transacción confirmada en bloque ${receipt.blockNumber}`)
-          break
-        }
-      } catch (err) {
-        // No hacer nada, solo esperar
-      }
-      await new Promise(r => setTimeout(r, 1000))
-    }
-    
-    if (!confirmed) {
-      logMsg(`⚠️ No se pudo confirmar la transacción después de 15 segundos, continuando de todos modos...`)
-    }
-    
     // Llamar al backend para asignar la donación (con reintentos)
+    // El backend verificará la transacción en la blockchain
     logMsg(`🔄 Llamando al backend para asignar donación...`)
     let backendResponse: Response | null = null
     let lastError: string = ''

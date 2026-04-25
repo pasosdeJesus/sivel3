@@ -17,6 +17,7 @@ interface OSMMapDesktopProps {
   regionBalance: string | null;
   isConnected: boolean;
   isTransacting: boolean;
+  isProcessing: boolean;
   isApproving: boolean;
   onFilterChange: (key: string, value: string) => void;
   onApplyFilters: () => void;
@@ -42,6 +43,7 @@ export function OSMMapDesktop({
   regionBalance,
   isConnected,
   isTransacting,
+  isProcessing,
   isApproving,
   onFilterChange,
   onApplyFilters,
@@ -113,6 +115,7 @@ export function OSMMapDesktop({
             onDonate={(amount: string) => onDonate(amount)}
             onRefreshBalance={onRefreshBalance}
             isTransacting={isTransacting}
+            isProcessing={isProcessing}
             isApproving={isApproving}
             labels={{
               cause: t.cause,

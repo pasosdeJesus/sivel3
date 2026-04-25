@@ -18,12 +18,13 @@ interface DonationPopoverProps {
   onDonate: (amount: string) => void
   onRefreshBalance?: () => void
   isTransacting: boolean
+  isProcessing: boolean
   isApproving: boolean
   labels: { cause: string; availableFunds: string; amount: string; approve: string; donateTitle?: string; approving: string; donating: string }
   variant?: 'mobile' | 'desktop'
 }
 
-export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
+export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isProcessing, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
   // ============================================
   // TODOS LOS HOOKS AL INICIO (mismo orden siempre)
   // ============================================
@@ -101,7 +102,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                     setTimeout(() => onRefreshBalance(), 3000)
                   }
                 }}
-                disabled={isTransacting || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) <= 0}
+                disabled={isProcessing || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) <= 0}
                 className="whitespace-nowrap"
               >
                 {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
@@ -154,7 +155,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               if (onRefreshBalance) {
                 setTimeout(() => onRefreshBalance(), 3000)
               }
-            }} disabled={isTransacting || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) <= 0}>
+            }} disabled={isProcessing || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) <= 0}>
               {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
             </Button>
           </div>

@@ -54,6 +54,7 @@ interface WalletContextType {
   disconnect: () => void
   donate: (regionId: number, amount: string) => Promise<string>
   isTransacting: boolean
+  isProcessing: boolean
   error: Error | null
   // Nuevas propiedades para MiniPay
   isMiniPay: boolean
@@ -213,6 +214,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     })
   }, [writeContract])
 
+  // Estado local para donación en curso
+  const [isDonating, setIsDonating] = useState(false)
+  
   // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
   const donate = useCallback(async (regionId: number, amount: string) => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
@@ -226,14 +230,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Wallet not connected')
     }
     
-    return donateFn({
-      regionId,
-      amount,
-      effectiveAddress,
-      usdtContractAddress,
-      regionalDonationContractAddress,
-    })
+    setIsDonating(true)
+    try {
+      return await donateFn({
+        regionId,
+        amount,
+        effectiveAddress,
+        usdtContractAddress,
+        regionalDonationContractAddress,
+      })
+    } finally {
+      setIsDonating(false)
+    }
   }, [effectiveAddress])
+  
+  // Combinar isTransacting (de wagmi) con isDonating (local)
+  const isProcessing = isPending || isDonating
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
@@ -242,6 +254,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     disconnect,
     donate,
     isTransacting: isPending,
+    isProcessing,
     error,
     isMiniPay,
     phoneNumber,
