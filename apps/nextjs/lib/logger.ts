@@ -20,10 +20,20 @@ class Logger {
   
   constructor() {
     if (typeof window !== 'undefined') {
-      // Verificar si la consola flotante está activada
-      this.floatingConsoleEnabled = process.env.NEXT_PUBLIC_M_DEBUGGER_CONSOLE === '1'
-      if (this.floatingConsoleEnabled) {
-        console.log('🐞 [Logger] Consola flotante activada (M_DEBUGGER_CONSOLE)')
+      // Verificar parámetro URL debug=1 (tiene prioridad)
+      const urlParams = new URLSearchParams(window.location.search)
+      const debugParam = urlParams.get('debug')
+      const isDebugByUrl = debugParam === '1'
+      
+      // Variable de entorno o URL
+      if (isDebugByUrl) {
+        this.floatingConsoleEnabled = true
+        console.log('🐞 [Logger] Consola flotante activada por URL (?debug=1)')
+      } else {
+        this.floatingConsoleEnabled = process.env.NEXT_PUBLIC_M_DEBUGGER_CONSOLE === '1'
+        if (this.floatingConsoleEnabled) {
+          console.log('🐞 [Logger] Consola flotante activada (M_DEBUGGER_CONSOLE)')
+        }
       }
     }
   }
