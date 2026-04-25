@@ -93,10 +93,34 @@ export default function OSMMapPage() {
     }
   };
 
-  // Función de donación unificada
+  // Función de donación unificada con manejo de errores
   const onDonate = async (amount: string) => {
-    await donate(parseInt(selectedRegion, 10), amount);
-    refreshBalanceAfterDonation();
+    try {
+      await donate(parseInt(selectedRegion, 10), amount);
+      refreshBalanceAfterDonation();
+    } catch (err: any) {
+      console.error('Error en donación:', err);
+      
+      // Mensaje de error amigable según el tipo de error
+      let errorMessage = 'No se pudo completar la donación. ';
+      
+      if (err?.message?.includes('insufficient funds') || err?.message?.includes('exceeds balance')) {
+        errorMessage = '❌ Saldo insuficiente.\n\nNo tienes suficientes USDT para realizar esta donación.';
+      } else if (err?.message?.includes('user rejected') || err?.code === 4001) {
+        errorMessage = '⚠️ Transacción cancelada.\n\nCancelaste la transacción en tu wallet.';
+      } else if (err?.message?.includes('network') || err?.message?.includes('RPC')) {
+        errorMessage = '🌐 Error de red.\n\nNo se pudo conectar con la red. Verifica tu conexión.';
+      } else if (err?.message?.includes('gas')) {
+        errorMessage = '⛽ Error de gas.\n\nNo tienes suficiente CELO para pagar la transacción.';
+      } else {
+        errorMessage = `❌ Error en la donación.\n\n${err?.message || 'Intenta nuevamente más tarde.'}`;
+      }
+      
+      alert(errorMessage);
+      
+      // También mostrar en consola para depuración
+      console.error('[Donation Error]', err);
+    }
   };
 
   // isApproving ya no es necesario (flujo de una transacción)

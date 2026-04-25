@@ -93,16 +93,23 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               />
               <Button 
                 onClick={async () => {
-                  const amount = desktopLocalAmount
+                  const amount = parseFloat(desktopLocalAmount)
                   console.log('🔍 [DonationPopover] Desktop - Monto:', amount)
-                  onAmountChange(amount)
+                  
+                  // Validar monto mínimo (0.02 USDT)
+                  if (isNaN(amount) || amount < 0.02) {
+                    alert(`⚠️ El monto mínimo de donación es 0.02 USDT. Ingresaste ${amount || 0} USDT.`)
+                    return
+                  }
+                  
+                  onAmountChange(desktopLocalAmount)
                   await new Promise(resolve => setTimeout(resolve, 100))
-                  await onDonate(amount)
+                  await onDonate(desktopLocalAmount)
                   if (onRefreshBalance) {
                     setTimeout(() => onRefreshBalance(), 3000)
                   }
                 }}
-                disabled={isProcessing || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) <= 0}
+                disabled={isProcessing || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) < 0.02}
                 className="whitespace-nowrap"
               >
                 {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
@@ -147,15 +154,22 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               disabled={isTransacting || isApproving} 
             /></div>
             <Button size="sm" className="w-full" onClick={async () => {
-              const amountToDonate = mobileLocalAmountRef.current
+              const amountToDonate = parseFloat(mobileLocalAmountRef.current)
               console.log('🔍 [DonationPopover] Mobile - Monto:', amountToDonate)
-              onAmountChange(amountToDonate)
+              
+              // Validar monto mínimo (0.02 USDT)
+              if (isNaN(amountToDonate) || amountToDonate < 0.02) {
+                alert(`⚠️ El monto mínimo de donación es 0.02 USDT. Ingresaste ${amountToDonate || 0} USDT.`)
+                return
+              }
+              
+              onAmountChange(mobileLocalAmountRef.current)
               await new Promise(resolve => setTimeout(resolve, 100))
-              await onDonate(amountToDonate)
+              await onDonate(mobileLocalAmountRef.current)
               if (onRefreshBalance) {
                 setTimeout(() => onRefreshBalance(), 3000)
               }
-            }} disabled={isProcessing || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) <= 0}>
+            }} disabled={isProcessing || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) < 0.02}>
               {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
             </Button>
           </div>

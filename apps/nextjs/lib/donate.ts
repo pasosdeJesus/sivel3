@@ -24,6 +24,13 @@ export async function donate(params: DonateParams): Promise<string> {
   logMsg(`Iniciando - Región: ${regionId}, Monto: ${amount}`)
   logMsg(`✅ Contract addresses: USDT=${usdtContractAddress}, Donation=${regionalDonationContractAddress}`)
   
+  const amountNum = parseFloat(amount)
+  if (amountNum < 0.02) {
+    const errorMsg = `El monto mínimo de donación es 0.02 USDT. Ingresaste ${amountNum} USDT.`
+    logMsg(`❌ ${errorMsg}`)
+    throw new Error(errorMsg)
+  }
+  
   const amountInSmallestUnit = parseUnits(amount, 6)
   logMsg(`Monto en unidades pequeñas: ${amountInSmallestUnit.toString()}`)
   
@@ -186,10 +193,36 @@ export async function donate(params: DonateParams): Promise<string> {
     return txHash
   } catch (err: any) {
     logMsg(`❌ Error detectado:`)
-    if (err?.message) logMsg(`   Mensaje: ${err.message}`)
+    
+    // Extraer mensaje de error más legible
+    let userFriendlyMessage = ''
+    const errorString = String(err?.message || err)
+    
+    if (errorString.includes('insufficient funds') || errorString.includes('exceeds balance')) {
+      userFriendlyMessage = 'Saldo insuficiente. No tienes suficientes USDT para esta donación.'
+    } else if (errorString.includes('user rejected') || err?.code === 4001) {
+      userFriendlyMessage = 'Transacción cancelada por el usuario.'
+    } else if (errorString.includes('network') || errorString.includes('RPC')) {
+      userFriendlyMessage = 'Error de red. Verifica tu conexión.'
+    } else if (errorString.includes('gas')) {
+      userFriendlyMessage = 'Error de gas. No tienes suficiente CELO para la transacción.'
+    } else if (errorString.includes('execution reverted')) {
+      userFriendlyMessage = 'La transacción fue rechazada por el contrato. Verifica los datos.'
+    } else if (errorString.includes('monto mínimo')) {
+      userFriendlyMessage = errorString
+    } else {
+      userFriendlyMessage = err?.message || 'Error desconocido'
+    }
+    
+    logMsg(`   ❌ ${userFriendlyMessage}`)
+    if (err?.message && err.message !== userFriendlyMessage) {
+      logMsg(`   Detalle técnico: ${err.message}`)
+    }
     if (err?.code) logMsg(`   Código: ${err.code}`)
-    if (err?.data) logMsg(`   Data: ${JSON.stringify(err.data)}`)
-    logMsg(`   Error original: ${String(err)}`)
-    throw err
+    if (err?.data) logMsg(`   Data: ${safeStringify(err.data)}`)
+    debugLog('Donation Error', err)
+    
+    // Lanzar error con mensaje amigable
+    throw new Error(userFriendlyMessage)
   }
 }
