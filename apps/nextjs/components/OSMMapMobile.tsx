@@ -87,7 +87,6 @@ export function OSMMapMobile({
           variant="mobile"
         />
         <DonationPopover 
-          key={donationAmount}
           isConnected={isConnected}
           selectedRegion={selectedRegion}
           donationAmount={donationAmount}

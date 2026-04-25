@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useTranslation } from '@/hooks/useTranslation';
+import { logger } from '@/lib/logger';
 import confetti from 'canvas-confetti';
 import { useRegionBalance } from './hooks/useRegionBalance';
 import { useOSMMapData } from './hooks/useOSMMapData';
@@ -217,7 +218,10 @@ export default function OSMMapPage() {
     isApproving,
     onFilterChange: handleFilterChange,
     onApplyFilters: applyFilters,
-    onRegionChange: setSelectedRegion,
+    onRegionChange: (val: string) => {
+      logger.info(`Cambio de región: ${val}`, 'OSMMapPage');
+      setSelectedRegion(val);
+    },
     onAmountChange: setDonationAmount,
     onDonate,
     onRefreshBalance: refreshBalanceAfterDonation,

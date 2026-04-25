@@ -89,7 +89,6 @@ export function OSMMapDesktop({
 
         {isConnected && (
           <DonationPopover 
-            key={donationAmount}
             isConnected={isConnected}
             selectedRegion={selectedRegion}
             donationAmount={donationAmount}

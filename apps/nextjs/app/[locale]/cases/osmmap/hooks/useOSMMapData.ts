@@ -67,6 +67,7 @@ export function useOSMMapData(currentLocale: string) {
         const categoriesData = await catRes.json();
         const allegedPerpetratorsData = await presRes.json();
         const regionsData = await regionRes.json();
+        logger.info(`Regiones cargadas: ${JSON.stringify(regionsData)}`, 'OSMMapData');
         
         setDepartments(departmentsData);
         setCategories(categoriesData);
@@ -74,7 +75,9 @@ export function useOSMMapData(currentLocale: string) {
         setDonationRegions(regionsData);
         
         if (regionsData.length > 0) {
-          setSelectedRegion(String(regionsData[0].id));
+          const firstId = String(regionsData[0].id);
+          logger.success(`Seleccionando región inicial: ${firstId}`, 'OSMMapData');
+          setSelectedRegion(firstId);
         }
         
         logger.info('Datos iniciales cargados correctamente', 'OSMMapData');

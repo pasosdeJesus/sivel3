@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from '@/hooks/useTranslation'
+import { logger } from '@/lib/logger'
 
 const localTranslations = {
   en: {
@@ -70,7 +71,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
   }, [donationAmount])
 
   // ============================================
-  // RENDERIZADO CONDICIONAL
+  // RENDERIZADO
   // ============================================
   if (!isConnected) return null
 
@@ -89,7 +90,13 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <Select value={selectedRegion} onValueChange={onRegionChange}>
+            <Select 
+              value={selectedRegion} 
+              onValueChange={(value) => {
+                logger.info(`Cambio de región solicitado: ${value}`, 'Donate');
+                onRegionChange(value);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -166,7 +173,18 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
             <button onClick={() => setIsOpen(false)} className="text-gray-500">✕</button>
           </div>
           <div className="p-3 space-y-3">
-            <div><Label className="text-xs">{t('cause')}</Label><Select value={selectedRegion} onValueChange={onRegionChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label className="text-xs">{t('cause')}</Label>
+              <Select 
+                value={selectedRegion} 
+                onValueChange={(value) => {
+                  logger.info(`Cambio de región (móvil): ${value}`, 'Donate');
+                  onRegionChange(value);
+                }}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{donationRegions.map(r => <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <div><Label className="text-xs">{t('availableFunds')}</Label><div className="text-lg font-bold text-green-600">{regionBalance ? `${parseFloat(regionBalance).toFixed(2)} USDT` : '--'}</div></div>
             <div><Label className="text-xs">{t('amount')}</Label><Input 
               type="number" 
