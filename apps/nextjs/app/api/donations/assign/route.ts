@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, getContract } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
+import { createTranslator } from '@/hooks/useTranslation'
+
+const localTranslations = {
+  en: {
+    missingParams: 'Missing parameters: regionId, donor, amount, txHash',
+    invalidTransaction: 'Invalid or unverified transaction',
+    internalError: 'Internal server error',
+    donationAssigned: 'Donation assigned successfully',
+  },
+  es: {
+    missingParams: 'Faltan parámetros: regionId, donor, amount, txHash',
+    invalidTransaction: 'Transacción no válida o no verificada',
+    internalError: 'Error interno del servidor',
+    donationAssigned: 'Donación asignada correctamente',
+  }
+}
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -141,6 +157,9 @@ async function verifyTransferAndGetRegion(
 }
 
 export async function POST(request: NextRequest) {
+  const locale = (request.nextUrl.searchParams.get('locale') as 'en' | 'es') || 'en'
+  const t = createTranslator(locale, localTranslations)
+
   try {
     const body = await request.json()
     const { regionId, donor, amount, txHash } = body
@@ -150,7 +169,7 @@ export async function POST(request: NextRequest) {
     // Validar parámetros
     if (!regionId || !donor || !amount || !txHash) {
       return NextResponse.json(
-        { error: 'Faltan parámetros: regionId, donor, amount, txHash' },
+        { error: t('missingParams') },
         { status: 400 }
       )
     }
@@ -166,7 +185,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Transacción no válida o no verificada' },
+        { error: t('invalidTransaction') },
         { status: 400 }
       )
     }
@@ -209,15 +228,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Donación asignada correctamente',
+      message: t('donationAssigned'),
       txHash: hash,
     })
 
-  } catch (error) {
+    } catch (error) {
     serverLog.error(`Error en POST /api/donations/assign: ${error}`)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: t('internalError') },
       { status: 500 }
     )
-  }
-}
+    }
+    }

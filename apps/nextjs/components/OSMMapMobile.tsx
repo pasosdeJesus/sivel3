@@ -75,11 +75,6 @@ export function OSMMapMobile({
       <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
         <CountsPopover 
           counts={counts}
-          labelCases={t.cases}
-          labelVictims={t.victims}
-          labelVictimizations={t.victimizations}
-          labelActs={t.acts}
-          title={t.counts}
           variant="mobile"
         />
         <FiltersPopover 
@@ -89,15 +84,6 @@ export function OSMMapMobile({
           categories={categories}
           onFilterChange={onFilterChange}
           onApplyFilters={onApplyFilters}
-          labels={{
-            from: t.from,
-            to: t.to,
-            department: t.department,
-            allegedPerpetrator: t.allegedPerpetrator,
-            violence: t.violence,
-            filter: t.filter,
-            showAll: t.showAll
-          }}
           variant="mobile"
         />
         <DonationPopover 
@@ -114,15 +100,6 @@ export function OSMMapMobile({
           isTransacting={isTransacting}
           isProcessing={isProcessing}
           isApproving={isApproving}
-          labels={{
-            cause: t.cause,
-            availableFunds: t.availableFunds,
-            amount: t.amount,
-            approve: t.approve,
-            donateTitle: t.donateTitle || t.approve,
-            approving: t.approving,
-            donating: t.donating
-          }}
           variant="mobile"
         />
       </div>

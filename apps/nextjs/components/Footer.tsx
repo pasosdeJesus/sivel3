@@ -1,13 +1,26 @@
-// components/Footer.tsx
+'use client'
+
 import { Badge } from '@/components/ui/badge'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { useWallet } from '@/contexts/WalletContext'
 import { useState, useEffect } from 'react'
+import { useTranslation } from '@/hooks/useTranslation'
+
+const localTranslations = {
+  en: {
+    developedBy: 'Developed by ',
+    seeCredits: 'See Credits',
+    openDataFrom: 'Sample of open data from ',
+    walletConnected: 'Wallet connected',
+    connectWalletAdv: 'Connect a web3 wallet for advanced functions'
+  },
+  es: {
+    developedBy: 'Desarrollado por ',
+    seeCredits: 'Ver Créditos',
+    openDataFrom: 'Muestra de datos abiertos de ',
+    walletConnected: 'Billetera conectada',
+    connectWalletAdv: 'Conecta una billetera web3 para funciones avanzadas'
+  }
+}
 
 interface FooterProps {
   lang?: string
@@ -15,10 +28,10 @@ interface FooterProps {
 }
 
 export default function Footer({
-  lang = 'en',
   showWalletStatus = true,
 }: FooterProps) {
   const { isConnected } = useWallet()
+  const { t } = useTranslation(localTranslations)
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
@@ -31,14 +44,13 @@ export default function Footer({
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-gray-600">
             <p>
-            {lang == 'es' ? 'Desarrollado por ' : 'Developed by '}
-              <a href="https://www.pasosdeJesus.org">Pasos de Jesús</a> 
-              (<a href="https://gitlab.com/pasosdeJesus/sivel3/-/blob/main/CREDITOS.md">{lang == 'es' ? 'Ver Créditos' : 'See Credits'}</a>).
+              {t('developedBy')}
+              <a href="https://www.pasosdeJesus.org" className="hover:underline">Pasos de Jesús</a> 
+              {' '}(<a href="https://gitlab.com/pasosdeJesus/sivel3/-/blob/main/CREDITOS.md" className="hover:underline">{t('seeCredits')}</a>).
             </p>
             <p className="mt-1">
-              {lang == 'es' ? 'Muestra de datos abiertos de ' :
-               'Sample of open data from '}
-              <a href="nocheyniebla.org">Noche y Niebla</a>
+              {t('openDataFrom')}
+              <a href="https://nocheyniebla.org" className="hover:underline">Noche y Niebla</a>
             </p>
           </div>
 
@@ -50,23 +62,20 @@ export default function Footer({
                   className="text-green-600 border-green-200"
                 >
                
-                  🔗  {lang == 'es' ? 'Billetera conectada' : 
-                    'Wallet connected'}
+                  🔗  {t('walletConnected')}
                 </Badge>
               ) : (
                 <Badge
                   variant="outline"
                   className="text-amber-600 border-amber-200"
                 >
-                  ⚠️ {lang == 'es' ? 
-                    ' Conecta una billetera web3 para funciones avanzadas' : 
-                    ' Connect a web3 wallet to have advanced functions'}
+                  ⚠️ {t('connectWalletAdv')}
                 </Badge>
               )
             )}
             {showWalletStatus && !mounted && (
               <Badge variant="outline" className="text-gray-400 border-gray-200">
-                ⏳ {lang == 'es' ? 'Cargando...' : 'Loading...'}
+                ⏳ {t('loading')}
               </Badge>
             )}
 

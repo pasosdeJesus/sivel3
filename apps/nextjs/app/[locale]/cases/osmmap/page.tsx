@@ -1,18 +1,86 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslation } from '@/hooks/useTranslation';
 import confetti from 'canvas-confetti';
-import { translations } from './locales/osmmap';
 import { useRegionBalance } from './hooks/useRegionBalance';
 import { useOSMMapData } from './hooks/useOSMMapData';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
+
+const localTranslations = {
+  en: {
+    counts: 'Counts',
+    totalsByFilters: 'Totals according to applied filters',
+    cases: 'Cases',
+    victims: 'Victims',
+    victimizations: 'Victimizations',
+    acts: 'Acts',
+    filters: 'Filters',
+    from: 'From',
+    to: 'To',
+    department: 'Department',
+    showAll: 'Show All',
+    allegedPerpetrator: 'Alleged Perpetrator',
+    violence: 'Violence',
+    filter: 'Filter',
+    connectWallet: 'Connect wallet for advanced features',
+    donation: 'Donation',
+    cause: 'To document cases in',
+    amount: 'Amount (in USDT)',
+    donate: 'Donate',
+    donating: 'Donating...',
+    approving: 'Approving...',
+    invalidAmount: 'Please enter a valid donation amount.',
+    noRecipient: 'The destination address for the donation is not configured.',
+    approve: 'Donate',
+    donateTitle: 'Donate',
+    noContract: 'Donation contract not configured',
+    availableFunds: '💰 Regional Balance',
+    waitingForConfirmation: 'Waiting for confirmation...',
+    donateSuccess: '🎉 Donation completed!',
+    thanksTitle: '🙏 Thank you for your donation!',
+    thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.'
+  },
+  es: {
+    counts: 'Conteos',
+    totalsByFilters: 'Totales según filtros aplicados',
+    cases: 'Casos',
+    victims: 'Víctimas',
+    victimizations: 'Victimizaciones',
+    acts: 'Actos',
+    filters: 'Filtros',
+    from: 'Desde',
+    to: 'Hasta',
+    department: 'Departamento',
+    showAll: 'Mostrar todos',
+    allegedPerpetrator: 'P. Responsable',
+    violence: 'Violencia',
+    filter: 'Filtrar',
+    connectWallet: 'Conecta la billetera para funciones avanzadas',
+    donation: 'Donación',
+    cause: 'Para documentar casos en',
+    amount: 'Valor (en USDT)',
+    donate: 'Donar',
+    donating: 'Donando...',
+    approving: 'Aprobando...',
+    invalidAmount: 'Por favor, ingrese un monto de donación válido.',
+    noRecipient: 'La dirección de destino para la donación no está configurada.',
+    approve: 'Donar',
+    donateTitle: 'Donar',
+    noContract: 'El contrato de donaciones no está configurado',
+    availableFunds: '💰 Balance Regional',
+    waitingForConfirmation: 'Esperando confirmación...',
+    donateSuccess: '🎉 ¡Donación completada!',
+    thanksTitle: '🙏 ¡Gracias por tu donación!',
+    thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.'
+  }
+};
 
 const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ssr: false,
@@ -28,9 +96,7 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 });
 
 export default function OSMMapPage() {
-  const params = useParams();
-  const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
-  const t = translations[currentLocale as keyof typeof translations] || translations.en;
+  const { t, locale: currentLocale } = useTranslation(localTranslations);
 
   const { isConnected, donate, isTransacting, isProcessing } = useWallet();
   const { toast } = useToast();
@@ -76,10 +142,11 @@ export default function OSMMapPage() {
                         (currentLocale === 'es' ? 'la región' : 'the region');
       
       toast({
-        title: t.thanksTitle,
-        description: t.thanksMessage
-          .replace('{{region}}', regionName)
-          .replace('{{amount}}', donationAmount),
+        title: t('thanksTitle'),
+        description: t('thanksMessage', {
+          region: regionName,
+          amount: donationAmount
+        }),
         duration: 4000,
       });
       

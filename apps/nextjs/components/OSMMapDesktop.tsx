@@ -62,12 +62,6 @@ export function OSMMapDesktop({
       <div className="lg:w-[300px] lg:flex-shrink-0 space-y-6">
         <CountsPopover 
           counts={counts}
-          labelCases={t.cases}
-          labelVictims={t.victims}
-          labelVictimizations={t.victimizations}
-          labelActs={t.acts}
-          title={t.counts}
-          totalsByFilters={t.totalsByFilters}
           variant="desktop"
         />
         <FiltersPopover 
@@ -77,15 +71,6 @@ export function OSMMapDesktop({
           categories={categories}
           onFilterChange={onFilterChange}
           onApplyFilters={onApplyFilters}
-          labels={{
-            from: t.from,
-            to: t.to,
-            department: t.department,
-            allegedPerpetrator: t.allegedPerpetrator,
-            violence: t.violence,
-            filter: t.filter,
-            showAll: t.showAll
-          }}
           variant="desktop"
         />
       </div>
@@ -117,15 +102,6 @@ export function OSMMapDesktop({
             isTransacting={isTransacting}
             isProcessing={isProcessing}
             isApproving={isApproving}
-            labels={{
-              cause: t.cause,
-              availableFunds: t.availableFunds,
-              amount: t.amount,
-              approve: t.approve,
-              donateTitle: t.donateTitle || t.approve,
-              approving: t.approving,
-              donating: t.donating
-            }}
             variant="desktop"
           />
         )}

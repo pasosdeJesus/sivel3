@@ -2,11 +2,11 @@
 
 import { Map } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 
 import ConnectWalletButton from './ConnectWalletButton'
 
-// Tipo explícito para el objeto de traducciones para evitar error de 'any' implícito.
-const translations: { [key: string]: { mapOfCases: string } } = {
+const localTranslations = {
   en: { mapOfCases: 'Map of Cases' },
   es: { mapOfCases: 'Mapa de Casos' },
 }
@@ -18,14 +18,13 @@ interface HeaderProps {
 export default function Header({ lang }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t } = useTranslation(localTranslations)
 
   const changeLanguage = (newLocale: string) => {
     // Reemplaza el locale actual en la URL con el nuevo
     const newPath = pathname.replace(`/${lang}`, `/${newLocale}`)
     router.push(newPath)
   }
-
-  const t = translations[lang] || translations.en
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur-sm">
@@ -35,7 +34,7 @@ export default function Header({ lang }: HeaderProps) {
             <Map className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {t.mapOfCases}
+                {t('mapOfCases')}
               </h1>
             </div>
           </div>
