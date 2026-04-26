@@ -196,11 +196,11 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
         lastStatus = `HTTP ${backendResponse.status}`
         logMsg(`⚠️ Intento ${attempt}/5 falló: ${lastError}`)
 
-        // 4xx: error del cliente, no reintentar
+        // 4xx: error del backend (p. ej. transacción no confirmada aún)
+        // Se marca como clientError para el mensaje final, pero se sigue reintentando
+        // porque la transacción puede confirmarse en los próximos segundos.
         if (backendResponse.status >= 400 && backendResponse.status < 500) {
           isClientError = true
-          logMsg(`⚠️ Error 4xx detectado, no se reintentará`)
-          break
         }
       } catch (err: any) {
         lastError = err.message
