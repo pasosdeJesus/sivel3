@@ -1,38 +1,9 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { useAccount, useDisconnect, useChainId, useWriteContract, useConnect } from 'wagmi'
-import { parseUnits } from 'viem'
+import { useAccount, useDisconnect, useChainId, useConnect } from 'wagmi'
 import { useMiniPay } from '@/hooks/useMiniPay'
-import { logger } from '@/lib/logger'
 import { donate as donateFn } from '@/lib/donate'
-
-const erc20Abi = [
-  {
-    "name": "transfer",
-    "type": "function",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      { "type": "address", "name": "to" },
-      { "type": "uint256", "name": "amount" }
-    ],
-    "outputs": [
-      { "type": "bool", "name": "" }
-    ]
-  },
-  {
-    "name": "approve",
-    "type": "function",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      { "type": "address", "name": "spender" },
-      { "type": "uint256", "name": "amount" }
-    ],
-    "outputs": [
-      { "type": "bool", "name": "" }
-    ]
-  }
-] as const
 
 interface WalletContextType {
   isConnected: boolean
@@ -43,7 +14,6 @@ interface WalletContextType {
   donate: (regionId: number, amount: string, locale?: string) => Promise<{ txHash: string; learningPoints?: { success: boolean; newScore?: number; message?: string } }>
   isTransacting: boolean
   isProcessing: boolean
-  error: Error | null
   // Nuevas propiedades para MiniPay
   isMiniPay: boolean
   phoneNumber: string | null
@@ -61,16 +31,12 @@ export const useWallet = () => {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const { address, isConnected, connector } = useAccount()
+  const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const { connect, connectors } = useConnect()
   const chainId = useChainId()
-  const { data: hash, error, isPending, writeContract } = useWriteContract()
-  
-  // Log para depurar isTransacting
-  console.log('🔍 [WalletContext] isPending (isTransacting):', isPending);
   const { isMiniPay, phoneNumber, isConnected: isMiniPayConnected, address: miniPayAddress } = useMiniPay()
-  
+
   // Sincronizar el estado de MiniPay con el estado de wagmi
   const effectiveIsConnected = isConnected || (isMiniPay && isMiniPayConnected)
   const effectiveAddress = address || miniPayAddress
@@ -90,7 +56,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     try {
       // Solicitar conexión a MiniPay
       await window.ethereum.request({ method: 'eth_requestAccounts' })
-      
+
       // Si hay un connector específico para MiniPay, usarlo
       const miniPayConnector = connectors?.find((c: { id: string }) => c.id === 'minipay')
       if (miniPayConnector) {
@@ -125,63 +91,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     autoConnectMiniPay()
   }, [isMiniPay, isConnected])
 
-  const approveUSDT = useCallback(async (spender: `0x${string}`, amount: string): Promise<`0x${string}`> => {
-    logger.info(`approveUSDT llamado - Spender: ${spender}, Amount: ${amount}`, 'Approve')
-    
-    const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
-    if (!usdtContractAddress) {
-      logger.error("USDT contract address not configured", 'Approve')
-      throw new Error("La dirección del contrato USDT no está configurada.")
-    }
-    
-    logger.info(`USDT contract address: ${usdtContractAddress}`, 'Approve')
-    logger.info(`Spender (RegionalDonation): ${spender}`, 'Approve')
-    
-    const amountInSmallestUnit = parseUnits(amount, 6)
-    logger.info(`Amount in smallest unit: ${amountInSmallestUnit.toString()}`, 'Approve')
-    
-    const expectedContract = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
-    if (spender.toLowerCase() !== expectedContract?.toLowerCase()) {
-      logger.error(`Spender mismatch! Got: ${spender}, Expected: ${expectedContract}`, 'Approve')
-    }
-    
-    logger.info('Calling writeContract for approve...', 'Approve')
-    
-    return new Promise((resolve, reject) => {
-      writeContract({
-        address: usdtContractAddress,
-        abi: erc20Abi,
-        functionName: 'approve',
-        args: [spender, amountInSmallestUnit],
-      }, {
-        onSuccess: (hash) => {
-          logger.success(`approve transaction confirmed! Hash: ${hash}`, 'Approve')
-          resolve(hash)
-        },
-        onError: (error) => {
-          logger.error(`approve transaction failed: ${error.message}`, 'Approve')
-          reject(error)
-        }
-      })
-    })
-  }, [writeContract])
-
   // Estado local para donación en curso
   const [isDonating, setIsDonating] = useState(false)
-  
+
   // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
   const donate = useCallback(async (regionId: number, amount: string, locale?: string): Promise<{ txHash: string; learningPoints?: any }> => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
-    
+
     if (!regionalDonationContractAddress || !usdtContractAddress) {
       throw new Error('Contract addresses not configured')
     }
-    
+
     if (!effectiveAddress) {
       throw new Error('Wallet not connected')
     }
-    
+
     setIsDonating(true)
     try {
       return await donateFn({
@@ -195,9 +120,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setIsDonating(false)
     }
   }, [effectiveAddress])
-  
-  // Combinar isTransacting (de wagmi) con isDonating (local)
-  const isProcessing = isPending || isDonating
+
+  // isTransacting e isProcessing reflejan solo el estado local de donación
+  // (el flujo unificado no usa wagmi writeContract)
+  const isTransacting = isDonating
+  const isProcessing = isDonating
 
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
@@ -206,9 +133,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     chainId: state.chainId,
     disconnect,
     donate,
-    isTransacting: isPending,
+    isTransacting,
     isProcessing,
-    error,
     isMiniPay,
     phoneNumber,
     connectMiniPay,

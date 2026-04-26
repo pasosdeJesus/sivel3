@@ -763,6 +763,13 @@ export interface SchemaMigrations {
   version: string;
 }
 
+export interface SiteNonce {
+  site: string;
+  available_learningpoints: number;
+  last_nonce: number;
+  updated_at: Timestamp | null;
+}
+
 export interface Sivel2GenActividadoficio {
   created_at: Timestamp;
   fechacreacion: Timestamp;
@@ -1413,6 +1420,7 @@ export interface DB {
   nobelicas: Nobelicas;
   region: Region;
   schema_migrations: SchemaMigrations;
+  site_nonces: SiteNonce;
   sivel2_gen_actividadoficio: Sivel2GenActividadoficio;
   sivel2_gen_acto: Sivel2GenActo;
   sivel2_gen_actocolectivo: Sivel2GenActocolectivo;
