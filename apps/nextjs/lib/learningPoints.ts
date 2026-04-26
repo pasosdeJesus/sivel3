@@ -56,7 +56,10 @@ export async function updateNonce(db: any, nonce: number): Promise<void> {
 
 /**
  * Construye el mensaje a firmar según el formato de learn.tg
- * Formato: {SITE_ADDRESS}:increment:{user_wallet}:{amount}:{nonce}:{timestamp}:{txHash}
+ * Formato: sivel.xyz:increment:{user_wallet}:{amount}:{nonce}:{timestamp}:{txHash}
+ * 
+ * IMPORTANTE: El prefijo debe ser el nombre del sitio, NO la dirección del servicio.
+ * Según la documentación de learn.tg, el mensaje debe comenzar con "sivel.xyz:increment:"
  */
 function buildMessage(
   userWallet: string,
@@ -65,7 +68,8 @@ function buildMessage(
   timestamp: number,
   txHash: string
 ): string {
-  return `${SITE_ADDRESS}:increment:${userWallet}:${amount}:${nonce}:${timestamp}:${txHash}`
+  // Formato correcto: sitio:increment:wallet:amount:nonce:timestamp:txHash
+  return `sivel.xyz:increment:${userWallet}:${amount}:${nonce}:${timestamp}:${txHash}`
 }
 
 /**
