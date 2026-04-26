@@ -4,6 +4,7 @@
 import { parseUnits } from 'viem'
 import { logger } from './logger'
 import { safeStringify, debugLog } from './debug'
+import { parseWalletError } from './errors'
 
 export interface DonateParams {
   regionId: number
@@ -206,35 +207,11 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
   } catch (err: any) {
     logMsg(`❌ Error detectado:`)
     
-    // Extraer mensaje de error más legible
-    let userFriendlyMessage = ''
-    const errorString = String(err?.message || err)
-    
-    if (errorString.includes('insufficient funds') || errorString.includes('exceeds balance')) {
-      userFriendlyMessage = 'Saldo insuficiente. No tienes suficientes USDT para esta donación.'
-    } else if (errorString.includes('user rejected') || err?.code === 4001) {
-      userFriendlyMessage = 'Transacción cancelada por el usuario.'
-    } else if (errorString.includes('network') || errorString.includes('RPC')) {
-      userFriendlyMessage = 'Error de red. Verifica tu conexión.'
-    } else if (errorString.includes('gas')) {
-      userFriendlyMessage = 'Error de gas. No tienes suficiente CELO para la transacción.'
-    } else if (errorString.includes('execution reverted')) {
-      userFriendlyMessage = 'La transacción fue rechazada por el contrato. Verifica los datos.'
-    } else if (errorString.includes('monto mínimo')) {
-      userFriendlyMessage = errorString
-    } else {
-      userFriendlyMessage = err?.message || 'Error desconocido'
-    }
-    
+    const userFriendlyMessage = parseWalletError(err)
+
     logMsg(`   ❌ ${userFriendlyMessage}`)
-    if (err?.message && err.message !== userFriendlyMessage) {
-      logMsg(`   Detalle técnico: ${err.message}`)
-    }
-    if (err?.code) logMsg(`   Código: ${err.code}`)
-    if (err?.data) logMsg(`   Data: ${safeStringify(err.data)}`)
     debugLog('Donation Error', err)
-    
-    // Lanzar error con mensaje amigable
+
     throw new Error(userFriendlyMessage)
   }
 }

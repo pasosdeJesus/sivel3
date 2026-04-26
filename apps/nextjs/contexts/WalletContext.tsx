@@ -34,19 +34,6 @@ const erc20Abi = [
   }
 ] as const
 
-const regionalDonationAbi = [
-  {
-    "name": "donate",
-    "type": "function",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      { "type": "uint256", "name": "regionId" },
-      { "type": "uint256", "name": "amount" }
-    ],
-    "outputs": []
-  }
-] as const
-
 interface WalletContextType {
   isConnected: boolean
   address: `0x${string}` | null
@@ -173,42 +160,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         },
         onError: (error) => {
           logger.error(`approve transaction failed: ${error.message}`, 'Approve')
-          reject(error)
-        }
-      })
-    })
-  }, [writeContract])
-
-  // Función legacy para wallets tradicionales
-  const donateToRegion = useCallback(async (regionId: number, amount: string): Promise<void> => {
-    logger.info(`Donate called - Region: ${regionId}, Amount: ${amount}, isMiniPay: ${isMiniPay}`, 'Donate')
-    
-    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
-    
-    if (!regionalDonationContractAddress) {
-      const errorMsg = "Donation contract not configured"
-      logger.error(errorMsg, 'Donate')
-      throw new Error(errorMsg)
-    }
-    
-    const amountInSmallestUnit = parseUnits(amount, 6)
-    
-    // Para wallets normales: usar writeContract
-    logger.info('Usando writeContract para donate...', 'Donate')
-    
-    return new Promise((resolve, reject) => {
-      writeContract({
-        address: regionalDonationContractAddress,
-        abi: regionalDonationAbi,
-        functionName: 'donate',
-        args: [BigInt(regionId), amountInSmallestUnit],
-      }, {
-        onSuccess: () => {
-          logger.success(`donate transaction confirmed!`, 'Donate')
-          resolve()
-        },
-        onError: (error) => {
-          logger.error(`donate transaction failed: ${error.message}`, 'Donate')
           reject(error)
         }
       })

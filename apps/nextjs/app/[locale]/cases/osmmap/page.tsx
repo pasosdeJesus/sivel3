@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger';
+import { parseWalletError } from '@/lib/errors';
 import confetti from 'canvas-confetti';
 import { translations } from './locales/osmmap';
 import { useRegionBalance } from './hooks/useRegionBalance';
@@ -113,28 +114,15 @@ export default function OSMMapPage() {
 
       logger.info(`✅ Donación completada. TX: ${result.txHash}${result.learningPoints?.success ? ' + Learning Points' : ''}`, 'DonatePage')
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error en donación:', err);
-      
-      // Mensaje de error amigable según el tipo de error
-      let errorMessage = 'No se pudo completar la donación. ';
-      
-      if (err?.message?.includes('insufficient funds') || err?.message?.includes('exceeds balance')) {
-        errorMessage = '❌ Saldo insuficiente.\n\nNo tienes suficientes USDT para realizar esta donación.';
-      } else if (err?.message?.includes('user rejected') || err?.code === 4001) {
-        errorMessage = '⚠️ Transacción cancelada.\n\nCancelaste la transacción en tu wallet.';
-      } else if (err?.message?.includes('network') || err?.message?.includes('RPC')) {
-        errorMessage = '🌐 Error de red.\n\nNo se pudo conectar con la red. Verifica tu conexión.';
-      } else if (err?.message?.includes('gas')) {
-        errorMessage = '⛽ Error de gas.\n\nNo tienes suficiente CELO para pagar la transacción.';
-      } else {
-        errorMessage = `❌ Error en la donación.\n\n${err?.message || 'Intenta nuevamente más tarde.'}`;
-      }
-      
-      alert(errorMessage);
-      
-      // También mostrar en consola para depuración
-      console.error('[Donation Error]', err);
+      const errorMessage = parseWalletError(err);
+      toast({
+        title: currentLocale === 'es' ? 'Error en donación' : 'Donation error',
+        description: errorMessage,
+        variant: 'destructive',
+        duration: 5000,
+      });
     }
   };
 
