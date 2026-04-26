@@ -2,8 +2,6 @@
 // Cliente para la API de learn.tg (incremento de Learning Points)
 
 import { privateKeyToAccount } from 'viem/accounts'
-import { createPublicClient, http } from 'viem'
-import { celo, celoSepolia } from 'viem/chains'
 
 // Configuración desde variables de entorno
 const LEARN_API_URL = process.env.LEARNTG_INCREMENT_API_URL || 'https://learn.tg/api/learning-points/increment'
@@ -24,9 +22,15 @@ export interface LearningPointsResponse {
   expectedNonce?: number
 }
 
+export interface LearningPointsResult {
+  success: boolean
+  message: string
+  userMessage: string
+  newScore?: number
+}
+
 /**
  * Obtiene el nonce actual desde la base de datos
- * @param db Instancia de Kysely
  */
 export async function getCurrentNonce(db: any): Promise<number> {
   const result = await db
@@ -39,9 +43,7 @@ export async function getCurrentNonce(db: any): Promise<number> {
 }
 
 /**
- * Actualiza el nonce en la base de datos después de una solicitud exitosa
- * @param db Instancia de Kysely
- * @param nonce Nuevo nonce
+ * Actualiza el nonce en la base de datos
  */
 export async function updateNonce(db: any, nonce: number): Promise<void> {
   await db
@@ -55,20 +57,16 @@ export async function updateNonce(db: any, nonce: number): Promise<void> {
 }
 
 /**
- * Construye el mensaje a firmar según el formato de learn.tg
+ * Construye el mensaje a firmar
  * Formato: sivel.xyz:increment:{user_wallet}:{amount}:{nonce}:{timestamp}:{txHash}
- * 
- * IMPORTANTE: El prefijo debe ser el nombre del sitio, NO la dirección del servicio.
- * Según la documentación de learn.tg, el mensaje debe comenzar con "sivel.xyz:increment:"
  */
-function buildMessage(
+export function buildMessage(
   userWallet: string,
   amount: number,
   nonce: number,
   timestamp: number,
   txHash: string
 ): string {
-  // Formato correcto: sitio:increment:wallet:amount:nonce:timestamp:txHash
   return `sivel.xyz:increment:${userWallet}:${amount}:${nonce}:${timestamp}:${txHash}`
 }
 
@@ -87,10 +85,6 @@ async function signMessage(message: string): Promise<string> {
 
 /**
  * Llama a la API de learn.tg para incrementar Learning Points
- * @param db Instancia de Kysely
- * @param userWallet Dirección del usuario que donó
- * @param amount Cantidad de puntos (siempre 1)
- * @param retryCount Número de reintentos (para recursión)
  */
 export async function incrementLearningPoints(
   db: any,
@@ -98,23 +92,20 @@ export async function incrementLearningPoints(
   txHash: string,
   amount: number = 1,
   retryCount: number = 0
-): Promise<{ success: boolean; message: string; userMessage: string }> {
+): Promise<LearningPointsResult> {
   const maxRetries = 3
   
   try {
-    // Obtener nonce actual
     const nonce = await getCurrentNonce(db)
     const nextNonce = nonce + 1
     const timestamp = Date.now()
     
-    // Construir mensaje y firmar (incluyendo txHash)
     const message = buildMessage(userWallet, amount, nextNonce, timestamp, txHash)
     console.log(`🔍 [LearningPoints] Mensaje a firmar: ${message}`)
     
     const signature = await signMessage(message)
     console.log(`🔍 [LearningPoints] Firma: ${signature.substring(0, 30)}...`)
     
-    // Llamar a la API incluyendo txHash
     const response = await fetch(LEARN_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -131,22 +122,19 @@ export async function incrementLearningPoints(
     const data: LearningPointsResponse = await response.json()
     
     if (response.ok && data.success) {
-      // Éxito: actualizar nonce en DB
-      if (data.new_nonce) {
-        await updateNonce(db, data.new_nonce)
-        console.log(`✅ [LearningPoints] Nonce actualizado a ${data.new_nonce}`)
-      }
+      await updateNonce(db, nextNonce)
+      console.log(`✅ [LearningPoints] Nonce actualizado a ${nextNonce}`)
       return {
         success: true,
         message: `Learning Points incrementados. Nuevo score: ${data.new_learningscore}`,
-        userMessage: '🎓 Learning Points updated!'
+        userMessage: `🎓 Your Learning Score is now ${data.new_learningscore}`,
+        newScore: data.new_learningscore
       }
     }
     
-    // Manejo de errores según la API
+    // Manejo de errores específicos
     if (data.error === 'Nonce out of order' && data.expectedNonce) {
-      // Reintentar con el nonce esperado
-      console.log(`🔄 [LearningPoints] Nonce out of order. Esperado: ${data.expectedNonce}, actualizando...`)
+      console.log(`🔄 [LearningPoints] Nonce out of order. Esperado: ${data.expectedNonce}`)
       await updateNonce(db, data.expectedNonce - 1)
       return incrementLearningPoints(db, userWallet, txHash, amount, retryCount + 1)
     }
@@ -167,7 +155,7 @@ export async function incrementLearningPoints(
       }
     }
     
-    // Otros errores (posiblemente transitorios)
+    // Reintentos para errores transitorios
     if (retryCount < maxRetries) {
       const delay = Math.pow(2, retryCount) * 1000
       console.log(`🔄 [LearningPoints] Reintentando en ${delay}ms (intento ${retryCount + 1}/${maxRetries})...`)
@@ -184,7 +172,6 @@ export async function incrementLearningPoints(
   } catch (error: any) {
     console.error('❌ [LearningPoints] Error:', error)
     
-    // Errores de red/timeout - reintentar
     if (retryCount < maxRetries) {
       const delay = Math.pow(2, retryCount) * 1000
       console.log(`🔄 [LearningPoints] Error de red, reintentando en ${delay}ms...`)

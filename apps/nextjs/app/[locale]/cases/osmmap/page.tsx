@@ -64,7 +64,7 @@ export default function OSMMapPage() {
   }, [selectedRegion, fetchBalance]);
 
   // Función para refrescar balance después de donar (con confetti y toast)
-  const refreshBalanceAfterDonation = () => {
+  const refreshBalanceAfterDonation = (learningPoints?: { success: boolean; newScore?: number; message?: string }) => {
     if (selectedRegion) {
       confetti({
         particleCount: 150,
@@ -72,10 +72,10 @@ export default function OSMMapPage() {
         origin: { y: 0.6 },
         colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b']
       });
-      
-      const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name || 
+
+      const regionName = donationRegions.find(r => r.id.toString() === selectedRegion)?.name ||
                         (currentLocale === 'es' ? 'la región' : 'the region');
-      
+
       toast({
         title: t.thanksTitle,
         description: t.thanksMessage
@@ -83,10 +83,21 @@ export default function OSMMapPage() {
           .replace('{{amount}}', donationAmount),
         duration: 4000,
       });
-      
+
+      // Mostrar toast de Learning Points si se incrementaron exitosamente
+      if (learningPoints?.success) {
+        toast({
+          title: currentLocale === 'es' ? '🎓 Puntos de Aprendizaje' : '🎓 Learning Points',
+          description: currentLocale === 'es'
+            ? `Has ganado puntos de aprendizaje. Puntaje total: ${learningPoints.newScore}`
+            : `You earned Learning Points. Total score: ${learningPoints.newScore}`,
+          duration: 4000,
+        });
+      }
+
       // Limpiar monto después de donar
       setDonationAmount('');
-      
+
       // Refrescar balance después de 3 segundos
       setTimeout(() => {
         fetchBalance(selectedRegion);
@@ -97,83 +108,10 @@ export default function OSMMapPage() {
   // Función de donación unificada con manejo de errores y Learning Points
   const onDonate = async (amount: string) => {
     try {
-      await donate(parseInt(selectedRegion, 10), amount);
-      refreshBalanceAfterDonation();
-      
-      // Después de donación exitosa, intentar incrementar Learning Points (no bloquea)
-      try {
-        logger.info(`[LearningPoints] Intentando incrementar para wallet: ${effectiveAddress}`, 'DonatePage')
-        const response = await fetch('/api/learning-points/increment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userWallet: isConnected ? effectiveAddress : null,
-            amount: 1
-          }),
-        })
-        
-        logger.info(`[LearningPoints] Respuesta HTTP: ${response.status}`, 'DonatePage')
-        
-        if (response.ok) {
-          const result = await response.json()
-          logger.info(`[LearningPoints] Resultado: ${JSON.stringify(result)}`, 'DonatePage')
-          if (result.success) {
-            toast({
-              title: '🎓 Learning Points Updated!',
-              description: result.userMessage || 'You earned +1 Learning Point for your donation.',
-              duration: 4000,
-            })
-          } else if (result.userMessage) {
-            logger.warn(`[LearningPoints] Error: ${result.userMessage}`, 'DonatePage')
-            toast({
-              title: '⚠️ Learning Points Not Updated',
-              description: result.userMessage,
-              duration: 6000,
-              variant: 'destructive',
-            })
-          } else {
-            // Éxito pero sin mensaje
-            toast({
-              title: '🎓 Learning Points Updated!',
-              description: 'You earned +1 Learning Point for your donation.',
-              duration: 4000,
-            })
-          }
-        } else {
-          // Manejo específico según código HTTP
-          let userMessage = 'Unable to update Learning Points. Please try again later.'
-          
-          if (response.status === 401) {
-            userMessage = 'Authentication error. The service could not verify your Learning Points. Please contact support.'
-            logger.error(`[LearningPoints] Error 401: Invalid signature or unauthorized`, 'DonatePage')
-          } else if (response.status === 404) {
-            userMessage = 'Learning Points service unavailable. Please try again later.'
-            logger.error(`[LearningPoints] Error 404: Endpoint not found`, 'DonatePage')
-          } else if (response.status === 400) {
-            const errorData = await response.json().catch(() => ({}))
-            userMessage = errorData.userMessage || errorData.error || 'Invalid request. Please try again.'
-            logger.error(`[LearningPoints] Error 400: ${JSON.stringify(errorData)}`, 'DonatePage')
-          } else {
-            const errorText = await response.text()
-            logger.error(`[LearningPoints] API error ${response.status}: ${errorText}`, 'DonatePage')
-          }
-          
-          toast({
-            title: '⚠️ Learning Points Not Updated',
-            description: userMessage,
-            duration: 7000,
-            variant: 'destructive',
-          })
-        }
-      } catch (lpError) {
-        logger.error(`[LearningPoints] Error llamando API: ${lpError}`, 'DonatePage')
-        toast({
-          title: '⚠️ Learning Points Not Updated',
-          description: 'Network error. Your donation was successful, but we could not update your Learning Points.',
-          duration: 6000,
-          variant: 'destructive',
-        })
-      }
+      const result = await donate(parseInt(selectedRegion, 10), amount);
+      refreshBalanceAfterDonation(result.learningPoints);
+
+      logger.info(`✅ Donación completada. TX: ${result.txHash}${result.learningPoints?.success ? ' + Learning Points' : ''}`, 'DonatePage')
       
     } catch (err: any) {
       console.error('Error en donación:', err);

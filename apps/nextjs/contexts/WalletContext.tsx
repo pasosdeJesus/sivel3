@@ -53,7 +53,7 @@ interface WalletContextType {
   effectiveAddress: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
-  donate: (regionId: number, amount: string) => Promise<string>
+  donate: (regionId: number, amount: string) => Promise<{ txHash: string; learningPoints?: { success: boolean; newScore?: number; message?: string } }>
   isTransacting: boolean
   isProcessing: boolean
   error: Error | null
@@ -219,7 +219,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isDonating, setIsDonating] = useState(false)
   
   // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
-  const donate = useCallback(async (regionId: number, amount: string) => {
+  const donate = useCallback(async (regionId: number, amount: string): Promise<{ txHash: string; learningPoints?: any }> => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
     

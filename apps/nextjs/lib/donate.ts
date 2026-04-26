@@ -13,7 +13,16 @@ export interface DonateParams {
   regionalDonationContractAddress: `0x${string}`
 }
 
-export async function donate(params: DonateParams): Promise<string> {
+export interface DonateResult {
+  txHash: string
+  learningPoints?: {
+    success: boolean
+    newScore?: number
+    message?: string
+  }
+}
+
+export async function donate(params: DonateParams): Promise<DonateResult> {
   const { regionId, amount, effectiveAddress, usdtContractAddress, regionalDonationContractAddress } = params
   
   const logMsg = (msg: string) => {
@@ -190,7 +199,10 @@ export async function donate(params: DonateParams): Promise<string> {
     
     const result = await backendResponse.json()
     logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
-    return txHash
+    return {
+      txHash: result.txHash || txHash,
+      learningPoints: result.learningPoints,
+    } as DonateResult
   } catch (err: any) {
     logMsg(`❌ Error detectado:`)
     

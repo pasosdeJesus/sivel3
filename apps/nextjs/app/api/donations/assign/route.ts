@@ -210,8 +210,15 @@ export async function POST(request: NextRequest) {
     serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
 
     // ============================================================
-    // Incrementar Learning Points en learn.tg (no bloquea la respuesta)
+    // Incrementar Learning Points en learn.tg (una sola vez)
     // ============================================================
+    let learningPointsResult: { 
+      success: boolean; 
+      message: string; 
+      userMessage?: string; 
+      newScore?: number 
+    } = { success: false, message: 'No se intentó actualizar' }
+    
     try {
       const learnDb = newKyselyPostgresql()
       serverLog.info(`Incrementando Learning Points para ${donor}...`)
@@ -219,19 +226,34 @@ export async function POST(request: NextRequest) {
       
       if (lpResult.success) {
         serverLog.success(`Learning Points incrementados: ${lpResult.message}`)
+        learningPointsResult = {
+          success: true,
+          message: lpResult.message,
+          userMessage: lpResult.userMessage,
+          newScore: (lpResult as any).newScore
+        }
       } else {
         serverLog.warn(`No se pudieron incrementar Learning Points: ${lpResult.message}`)
-        // No fallamos la respuesta principal
+        learningPointsResult = {
+          success: false,
+          message: lpResult.message,
+          userMessage: lpResult.userMessage
+        }
       }
     } catch (lpError) {
       serverLog.error(`Error en incrementLearningPoints: ${lpError}`)
-      // No fallamos la respuesta principal
+      learningPointsResult = { 
+        success: false, 
+        message: 'Error interno del servidor',
+        userMessage: 'Could not update Learning Points due to internal error.'
+      }
     }
 
     return NextResponse.json({
       success: true,
       message: 'Donación asignada correctamente',
       txHash: hash,
+      learningPoints: learningPointsResult,
     })
   } catch (error) {
     serverLog.error(`Error en POST /api/donations/assign: ${error}`)
