@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '@/lib/logger';
+import { useToast } from '@/components/ui/use-toast';
 
 export function useRegionBalance(selectedRegion: string | null) {
+  const { toast } = useToast();
   const [regionBalance, setRegionBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
 
@@ -31,6 +33,12 @@ export function useRegionBalance(selectedRegion: string | null) {
             setTimeout(() => attempt(retryCount - 1), delay);
           } else {
             setBalanceLoading(false);
+            toast({
+              title: 'Error',
+              description: 'No se pudo consultar el balance de la región. Verifica tu conexión.',
+              variant: 'destructive',
+              duration: 5000,
+            });
           }
         });
     };

@@ -65,7 +65,7 @@ export default function OSMMapPage() {
   }, [selectedRegion, fetchBalance]);
 
   // Función para refrescar balance después de donar (con confetti y toast)
-  const refreshBalanceAfterDonation = (learningPoints?: { success: boolean; newScore?: number; message?: string }) => {
+  const refreshBalanceAfterDonation = (learningPoints?: { success: boolean; newScore?: number; message?: string; userMessage?: string }) => {
     if (selectedRegion) {
       confetti({
         particleCount: 150,
@@ -93,6 +93,18 @@ export default function OSMMapPage() {
             ? `Has ganado puntos de aprendizaje. Puntaje total: ${learningPoints.newScore}`
             : `You earned Learning Points. Total score: ${learningPoints.newScore}`,
           duration: 4000,
+        });
+      }
+
+      // Mostrar toast informativo si Learning Points fallaron
+      if (learningPoints && !learningPoints.success) {
+        toast({
+          title: currentLocale === 'es' ? '🎓 Puntos de Aprendizaje' : '🎓 Learning Points',
+          description: learningPoints.userMessage
+            || (currentLocale === 'es'
+              ? 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.'
+              : 'Unable to update Learning Points. Contact the team.'),
+          duration: 0, // Sin auto-dismiss — el usuario debe cerrarlo manualmente
         });
       }
 

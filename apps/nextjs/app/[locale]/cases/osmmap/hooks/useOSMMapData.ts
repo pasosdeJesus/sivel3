@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { useToast } from '@/components/ui/use-toast';
 
 interface DonationRegion {
   id: number;
@@ -22,6 +23,7 @@ interface Counts {
 }
 
 export function useOSMMapData(currentLocale: string) {
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState<Counts>({ casos: 0, victimas: 0, victimizaciones: 0, actos: 0 });
   const [filters, setFilters] = useState<Filters>({
@@ -81,6 +83,14 @@ export function useOSMMapData(currentLocale: string) {
       } catch (error) {
         logger.error(`Error loading data: ${error}`, 'OSMMapData');
         console.error('Error loading data:', error);
+        toast({
+          title: currentLocale === 'es' ? 'Error al cargar datos' : 'Error loading data',
+          description: currentLocale === 'es'
+            ? 'No se pudieron cargar los datos del mapa. Verifica tu conexión e intenta de nuevo.'
+            : 'Unable to load map data. Check your connection and try again.',
+          variant: 'destructive',
+          duration: 0,
+        });
       } finally {
         setLoading(false);
       }

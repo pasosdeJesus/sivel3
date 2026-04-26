@@ -145,10 +145,13 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
     
     // Llamar al backend para asignar la donación (con reintentos)
     // El backend verificará la transacción en la blockchain
+    // Los errores 4xx NO se reintentan (el backend rechazó la solicitud)
+    // Los errores 5xx y de red SÍ se reintentan (problema temporal del servidor)
     logMsg(`🔄 Llamando al backend para asignar donación...`)
     let backendResponse: Response | null = null
     let lastError: string = ''
-    
+    let isClientError = false
+
     for (let attempt = 1; attempt <= 5; attempt++) {
       try {
         backendResponse = await fetch('/api/donations/assign', {
@@ -161,41 +164,39 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
             txHash,
           }),
         })
-        
+
         if (backendResponse.ok) break
-        
+
         const errorText = await backendResponse.text()
         lastError = `HTTP ${backendResponse.status}: ${errorText}`
         logMsg(`⚠️ Intento ${attempt}/5 falló: ${lastError}`)
+
+        // 4xx: error del cliente, no reintentar
+        if (backendResponse.status >= 400 && backendResponse.status < 500) {
+          isClientError = true
+          logMsg(`⚠️ Error 4xx detectado, no se reintentará`)
+          break
+        }
       } catch (err: any) {
         lastError = err.message
-        logMsg(`⚠️ Intento ${attempt}/5 error: ${lastError}`)
+        logMsg(`⚠️ Intento ${attempt}/5 error de red: ${lastError}`)
       }
-      
+
       if (attempt < 5) await new Promise(r => setTimeout(r, 2000))
     }
-    
+
     if (!backendResponse || !backendResponse.ok) {
-      // Mensaje de error detallado para el usuario
-      const errorMsg = `⚠️ ERROR EN LA DONACIÓN ⚠️\n\n` +
-        `La transferencia de USDT se realizó correctamente (hash: ${txHash.substring(0, 16)}...), ` +
-        `pero NO se pudo asignar a la región ${regionId}.\n\n` +
-        `Motivo: ${lastError}\n\n` +
-        `📋 Datos para soporte:\n` +
-        `- Región: ${regionId}\n` +
-        `- Monto: ${amount} USDT\n` +
-        `- Donante: ${effectiveAddress}\n` +
-        `- Hash: ${txHash}\n\n` +
-        `Por favor, contacta al equipo con estos datos para que asignen manualmente tu donación.\n` +
-        `Los fondos están seguros en el contrato.`
-      
-      logMsg(`❌ ${errorMsg}`)
-      
-      if (typeof window !== 'undefined') {
-        alert(errorMsg)
-      }
-      
-      throw new Error('Backend assignment failed after retries')
+      logMsg(`❌ Error en asignación: ${lastError}`)
+
+      // Lanzar error amigable para el usuario — page.tsx lo mostrará como toast
+      const userMsg = isClientError
+        ? `La transacción no pudo ser verificada por el servidor.\n\nMotivo: ${lastError}\n\nContacta al equipo si el problema persiste.`
+        : `La donación se realizó pero no se pudo asignar automáticamente (tras ${5} intentos).\n\n` +
+          `Los fondos están seguros en el contrato.\n\n` +
+          `Hash: ${txHash.substring(0, 16)}...\n\n` +
+          `Contacta al equipo con este hash para que asignen manualmente tu donación.`
+
+      throw new Error(userMsg)
     }
     
     const result = await backendResponse.json()

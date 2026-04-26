@@ -26,6 +26,9 @@ export function parseWalletError(err: unknown): string {
   if (msg.includes('monto mínimo')) {
     return msg
   }
+  if (msg.includes('no pudo ser verificada') || msg.includes('no se pudo asignar')) {
+    return msg
+  }
 
   return `❌ Error en la operación.\n\n${msg || 'Intenta nuevamente más tarde.'}`
 }
