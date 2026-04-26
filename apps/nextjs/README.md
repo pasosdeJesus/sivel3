@@ -88,3 +88,8 @@ Creates a new role and database using the variables from `.env`.
 - `.env`: Environment configuration file.
 - `package.json`: Project dependencies and scripts.
 - `tsconfig.json`: TypeScript configuration.
+
+## Reference Documentation
+
+- **[doc/mobile-debug-console.md](doc/mobile-debug-console.md)** — Debug console for testing in MiniPay and embedded browsers
+- **[doc/I18N.md](doc/I18N.md)** — Internationalization strategy and patterns

@@ -144,7 +144,7 @@ export default function OSMMapPage() {
         title: currentLocale === 'es' ? 'Error en donación' : 'Donation error',
         description: errorMessage,
         variant: 'destructive',
-        duration: 5000,
+        duration: 0,
       });
     }
   };

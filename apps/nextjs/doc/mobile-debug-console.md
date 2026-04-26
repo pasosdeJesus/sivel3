@@ -14,9 +14,11 @@ It is especially useful in **MiniPay** and other embedded browsers where there i
 
 The console **only appears** when:
 - The URL contains the parameter `?debug=1` (e.g., `https://sivel.xyz/en/cases/osmmap?debug=1`)
-- Or the environment variable `NEXT_PUBLIC_M_DEBUGGER_CONSOLE=1` is enabled on the server
+- Or the environment variable `NEXT_PUBLIC_M_DEBUGGER_CONSOLE=1` is enabled at build time
 
 Under normal conditions (without the parameter), **the console does not appear** to avoid interfering with the user experience.
+
+> **Note:** Regardless of the floating console, the Logger class (`lib/logger.ts`) always writes all messages to `console.log`/`console.error` via the browser DevTools. This means logs are always accessible via F12 even without `?debug=1`.
 
 ### What does it look like?
 
@@ -33,10 +35,10 @@ Under normal conditions (without the parameter), **the console does not appear**
 | Action | Result |
 |--------|--------|
 | **Open console** | Tap the `>_` button in the bottom right corner |
-| **Close console** | Tap the `X` in the top right corner of the console |
-| **Copy logs** | Tap the copy icon (📋) |
-| **Clear logs** | Tap the trash icon (🗑️) |
-| **Minimize** | Tap the down arrow icon (⌄) |
+| **Close console** | Tap the `×` in the top right corner of the console |
+| **Copy logs** | Tap the copy icon |
+| **Clear logs** | Tap the trash icon |
+| **Minimize** | Tap the chevron-down / chevron-up icon |
 
 ### What is it for?
 
@@ -54,11 +56,23 @@ Under normal conditions (without the parameter), **the console does not appear**
 |--------|----------------|
 | **Via URL (recommended)** | Add `?debug=1` to the URL: `https://sivel.xyz/en/cases/osmmap?debug=1` |
 | **Environment variable** | `NEXT_PUBLIC_M_DEBUGGER_CONSOLE=1` in `.env` |
-| **LocalStorage (advanced only)** | `localStorage.setItem('floatingConsole', '1')` |
 
 ### How does it work internally?
 
-The console is implemented in `components/DebugConsole.tsx` and uses the unified logging system (`lib/logger.ts`).
+The console is implemented in `components/DebugConsole.tsx` and uses the unified logging system (`lib/logger.ts`). It is rendered in the client layout (`components/ClientLayout.tsx`) so it is available on all pages.
+
+Architecture:
+```
+ClientLayout.tsx
+  └── <DebugConsole />         ← rendered always (returns null when disabled)
+        └── useLogger()        ← reads from Logger singleton
+
+Any component/fn              ← writes via
+  └── logger.info('msg')       → Logger singleton → console.log (always)
+                                                    → subscribers (console UI)
+```
+
+The Logger class stores a buffer of up to 500 entries and notifies subscribers (`useLogger()` hook) in real-time when the floating console is enabled.
 
 ```typescript
 // Activate via URL (logger.ts)
@@ -118,9 +132,9 @@ if (debugParam === '1') {
 
 ```
 [12:05:35][Donate]📢Starting - Region: 1, Amount: 10
-[12:05:38][Donate]❌ Error detected:
-[12:05:38][Donate]   Message: transfer amount exceeds balance
-[12:05:38][Donate]   ❌ Insufficient balance. You don't have enough USDT for this donation.
+[12:05:38][Donate]📢Error detected:
+[12:05:38][Donate]   ❌ Insufficient balance.
+   You don't have enough USDT for this donation.
 ```
 
 ---
@@ -138,9 +152,8 @@ No, logs are volatile. To preserve them, tap the **copy** icon (📋) before clo
 
 ### Can I use the console on desktop?
 
-Yes, it works in any browser with `?debug=1`. On desktop you can also use F12 (DevTools) to see logs, but the floating console is optional.
+Yes, it works in any browser with `?debug=1`. On desktop you can also use F12 (DevTools) to see all logs via `console.log` — the Logger class writes there regardless of the floating console state.
 
 ### How do I disable the console in production?
 
 Use the URL without `?debug=1`. Regular users will **never** see the console.
-```
