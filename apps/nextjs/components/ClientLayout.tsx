@@ -6,6 +6,7 @@ import Footer from './Footer'
 import Header from './Header'
 import { AppProvider } from '@/providers/AppProvider'
 import { DebugConsole } from './DebugConsole'
+import { Toaster } from '@/components/ui/toaster'
 
 interface ClientLayoutProps {
   children: ReactNode
@@ -20,6 +21,7 @@ export default function ClientLayout({ children, locale }: ClientLayoutProps) {
         <main role="main">{children}</main>
         <Footer lang={locale} />
         <DebugConsole />
+        <Toaster />
       </div>
     </AppProvider>
   )

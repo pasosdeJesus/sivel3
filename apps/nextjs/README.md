@@ -44,6 +44,13 @@ Political Violence Information System (SIVeL)
     # Use 'celo' for the production environment.
     # Use 'celoSepolia' for the development or testing environment.
     NEXT_PUBLIC_NETWORK=celoSepolia
+
+    # -- Learning Points (learn.tg Integration) --
+    # URL of the learn.tg endpoint that increments Learning Points after donation
+    LEARNTG_INCREMENT_API_URL=https://learn.tg/api/learning-points/increment
+
+    # Ethereum address that identifies sivel.xyz (must match learn.tg's SIVEL_ADDRESS)
+    LEARNTG_ADDRESS=0x9F636E5653b649b44c9375E6E103600AE55aF979
     ```
 
     **Important!** This database configuration is a starting point. You **must** verify that these values match your local system's setup. For example, the `PG_SUPERUSER` might be different (e.g., `postgres`, `user`, etc.) depending on your PostgreSQL installation. Adjust these variables as needed before proceeding.

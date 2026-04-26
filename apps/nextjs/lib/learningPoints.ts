@@ -1,5 +1,26 @@
 // lib/learningPoints.ts
 // Cliente para la API de learn.tg (incremento de Learning Points)
+//
+// === Protocolo de Nonces ===
+// La tabla site_nonces mantiene last_nonce para sivel.xyz. Cada solicitud
+// a learn.tg debe usar un nonce estrictamente mayor al anterior:
+//   1. getCurrentNonce(db) → last_nonce (ej. 5)
+//   2. Enviar nonce = last_nonce + 1 (ej. 6)
+//   3. Si learn.tg responde "Nonce out of order" + expectedNonce:
+//      - Actualizar last_nonce = expectedNonce - 1
+//      - Reintentar
+//   4. Si éxito: updateNonce(db, nextNonce) → last_nonce = nonce enviado
+//
+// El new_nonce en la respuesta de learn.tg es el contador INDEPENDIENTE
+// de learn.tg, NO debe usarse para actualizar el nonce de sivel.xyz.
+//
+// === Mensaje Firmado ===
+// Formato: sivel.xyz:increment:{user_wallet}:{amount}:{nonce}:{timestamp}:{txHash}
+// Firmado con EIP-191 (personal_sign) usando PRIVATE_KEY.
+// learn.tg verifica la firma recuperando la dirección y comparándola con SIVEL_ADDRESS.
+//
+// === Documentación Completa ===
+// Ver documentación de la API de learn.tg (privada) para más detalles.
 
 import { privateKeyToAccount } from 'viem/accounts'
 
