@@ -16,6 +16,20 @@ import { useOSMMapData } from './hooks/useOSMMapData';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 
+// Local TypeScript Object para LP (ver doc/I18N.md)
+const lpTranslations = {
+  en: {
+    title: '🎓 Learning Points',
+    success: 'You earned Learning Points. Total score: {{0}}',
+    fallbackError: 'Unable to update Learning Points. Contact the team.',
+  },
+  es: {
+    title: '🎓 Puntos de Aprendizaje',
+    success: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
+    fallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
+  },
+}
+
 const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
   ssr: false,
   loading: () => (
@@ -87,23 +101,20 @@ export default function OSMMapPage() {
 
       // Mostrar toast de Learning Points si se incrementaron exitosamente
       if (learningPoints?.success) {
+        const lpT = currentLocale === 'es' ? lpTranslations.es : lpTranslations.en
         toast({
-          title: currentLocale === 'es' ? '🎓 Puntos de Aprendizaje' : '🎓 Learning Points',
-          description: currentLocale === 'es'
-            ? `Has ganado puntos de aprendizaje. Puntaje total: ${learningPoints.newScore}`
-            : `You earned Learning Points. Total score: ${learningPoints.newScore}`,
+          title: lpT.title,
+          description: lpT.success.replace('{{0}}', String(learningPoints.newScore)),
           duration: 4000,
         });
       }
 
       // Mostrar toast informativo si Learning Points fallaron
       if (learningPoints && !learningPoints.success) {
+        const lpT = currentLocale === 'es' ? lpTranslations.es : lpTranslations.en
         toast({
-          title: currentLocale === 'es' ? '🎓 Puntos de Aprendizaje' : '🎓 Learning Points',
-          description: learningPoints.userMessage
-            || (currentLocale === 'es'
-              ? 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.'
-              : 'Unable to update Learning Points. Contact the team.'),
+          title: lpT.title,
+          description: learningPoints.userMessage || lpT.fallbackError,
           duration: 0, // Sin auto-dismiss — el usuario debe cerrarlo manualmente
         });
       }
@@ -121,14 +132,14 @@ export default function OSMMapPage() {
   // Función de donación unificada con manejo de errores y Learning Points
   const onDonate = async (amount: string) => {
     try {
-      const result = await donate(parseInt(selectedRegion, 10), amount);
+      const result = await donate(parseInt(selectedRegion, 10), amount, currentLocale);
       refreshBalanceAfterDonation(result.learningPoints);
 
       logger.info(`✅ Donación completada. TX: ${result.txHash}${result.learningPoints?.success ? ' + Learning Points' : ''}`, 'DonatePage')
       
     } catch (err: unknown) {
       console.error('Error en donación:', err);
-      const errorMessage = parseWalletError(err);
+      const errorMessage = parseWalletError(err, currentLocale);
       toast({
         title: currentLocale === 'es' ? 'Error en donación' : 'Donation error',
         description: errorMessage,

@@ -1,8 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 
+// Local TypeScript Object para i18n (ver doc/I18N.md)
+const balanceTranslations = {
+  en: { error: 'Error', errorDesc: 'Unable to fetch region balance. Check your connection.' },
+  es: { error: 'Error', errorDesc: 'No se pudo consultar el balance de la región. Verifica tu conexión.' },
+}
+
 export function useRegionBalance(selectedRegion: string | null) {
+  const params = useParams();
+  const currentLocale = ((params?.locale as string) || 'en');
+  const balT = currentLocale === 'es' ? balanceTranslations.es : balanceTranslations.en;
   const { toast } = useToast();
   const [regionBalance, setRegionBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
@@ -34,8 +44,8 @@ export function useRegionBalance(selectedRegion: string | null) {
           } else {
             setBalanceLoading(false);
             toast({
-              title: 'Error',
-              description: 'No se pudo consultar el balance de la región. Verifica tu conexión.',
+              title: balT.error,
+              description: balT.errorDesc,
               variant: 'destructive',
               duration: 5000,
             });

@@ -23,44 +23,67 @@ export interface DonateResult {
   }
 }
 
-export async function donate(params: DonateParams): Promise<DonateResult> {
+// Local TypeScript Objects para i18n (ver doc/I18N.md)
+const donateTranslations = {
+  en: {
+    minAmount: 'The minimum donation amount is 0.02 USDT. You entered {{0}} USDT.',
+    noWallet: 'No wallet provider available',
+    walletIncompatible: 'Incompatible wallet: neither send nor request available',
+    verifying: 'Sending transaction to the network...',
+    backendCalling: 'Calling backend to assign donation...',
+    backend4xx: 'The transaction could not be verified by the server.\n\nReason: {{0}}\n\nContact the team if the problem persists.',
+    backend5xx: 'The donation was sent but could not be assigned automatically (after {{0}} attempts).\n\nFunds are safe in the contract.\n\nHash: {{1}}...\n\nContact the team with this hash to manually assign your donation.',
+  },
+  es: {
+    minAmount: 'El monto mínimo de donación es 0.02 USDT. Ingresaste {{0}} USDT.',
+    noWallet: 'No hay wallet disponible',
+    walletIncompatible: 'Wallet no compatible: ni send ni request disponibles',
+    verifying: 'Enviando transacción a la red...',
+    backendCalling: 'Llamando al backend para asignar donación...',
+    backend4xx: 'La transacción no pudo ser verificada por el servidor.\n\nMotivo: {{0}}\n\nContacta al equipo si el problema persiste.',
+    backend5xx: 'La donación se realizó pero no se pudo asignar automáticamente (tras {{0}} intentos).\n\nLos fondos están seguros en el contrato.\n\nHash: {{1}}...\n\nContacta al equipo con este hash para que asignen manualmente tu donación.',
+  },
+}
+
+export async function donate(params: DonateParams, locale: string = 'en'): Promise<DonateResult> {
   const { regionId, amount, effectiveAddress, usdtContractAddress, regionalDonationContractAddress } = params
-  
+  const t = locale === 'es' ? donateTranslations.es : donateTranslations.en
+
   const logMsg = (msg: string) => {
     console.log(`🔍 [donate] ${msg}`)
     logger.info(msg, 'Donate')
   }
-  
+
   logMsg(`Iniciando - Región: ${regionId}, Monto: ${amount}`)
   logMsg(`✅ Contract addresses: USDT=${usdtContractAddress}, Donation=${regionalDonationContractAddress}`)
-  
+
   const amountNum = parseFloat(amount)
   if (amountNum < 0.02) {
-    const errorMsg = `El monto mínimo de donación es 0.02 USDT. Ingresaste ${amountNum} USDT.`
+    const errorMsg = t.minAmount.replace('{{0}}', String(amountNum))
     logMsg(`❌ ${errorMsg}`)
     throw new Error(errorMsg)
   }
-  
+
   const amountInSmallestUnit = parseUnits(amount, 6)
   logMsg(`Monto en unidades pequeñas: ${amountInSmallestUnit.toString()}`)
-  
+
   // Codificar el data con el regionId (32 bytes)
   const regionIdHex = BigInt(regionId).toString(16).padStart(64, '0')
   logMsg(`RegionId hex: ${regionIdHex}`)
-  
+
   // Codificar transferencia ERC-20: transfer(address to, uint256 amount)
   const transferSelector = '0xa9059cbb'
   const toHex = regionalDonationContractAddress.slice(2).toLowerCase().padStart(64, '0')
   const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
   const transferData = transferSelector + toHex + amountHex + regionIdHex
-  
+
   logMsg(`Transfer data (primeros 100 chars): ${transferData.substring(0, 100)}...`)
-  
+
   if (typeof window === 'undefined' || !window.ethereum) {
     logMsg(`❌ No hay wallet disponible`)
-    throw new Error('No wallet provider available')
+    throw new Error(t.noWallet)
   }
-  
+
   const ethereum = window.ethereum as any
   const txParams = {
     from: effectiveAddress,
@@ -68,28 +91,28 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
     data: transferData,
     value: '0x0',
   }
-  
+
   /**
    * NOTA: Métodos de transacción según wallet (Abril 2026)
-   * 
+   *
    * Durante la integración de MiniPay, se descubrió que:
    * - MiniPay NO soporta ethereum.request (error: Cannot read properties of undefined (reading '_request'))
    * - MiniPay SÍ soporta ethereum.send
-   * 
+   *
    * Por otro lado:
    * - MetaMask NO soporta ethereum.send sin callback (error: does not support synchronous methods)
    * - MetaMask SÍ soporta ethereum.request
-   * 
+   *
    * Por tanto, debemos detectar la wallet y usar el método apropiado.
-   * 
+   *
    * Referencia: https://github.com/pasosdeJesus/sivel3/issues/24
    * Fecha de las pruebas: 21-24 de abril de 2026
    */
   const isMiniPay = ethereum.isMiniPay === true
-  
+
   try {
     let txHash: string
-    
+
     let rawHash: any
     if (isMiniPay && typeof ethereum.send === 'function') {
       logMsg(`📱 Usando ethereum.send (MiniPay)...`)
@@ -97,11 +120,11 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
         method: 'eth_sendTransaction',
         params: [txParams],
       })
-      
+
       // Depuración: serializar la respuesta usando debugLog
       debugLog('MiniPay Response', rawHash)
       logMsg(`📦 Respuesta MiniPay (tipo: ${typeof rawHash}): ${safeStringify(rawHash)}`)
-      
+
       // Intentar extraer el hash de diferentes propiedades
       if (typeof rawHash === 'string') {
         txHash = rawHash
@@ -126,7 +149,7 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
         debugLog('MiniPay Invalid Type', { type: typeof rawHash, value: rawHash })
         throw new Error(`Tipo de respuesta inesperado: ${typeof rawHash}`)
       }
-      
+
       debugLog('MiniPay Extracted Hash', { hash: txHash })
       logMsg(`📱 Hash extraído: ${txHash}`)
     } else if (typeof ethereum.request === 'function') {
@@ -138,11 +161,11 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
       logMsg(`✅ Hash: ${txHash}`)
     } else {
       logMsg(`⚠️ No se encontró método compatible`)
-      throw new Error('Wallet no compatible: ni send ni request disponibles')
+      throw new Error(t.walletIncompatible)
     }
-    
+
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
-    
+
     // Llamar al backend para asignar la donación (con reintentos)
     // El backend verificará la transacción en la blockchain
     // Los errores 4xx NO se reintentan (el backend rechazó la solicitud)
@@ -188,17 +211,15 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
     if (!backendResponse || !backendResponse.ok) {
       logMsg(`❌ Error en asignación: ${lastError}`)
 
-      // Lanzar error amigable para el usuario — page.tsx lo mostrará como toast
       const userMsg = isClientError
-        ? `La transacción no pudo ser verificada por el servidor.\n\nMotivo: ${lastError}\n\nContacta al equipo si el problema persiste.`
-        : `La donación se realizó pero no se pudo asignar automáticamente (tras ${5} intentos).\n\n` +
-          `Los fondos están seguros en el contrato.\n\n` +
-          `Hash: ${txHash.substring(0, 16)}...\n\n` +
-          `Contacta al equipo con este hash para que asignen manualmente tu donación.`
+        ? t.backend4xx.replace('{{0}}', lastError)
+        : t.backend5xx
+            .replace('{{0}}', String(5))
+            .replace('{{1}}', txHash.substring(0, 16))
 
       throw new Error(userMsg)
     }
-    
+
     const result = await backendResponse.json()
     logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
     return {
@@ -207,8 +228,8 @@ export async function donate(params: DonateParams): Promise<DonateResult> {
     } as DonateResult
   } catch (err: any) {
     logMsg(`❌ Error detectado:`)
-    
-    const userFriendlyMessage = parseWalletError(err)
+
+    const userFriendlyMessage = parseWalletError(err, locale)
 
     logMsg(`   ❌ ${userFriendlyMessage}`)
     debugLog('Donation Error', err)
