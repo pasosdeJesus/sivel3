@@ -16,7 +16,7 @@ import { useOSMMapData } from './hooks/useOSMMapData';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 
-// Local TypeScript Object para LP (ver doc/I18N.md)
+// Translation objects (ver doc/I18N.md)
 const lpTranslations = {
   en: {
     title: '🎓 Learning Points',

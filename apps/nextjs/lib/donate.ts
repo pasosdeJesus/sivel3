@@ -173,6 +173,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
     logMsg(`🔄 Llamando al backend para asignar donación...`)
     let backendResponse: Response | null = null
     let lastError: string = ''
+    let lastStatus: string = ''
     let isClientError = false
 
     for (let attempt = 1; attempt <= 5; attempt++) {
@@ -192,6 +193,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
 
         const errorText = await backendResponse.text()
         lastError = `HTTP ${backendResponse.status}: ${errorText}`
+        lastStatus = `HTTP ${backendResponse.status}`
         logMsg(`⚠️ Intento ${attempt}/5 falló: ${lastError}`)
 
         // 4xx: error del cliente, no reintentar
@@ -212,7 +214,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
       logMsg(`❌ Error en asignación: ${lastError}`)
 
       const userMsg = isClientError
-        ? t.backend4xx.replace('{{0}}', lastError)
+        ? t.backend4xx.replace('{{0}}', lastStatus)
         : t.backend5xx
             .replace('{{0}}', String(5))
             .replace('{{1}}', txHash.substring(0, 16))

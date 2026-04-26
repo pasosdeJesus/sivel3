@@ -47,7 +47,7 @@ export function useRegionBalance(selectedRegion: string | null) {
               title: balT.error,
               description: balT.errorDesc,
               variant: 'destructive',
-              duration: 5000,
+              duration: 0,
             });
           }
         });
