@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/lib/logger';
 import confetti from 'canvas-confetti';
 import { translations } from './locales/osmmap';
 import { useRegionBalance } from './hooks/useRegionBalance';
@@ -101,6 +102,7 @@ export default function OSMMapPage() {
       
       // Después de donación exitosa, intentar incrementar Learning Points (no bloquea)
       try {
+        logger.info(`[LearningPoints] Intentando incrementar para wallet: ${effectiveAddress}`, 'DonatePage')
         const response = await fetch('/api/learning-points/increment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -110,8 +112,11 @@ export default function OSMMapPage() {
           }),
         })
         
+        logger.info(`[LearningPoints] Respuesta HTTP: ${response.status}`, 'DonatePage')
+        
         if (response.ok) {
           const result = await response.json()
+          logger.info(`[LearningPoints] Resultado: ${JSON.stringify(result)}`, 'DonatePage')
           if (result.success) {
             toast({
               title: '🎓 Learning Points Updated!',
@@ -119,6 +124,7 @@ export default function OSMMapPage() {
               duration: 4000,
             })
           } else if (result.userMessage) {
+            logger.warn(`[LearningPoints] Error: ${result.userMessage}`, 'DonatePage')
             toast({
               title: '⚠️ Learning Points Not Updated',
               description: result.userMessage,
@@ -128,7 +134,7 @@ export default function OSMMapPage() {
           }
         } else {
           const errorText = await response.text()
-          console.warn('Learning Points API error:', errorText)
+          logger.error(`[LearningPoints] API error ${response.status}: ${errorText}`, 'DonatePage')
           toast({
             title: '⚠️ Learning Points Not Updated',
             description: 'Unable to update Learning Points. Please try again later.',
@@ -137,7 +143,7 @@ export default function OSMMapPage() {
           })
         }
       } catch (lpError) {
-        console.error('Error calling Learning Points API:', lpError)
+        logger.error(`[LearningPoints] Error llamando API: ${lpError}`, 'DonatePage')
         toast({
           title: '⚠️ Learning Points Not Updated',
           description: 'Network error. Your donation was successful, but we could not update your Learning Points.',
