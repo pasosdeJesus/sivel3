@@ -153,30 +153,40 @@ export async function incrementLearningPoints(
       }
     }
     
-    // Manejo de errores específicos
+    // Los errores 4xx de learn.tg no se reintentan (error del cliente)
+    // Excepción: "Nonce out of order" es recuperable (re-sincronizar nonce y reintentar)
     if (data.error === 'Nonce out of order' && data.expectedNonce) {
       console.log(`🔄 [LearningPoints] Nonce out of order. Esperado: ${data.expectedNonce}`)
       await updateNonce(db, data.expectedNonce - 1)
       return incrementLearningPoints(db, userWallet, txHash, amount, retryCount + 1)
     }
-    
-    if (data.error === 'Profile score too low') {
-      return {
-        success: false,
-        message: `Profile score too low: ${data.currentScore} (needs >= 50)`,
-        userMessage: '⚠️ You need to complete your profile first to earn Learning Points.'
+    if (response.status >= 400 && response.status < 500) {
+      console.log(`⚠️ [LearningPoints] Error 4xx de learn.tg: ${response.status}`)
+      // Extraer userMessage según el error específico
+      let userMsg: string
+      if (data.error?.toLowerCase().includes('not found') || data.error?.toLowerCase().includes('no encontrado')) {
+        userMsg = '⚠️ Your wallet is not registered in learn.tg. Create an account first to earn Learning Points.'
+      } else if (data.error === 'Profile score too low') {
+        return {
+          success: false,
+          message: `Profile score too low: ${data.currentScore} (needs >= 50)`,
+          userMessage: '⚠️ You need to complete your profile first to earn Learning Points.'
+        }
+      } else if (data.error === 'Insufficient balance') {
+        return {
+          success: false,
+          message: 'Campaign balance exhausted',
+          userMessage: '⚠️ Campaign balance exhausted. Try again later.'
+        }
+      } else {
+        userMsg = data.error
+          ? `⚠️ learn.tg: ${data.error}`
+          : '❌ Unable to update Learning Points. Contact the team.'
       }
+      return { success: false, message: data.error || 'Client error', userMessage: userMsg }
     }
-    
-    if (data.error === 'Insufficient balance') {
-      return {
-        success: false,
-        message: 'Campaign balance exhausted',
-        userMessage: '⚠️ Campaign balance exhausted. Try again later.'
-      }
-    }
-    
-    // Reintentos para errores transitorios
+
+    // Reintentos para errores transitorios (5xx o de red)
     if (retryCount < maxRetries) {
       const delay = Math.pow(2, retryCount) * 1000
       console.log(`🔄 [LearningPoints] Reintentando en ${delay}ms (intento ${retryCount + 1}/${maxRetries})...`)
