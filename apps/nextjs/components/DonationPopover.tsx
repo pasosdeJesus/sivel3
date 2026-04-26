@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,12 +19,11 @@ interface DonationPopoverProps {
   onRefreshBalance?: () => void
   isTransacting: boolean
   isProcessing: boolean
-  isApproving: boolean
-  labels: { cause: string; availableFunds: string; amount: string; approve: string; donateTitle?: string; approving: string; donating: string }
+  labels: { cause: string; availableFunds: string; amount: string; approve: string; donateTitle?: string; donating: string }
   variant?: 'mobile' | 'desktop'
 }
 
-export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isProcessing, isApproving, labels, variant = 'mobile' }: DonationPopoverProps) {
+export function DonationPopover({ isConnected, selectedRegion, donationAmount, regionBalance, donationRegions, onRegionChange, onAmountChange, onDonate, onRefreshBalance, isTransacting, isProcessing, labels, variant = 'mobile' }: DonationPopoverProps) {
   // ============================================
   // TODOS LOS HOOKS AL INICIO (mismo orden siempre)
   // ============================================
@@ -46,6 +45,27 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
     mobileLocalAmountRef.current = donationAmount
     setMobileLocalAmountState(donationAmount)
   }, [donationAmount])
+
+  // ============================================
+  // HANDLER COMPARTIDO (extraído para evitar duplicado desktop/mobile)
+  // ============================================
+  const handleDonate = useCallback(async (amountStr: string) => {
+    const amount = parseFloat(amountStr)
+    console.log('🔍 [DonationPopover] Monto:', amount)
+
+    // Validar monto mínimo (0.02 USDT)
+    if (isNaN(amount) || amount < 0.02) {
+      alert(`⚠️ El monto mínimo de donación es 0.02 USDT. Ingresaste ${amount || 0} USDT.`)
+      return
+    }
+
+    onAmountChange(amountStr)
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await onDonate(amountStr)
+    if (onRefreshBalance) {
+      setTimeout(() => onRefreshBalance(), 3000)
+    }
+  }, [onAmountChange, onDonate, onRefreshBalance])
 
   // ============================================
   // RENDERIZADO CONDICIONAL
@@ -88,31 +108,15 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                 placeholder="10.00" 
                 value={desktopLocalAmount} 
                 onChange={(e) => setDesktopLocalAmount(e.target.value)} 
-                disabled={isTransacting || isApproving}
+                disabled={isTransacting}
                 className="flex-1"
               />
-              <Button 
-                onClick={async () => {
-                  const amount = parseFloat(desktopLocalAmount)
-                  console.log('🔍 [DonationPopover] Desktop - Monto:', amount)
-                  
-                  // Validar monto mínimo (0.02 USDT)
-                  if (isNaN(amount) || amount < 0.02) {
-                    alert(`⚠️ El monto mínimo de donación es 0.02 USDT. Ingresaste ${amount || 0} USDT.`)
-                    return
-                  }
-                  
-                  onAmountChange(desktopLocalAmount)
-                  await new Promise(resolve => setTimeout(resolve, 100))
-                  await onDonate(desktopLocalAmount)
-                  if (onRefreshBalance) {
-                    setTimeout(() => onRefreshBalance(), 3000)
-                  }
-                }}
-                disabled={isProcessing || isApproving || !desktopLocalAmount || parseFloat(desktopLocalAmount) < 0.02}
+              <Button
+                onClick={() => handleDonate(desktopLocalAmount)}
+                disabled={isProcessing ||!desktopLocalAmount || parseFloat(desktopLocalAmount) < 0.02}
                 className="whitespace-nowrap"
               >
-                {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
+                {isTransacting ? labels.donating : labels.approve}
               </Button>
             </div>
           </div>
@@ -151,26 +155,10 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               placeholder="10.00" 
               value={mobileLocalAmountState} 
               onChange={(e) => handleMobileAmountChange(e.target.value)} 
-              disabled={isTransacting || isApproving} 
+              disabled={isTransacting} 
             /></div>
-            <Button size="sm" className="w-full" onClick={async () => {
-              const amountToDonate = parseFloat(mobileLocalAmountRef.current)
-              console.log('🔍 [DonationPopover] Mobile - Monto:', amountToDonate)
-              
-              // Validar monto mínimo (0.02 USDT)
-              if (isNaN(amountToDonate) || amountToDonate < 0.02) {
-                alert(`⚠️ El monto mínimo de donación es 0.02 USDT. Ingresaste ${amountToDonate || 0} USDT.`)
-                return
-              }
-              
-              onAmountChange(mobileLocalAmountRef.current)
-              await new Promise(resolve => setTimeout(resolve, 100))
-              await onDonate(mobileLocalAmountRef.current)
-              if (onRefreshBalance) {
-                setTimeout(() => onRefreshBalance(), 3000)
-              }
-            }} disabled={isProcessing || isApproving || !mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) < 0.02}>
-              {isApproving ? labels.approving : isTransacting ? labels.donating : labels.approve}
+            <Button size="sm" className="w-full" onClick={() => handleDonate(mobileLocalAmountRef.current)} disabled={isProcessing ||!mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) < 0.02}>
+              {isTransacting ? labels.donating : labels.approve}
             </Button>
           </div>
         </div>

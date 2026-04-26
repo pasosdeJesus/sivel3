@@ -22,6 +22,8 @@
 // === Documentación Completa ===
 // Ver documentación de la API de learn.tg (privada) para más detalles.
 
+import type { Kysely } from 'kysely'
+import type { DB } from '@/db/db'
 import { privateKeyToAccount } from 'viem/accounts'
 
 // Configuración desde variables de entorno
@@ -53,7 +55,7 @@ export interface LearningPointsResult {
 /**
  * Obtiene el nonce actual desde la base de datos
  */
-export async function getCurrentNonce(db: any): Promise<number> {
+export async function getCurrentNonce(db: Kysely<DB>): Promise<number> {
   const result = await db
     .selectFrom('site_nonces')
     .select('last_nonce')
@@ -66,7 +68,7 @@ export async function getCurrentNonce(db: any): Promise<number> {
 /**
  * Actualiza el nonce en la base de datos
  */
-export async function updateNonce(db: any, nonce: number): Promise<void> {
+export async function updateNonce(db: Kysely<DB>, nonce: number): Promise<void> {
   await db
     .updateTable('site_nonces')
     .set({ 
@@ -108,7 +110,7 @@ async function signMessage(message: string): Promise<string> {
  * Llama a la API de learn.tg para incrementar Learning Points
  */
 export async function incrementLearningPoints(
-  db: any,
+  db: Kysely<DB>,
   userWallet: string,
   txHash: string,
   amount: number = 1,

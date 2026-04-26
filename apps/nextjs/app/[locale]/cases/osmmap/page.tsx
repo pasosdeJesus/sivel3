@@ -149,9 +149,6 @@ export default function OSMMapPage() {
     }
   };
 
-  // isApproving ya no es necesario (flujo de una transacción)
-  const isApproving = false;
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
@@ -173,7 +170,6 @@ export default function OSMMapPage() {
     isConnected,
     isTransacting,
     isProcessing,
-    isApproving,
     onFilterChange: handleFilterChange,
     onApplyFilters: applyFilters,
     onRegionChange: setSelectedRegion,
