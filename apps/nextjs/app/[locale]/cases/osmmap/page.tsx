@@ -131,14 +131,37 @@ export default function OSMMapPage() {
               duration: 6000,
               variant: 'destructive',
             })
+          } else {
+            // Éxito pero sin mensaje
+            toast({
+              title: '🎓 Learning Points Updated!',
+              description: 'You earned +1 Learning Point for your donation.',
+              duration: 4000,
+            })
           }
         } else {
-          const errorText = await response.text()
-          logger.error(`[LearningPoints] API error ${response.status}: ${errorText}`, 'DonatePage')
+          // Manejo específico según código HTTP
+          let userMessage = 'Unable to update Learning Points. Please try again later.'
+          
+          if (response.status === 401) {
+            userMessage = 'Authentication error. The service could not verify your Learning Points. Please contact support.'
+            logger.error(`[LearningPoints] Error 401: Invalid signature or unauthorized`, 'DonatePage')
+          } else if (response.status === 404) {
+            userMessage = 'Learning Points service unavailable. Please try again later.'
+            logger.error(`[LearningPoints] Error 404: Endpoint not found`, 'DonatePage')
+          } else if (response.status === 400) {
+            const errorData = await response.json().catch(() => ({}))
+            userMessage = errorData.userMessage || errorData.error || 'Invalid request. Please try again.'
+            logger.error(`[LearningPoints] Error 400: ${JSON.stringify(errorData)}`, 'DonatePage')
+          } else {
+            const errorText = await response.text()
+            logger.error(`[LearningPoints] API error ${response.status}: ${errorText}`, 'DonatePage')
+          }
+          
           toast({
             title: '⚠️ Learning Points Not Updated',
-            description: 'Unable to update Learning Points. Please try again later.',
-            duration: 5000,
+            description: userMessage,
+            duration: 7000,
             variant: 'destructive',
           })
         }
