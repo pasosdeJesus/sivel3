@@ -32,7 +32,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, donate, isTransacting, isProcessing } = useWallet();
+  const { isConnected, donate, isTransacting, isProcessing, effectiveAddress } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -93,11 +93,59 @@ export default function OSMMapPage() {
     }
   };
 
-  // Función de donación unificada con manejo de errores
+  // Función de donación unificada con manejo de errores y Learning Points
   const onDonate = async (amount: string) => {
     try {
       await donate(parseInt(selectedRegion, 10), amount);
       refreshBalanceAfterDonation();
+      
+      // Después de donación exitosa, intentar incrementar Learning Points (no bloquea)
+      try {
+        const response = await fetch('/api/learning-points/increment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userWallet: isConnected ? effectiveAddress : null,
+            amount: 1
+          }),
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            toast({
+              title: '🎓 Learning Points Updated!',
+              description: result.userMessage || 'You earned +1 Learning Point for your donation.',
+              duration: 4000,
+            })
+          } else if (result.userMessage) {
+            toast({
+              title: '⚠️ Learning Points Not Updated',
+              description: result.userMessage,
+              duration: 6000,
+              variant: 'destructive',
+            })
+          }
+        } else {
+          const errorText = await response.text()
+          console.warn('Learning Points API error:', errorText)
+          toast({
+            title: '⚠️ Learning Points Not Updated',
+            description: 'Unable to update Learning Points. Please try again later.',
+            duration: 5000,
+            variant: 'destructive',
+          })
+        }
+      } catch (lpError) {
+        console.error('Error calling Learning Points API:', lpError)
+        toast({
+          title: '⚠️ Learning Points Not Updated',
+          description: 'Network error. Your donation was successful, but we could not update your Learning Points.',
+          duration: 6000,
+          variant: 'destructive',
+        })
+      }
+      
     } catch (err: any) {
       console.error('Error en donación:', err);
       

@@ -50,6 +50,7 @@ const regionalDonationAbi = [
 interface WalletContextType {
   isConnected: boolean
   address: `0x${string}` | null
+  effectiveAddress: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
   donate: (regionId: number, amount: string) => Promise<string>
@@ -250,6 +251,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const value: WalletContextType = {
     isConnected: effectiveIsConnected,
     address: effectiveAddress || state.address,
+    effectiveAddress: effectiveAddress || state.address,
     chainId: state.chainId,
     disconnect,
     donate,
