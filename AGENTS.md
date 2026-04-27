@@ -23,7 +23,8 @@ You are to read and fully assimilate the following documents in order:
 7. **[CONTRIBUTING.md]**: The process workflows for collaboration.
 8. **[apps/nextjs/README.md]**: Details of the Next.js application
 9. **[apps/nextjs/ARCHITECTURE.md]**: Architecture and data flow of the Next.js application
-10. **[apps/hardhat/README.md]**: Details of the Solidity contracts
+10. **[apps/nextjs/CONTRIBUTING.md]**: Documentation and testing policies for the Next.js application
+11. **[apps/hardhat/README.md]**: Details of the Solidity contracts
 10. Solo si estás operando en el entorno firebase lee [.idx/README.md]
 
 ### 2. Acknowledge Your Core Mandate
