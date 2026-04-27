@@ -8,6 +8,9 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     setupFiles: ['tests/setup-env.ts'],
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
   },
   resolve: {
     preserveSymlinks: true,

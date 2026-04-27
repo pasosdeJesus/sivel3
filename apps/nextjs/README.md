@@ -60,7 +60,7 @@ Political Violence Information System (SIVeL)
 This project uses a `Makefile` for common development tasks.
 
 - **`make type`**: Type-checks the TypeScript code using `tsc --noEmit`. This is the recommended way to verify that all type definitions are correct after making changes.
-- **`pnpm test`**: Runs the test suite with `vitest`.
+- **`make test`**: Runs the test suite with `vitest`.
 
 
 ## CLI Usage
@@ -91,5 +91,8 @@ Creates a new role and database using the variables from `.env`.
 
 ## Reference Documentation
 
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — Documentation and testing policies
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — Application architecture and data flow
+- **[doc/donation-flow.md](doc/donation-flow.md)** — Complete donation flow documentation
 - **[doc/mobile-debug-console.md](doc/mobile-debug-console.md)** — Debug console for testing in MiniPay and embedded browsers
 - **[doc/I18N.md](doc/I18N.md)** — Internationalization strategy and patterns

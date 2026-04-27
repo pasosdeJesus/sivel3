@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.5
--- Dumped by pg_dump version 17.5
+\restrict asUrnhdfMHaLjMKMPa7DvOTNeGW7f0vw31ufs8TRAio6s7A8e0ul9Oqy8R3VHq0
+
+-- Dumped from database version 17.9
+-- Dumped by pg_dump version 17.6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -3698,8 +3700,8 @@ CREATE TABLE public.region (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     name_es character varying(255) NOT NULL,
-    created_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL
+    created_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL
 );
 
 
@@ -3729,6 +3731,18 @@ ALTER SEQUENCE public.region_id_seq OWNED BY public.region.id;
 
 CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
+);
+
+
+--
+-- Name: site_nonces; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.site_nonces (
+    site character varying(100) NOT NULL,
+    available_learningpoints integer DEFAULT 0 NOT NULL,
+    last_nonce integer DEFAULT 0 NOT NULL,
+    updated_at timestamp without time zone
 );
 
 
@@ -5031,6 +5045,41 @@ CREATE TABLE public.sivel2_gen_vinculoestado (
 
 
 --
+-- Name: userevent; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.userevent (
+    id integer NOT NULL,
+    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
+    type text NOT NULL,
+    path text,
+    amount numeric,
+    currency text,
+    metadata jsonb
+);
+
+
+--
+-- Name: userevent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.userevent_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: userevent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.userevent_id_seq OWNED BY public.userevent.id;
+
+
+--
 -- Name: heb412_gen_campohc id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5378,6 +5427,13 @@ ALTER TABLE ONLY public.sivel2_gen_profesion_victima ALTER COLUMN id SET DEFAULT
 --
 
 ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextval('public.sivel2_gen_resagresion_id_seq'::regclass);
+
+
+--
+-- Name: userevent id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userevent ALTER COLUMN id SET DEFAULT nextval('public.userevent_id_seq'::regclass);
 
 
 --
@@ -6013,6 +6069,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: site_nonces site_nonces_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.site_nonces
+    ADD CONSTRAINT site_nonces_pkey PRIMARY KEY (site);
+
+
+--
 -- Name: sivel2_gen_actividadoficio sivel2_gen_actividadoficio_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6498,6 +6562,14 @@ ALTER TABLE ONLY public.msip_trelacion
 
 ALTER TABLE ONLY public.sivel2_gen_tviolencia
     ADD CONSTRAINT tipo_violencia_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: userevent userevent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userevent
+    ADD CONSTRAINT userevent_pkey PRIMARY KEY (id);
 
 
 --
@@ -8662,4 +8734,6 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict asUrnhdfMHaLjMKMPa7DvOTNeGW7f0vw31ufs8TRAio6s7A8e0ul9Oqy8R3VHq0
 
