@@ -47,7 +47,8 @@ archivos/*
 coverage
 .byebug_history
 public/heb412/
-public/assets/
+sivel2/public/assets/
+sivel2/public/sivel2/assets/
 public/cor1440*
 
 public/packs
