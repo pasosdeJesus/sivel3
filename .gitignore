@@ -23,8 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-----
-
 # Ignore bundler config.
 config/database.yml
 
