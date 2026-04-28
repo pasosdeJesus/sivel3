@@ -31,7 +31,7 @@ This document defines the documentation and testing policies for the Next.js app
 
 ### Format
 
-- Documents in English (Spanish only for domain-specific content).
+- All code (variable names, comments, commit messages) and documentation in English. Spanish is only acceptable for domain-specific content (e.g., legal terms from Colombian law).
 - `doc/` documents are feature-specific, self-contained, and potentially migrable to `@pasosdejesus/m`.
 
 ---
