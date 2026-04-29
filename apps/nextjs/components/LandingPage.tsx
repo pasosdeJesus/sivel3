@@ -22,6 +22,9 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
     description: isSpanish
       ? 'SIVeL 3 empodera a ciudadanos, documentadores y validadores para crear un registro inmutable y transparente de casos de violencia, financiado mediante donaciones regionales en la red Celo.'
       : 'SIVeL 3 empowers citizens, documenters, and validators to create an immutable, transparent record of violence cases, funded by regional donations on the Celo network.',
+    incentives: isSpanish
+      ? '✨ Donantes reciben Learning Points (SLEARN). ✨ Ciudadanos que reportan alertas verificadas reciben recompensas en USDT.'
+      : '✨ Donors earn Learning Points (SLEARN). ✨ Citizens who submit verified alerts earn USDT rewards.',
     stats: {
       cases: isSpanish ? 'Casos documentados' : 'Documented Cases',
       regions: isSpanish ? 'Regiones activas' : 'Active Regions',
@@ -68,9 +71,16 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
           <p className="text-xl md:text-2xl text-gray-600 mb-6">
             {content.subtitle}
           </p>
-          <p className="text-lg text-gray-500 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-500 mb-6 max-w-2xl mx-auto">
             {content.description}
           </p>
+          
+          {/* Incentivos */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-10 max-w-2xl mx-auto">
+            <p className="text-md text-gray-700 font-medium">
+              {content.incentives}
+            </p>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link 
