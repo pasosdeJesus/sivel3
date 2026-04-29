@@ -103,3 +103,7 @@ apps/nextjs/html-snapshots/
 tsconfig.tsbuildinfo
 apps/hardhat/tmpart
 contexto.md
+sivel2/config/credentials.yml.enc
+sivel2/config/master.key
+sivel2/app/assets/builds/
+sivel2/public/sivelxyz-admin/
