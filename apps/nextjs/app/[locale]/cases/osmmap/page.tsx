@@ -48,7 +48,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const t = translations[currentLocale as keyof typeof translations] || translations.en;
 
-  const { isConnected, donate, isTransacting, isProcessing, effectiveAddress } = useWallet();
+  const { isConnected, donate, isTransacting, isProcessing, effectiveAddress, isMiniPay } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -96,7 +96,7 @@ export default function OSMMapPage() {
         description: t.thanksMessage
           .replace('{{region}}', regionName)
           .replace('{{amount}}', donationAmount),
-        duration: 4000,
+        duration: isMiniPay ? 0 : 4000,
       });
 
       // Mostrar toast de Learning Points si se incrementaron exitosamente
@@ -105,7 +105,7 @@ export default function OSMMapPage() {
         toast({
           title: lpT.title,
           description: lpT.success.replace('{{0}}', String(learningPoints.newScore)),
-          duration: 4000,
+          duration: isMiniPay ? 0 : 4000,
         });
       }
 

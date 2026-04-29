@@ -209,8 +209,7 @@ describe('lib/donate', () => {
         effectiveAddress: USER_ADDRESS,
         usdtContractAddress: USDT_ADDRESS,
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/after 5 attempts/i)
-
+      }, 'en')).rejects.toThrow(/received your donation/i)
       expect(mockFetch).toHaveBeenCalledTimes(5)
     })
 
@@ -244,7 +243,7 @@ describe('lib/donate', () => {
         effectiveAddress: USER_ADDRESS,
         usdtContractAddress: USDT_ADDRESS,
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/after 5 attempts/i)
+      }, 'en')).rejects.toThrow(/received your donation/i)
 
       expect(mockFetch).toHaveBeenCalledTimes(5)
     })

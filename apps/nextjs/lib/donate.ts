@@ -32,7 +32,7 @@ const donateTranslations = {
     verifying: 'Sending transaction to the network...',
     backendCalling: 'Calling backend to assign donation...',
     backend4xx: 'The transaction could not be verified by the server.\n\nReason: {{0}}\n\nContact the team if the problem persists.',
-    backend5xx: 'The donation was sent but could not be assigned automatically (after {{0}} attempts).\n\nFunds are safe in the contract.\n\nHash: {{1}}...\n\nContact the team with this hash to manually assign your donation.',
+    backend5xx: 'We received your donation. Thank you!\n\nWe couldn\'t assign it to your chosen region automatically. Please contact support with this hash to complete the assignment:\n{{1}}',
   },
   es: {
     minAmount: 'El monto mínimo de donación es 0.02 USDT. Ingresaste {{0}} USDT.',
@@ -41,7 +41,7 @@ const donateTranslations = {
     verifying: 'Enviando transacción a la red...',
     backendCalling: 'Llamando al backend para asignar donación...',
     backend4xx: 'La transacción no pudo ser verificada por el servidor.\n\nMotivo: {{0}}\n\nContacta al equipo si el problema persiste.',
-    backend5xx: 'La donación se realizó pero no se pudo asignar automáticamente (tras {{0}} intentos).\n\nLos fondos están seguros en el contrato.\n\nHash: {{1}}...\n\nContacta al equipo con este hash para que asignen manualmente tu donación.',
+    backend5xx: 'Hemos recibido su donación. ¡Gracias!\n\nNo pudimos asignarla a la región que eligió automáticamente. Por favor contacte a soporte con este hash para completar la asignación:\n{{1}}',
   },
 }
 
@@ -216,7 +216,6 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
       const userMsg = isClientError
         ? t.backend4xx.replace('{{0}}', lastStatus)
         : t.backend5xx
-            .replace('{{0}}', String(5))
             .replace('{{1}}', txHash.substring(0, 16))
 
       throw new Error(userMsg)

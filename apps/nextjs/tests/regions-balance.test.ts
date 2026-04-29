@@ -37,7 +37,7 @@ describe('GET /api/regions/[id]/balance', () => {
     process.env.NEXT_PUBLIC_NETWORK = 'celoSepolia'
 
     const mod = await import('@/app/api/regions/[id]/balance/route')
-    GET = mod.GET
+    GET = mod.GET as unknown as (request: Request, context: { params: Promise<{ id: string }> }) => Promise<Response>
   })
 
   beforeEach(() => {

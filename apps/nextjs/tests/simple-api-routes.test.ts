@@ -66,16 +66,16 @@ let allegedPerpetratorsGET: (request: Request) => Promise<Response>
 describe('API reference data endpoints', () => {
   beforeAll(async () => {
     const regionsMod = await import('@/app/api/regions/route')
-    regionsGET = regionsMod.GET
+    regionsGET = regionsMod.GET as unknown as (request: Request) => Promise<Response>
 
     const categoriesMod = await import('@/app/api/categories/route')
-    categoriesGET = categoriesMod.GET
+    categoriesGET = categoriesMod.GET as unknown as (request: Request) => Promise<Response>
 
     const departmentsMod = await import('@/app/api/departments/route')
-    departmentsGET = departmentsMod.GET
+    departmentsGET = departmentsMod.GET as unknown as (request: Request) => Promise<Response>
 
     const apMod = await import('@/app/api/alleged-perpetrators/route')
-    allegedPerpetratorsGET = apMod.GET
+    allegedPerpetratorsGET = apMod.GET as unknown as (request: Request) => Promise<Response>
   })
 
   beforeEach(() => {

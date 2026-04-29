@@ -57,7 +57,7 @@ let GET: (request: Request) => Promise<Response>
 describe('GET /api/cases/counts', () => {
   beforeAll(async () => {
     const mod = await import('@/app/api/cases/counts/route')
-    GET = mod.GET
+    GET = mod.GET as unknown as (request: Request) => Promise<Response>
   })
 
   beforeEach(() => {

@@ -83,7 +83,7 @@ describe('POST /api/donations/assign', () => {
     process.env.LEARNTG_INCREMENT_API_URL = 'https://learn.tg/api/learning-points/increment'
 
     const mod = await import('@/app/api/donations/assign/route')
-    POST = mod.POST
+    POST = mod.POST as unknown as (request: Request) => Promise<Response>
   })
 
   beforeEach(() => {

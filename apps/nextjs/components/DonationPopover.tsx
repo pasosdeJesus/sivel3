@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -116,12 +117,13 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
                 disabled={isProcessing ||!desktopLocalAmount || parseFloat(desktopLocalAmount) < 0.02}
                 className="whitespace-nowrap"
               >
-                {isTransacting ? labels.donating : labels.approve}
-              </Button>
+                {isTransacting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{labels.donating}</> : labels.approve}
+              </Button> 
             </div>
           </div>
         </CardContent>
       </Card>
+
     )
   }
 
@@ -158,7 +160,7 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
               disabled={isTransacting} 
             /></div>
             <Button size="sm" className="w-full" onClick={() => handleDonate(mobileLocalAmountRef.current)} disabled={isProcessing ||!mobileLocalAmountRef.current || parseFloat(mobileLocalAmountRef.current) < 0.02}>
-              {isTransacting ? labels.donating : labels.approve}
+              {isTransacting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{labels.donating}</> : labels.approve}
             </Button>
           </div>
         </div>
