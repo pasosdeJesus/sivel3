@@ -20,9 +20,10 @@ The application uses a hierarchy of providers (`AppProvider.tsx`) to manage glob
 
 1.  **Wagmi & RainbowKit:** Configure the connection to the Celo blockchain (Mainnet or Sepolia).
 2.  **WalletContext (`contexts/WalletContext.tsx`):** A custom abstraction layer over Wagmi that:
-    *   Manages unified wallet connection.
-    *   Implements specific logic for **MiniPay** (detection, auto-connection, and legacy transaction handling).
-    *   Provides the `donate` function that orchestrates the on-chain transaction and subsequent backend notification.
+    *   Manages unified wallet connection — merges Wagmi's `useAccount` with MiniPay's native detection via `useMiniPay`.
+    *   Implements specific logic for **MiniPay** (auto-connection on detection, legacy transaction handling).
+    *   Provides the `donate` function that orchestrates the on-chain USDT transfer and subsequent backend notification via `lib/donate.ts`.
+    *   Exposes wallet state to the entire app: `isConnected`, `effectiveAddress`, `isTransacting`, `isProcessing`, `isMiniPay`, `phoneNumber`, and `connectMiniPay`.
 
 ---
 
@@ -80,14 +81,31 @@ The Next.js application acts as a bridge between the PostgreSQL database and the
 *   **API Routes (`app/api/`):**
     *   `donations/assign`: Critical endpoint that verifies a USDT transaction on-chain (using `viem`) and then calls the `RegionalDonation` contract to assign the donation to a specific region from the server (using a secure private key).
     *   `cases/*`: Endpoints for querying geo-referenced socio-political violence data.
-*   **Database Access:** The `@pasosdejesus/m` library is used to interact with the SIVeL database schema, maintaining compatibility with the Rails backend (`sivel2`).
+*   **Database Access:** API routes use Kysely directly via `newKyselyPostgresql()` (configured in `.config/kysely.config.ts`) to query PostgreSQL tables shared with the Rails backend (`sivel2`). Database types in `db/db.d.ts` are auto-generated with `kysely-codegen`.
 
 ---
 
 ## 5. Components and UI
 
 *   **Hybrid Architecture:** **Server Components** are prioritized for initial data fetching and SEO, while heavy interactivity (maps, wallet connection) is delegated to **Client Components** marked with `'use client'`.
-*   **Map System (`components/mapa/`):** Uses Leaflet/React-Leaflet to visualize cases. It is designed to be responsive, with specific versions for mobile and desktop.
+*   **Map System (`components/mapa/`):** Uses Leaflet/React-Leaflet to visualize cases. It is designed to be responsive, with specific versions for mobile (`OSMMapMobile`) and desktop (`OSMMapDesktop`).
+
+### 5b. Map Page Hooks (`app/[locale]/cases/osmmap/hooks/`)
+
+These hooks are specific to the case map page and centralize its data-fetching logic:
+
+*   **`useOSMMapData(currentLocale)`:** Loads all reference data needed by the map on mount:
+    *   Fetches departments, violence categories, alleged perpetrators, and donation regions from `/api/departments`, `/api/categories`, `/api/alleged-perpetrators`, and `/api/regions` in parallel via `Promise.all`.
+    *   Selects the first donation region by default.
+    *   Manages filter state (`filters` object with Rails-compatible keys like `filtro[fechaini]`, `filtro[departamento_id]`, etc.) and exposes `handleFilterChange` + `applyFilters`.
+    *   Receives map counts from the `MapComponent` via `handleCountsLoad` callback.
+    *   Shows a toast on fetch failure.
+
+*   **`useRegionBalance(selectedRegion)`:** Manages on-chain regional balance fetching:
+    *   Calls `GET /api/regions/{id}/balance` to read the `RegionalDonation` contract balance on Celo via Viem.
+    *   Implements retry logic (up to 3 retries, 2s delay) — the on-chain balance may take seconds to reflect a recent donation.
+    *   Exposes `fetchBalance(regionId)` for explicit refreshes (e.g., after donation).
+    *   Does **not** auto-refresh on region change to avoid duplicate fetches during transactions.
 
 ---
 

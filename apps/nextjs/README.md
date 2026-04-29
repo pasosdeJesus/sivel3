@@ -60,7 +60,11 @@ Political Violence Information System (SIVeL)
 This project uses a `Makefile` for common development tasks.
 
 - **`make type`**: Type-checks the TypeScript code using `tsc --noEmit`. This is the recommended way to verify that all type definitions are correct after making changes.
+- **`make type-check-tests`**: Type-checks test files using `tsc --noEmit -p tsconfig.test.json`.
 - **`make test`**: Runs the test suite with `vitest`.
+- **`make format`**: Formats code with `prettier`.
+- **`make dev`**: Starts the development server via `./bin/dev`.
+- **`make prod`**: Builds and starts production server in background.
 
 
 ## CLI Usage
@@ -82,9 +86,17 @@ Creates a new role and database using the variables from `.env`.
 
 ## Project Structure
 
+The application uses the Next.js **App Router**:
+
+- `app/`: Pages and API routes (`[locale]/`, `api/`)
+- `components/`: React components (maps, UI, layout)
+- `hooks/`: Custom React hooks (`useTranslation`, `useMiniPay`, `useAutoConnect`)
+- `lib/`: Logic modules (donations, learning points, errors, i18n)
+- `providers/`: Global providers (`AppProvider` with Wagmi/RainbowKit)
+- `contexts/`: React contexts (`WalletContext`)
+- `db/`: Database schema, migrations, types (Kysely)
+- `tests/`: Test suite (Vitest)
 - `bin/m`: The CLI executable.
-- `src/index.ts`: The main application entry point.
-- `tests/`: Contains test files.
 - `.env`: Environment configuration file.
 - `package.json`: Project dependencies and scripts.
 - `tsconfig.json`: TypeScript configuration.

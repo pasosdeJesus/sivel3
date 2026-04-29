@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 
 describe('hooks/useTranslation - createTranslator', () => {
-  let createTranslator: (locale: string, translations: any) => (key: string, ...args: string[]) => string
+  let createTranslator: (
+    locale: string,
+    translations: any,
+    common?: any
+  ) => (key: string, ...args: string[]) => string
 
   beforeEach(async () => {
     const mod = await import('@/hooks/useTranslation')
@@ -67,5 +71,67 @@ describe('hooks/useTranslation - createTranslator', () => {
     }
     const t = createTranslator('en', multiTranslations)
     expect(t('repeated', 'echo')).toBe('echo says echo')
+  })
+
+  // ---- common fallback ----
+
+  const commonTranslations = {
+    en: { save: 'Save', cancel: 'Cancel', delete: 'Delete' },
+    es: { save: 'Guardar', cancel: 'Cancelar' },
+  }
+
+  it('usa common cuando falta clave en local', () => {
+    const t = createTranslator('en', testTranslations, commonTranslations)
+    expect(t('save')).toBe('Save')
+  })
+
+  it('usa common[es] cuando falta clave en local[es] y common[es] existe', () => {
+    const t = createTranslator('es', testTranslations, commonTranslations)
+    expect(t('save')).toBe('Guardar')
+  })
+
+  it('fallback common[en] cuando common[es] no tiene la clave', () => {
+    const t = createTranslator('es', testTranslations, commonTranslations)
+    expect(t('delete')).toBe('Delete')
+  })
+
+  it('local[lang] tiene prioridad sobre common', () => {
+    const localWithSave = {
+      en: { save: 'Local Save' },
+      es: { save: 'Local Guardar' },
+    }
+    const t = createTranslator('es', localWithSave, commonTranslations)
+    expect(t('save')).toBe('Local Guardar')
+  })
+
+  it('local[en] tiene prioridad sobre common[lang]', () => {
+    // local tiene 'save' solo en inglés; common[es] también lo tiene
+    // debe prevalecer local[en] sobre common[es]
+    const localEnOnly = {
+      en: { save: 'Local Save EN Only' },
+      es: {},
+    }
+    const t = createTranslator('es', localEnOnly, commonTranslations)
+    expect(t('save')).toBe('Local Save EN Only')
+  })
+
+  it('retorna la clave si no está ni en local ni en common', () => {
+    const t = createTranslator('en', testTranslations, commonTranslations)
+    expect(t('bogus_key_xyz')).toBe('bogus_key_xyz')
+  })
+
+  it('commonTranslations opcional — funcionamiento normal sin common', () => {
+    const t = createTranslator('en', testTranslations)
+    expect(t('hello')).toBe('Hello')
+    expect(t('nonexistent')).toBe('nonexistent')
+  })
+
+  it('reemplazo de argumentos {{0}} con common fallback', () => {
+    const commonWithPlaceholder = {
+      en: { notify: 'Notification: {{0}}' },
+      es: { notify: 'Notificación: {{0}}' },
+    }
+    const t = createTranslator('es', testTranslations, commonWithPlaceholder)
+    expect(t('notify', 'Test')).toBe('Notificación: Test')
   })
 })

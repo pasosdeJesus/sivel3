@@ -2,14 +2,10 @@
 
 import { Map } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
+import { createTranslator } from '@/hooks/useTranslation'
+import commonTranslations from '@/lib/i18n/common'
 
 import ConnectWalletButton from './ConnectWalletButton'
-
-// Tipo explícito para el objeto de traducciones para evitar error de 'any' implícito.
-const translations: { [key: string]: { mapOfCases: string } } = {
-  en: { mapOfCases: 'Map of Cases' },
-  es: { mapOfCases: 'Mapa de Casos' },
-}
 
 interface HeaderProps {
   lang: string;
@@ -25,7 +21,7 @@ export default function Header({ lang }: HeaderProps) {
     router.push(newPath)
   }
 
-  const t = translations[lang] || translations.en
+  const t = createTranslator(lang, {}, commonTranslations)
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur-sm">
@@ -35,7 +31,7 @@ export default function Header({ lang }: HeaderProps) {
             <Map className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {t.mapOfCases}
+                {t('mapOfCases')}
               </h1>
             </div>
           </div>

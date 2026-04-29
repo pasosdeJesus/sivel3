@@ -22,16 +22,16 @@ probabilities = {
     'C':  [0.01, 0.9, 0.7],
 
     # Moralidad objetiva (M): bien/mal universales no reducibles
-    # H₁: moralidad emergente, objetividad improbable (~0.05)
+    # H₁: moralidad emergente, objetividad muy improbable (~0.03)
     # H₂: Dios fuente de moral objetiva (probabilidad alta)
     # H₃: Dios fuente de moral pero sin revelación específica (moderada)
-    'M':  [0.05, 0.9, 0.6],
+    'M':  [0.03, 0.9, 0.6],
 
     # Fiabilidad razón (R): nuestra razón descubre verdad, no solo supervivencia
-    # H₁: razón evolucionada puede descubrir verdad (~0.3)
+    # H₁: EAAN: evolución selecciona conducta adaptativa, no verdad (~0.15)
     # H₂: razón creada por Dios racional para descubrir verdad (alta)
     # H₃: similar pero sin garantía de correspondencia con realidad divina (moderada)
-    'R':  [0.3, 0.9, 0.5],
+    'R':  [0.15, 0.9, 0.5],
 
     # Jesús histórico (J): vida, muerte, resurrección, impacto transformador
     # H₁: naturalismo no predice resurrección, probabilidad muy baja (~0.0001)
@@ -53,12 +53,12 @@ justifications = {
         "H₃: Dios podría crear conciencia pero sin propósito específico (moderada 0.7)"
     ],
     'M': [
-        "H₁: moralidad emergente, objetividad improbable (~0.05)",
+        "H₁: moralidad emergente, objetividad muy improbable (~0.03)",
         "H₂: Dios fuente de moral objetiva (probabilidad alta 0.9)",
         "H₃: Dios fuente de moral pero sin revelación específica (moderada 0.6)"
     ],
     'R': [
-        "H₁: razón evolucionada puede descubrir verdad, probabilidad moderada (~0.3)",
+        "H₁: EAAN: evolución selecciona conducta adaptativa, no necesariamente verdad (~0.15)",
         "H₂: razón creada por Dios racional para descubrir verdad (alta 0.9)",
         "H₃: similar pero sin garantía de correspondencia con realidad divina (moderada 0.5)"
     ],
