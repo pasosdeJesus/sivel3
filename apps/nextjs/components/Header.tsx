@@ -2,7 +2,7 @@
 
 import { Map } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
-import { createTranslator } from '@/hooks/useTranslation'
+import { createTranslator } from '@pasosdejesus/m/i18n'
 import commonTranslations from '@/lib/i18n/common'
 
 import ConnectWalletButton from './ConnectWalletButton'

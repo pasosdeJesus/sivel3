@@ -6,7 +6,7 @@
 //
 // When adding new keys, always add both 'en' and 'es' entries.
 
-import type { TranslationSet } from '@/hooks/useTranslation'
+import type { TranslationSet } from '@pasosdejesus/m/i18n'
 
 const commonTranslations: TranslationSet = {
   en: {

@@ -1,16 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { createTranslator } from '@pasosdejesus/m/i18n'
 
-describe('hooks/useTranslation - createTranslator', () => {
-  let createTranslator: (
-    locale: string,
-    translations: any,
-    common?: any
-  ) => (key: string, ...args: string[]) => string
-
-  beforeEach(async () => {
-    const mod = await import('@/hooks/useTranslation')
-    createTranslator = mod.createTranslator
-  })
+describe('@pasosdejesus/m/i18n - createTranslator', () => {
 
   const testTranslations = {
     en: {

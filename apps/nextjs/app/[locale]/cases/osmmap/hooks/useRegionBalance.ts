@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { createTranslator } from '@/hooks/useTranslation';
+import { createTranslator } from '@pasosdejesus/m/i18n'
 import commonTranslations from '@/lib/i18n/common';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
