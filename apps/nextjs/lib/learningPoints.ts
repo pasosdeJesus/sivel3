@@ -50,6 +50,7 @@ export interface LearningPointsResult {
   message: string
   userMessage: string
   newScore?: number
+  nonce?: number
 }
 
 /**
@@ -151,7 +152,8 @@ export async function incrementLearningPoints(
         success: true,
         message: `Learning Points incrementados. Nuevo score: ${data.new_learningscore}`,
         userMessage: `🎓 Your Learning Score is now ${data.new_learningscore}`,
-        newScore: data.new_learningscore
+        newScore: data.new_learningscore,
+        nonce: nextNonce,
       }
     }
     

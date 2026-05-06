@@ -169,6 +169,7 @@ describe('lib/learningPoints', () => {
 
       expect(result.success).toBe(true)
       expect(result.message).toContain('Learning Points incrementados')
+      expect(result.nonce).toBe(6) // nextNonce = last_nonce(5) + 1
 
       // Verificar que se llamó a fetch con los parámetros correctos
       expect(mockFetch).toHaveBeenCalledWith(

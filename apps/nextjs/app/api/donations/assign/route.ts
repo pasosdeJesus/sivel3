@@ -210,13 +210,38 @@ export async function POST(request: NextRequest) {
     serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
 
     // ============================================================
+    // Record donation in transaction_log
+    // ============================================================
+    try {
+      const txDb = newKyselyPostgresql()
+      await txDb
+        .insertInto('transaction_log')
+        .values({
+          wallet: donor,
+          tipo: 'donation',
+          crypto: 'usdt',
+          cantidad: amount,
+          impacto_balance: (-parseFloat(amount)).toString(),
+          region_id: finalRegionId,
+          hash_tx: txHash,
+          hash_assign: hash,
+        })
+        .execute()
+      serverLog.success(`Donation recorded in transaction_log: ${txHash}`)
+    } catch (txError) {
+      // Non-critical: log but don't fail the donation
+      serverLog.error(`Error recording donation in transaction_log: ${txError}`)
+    }
+
+    // ============================================================
     // Incrementar Learning Points en learn.tg (una sola vez)
     // ============================================================
     let learningPointsResult: { 
       success: boolean; 
       message: string; 
       userMessage?: string; 
-      newScore?: number 
+      newScore?: number;
+      nonce?: number
     } = { success: false, message: 'No se intentó actualizar' }
     
     try {
@@ -230,7 +255,8 @@ export async function POST(request: NextRequest) {
           success: true,
           message: lpResult.message,
           userMessage: lpResult.userMessage,
-          newScore: (lpResult as any).newScore
+          newScore: (lpResult as any).newScore,
+          nonce: (lpResult as any).nonce
         }
       } else {
         serverLog.warn(`No se pudieron incrementar Learning Points: ${lpResult.message}`)
@@ -247,6 +273,33 @@ export async function POST(request: NextRequest) {
         message: 'Error interno del servidor',
         userMessage: 'Could not update Learning Points due to internal error.'
       }
+    }
+
+    // ============================================================
+    // Record Learning Points request in transaction_log
+    // ============================================================
+    try {
+      const lpDb = newKyselyPostgresql()
+      await lpDb
+        .insertInto('transaction_log')
+        .values({
+          wallet: donor,
+          tipo: 'donation',
+          crypto: 'learningpoint',
+          cantidad: '1',
+          impacto_balance: '1',
+          region_id: finalRegionId,
+          hash_tx: txHash,
+          lp_tx_hash: txHash,
+          lp_nonce: learningPointsResult.nonce ?? null,
+          lp_response: JSON.stringify(learningPointsResult),
+          lp_success: learningPointsResult.success,
+        })
+        .execute()
+      serverLog.success(`Learning Points request recorded in transaction_log for ${txHash}`)
+    } catch (lpTxError) {
+      // Non-critical: log but don't fail the response
+      serverLog.error(`Error recording LP in transaction_log: ${lpTxError}`)
     }
 
     return NextResponse.json({

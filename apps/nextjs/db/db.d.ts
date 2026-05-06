@@ -1325,6 +1325,26 @@ export interface Sivel2GenVinculoestado {
   updated_at: Timestamp | null;
 }
 
+export interface TransactionLog {
+  cantidad: Numeric;
+  created_at: Timestamp | null;
+  crypto: string;
+  fecha: Generated<Timestamp>;
+  hash_assign: string | null;
+  hash_tx: string | null;
+  id: Generated<number>;
+  impacto_balance: Numeric;
+  lp_nonce: number | null;
+  lp_response: Json | null;
+  lp_success: boolean | null;
+  lp_tx_hash: string | null;
+  metadata: Json | null;
+  region_id: number | null;
+  tipo: string;
+  updated_at: Timestamp | null;
+  wallet: string;
+}
+
 export interface Userevent {
   amount: Numeric | null;
   currency: string | null;
@@ -1495,6 +1515,7 @@ export interface DB {
   sivel2_gen_victimacolectiva: Sivel2GenVictimacolectiva;
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
+  transaction_log: TransactionLog;
   userevent: Userevent;
   usuario: Usuario;
 }

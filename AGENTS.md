@@ -33,6 +33,8 @@ and conventions:
 - **[apps/nextjs/CONTRIBUTING.md]**: Documentation, testing, and refactoring policies.
 - **[apps/hardhat/README.md]**: Solidity contracts details.
 - **[.idx/README.md]**: Only if operating in the firebase environment.
+- **[ia/construir_en_celo.md]**: Celo development guide for the pdJ ecosystem (also in `node_modules/@pasosdejesus/m/ia/`).
+- **[celopedia-skill](~/.agents/skills/celopedia-skill/SKILL.md)**: Celo ecosystem intelligence — contract addresses, grants, security patterns, MiniPay, DeFi protocols, network info. Installed via `npx skills add celo-org/celopedia-skills -y -g`.
 
 ### 3. Acknowledge Your Core Mandate
 

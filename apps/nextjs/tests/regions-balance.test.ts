@@ -21,7 +21,7 @@ vi.mock('viem', async () => {
 
 vi.mock('viem/chains', () => ({
   celo: { id: 42220, name: 'Celo' },
-  celoSepolia: { id: 44787, name: 'Celo Sepolia' },
+  celoSepolia: { id: 11142220, name: 'Celo Sepolia' },
 }))
 
 // Mock the ABI import

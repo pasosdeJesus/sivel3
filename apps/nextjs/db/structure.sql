@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4cNjnasACbVHwEnl3Dquav1JjuMMp48UB509u99QwRdXcr7XdGoTU1nVWj9szth
+\restrict Fi0TDsYe2ViTFp44zvpttSCTqlrE2dWIkSrqpaerIDivkpAPf0K7flPYJuYODla
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.6
@@ -5045,6 +5045,51 @@ CREATE TABLE public.sivel2_gen_vinculoestado (
 
 
 --
+-- Name: transaction_log; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.transaction_log (
+    id integer NOT NULL,
+    wallet character varying(42) NOT NULL,
+    fecha timestamp without time zone DEFAULT now() NOT NULL,
+    tipo character varying(20) NOT NULL,
+    crypto character varying(20) NOT NULL,
+    cantidad numeric(18,6) NOT NULL,
+    impacto_balance numeric(18,6) NOT NULL,
+    region_id integer,
+    hash_tx character varying(66),
+    hash_assign character varying(66),
+    lp_tx_hash character varying(66),
+    lp_nonce integer,
+    lp_response jsonb,
+    lp_success boolean,
+    metadata jsonb,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: transaction_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.transaction_log_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: transaction_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.transaction_log_id_seq OWNED BY public.transaction_log.id;
+
+
+--
 -- Name: userevent; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5427,6 +5472,13 @@ ALTER TABLE ONLY public.sivel2_gen_profesion_victima ALTER COLUMN id SET DEFAULT
 --
 
 ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextval('public.sivel2_gen_resagresion_id_seq'::regclass);
+
+
+--
+-- Name: transaction_log id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transaction_log ALTER COLUMN id SET DEFAULT nextval('public.transaction_log_id_seq'::regclass);
 
 
 --
@@ -6565,6 +6617,14 @@ ALTER TABLE ONLY public.sivel2_gen_tviolencia
 
 
 --
+-- Name: transaction_log transaction_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transaction_log
+    ADD CONSTRAINT transaction_log_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: userevent userevent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6615,6 +6675,27 @@ CREATE INDEX caso_fecha_idx ON public.sivel2_gen_caso USING btree (fecha);
 --
 
 CREATE INDEX caso_fecha_idx1 ON public.sivel2_gen_caso USING btree (fecha);
+
+
+--
+-- Name: idx_transaction_log_fecha; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_transaction_log_fecha ON public.transaction_log USING btree (fecha);
+
+
+--
+-- Name: idx_transaction_log_hash_tx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_transaction_log_hash_tx ON public.transaction_log USING btree (hash_tx);
+
+
+--
+-- Name: idx_transaction_log_wallet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_transaction_log_wallet ON public.transaction_log USING btree (wallet);
 
 
 --
@@ -8588,6 +8669,14 @@ ALTER TABLE ONLY public.sivel2_gen_supracategoria
 
 
 --
+-- Name: transaction_log transaction_log_region_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transaction_log
+    ADD CONSTRAINT transaction_log_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id) ON DELETE SET NULL;
+
+
+--
 -- Name: msip_ubicacion ubicacion2_id_caso_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8735,5 +8824,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4cNjnasACbVHwEnl3Dquav1JjuMMp48UB509u99QwRdXcr7XdGoTU1nVWj9szth
+\unrestrict Fi0TDsYe2ViTFp44zvpttSCTqlrE2dWIkSrqpaerIDivkpAPf0K7flPYJuYODla
 
