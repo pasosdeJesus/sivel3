@@ -1386,6 +1386,20 @@ export interface Usuario {
   updated_at: Timestamp | null;
 }
 
+export interface WebEvent {
+  created_at: Generated<Timestamp | null>;
+  event_type: string;
+  id: Generated<number>;
+  ip: string | null;
+  locale: string | null;
+  metadata: Json | null;
+  pathname: string | null;
+  referrer: string | null;
+  session_id: string | null;
+  user_agent: string | null;
+  wallet: string | null;
+}
+
 export interface DB {
   ar_internal_metadata: ArInternalMetadata;
   cben1: Cben1;
@@ -1518,4 +1532,5 @@ export interface DB {
   transaction_log: TransactionLog;
   userevent: Userevent;
   usuario: Usuario;
+  web_event: WebEvent;
 }

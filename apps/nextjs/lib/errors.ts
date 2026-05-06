@@ -1,9 +1,12 @@
 // lib/errors.ts
-// Centralización de errores amigables para el usuario
+// Centralized wallet/blockchain error parsing with user-friendly messages.
 //
-// Local TypeScript Objects para i18n (ver doc/I18N.md)
+// Uses @pasosdejesus/m/i18n createTranslator for consistent i18n pattern.
 
-const walletErrorTranslations = {
+import { createTranslator } from '@pasosdejesus/m/i18n'
+import type { TranslationSet } from '@pasosdejesus/m/i18n'
+
+const walletErrorTranslations: TranslationSet = {
   en: {
     insufficientFunds: "❌ Insufficient balance.\n\nYou don't have enough USDT for this donation.",
     userRejected: '⚠️ Transaction cancelled.\n\nYou cancelled the transaction in your wallet.',
@@ -21,13 +24,13 @@ const walletErrorTranslations = {
 }
 
 /**
- * Traduce errores de wallet/blockchain a mensajes legibles para el usuario.
- * @param err - Error a traducir
- * @param locale - Código de locale ('en' | 'es', por defecto 'en')
- * Úsala en cualquier catch de operaciones Web3.
+ * Translates wallet/blockchain errors to user-friendly messages.
+ * @param err - Error to translate
+ * @param locale - Locale code ('en' | 'es', default 'en')
+ * Use in any Web3 operation catch block.
  */
 export function parseWalletError(err: unknown, locale: string = 'en'): string {
-  const t = locale === 'es' ? walletErrorTranslations.es : walletErrorTranslations.en
+  const t = createTranslator(locale, walletErrorTranslations)
 
   const msg = typeof err === 'object' && err !== null && 'message' in err
     ? String((err as any).message)
@@ -35,18 +38,18 @@ export function parseWalletError(err: unknown, locale: string = 'en'): string {
   const code = typeof err === 'object' && err !== null ? (err as any).code : undefined
 
   if (msg.includes('insufficient funds') || msg.includes('exceeds balance')) {
-    return t.insufficientFunds
+    return t('insufficientFunds')
   }
   if (msg.includes('user rejected') || code === 4001) {
-    return t.userRejected
+    return t('userRejected')
   }
   if (msg.includes('network') || msg.includes('RPC')) {
-    return t.networkError
+    return t('networkError')
   }
   if (msg.includes('gas')) {
-    return t.gasError
+    return t('gasError')
   }
-  // Mensajes que ya vienen traducidos (desde donate.ts)
+  // Pre-translated messages from donate.ts
   if (
     msg.includes('monto mínimo') ||
     msg.includes('minimum amount') ||
@@ -58,5 +61,5 @@ export function parseWalletError(err: unknown, locale: string = 'en'): string {
     return msg
   }
 
-  return t.fallback.replace('{{0}}', msg || (locale === 'es' ? 'Intenta nuevamente más tarde.' : 'Try again later.'))
+  return t('fallback', msg || (locale === 'es' ? 'Intenta nuevamente más tarde.' : 'Try again later.'))
 }

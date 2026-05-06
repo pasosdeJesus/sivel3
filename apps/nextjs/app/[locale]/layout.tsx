@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import '@/app/globals.css'
 import ClientLayout from '@/components/ClientLayout'
+import { recordEvent } from '@/lib/web-analytics'
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
@@ -27,6 +28,9 @@ export default async function LocaleLayout({
   if (!['en', 'es'].includes(locale)) {
     notFound()
   }
+
+  // Record page view (server-side, no client JS needed)
+  recordEvent({ event_type: 'pageview', locale })
 
   return (
     <ClientLayout locale={locale}>{children}</ClientLayout>

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict fpsvUe5ickeK5FfTqPASz0avUbowXkEasUehd6nxNvSoy4y6gevUVHR7N5k62DF
+\restrict bY2ek5d6uuOJQN3E9b0laEVIsBqrt5NCfqweNZVLT8Iz5uDZeDeuebF8XjseCa4
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.6
@@ -5125,6 +5125,45 @@ ALTER SEQUENCE public.userevent_id_seq OWNED BY public.userevent.id;
 
 
 --
+-- Name: web_event; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.web_event (
+    id integer NOT NULL,
+    session_id character varying(64),
+    event_type character varying(40) NOT NULL,
+    pathname character varying(200),
+    locale character varying(5),
+    referrer character varying(500),
+    user_agent character varying(500),
+    ip character varying(45),
+    wallet character varying(42),
+    metadata jsonb,
+    created_at timestamp without time zone DEFAULT now()
+);
+
+
+--
+-- Name: web_event_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.web_event_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: web_event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.web_event_id_seq OWNED BY public.web_event.id;
+
+
+--
 -- Name: heb412_gen_campohc id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5486,6 +5525,13 @@ ALTER TABLE ONLY public.transaction_log ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.userevent ALTER COLUMN id SET DEFAULT nextval('public.userevent_id_seq'::regclass);
+
+
+--
+-- Name: web_event id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_event ALTER COLUMN id SET DEFAULT nextval('public.web_event_id_seq'::regclass);
 
 
 --
@@ -6657,6 +6703,14 @@ ALTER TABLE ONLY public.sivel2_gen_victima
 
 
 --
+-- Name: web_event web_event_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_event
+    ADD CONSTRAINT web_event_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: busca_sivel2_gen_conscaso; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6696,6 +6750,34 @@ CREATE INDEX idx_transaction_log_hash_tx ON public.transaction_log USING btree (
 --
 
 CREATE INDEX idx_transaction_log_wallet ON public.transaction_log USING btree (wallet);
+
+
+--
+-- Name: idx_web_event_ip; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_web_event_ip ON public.web_event USING btree (ip);
+
+
+--
+-- Name: idx_web_event_session; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_web_event_session ON public.web_event USING btree (session_id);
+
+
+--
+-- Name: idx_web_event_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_web_event_type ON public.web_event USING btree (event_type, created_at);
+
+
+--
+-- Name: idx_web_event_wallet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_web_event_wallet ON public.web_event USING btree (wallet);
 
 
 --
@@ -8824,5 +8906,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fpsvUe5ickeK5FfTqPASz0avUbowXkEasUehd6nxNvSoy4y6gevUVHR7N5k62DF
+\unrestrict bY2ek5d6uuOJQN3E9b0laEVIsBqrt5NCfqweNZVLT8Iz5uDZeDeuebF8XjseCa4
 
