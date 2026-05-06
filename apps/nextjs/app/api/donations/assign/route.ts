@@ -3,6 +3,7 @@ import { createPublicClient, http, getContract } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
 import { incrementLearningPoints } from '@/lib/learningPoints'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { recordEvent } from '@/lib/web-analytics'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -208,6 +209,15 @@ export async function POST(request: NextRequest) {
     ])
     
     serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
+
+    // ============================================================
+    // Record donation in web_event (analytics)
+    // ============================================================
+    recordEvent({
+      event_type: 'donation_completed',
+      wallet: donor,
+      metadata: { region_id: finalRegionId, amount, tx_hash: txHash },
+    })
 
     // ============================================================
     // Record donation in transaction_log

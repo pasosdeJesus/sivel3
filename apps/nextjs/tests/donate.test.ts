@@ -210,7 +210,8 @@ describe('lib/donate', () => {
         usdtContractAddress: USDT_ADDRESS,
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
       }, 'en')).rejects.toThrow(/received your donation/i)
-      expect(mockFetch).toHaveBeenCalledTimes(5)
+      // 1 analytics call + 5 retries = 6 total
+      expect(mockFetch).toHaveBeenCalledTimes(6)
     })
 
     it('reintenta en 4xx (transaccion aun no confirmada)', async () => {
@@ -229,8 +230,8 @@ describe('lib/donate', () => {
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
       }, 'en')).rejects.toThrow(/HTTP 400/i)
 
-      // Should retry on 4xx too (transaction not confirmed yet)
-      expect(mockFetch).toHaveBeenCalledTimes(5)
+      // 1 analytics call + 5 retries = 6 total
+      expect(mockFetch).toHaveBeenCalledTimes(6)
     })
 
     it('maneja error de red con reintentos', async () => {
@@ -245,7 +246,8 @@ describe('lib/donate', () => {
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
       }, 'en')).rejects.toThrow(/received your donation/i)
 
-      expect(mockFetch).toHaveBeenCalledTimes(5)
+      // 1 analytics call + 5 retries = 6 total
+      expect(mockFetch).toHaveBeenCalledTimes(6)
     })
   })
 

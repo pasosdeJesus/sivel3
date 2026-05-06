@@ -235,6 +235,19 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
     logMsg(`   ❌ ${userFriendlyMessage}`)
     debugLog('Donation Error', err)
 
+    // Record donation_failed (fire-and-forget)
+    try {
+      fetch('/api/web-analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'donation_failed',
+          metadata: { region_id: params.regionId, amount: params.amount, error: userFriendlyMessage },
+        }),
+        keepalive: true,
+      })
+    } catch (_) {}
+
     throw new Error(userFriendlyMessage)
   }
 }

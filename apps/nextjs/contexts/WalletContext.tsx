@@ -1,9 +1,21 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { useAccount, useDisconnect, useChainId, useConnect } from 'wagmi'
 import { useMiniPay } from '@/hooks/useMiniPay'
 import { donate as donateFn } from '@/lib/donate'
+
+function recordWalletEvent(eventType: string, wallet?: string | null) {
+  if (typeof window === 'undefined') return
+  try {
+    fetch('/api/web-analytics/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: eventType, wallet }),
+      keepalive: true,
+    })
+  } catch (_) {}
+}
 
 interface WalletContextType {
   isConnected: boolean
@@ -93,6 +105,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   // Estado local para donación en curso
   const [isDonating, setIsDonating] = useState(false)
+
+  // Track wallet connection changes for analytics
+  const prevConnected = useRef(effectiveIsConnected)
+
+  useEffect(() => {
+    if (prevConnected.current !== effectiveIsConnected) {
+      if (effectiveIsConnected && effectiveAddress) {
+        recordWalletEvent('connect_wallet', effectiveAddress)
+      } else if (!effectiveIsConnected) {
+        recordWalletEvent('disconnect_wallet')
+      }
+      prevConnected.current = effectiveIsConnected
+    }
+  }, [effectiveIsConnected, effectiveAddress])
 
   // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
   const donate = useCallback(async (regionId: number, amount: string, locale?: string): Promise<{ txHash: string; learningPoints?: any }> => {

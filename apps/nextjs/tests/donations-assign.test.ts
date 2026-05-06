@@ -43,6 +43,13 @@ vi.mock('viem/accounts', () => ({
 }))
 
 // ============================================================
+// Mocks for web-analytics (server-only modules not available in tests)
+// ============================================================
+vi.mock('@/lib/web-analytics', () => ({
+  recordEvent: vi.fn(() => Promise.resolve()),
+}))
+
+// ============================================================
 // Mocks for learningPoints module
 // ============================================================
 const mockIncrementLearningPoints = vi.fn()

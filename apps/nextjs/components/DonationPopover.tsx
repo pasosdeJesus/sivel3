@@ -61,12 +61,26 @@ export function DonationPopover({ isConnected, selectedRegion, donationAmount, r
     }
 
     onAmountChange(amountStr)
+
+    // Record donation started (fire-and-forget)
+    try {
+      fetch('/api/web-analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'donation_started',
+          metadata: { region_id: parseInt(selectedRegion), amount },
+        }),
+        keepalive: true,
+      })
+    } catch (_) {}
+
     await new Promise(resolve => setTimeout(resolve, 100))
     await onDonate(amountStr)
     if (onRefreshBalance) {
       setTimeout(() => onRefreshBalance(), 3000)
     }
-  }, [onAmountChange, onDonate, onRefreshBalance])
+  }, [onAmountChange, onDonate, onRefreshBalance, selectedRegion])
 
   // ============================================
   // RENDERIZADO CONDICIONAL
