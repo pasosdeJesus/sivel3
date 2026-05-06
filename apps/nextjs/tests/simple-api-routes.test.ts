@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
 
+// Mock web-analytics (uses server-only modules not available in tests)
+vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
+
 // ============================================================
 // Full Kysely chain mock — function-based (not Proxy)
 // Every chain method returns a new builder object

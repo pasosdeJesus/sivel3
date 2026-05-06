@@ -4,6 +4,7 @@ import { Kysely } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { recordEvent } from '@/lib/web-analytics'
 
 
 export async function GET(req: NextRequest) {
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("Error en presponsables:", error);
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/alleged-perpetrators', status: 500 } });
     return NextResponse.json(
       { error: 'Error al obtener presuntos responsables' },
       { status: 500 }

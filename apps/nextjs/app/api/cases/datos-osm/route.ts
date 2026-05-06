@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { recordEvent } from '@/lib/web-analytics'
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(data);
   } catch (error) {
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/cases/datos-osm', status: 500 } });
     return NextResponse.json(
       { error: 'Error al obtener datos del mapa' },
       { status: 500 }

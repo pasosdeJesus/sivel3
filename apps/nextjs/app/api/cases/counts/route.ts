@@ -4,6 +4,7 @@ import { Kysely, sql } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { recordEvent } from '@/lib/web-analytics'
 
 // Definir tipo para los resultados de count
 interface CountResult {
@@ -66,6 +67,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("Error en conteos:", error);
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/cases/counts', status: 500 } });
     return NextResponse.json(
       { 
         error: 'Error al obtener conteos',

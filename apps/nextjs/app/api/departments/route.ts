@@ -4,6 +4,7 @@ import { Kysely, sql } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { recordEvent } from '@/lib/web-analytics'
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("Error en departamentos:", error);
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/departments', status: 500 } });
     return NextResponse.json(
       { error: 'Error al obtener departamentos' },
       { status: 500 }

@@ -3,6 +3,7 @@ import { createPublicClient, http, formatUnits } from 'viem';
 import { celoSepolia, celo } from 'viem/chains';
 
 import regionalDonationAbi from '@/abis/RegionalDonation.json'
+import { recordEvent } from '@/lib/web-analytics'
 
 const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
 
@@ -53,6 +54,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('❌ [Balance API] Error:', error);
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/regions/[id]/balance', status: 500 } });
     return NextResponse.json({ error: 'Failed to fetch balance' }, { status: 500 });
   }
 }

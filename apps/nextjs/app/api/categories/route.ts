@@ -4,6 +4,7 @@ import { Kysely, sql } from 'kysely';
 import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { recordEvent } from '@/lib/web-analytics'
 
 
 export async function GET(req: NextRequest) {
@@ -29,6 +30,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("Error en categorias:", error);
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/categories', status: 500 } });
     return NextResponse.json(
       { error: 'Error al obtener categorías' },
       { status: 500 }

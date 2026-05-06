@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { recordEvent } from '@/lib/web-analytics'
 
 export async function GET(
   request: NextRequest,
@@ -24,6 +25,7 @@ export async function GET(
     return NextResponse.json(data);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    recordEvent({ event_type: 'api_error', metadata: { route: '/api/cases/[id]', status: 500 } });
     return NextResponse.json(
       { error: 'Error al obtener detalle del caso', details: errorMessage },
       { status: 500 }
