@@ -1325,7 +1325,7 @@ export interface Sivel2GenVinculoestado {
   updated_at: Timestamp | null;
 }
 
-export interface TransactionLog {
+export interface Transaction {
   cantidad: Numeric;
   created_at: Timestamp | null;
   crypto: string;
@@ -1529,7 +1529,7 @@ export interface DB {
   sivel2_gen_victimacolectiva: Sivel2GenVictimacolectiva;
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
-  transaction_log: TransactionLog;
+  transaction: Transaction;
   userevent: Userevent;
   usuario: Usuario;
   web_event: WebEvent;

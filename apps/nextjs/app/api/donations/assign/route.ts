@@ -220,12 +220,12 @@ export async function POST(request: NextRequest) {
     })
 
     // ============================================================
-    // Record donation in transaction_log
+    // Record donation in transaction
     // ============================================================
     try {
       const txDb = newKyselyPostgresql()
       await txDb
-        .insertInto('transaction_log')
+        .insertInto('transaction')
         .values({
           wallet: donor,
           tipo: 'donation',
@@ -237,10 +237,10 @@ export async function POST(request: NextRequest) {
           hash_assign: hash,
         })
         .execute()
-      serverLog.success(`Donation recorded in transaction_log: ${txHash}`)
+      serverLog.success(`Donation recorded in transaction: ${txHash}`)
     } catch (txError) {
       // Non-critical: log but don't fail the donation
-      serverLog.error(`Error recording donation in transaction_log: ${txError}`)
+      serverLog.error(`Error recording donation in transaction: ${txError}`)
     }
 
     // ============================================================
@@ -286,12 +286,12 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================
-    // Record Learning Points request in transaction_log
+    // Record Learning Points request in transaction
     // ============================================================
     try {
       const lpDb = newKyselyPostgresql()
       await lpDb
-        .insertInto('transaction_log')
+        .insertInto('transaction')
         .values({
           wallet: donor,
           tipo: 'donation',
@@ -306,10 +306,10 @@ export async function POST(request: NextRequest) {
           lp_success: learningPointsResult.success,
         })
         .execute()
-      serverLog.success(`Learning Points request recorded in transaction_log for ${txHash}`)
+      serverLog.success(`Learning Points request recorded in transaction for ${txHash}`)
     } catch (lpTxError) {
       // Non-critical: log but don't fail the response
-      serverLog.error(`Error recording LP in transaction_log: ${lpTxError}`)
+      serverLog.error(`Error recording LP in transaction: ${lpTxError}`)
     }
 
     return NextResponse.json({

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict bY2ek5d6uuOJQN3E9b0laEVIsBqrt5NCfqweNZVLT8Iz5uDZeDeuebF8XjseCa4
+\restrict DXhIhey5xnQDYgTJdwGB7pPRt4LayCId90EhrxWVDkbXW26p7FvO0zKKqY4CwFT
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.6
@@ -5045,10 +5045,10 @@ CREATE TABLE public.sivel2_gen_vinculoestado (
 
 
 --
--- Name: transaction_log; Type: TABLE; Schema: public; Owner: -
+-- Name: transaction; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.transaction_log (
+CREATE TABLE public.transaction (
     id integer NOT NULL,
     wallet character varying(42) NOT NULL,
     fecha timestamp without time zone DEFAULT now() NOT NULL,
@@ -5070,10 +5070,10 @@ CREATE TABLE public.transaction_log (
 
 
 --
--- Name: transaction_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: transaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.transaction_log_id_seq
+CREATE SEQUENCE public.transaction_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -5083,10 +5083,10 @@ CREATE SEQUENCE public.transaction_log_id_seq
 
 
 --
--- Name: transaction_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: transaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.transaction_log_id_seq OWNED BY public.transaction_log.id;
+ALTER SEQUENCE public.transaction_id_seq OWNED BY public.transaction.id;
 
 
 --
@@ -5514,10 +5514,10 @@ ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextv
 
 
 --
--- Name: transaction_log id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: transaction id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.transaction_log ALTER COLUMN id SET DEFAULT nextval('public.transaction_log_id_seq'::regclass);
+ALTER TABLE ONLY public.transaction ALTER COLUMN id SET DEFAULT nextval('public.transaction_id_seq'::regclass);
 
 
 --
@@ -6663,10 +6663,10 @@ ALTER TABLE ONLY public.sivel2_gen_tviolencia
 
 
 --
--- Name: transaction_log transaction_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: transaction transaction_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.transaction_log
+ALTER TABLE ONLY public.transaction
     ADD CONSTRAINT transaction_log_pkey PRIMARY KEY (id);
 
 
@@ -6732,24 +6732,24 @@ CREATE INDEX caso_fecha_idx1 ON public.sivel2_gen_caso USING btree (fecha);
 
 
 --
--- Name: idx_transaction_log_fecha; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_transaction_fecha; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_transaction_log_fecha ON public.transaction_log USING btree (fecha);
-
-
---
--- Name: idx_transaction_log_hash_tx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_transaction_log_hash_tx ON public.transaction_log USING btree (hash_tx);
+CREATE INDEX idx_transaction_fecha ON public.transaction USING btree (fecha);
 
 
 --
--- Name: idx_transaction_log_wallet; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_transaction_hash_tx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_transaction_log_wallet ON public.transaction_log USING btree (wallet);
+CREATE INDEX idx_transaction_hash_tx ON public.transaction USING btree (hash_tx);
+
+
+--
+-- Name: idx_transaction_wallet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_transaction_wallet ON public.transaction USING btree (wallet);
 
 
 --
@@ -8751,10 +8751,10 @@ ALTER TABLE ONLY public.sivel2_gen_supracategoria
 
 
 --
--- Name: transaction_log transaction_log_region_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: transaction transaction_log_region_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.transaction_log
+ALTER TABLE ONLY public.transaction
     ADD CONSTRAINT transaction_log_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id) ON DELETE SET NULL;
 
 
@@ -8906,5 +8906,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bY2ek5d6uuOJQN3E9b0laEVIsBqrt5NCfqweNZVLT8Iz5uDZeDeuebF8XjseCa4
+\unrestrict DXhIhey5xnQDYgTJdwGB7pPRt4LayCId90EhrxWVDkbXW26p7FvO0zKKqY4CwFT
 

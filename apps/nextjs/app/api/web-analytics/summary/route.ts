@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest) {
            donationStarted24h, donationCompleted24h,
            topPages,
            errorTotal24h,
-           /* on-chain stats from transaction_log */
+           /* on-chain stats from transaction */
            totalDonations, totalUsdtDonated, uniqueDonors,
            donationsByRegion, totalLearningPoints] = await Promise.all([
       db.selectFrom('web_event').select(sql<number>`count(*)`.as('v'))
@@ -55,24 +55,24 @@ export async function GET(_request: NextRequest) {
         .where('event_type', '=', 'api_error').where(sql<boolean>`created_at >= now() - interval '24 hours'`).executeTakeFirst(),
 
       // On-chain: count of USDT donations
-      db.selectFrom('transaction_log').select(sql<number>`count(*)`.as('v'))
+      db.selectFrom('transaction').select(sql<number>`count(*)`.as('v'))
         .where('crypto', '=', 'usdt').executeTakeFirst(),
 
       // On-chain: total USDT donated
-      db.selectFrom('transaction_log').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
+      db.selectFrom('transaction').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
         .where('crypto', '=', 'usdt').executeTakeFirst(),
 
       // On-chain: unique donor wallets
-      db.selectFrom('transaction_log').select(sql<number>`count(distinct wallet)`.as('v'))
+      db.selectFrom('transaction').select(sql<number>`count(distinct wallet)`.as('v'))
         .where('crypto', '=', 'usdt').executeTakeFirst(),
 
       // On-chain: donations by region
-      db.selectFrom('transaction_log').select(['region_id', sql<number>`count(*)`.as('cnt'), sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('total')])
+      db.selectFrom('transaction').select(['region_id', sql<number>`count(*)`.as('cnt'), sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('total')])
         .where('crypto', '=', 'usdt').where('region_id', 'is not', null)
         .groupBy('region_id').orderBy(sql`count(*)`, 'desc').execute(),
 
       // On-chain: learning points earned
-      db.selectFrom('transaction_log').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
+      db.selectFrom('transaction').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
         .where('crypto', '=', 'learningpoint').executeTakeFirst(),
     ])
 
