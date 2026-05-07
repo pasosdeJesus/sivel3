@@ -79,7 +79,7 @@ sivel2/app/javascript/controllers/sivel2_gen
 cobertura-sistema/
 cobertura-unitarias/
 servidor/archivos/bd/
-servidor/app/assets/builds
+sivel2/app/assets/builds
 servidor/app/javascript/controllers/heb412_gen
 servidor/app/javascript/controllers/mr519_gen
 servidor/app/javascript/controllers/msip
