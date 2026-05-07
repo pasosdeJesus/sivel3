@@ -10,23 +10,28 @@ import { useToast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger';
 import { parseWalletError } from '@/lib/errors';
 import confetti from 'canvas-confetti';
-import { translations } from './locales/osmmap';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useRegionBalance } from './hooks/useRegionBalance';
 import { useOSMMapData } from './hooks/useOSMMapData';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 
-// Translation objects (ver doc/I18N.md)
-const lpTranslations = {
+const localT = {
   en: {
-    title: '🎓 Learning Points',
-    success: 'You earned Learning Points. Total score: {{0}}',
-    fallbackError: 'Unable to update Learning Points. Contact the team.',
+    thanksTitle: '🙏 Thank you for your donation!',
+    thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.',
+    lpTitle: '🎓 Learning Points',
+    lpSuccess: 'You earned Learning Points. Total score: {{0}}',
+    lpFallbackError: 'Unable to update Learning Points. Contact the team.',
+    donationError: 'Donation error',
   },
   es: {
-    title: '🎓 Puntos de Aprendizaje',
-    success: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
-    fallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
+    thanksTitle: '🙏 ¡Gracias por tu donación!',
+    thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.',
+    lpTitle: '🎓 Puntos de Aprendizaje',
+    lpSuccess: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
+    lpFallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
+    donationError: 'Error en donación',
   },
 }
 
@@ -46,7 +51,7 @@ const MapComponent = dynamic(() => import('@/components/mapa/MapComponent'), {
 export default function OSMMapPage() {
   const params = useParams();
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
-  const t = translations[currentLocale as keyof typeof translations] || translations.en;
+  const { t } = useTranslation(localT);
 
   const { isConnected, donate, isTransacting, isProcessing, effectiveAddress, isMiniPay } = useWallet();
   const { toast } = useToast();
@@ -92,8 +97,8 @@ export default function OSMMapPage() {
                         (currentLocale === 'es' ? 'la región' : 'the region');
 
       toast({
-        title: t.thanksTitle,
-        description: t.thanksMessage
+        title: t('thanksTitle'),
+        description: t('thanksMessage')
           .replace('{{region}}', regionName)
           .replace('{{amount}}', donationAmount),
         duration: isMiniPay ? 0 : 4000,
@@ -101,21 +106,19 @@ export default function OSMMapPage() {
 
       // Mostrar toast de Learning Points si se incrementaron exitosamente
       if (learningPoints?.success) {
-        const lpT = currentLocale === 'es' ? lpTranslations.es : lpTranslations.en
         toast({
-          title: lpT.title,
-          description: lpT.success.replace('{{0}}', String(learningPoints.newScore)),
+          title: t('lpTitle'),
+          description: t('lpSuccess').replace('{{0}}', String(learningPoints.newScore)),
           duration: isMiniPay ? 0 : 4000,
         });
       }
 
       // Mostrar toast informativo si Learning Points fallaron
       if (learningPoints && !learningPoints.success) {
-        const lpT = currentLocale === 'es' ? lpTranslations.es : lpTranslations.en
         toast({
-          title: lpT.title,
-          description: learningPoints.userMessage || lpT.fallbackError,
-          duration: 0, // Sin auto-dismiss — el usuario debe cerrarlo manualmente
+          title: t('lpTitle'),
+          description: learningPoints.userMessage || t('lpFallbackError'),
+          duration: 0, // Sin auto-dismiss
         });
       }
 
@@ -141,7 +144,7 @@ export default function OSMMapPage() {
       console.error('Error en donación:', err);
       const errorMessage = parseWalletError(err, currentLocale);
       toast({
-        title: currentLocale === 'es' ? 'Error en donación' : 'Donation error',
+        title: t('donationError'),
         description: errorMessage,
         variant: 'destructive',
         duration: 0,
@@ -176,7 +179,6 @@ export default function OSMMapPage() {
     onAmountChange: setDonationAmount,
     onDonate,
     onRefreshBalance: () => selectedRegion && fetchBalance(selectedRegion),
-    t,
     MapComponent,
     filtersObj: filters,
     handleCountsLoad

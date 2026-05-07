@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { CountsPopover } from '@/components/CountsPopover';
 import { FiltersPopover } from '@/components/FiltersPopover';
 import { DonationPopover } from '@/components/DonationPopover';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface OSMMapMobileProps {
   counts: { casos: number; victimas: number; victimizaciones: number; actos: number };
@@ -24,7 +24,6 @@ interface OSMMapMobileProps {
   onAmountChange: (value: string) => void;
   onDonate: (amount: string) => Promise<void>;
   onRefreshBalance?: () => void;
-  t: any;
   MapComponent: React.ComponentType<any>;
   filtersObj: any;
   handleCountsLoad: (counts: any) => void;
@@ -49,35 +48,23 @@ export function OSMMapMobile({
   onAmountChange,
   onDonate,
   onRefreshBalance,
-  t,
   MapComponent,
   filtersObj,
   handleCountsLoad
 }: OSMMapMobileProps) {
+  const { t } = useTranslation({});
   return (
     <>
-      {/* Mapa a ancho completo */}
-      <div className="w-full mb-4">
-        <Card>
-          <CardContent className="p-0">
-            <MapComponent
-              filtros={filtersObj}
-              onCargarConteos={handleCountsLoad}
-              isConnected={isConnected}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Botones flotantes móvil */}
+      {/* Toolbar flotante */}
       <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
         <CountsPopover 
           counts={counts}
-          labelCases={t.cases}
-          labelVictims={t.victims}
-          labelVictimizations={t.victimizations}
-          labelActs={t.acts}
-          title={t.counts}
+          labelCases={t('cases')}
+          labelVictims={t('victims')}
+          labelVictimizations={t('victimizations')}
+          labelActs={t('acts')}
+          title={t('counts')}
+          totalsByFilters={t('totalsByFilters')}
           variant="mobile"
         />
         <FiltersPopover 
@@ -88,13 +75,13 @@ export function OSMMapMobile({
           onFilterChange={onFilterChange}
           onApplyFilters={onApplyFilters}
           labels={{
-            from: t.from,
-            to: t.to,
-            department: t.department,
-            allegedPerpetrator: t.allegedPerpetrator,
-            violence: t.violence,
-            filter: t.filter,
-            showAll: t.showAll
+            from: t('from'),
+            to: t('to'),
+            department: t('department'),
+            allegedPerpetrator: t('allegedPerpetrator'),
+            violence: t('violence'),
+            filter: t('filter'),
+            showAll: t('showAll')
           }}
           variant="mobile"
         />
@@ -112,14 +99,23 @@ export function OSMMapMobile({
           isTransacting={isTransacting}
           isProcessing={isProcessing}
           labels={{
-            cause: t.cause,
-            availableFunds: t.availableFunds,
-            amount: t.amount,
-            approve: t.approve,
-            donateTitle: t.donateTitle || t.approve,
-            donating: t.donating
+            cause: t('cause'),
+            availableFunds: t('availableFunds'),
+            amount: t('amount'),
+            approve: t('approve'),
+            donateTitle: t('donateTitle') || t('approve'),
+            donating: t('donating')
           }}
           variant="mobile"
+        />
+      </div>
+
+      {/* Mapa de fondo */}
+      <div className="h-[calc(100vh-120px)] w-full">
+        <MapComponent
+          filtros={filtersObj}
+          onCargarConteos={handleCountsLoad}
+          isConnected={isConnected}
         />
       </div>
     </>

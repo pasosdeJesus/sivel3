@@ -43,6 +43,12 @@ const commonTranslations: TranslationSet = {
     mapOfCases: 'Map of Cases',
     error: 'Error',
     errorDesc: 'Unable to fetch region balance. Check your connection.',
+    cause: 'To document cases in',
+    availableFunds: '💰 Regional Balance',
+    amount: 'Amount (in USDT)',
+    approve: 'Donate',
+    donateTitle: 'Donate',
+    donating: 'Donating...',
   },
   es: {
     acts: 'Actos',
@@ -78,6 +84,12 @@ const commonTranslations: TranslationSet = {
     mapOfCases: 'Mapa de Casos',
     error: 'Error',
     errorDesc: 'No se pudo consultar el balance de la región. Verifica tu conexión.',
+    cause: 'Para documentar casos en',
+    availableFunds: '💰 Balance Regional',
+    amount: 'Valor (en USDT)',
+    approve: 'Donar',
+    donateTitle: 'Donar',
+    donating: 'Donando...',
   },
 }
 
