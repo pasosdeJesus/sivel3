@@ -20,6 +20,15 @@ const statsTranslations = {
     period7d: '7 days',
     period30d: '30 days',
     noData: 'No data yet. Analytics are collected as users interact with the site.',
+    onChain: 'On-Chain',
+    totalDonations: 'Total Donations',
+    totalUsdtDonated: 'Total USDT Donated',
+    uniqueDonors: 'Unique Donors',
+    totalLearningPoints: 'Learning Points Earned',
+    donationsByRegion: 'Donations by Region',
+    region: 'Region',
+    count: 'Count',
+    amount: 'Amount',
   },
   es: {
     title: 'Estadísticas del Sitio',
@@ -40,6 +49,15 @@ const statsTranslations = {
     period7d: '7 días',
     period30d: '30 días',
     noData: 'Sin datos aún. Las analíticas se recopilan cuando los usuarios interactúan con el sitio.',
+    onChain: 'En Cadena',
+    totalDonations: 'Donaciones Totales',
+    totalUsdtDonated: 'USDT Donado Total',
+    uniqueDonors: 'Donantes Únicos',
+    totalLearningPoints: 'Puntos de Aprendizaje',
+    donationsByRegion: 'Donaciones por Región',
+    region: 'Región',
+    count: 'Cantidad',
+    amount: 'Monto',
   },
 }
 
@@ -51,6 +69,13 @@ interface SummaryData {
   donationConversion: { started: number; completed: number; rate: number }
   errors24h: number
   topPages: { path: string; views: number }[]
+  onChain: {
+    totalDonations: number
+    totalUsdtDonated: string
+    uniqueDonors: number
+    totalLearningPoints: string
+    donationsByRegion: { regionId: number; count: number; total: string }[]
+  }
 }
 
 export default async function StatsPage({
@@ -172,6 +197,54 @@ export default async function StatsPage({
                       <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
                         <td className="p-3 text-gray-600 font-mono text-sm">{p.path}</td>
                         <td className="p-3 text-right text-gray-800">{p.views}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* On-chain analytics */}
+            <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+              {t('onChain')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <MetricCard
+                title={t('totalDonations')}
+                value={data.onChain.totalDonations}
+              />
+              <MetricCard
+                title={t('totalUsdtDonated')}
+                value={`${parseFloat(data.onChain.totalUsdtDonated).toFixed(2)} USDT`}
+              />
+              <MetricCard
+                title={t('uniqueDonors')}
+                value={data.onChain.uniqueDonors}
+              />
+              <MetricCard
+                title={t('totalLearningPoints')}
+                value={data.onChain.totalLearningPoints}
+              />
+            </div>
+
+            {data.onChain.donationsByRegion.length > 0 && (
+              <div className="bg-white rounded shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="p-3 font-medium text-gray-700">{t('region')}</th>
+                      <th className="p-3 font-medium text-gray-700 text-right">{t('count')}</th>
+                      <th className="p-3 font-medium text-gray-700 text-right">{t('amount')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.onChain.donationsByRegion.map((r, i) => (
+                      <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
+                        <td className="p-3 text-gray-600">{r.regionId}</td>
+                        <td className="p-3 text-right text-gray-800">{r.count}</td>
+                        <td className="p-3 text-right text-gray-800">
+                          {parseFloat(r.total).toFixed(2)} USDT
+                        </td>
                       </tr>
                     ))}
                   </tbody>

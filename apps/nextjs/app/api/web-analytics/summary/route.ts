@@ -13,7 +13,10 @@ export async function GET(_request: NextRequest) {
            ips24h, ips7d,
            donationStarted24h, donationCompleted24h,
            topPages,
-           errorTotal24h] = await Promise.all([
+           errorTotal24h,
+           /* on-chain stats from transaction_log */
+           totalDonations, totalUsdtDonated, uniqueDonors,
+           donationsByRegion, totalLearningPoints] = await Promise.all([
       db.selectFrom('web_event').select(sql<number>`count(*)`.as('v'))
         .where('event_type', '=', 'pageview').where(sql<boolean>`created_at >= now() - interval '24 hours'`).executeTakeFirst(),
       db.selectFrom('web_event').select(sql<number>`count(*)`.as('v'))
@@ -50,6 +53,27 @@ export async function GET(_request: NextRequest) {
 
       db.selectFrom('web_event').select(sql<number>`count(*)`.as('v'))
         .where('event_type', '=', 'api_error').where(sql<boolean>`created_at >= now() - interval '24 hours'`).executeTakeFirst(),
+
+      // On-chain: count of USDT donations
+      db.selectFrom('transaction_log').select(sql<number>`count(*)`.as('v'))
+        .where('crypto', '=', 'usdt').executeTakeFirst(),
+
+      // On-chain: total USDT donated
+      db.selectFrom('transaction_log').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
+        .where('crypto', '=', 'usdt').executeTakeFirst(),
+
+      // On-chain: unique donor wallets
+      db.selectFrom('transaction_log').select(sql<number>`count(distinct wallet)`.as('v'))
+        .where('crypto', '=', 'usdt').executeTakeFirst(),
+
+      // On-chain: donations by region
+      db.selectFrom('transaction_log').select(['region_id', sql<number>`count(*)`.as('cnt'), sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('total')])
+        .where('crypto', '=', 'usdt').where('region_id', 'is not', null)
+        .groupBy('region_id').orderBy(sql`count(*)`, 'desc').execute(),
+
+      // On-chain: learning points earned
+      db.selectFrom('transaction_log').select(sql<string>`coalesce(sum(cantidad::numeric), 0)`.as('v'))
+        .where('crypto', '=', 'learningpoint').executeTakeFirst(),
     ])
 
     const toNum = (r: { v?: string | number | bigint } | undefined): number =>
@@ -57,6 +81,8 @@ export async function GET(_request: NextRequest) {
 
     const started = toNum(donationStarted24h)
     const completed = toNum(donationCompleted24h)
+    const toStr = (r: { v?: string | number | bigint } | undefined, fallback = '0'): string =>
+      r ? String(r.v ?? fallback) : fallback
 
     return NextResponse.json({
       pageViews: { '24h': toNum(views24h), '7d': toNum(views7d), '30d': toNum(views30d) },
@@ -73,6 +99,17 @@ export async function GET(_request: NextRequest) {
         path: r.pathname,
         views: Number(r.cnt),
       })),
+      onChain: {
+        totalDonations: toNum(totalDonations),
+        totalUsdtDonated: toStr(totalUsdtDonated),
+        uniqueDonors: toNum(uniqueDonors),
+        totalLearningPoints: toStr(totalLearningPoints),
+        donationsByRegion: (donationsByRegion as { region_id: number; cnt: number; total: string }[]).map((r) => ({
+          regionId: r.region_id,
+          count: Number(r.cnt),
+          total: r.total,
+        })),
+      },
     })
   } catch (error) {
     console.error('[web-analytics] Summary error:', error)

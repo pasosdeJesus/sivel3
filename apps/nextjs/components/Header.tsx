@@ -2,8 +2,7 @@
 
 import { Map } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
-import { createTranslator } from '@pasosdejesus/m/i18n'
-import commonTranslations from '@/lib/i18n/common'
+import { useTranslation } from '@/hooks/useTranslation'
 
 import ConnectWalletButton from './ConnectWalletButton'
 
@@ -14,14 +13,13 @@ interface HeaderProps {
 export default function Header({ lang }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t } = useTranslation({})
 
   const changeLanguage = (newLocale: string) => {
     // Reemplaza el locale actual en la URL con el nuevo
     const newPath = pathname.replace(`/${lang}`, `/${newLocale}`)
     router.push(newPath)
   }
-
-  const t = createTranslator(lang, {}, commonTranslations)
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur-sm">

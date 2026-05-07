@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { createTranslator } from '@pasosdejesus/m/i18n'
-import commonTranslations from '@/lib/i18n/common';
+import { useTranslation } from '@/hooks/useTranslation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 
 export function useRegionBalance(selectedRegion: string | null) {
   const params = useParams();
+  const { t } = useTranslation({});
   const currentLocale = ((params?.locale as string) || 'en');
-  const balT = createTranslator(currentLocale, {}, commonTranslations);
   const { toast } = useToast();
   const [regionBalance, setRegionBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
@@ -40,8 +39,8 @@ export function useRegionBalance(selectedRegion: string | null) {
           } else {
             setBalanceLoading(false);
             toast({
-              title: balT('error'),
-              description: balT('errorDesc'),
+              title: t('error'),
+              description: t('errorDesc'),
               variant: 'destructive',
               duration: 0,
             });
