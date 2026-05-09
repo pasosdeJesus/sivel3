@@ -4,9 +4,9 @@ import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@pasosdejesus/m/shadcn-components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast';
 import { logger } from '@/lib/logger';
 import { parseWalletError } from '@/lib/errors';
 import confetti from 'canvas-confetti';

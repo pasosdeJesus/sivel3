@@ -1,65 +1,10 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
+import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
 
-// ============================================================
-// Full Kysely chain mock — function-based (not Proxy)
-// Every chain method returns a new builder object
-// ============================================================
-const mockExecute = vi.fn()
-const mockExecuteTakeFirst = vi.fn()
-const mockSqlExecute = vi.fn()
-
-// sql template tag that supports .as() and .execute()
-const mockSql = Object.assign(
-  (..._args: any[]) => ({
-    as: vi.fn().mockReturnValue({}),
-    execute: mockSqlExecute,
-  }),
-  {
-    val: vi.fn((v: any) => v),
-  }
-)
-
-// Chain builder object — all methods return a fresh builder
-function makeBuilder(): Record<string, any> {
-  return {
-    selectFrom: () => makeBuilder(),
-    select: () => makeBuilder(),
-    selectAll: () => makeBuilder(),
-    innerJoin: () => makeBuilder(),
-    leftJoin: () => makeBuilder(),
-    where: () => makeBuilder(),
-    orderBy: () => makeBuilder(),
-    limit: () => makeBuilder(),
-    groupBy: () => makeBuilder(),
-    insertInto: () => makeBuilder(),
-    values: () => makeBuilder(),
-    updateTable: () => makeBuilder(),
-    set: () => makeBuilder(),
-    deleteFrom: () => makeBuilder(),
-    returningAll: () => makeBuilder(),
-    execute: () => mockExecute(),
-    executeTakeFirst: () => mockExecuteTakeFirst(),
-    executeTakeFirstOrThrow: () => mockExecuteTakeFirst(),
-  }
-}
-
-function createDbMock() {
-  return makeBuilder()
-}
-
-// Mock the config module
-vi.mock('@/.config/kysely.config', () => ({
-  newKyselyPostgresql: vi.fn(() => createDbMock()),
-}))
-
-// Mock kysely module for sql template tag
-vi.mock('kysely', () => ({
-  Kysely: vi.fn(() => createDbMock()),
-  sql: mockSql,
-}))
+const { mockExecute, mockExecuteTakeFirst } = apiDbMocks
 
 let regionsGET: (request: Request) => Promise<Response>
 let categoriesGET: (request: Request) => Promise<Response>
@@ -68,6 +13,9 @@ let allegedPerpetratorsGET: (request: Request) => Promise<Response>
 
 describe('API reference data endpoints', () => {
   beforeAll(async () => {
+    apiDbMocks.setupMocks()
+    apiDbMocks.setupCommonResponses()
+
     const regionsMod = await import('@/app/api/regions/route')
     regionsGET = regionsMod.GET as unknown as (request: Request) => Promise<Response>
 
@@ -82,10 +30,8 @@ describe('API reference data endpoints', () => {
   })
 
   beforeEach(() => {
-    vi.restoreAllMocks()
-    mockExecute.mockReset()
-    mockExecuteTakeFirst.mockReset()
-    mockSqlExecute.mockReset()
+    apiDbMocks.resetMocks()
+    apiDbMocks.setupCommonResponses()
   })
 
   // ---- Regions ----

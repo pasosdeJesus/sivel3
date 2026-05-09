@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock useToast
 const mockToast = vi.fn()
-vi.mock('@/components/ui/use-toast', () => ({
+vi.mock('@pasosdejesus/m/shadcn-components/ui/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
 }))
 

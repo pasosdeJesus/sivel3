@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@pasosdejesus/m/shadcn-components/ui/card';
 import { CountsPopover } from '@/components/CountsPopover';
 import { FiltersPopover } from '@/components/FiltersPopover';
 import { DonationPopover } from '@/components/DonationPopover';

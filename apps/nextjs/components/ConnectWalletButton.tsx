@@ -3,21 +3,21 @@
 import { useState } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
+import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
+} from '@pasosdejesus/m/shadcn-components/ui/popover'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
+} from '@pasosdejesus/m/shadcn-components/ui/tooltip'
+import { Avatar, AvatarFallback, AvatarImage } from '@pasosdejesus/m/shadcn-components/ui/avatar'
+import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
 
 export default function ConnectWalletButton() {
   const { isConnected, phoneNumber, isMiniPay } = useWallet()

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { logger } from '@/lib/logger';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast';
 
 export function useRegionBalance(selectedRegion: string | null) {
   const params = useParams();

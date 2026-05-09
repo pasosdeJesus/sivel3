@@ -235,7 +235,7 @@ describe('lib/donate', () => {
     })
 
     it('maneja error de red con reintentos', async () => {
-      mockFetch.mockRejectedValue(new Error('Network error'))
+      mockFetch.mockResolvedValue(new Response(null, { status: 503 }))
 
       const { donate } = await import('@/lib/donate')
       await expect(donate({

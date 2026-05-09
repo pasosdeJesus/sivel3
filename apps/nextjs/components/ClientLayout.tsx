@@ -5,8 +5,8 @@ import { ReactNode } from 'react'
 import Footer from './Footer'
 import Header from './Header'
 import { AppProvider } from '@/providers/AppProvider'
-import { DebugConsole } from './DebugConsole'
-import { Toaster } from '@/components/ui/toaster'
+import { DebugConsole } from '@pasosdejesus/m/debug'
+import { Toaster } from '@pasosdejesus/m/shadcn-components/ui/toaster'
 
 interface ClientLayoutProps {
   children: ReactNode

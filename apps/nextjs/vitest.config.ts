@@ -9,7 +9,11 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     setupFiles: ['tests/setup-env.ts'],
     coverage: {
+      enabled: true,
+      all: true,
+      include: ['lib/**', 'app/api/**'],
       reporter: ['text', 'json', 'html'],
+      provider: 'v8',
     },
   },
   resolve: {

@@ -11,12 +11,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@pasosdejesus/m/shadcn-components/ui/card'
+import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
+import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
+import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
+import { ScrollArea } from '@pasosdejesus/m/shadcn-components/ui/scroll-area'
+import { Skeleton } from '@pasosdejesus/m/shadcn-components/ui/skeleton'
 import {
   Navigation,
   Download,

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
+import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@pasosdejesus/m/shadcn-components/ui/card'
+import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
 
 interface CountsPopoverProps {
   counts: { casos: number; victimas: number; victimizaciones: number; actos: number }

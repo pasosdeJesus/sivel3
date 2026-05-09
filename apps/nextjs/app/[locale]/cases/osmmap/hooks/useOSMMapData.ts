@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast';
 
 interface DonationRegion {
   id: number;

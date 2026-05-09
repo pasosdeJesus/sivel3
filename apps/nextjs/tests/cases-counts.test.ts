@@ -101,7 +101,9 @@ describe('GET /api/cases/counts', () => {
   })
 
   it('returns 500 on DB error', async () => {
-    mockExecuteTakeFirst.mockRejectedValue(new Error('Connection refused'))
+    mockExecuteTakeFirst.mockImplementation(() => {
+      throw new Error('Connection refused')
+    })
 
     const req = new Request('http://localhost/api/cases/counts')
     const res = await GET(req)
