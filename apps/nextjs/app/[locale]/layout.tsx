@@ -1,5 +1,6 @@
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 
 import '@/app/globals.css'
 import ClientLayout from '@/components/ClientLayout'
@@ -30,7 +31,9 @@ export default async function LocaleLayout({
   }
 
   // Record page view (server-side, no client JS needed)
-  recordEvent({ event_type: 'pageview', locale })
+  const h = await headers()
+  const pathname = h.get('x-invoke-path') || h.get('next-url') || undefined
+  recordEvent({ event_type: 'pageview', pathname, locale })
 
   return (
     <ClientLayout locale={locale}>{children}</ClientLayout>

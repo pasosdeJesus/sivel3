@@ -1,4 +1,11 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { createTranslator } from '@pasosdejesus/m/i18n'
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts'
 
 const statsTranslations = {
   en: {
@@ -10,8 +17,8 @@ const statsTranslations = {
     uniqueIps: 'Unique IPs',
     donationConversion: 'Donation Conversion (24h)',
     errors24h: 'API Errors (24h)',
-    topPages: 'Top Pages (7d)',
-    path: 'Page',
+    topCases: 'Top Viewed Cases (7d)',
+    pageViewsTimeline: 'Daily Page Views (30d)',
     views: 'Views',
     started: 'Started',
     completed: 'Completed',
@@ -24,11 +31,13 @@ const statsTranslations = {
     totalDonations: 'Total Donations',
     totalUsdtDonated: 'Total USDT Donated',
     uniqueDonors: 'Unique Donors',
-    totalLearningPoints: 'Learning Points Earned',
+    totalLearningPoints: 'Learning Points',
     donationsByRegion: 'Donations by Region',
     region: 'Region',
     count: 'Count',
     amount: 'Amount',
+    donations: 'Donations',
+    loading: 'Loading...',
   },
   es: {
     title: 'Estadísticas del Sitio',
@@ -39,8 +48,8 @@ const statsTranslations = {
     uniqueIps: 'IPs Únicas',
     donationConversion: 'Conversión de Donaciones (24h)',
     errors24h: 'Errores de API (24h)',
-    topPages: 'Páginas Principales (7d)',
-    path: 'Página',
+    topCases: 'Casos Más Vistos (7d)',
+    pageViewsTimeline: 'Vistas Diarias (30d)',
     views: 'Vistas',
     started: 'Iniciadas',
     completed: 'Completadas',
@@ -58,6 +67,8 @@ const statsTranslations = {
     region: 'Región',
     count: 'Cantidad',
     amount: 'Monto',
+    donations: 'Donaciones',
+    loading: 'Cargando...',
   },
 }
 
@@ -78,35 +89,61 @@ interface SummaryData {
   }
 }
 
-export default async function StatsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const { locale } = await params
+interface TimelineDay {
+  date: string
+  count: number
+}
+
+export default function StatsPage() {
+  const params = useParams()
+  const locale = (params.locale as string) || 'en'
   const t = createTranslator(locale, statsTranslations)
 
-  // Fetch from internal API
-  const baseUrl = process.env.NEXT_PUBLIC_SELF_ENDPOINT
-    ? process.env.NEXT_PUBLIC_SELF_ENDPOINT.replace('/api/self-verify', '')
-    : 'http://localhost:4000'
-  let data: SummaryData | null = null
-  let error: string | null = null
+  const [summary, setSummary] = useState<SummaryData | null>(null)
+  const [timeline, setTimeline] = useState<TimelineDay[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  try {
-    const res = await fetch(`${baseUrl}/api/web-analytics/summary`, {
-      cache: 'no-store',
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/web-analytics/summary').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    ]).then(([s, tl]) => {
+      setSummary(s)
+      setTimeline(tl.days || [])
+    }).catch(e => {
+      setError(String(e))
     })
-    if (res.ok) {
-      data = await res.json()
-    } else {
-      error = `HTTP ${res.status}`
-    }
-  } catch (e) {
-    error = String(e)
+  }, [])
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded mb-6">
+            Error loading analytics: {error}
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const periods = ['24h', '7d', '30d'] as const
+  if (!summary) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+          <p className="text-gray-400 italic">{t('loading')}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Filter top pages to show only case paths
+  const topCases = summary.topPages
+    .filter(p => p.path.includes('/cases/'))
+    .slice(0, 10)
+    .map(p => ({ path: p.path.replace(/^\/[a-z]{2}\//, '/'), views: p.views }))
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -114,143 +151,72 @@ export default async function StatsPage({
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
         <p className="text-gray-500 mb-8">{t('description')}</p>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded mb-6">
-            Error loading analytics: {error}
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <MetricCard title={t('pageViews')} value={summary.pageViews['24h']} subtitle={t('period24h')} />
+          <MetricCard title={t('uniqueSessions')} value={summary.uniqueSessions['24h']} subtitle={t('period24h')} />
+          <MetricCard title={t('donationConversion')} value={`${summary.donationConversion.completed}/${summary.donationConversion.started}`} subtitle={`${t('rate')}: ${summary.donationConversion.rate}%`} />
+          <MetricCard title={t('uniqueWallets')} value={summary.uniqueWallets['24h']} subtitle={t('period24h')} />
+          <MetricCard title={t('uniqueIps')} value={summary.uniqueIps['24h']} subtitle={t('period24h')} />
+          <MetricCard title={t('errors24h')} value={summary.errors24h} subtitle={t('period24h')} />
+        </div>
+
+        {/* Page Views Timeline Chart */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('pageViewsTimeline')}</h2>
+        <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: 250 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={timeline}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} tickFormatter={d => d.slice(5)} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#999' }} />
+              <Tooltip />
+              <Line type="monotone" dataKey="count" stroke="#7c3aed" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Top Cases */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('topCases')}</h2>
+        {topCases.length === 0 ? (
+          <p className="text-gray-400 italic mb-8">{t('noData')}</p>
+        ) : (
+          <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: Math.max(120, topCases.length * 36) }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={topCases} layout="vertical" margin={{ left: 20, right: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11, fill: '#999' }} allowDecimals={false} />
+                <YAxis type="category" dataKey="path" tick={{ fontSize: 10, fill: '#666' }} width={160} />
+                <Tooltip />
+                <Bar dataKey="views" fill="#7c3aed" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
 
-        {!data && !error && (
-          <p className="text-gray-400 italic">{t('noData')}</p>
-        )}
+        {/* On-chain KPIs */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">{t('onChain')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <MetricCard title={t('totalDonations')} value={summary.onChain.totalDonations} />
+          <MetricCard title={t('totalUsdtDonated')} value={`${parseFloat(summary.onChain.totalUsdtDonated).toFixed(2)} USDT`} />
+          <MetricCard title={t('uniqueDonors')} value={summary.onChain.uniqueDonors} />
+          <MetricCard title={t('totalLearningPoints')} value={summary.onChain.totalLearningPoints} />
+        </div>
 
-        {data && (
+        {/* Donations by Region — Bar Chart */}
+        {summary.onChain.donationsByRegion.length > 0 && (
           <>
-            {/* Numeric metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <MetricCard
-                title={t('pageViews')}
-                value={data.pageViews['24h']}
-                subtitle={t('period24h')}
-              />
-              <MetricCard
-                title={t('uniqueSessions')}
-                value={data.uniqueSessions['24h']}
-                subtitle={t('period24h')}
-              />
-              <MetricCard
-                title={t('donationConversion')}
-                value={`${data.donationConversion.completed}/${data.donationConversion.started}`}
-                subtitle={`${t('rate')}: ${data.donationConversion.rate}%`}
-              />
-              <MetricCard
-                title={t('uniqueWallets')}
-                value={data.uniqueWallets['24h']}
-                subtitle={t('period24h')}
-              />
-              <MetricCard
-                title={t('uniqueIps')}
-                value={data.uniqueIps['24h']}
-                subtitle={t('period24h')}
-              />
-              <MetricCard
-                title={t('errors24h')}
-                value={data.errors24h}
-                subtitle={t('period24h')}
-              />
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('donationsByRegion')}</h2>
+            <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={summary.onChain.donationsByRegion.map(r => ({ region: r.regionId, donations: r.count, usdt: parseFloat(r.total) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="region" tick={{ fontSize: 11, fill: '#999' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#999' }} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="donations" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-
-            {/* Period comparison */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t('pageViews')}
-            </h2>
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              {periods.map((p) => (
-                <div key={p} className="bg-white p-4 rounded shadow-sm">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {data.pageViews[p]}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {p === '24h' ? t('period24h') : p === '7d' ? t('period7d') : t('period30d')}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Top pages */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t('topPages')}
-            </h2>
-            {data.topPages.length === 0 ? (
-              <p className="text-gray-400 italic">{t('noData')}</p>
-            ) : (
-              <div className="bg-white rounded shadow-sm overflow-hidden">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
-                      <th className="p-3 font-medium text-gray-700">{t('path')}</th>
-                      <th className="p-3 font-medium text-gray-700 text-right">{t('views')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.topPages.map((p, i) => (
-                      <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                        <td className="p-3 text-gray-600 font-mono text-sm">{p.path}</td>
-                        <td className="p-3 text-right text-gray-800">{p.views}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* On-chain analytics */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              {t('onChain')}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <MetricCard
-                title={t('totalDonations')}
-                value={data.onChain.totalDonations}
-              />
-              <MetricCard
-                title={t('totalUsdtDonated')}
-                value={`${parseFloat(data.onChain.totalUsdtDonated).toFixed(2)} USDT`}
-              />
-              <MetricCard
-                title={t('uniqueDonors')}
-                value={data.onChain.uniqueDonors}
-              />
-              <MetricCard
-                title={t('totalLearningPoints')}
-                value={data.onChain.totalLearningPoints}
-              />
-            </div>
-
-            {data.onChain.donationsByRegion.length > 0 && (
-              <div className="bg-white rounded shadow-sm overflow-hidden">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
-                      <th className="p-3 font-medium text-gray-700">{t('region')}</th>
-                      <th className="p-3 font-medium text-gray-700 text-right">{t('count')}</th>
-                      <th className="p-3 font-medium text-gray-700 text-right">{t('amount')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.onChain.donationsByRegion.map((r, i) => (
-                      <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                        <td className="p-3 text-gray-600">{r.regionId}</td>
-                        <td className="p-3 text-right text-gray-800">{r.count}</td>
-                        <td className="p-3 text-right text-gray-800">
-                          {parseFloat(r.total).toFixed(2)} USDT
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </>
         )}
       </div>
@@ -258,15 +224,7 @@ export default async function StatsPage({
   )
 }
 
-function MetricCard({
-  title,
-  value,
-  subtitle,
-}: {
-  title: string
-  value: string | number
-  subtitle?: string
-}) {
+function MetricCard({ title, value, subtitle }: { title: string; value: string | number; subtitle?: string }) {
   return (
     <div className="bg-white p-5 rounded shadow-sm">
       <div className="text-sm text-gray-500 mb-1">{title}</div>
