@@ -59,11 +59,11 @@ export async function up(db: Kysely<any>): Promise<void> {
         const txHashTx = log.transactionHash.toLowerCase()
 
         const existing = await db
-          .selectFrom('transaction').select('id')
+          .selectFrom('transaction_log').select('id')
           .where('hash_tx', '=', txHashTx).executeTakeFirst()
         if (existing) continue
 
-        await db.insertInto('transaction').values({
+        await db.insertInto('transaction_log').values({
           wallet: donor, fecha: ts ? new Date(ts * 1000) : new Date(),
           tipo: 'donation', crypto: 'usdt',
           cantidad: amount.toFixed(6),
@@ -96,7 +96,7 @@ export async function up(db: Kysely<any>): Promise<void> {
           const txHashTx = log.transactionHash.toLowerCase()
 
           const existing = await db
-            .selectFrom('transaction').select('id')
+            .selectFrom('transaction_log').select('id')
             .where('hash_tx', '=', txHashTx).executeTakeFirst()
           if (existing) continue
 
