@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../node_modules/@pasosdejesus/m/dist/shadcn_components";
 
 /* ================================
    🎨 Diseño Global Moderno & Profesional
