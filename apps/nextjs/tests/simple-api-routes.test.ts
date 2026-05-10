@@ -1,10 +1,52 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
-import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
 
-const { mockExecute, mockExecuteTakeFirst } = apiDbMocks
+// ============================================================
+// Kysely chain mock — vi.mock must be top-level for hoisting
+// ============================================================
+const mockExecute = vi.fn()
+const mockExecuteTakeFirst = vi.fn()
+
+const mockSql = vi.fn(() => ({
+  as: vi.fn().mockReturnValue({}),
+  execute: vi.fn(),
+  val: vi.fn((v: any) => v),
+}))
+
+function makeBuilder(): Record<string, any> {
+  return {
+    selectFrom: () => makeBuilder(),
+    select: () => makeBuilder(),
+    selectAll: () => makeBuilder(),
+    innerJoin: () => makeBuilder(),
+    leftJoin: () => makeBuilder(),
+    where: () => makeBuilder(),
+    orderBy: () => makeBuilder(),
+    limit: () => makeBuilder(),
+    groupBy: () => makeBuilder(),
+    insertInto: () => makeBuilder(),
+    values: () => makeBuilder(),
+    updateTable: () => makeBuilder(),
+    set: () => makeBuilder(),
+    deleteFrom: () => makeBuilder(),
+    returningAll: () => makeBuilder(),
+    execute: () => mockExecute(),
+    executeTakeFirst: () => mockExecuteTakeFirst(),
+    executeTakeFirstOrThrow: () => mockExecuteTakeFirst(),
+  }
+}
+
+vi.mock('@/.config/kysely.config', () => ({
+  newKyselyPostgresql: vi.fn(() => makeBuilder()),
+}))
+
+vi.mock('kysely', () => ({
+  Kysely: vi.fn(() => makeBuilder()),
+  PostgresDialect: vi.fn(),
+  sql: mockSql,
+}))
 
 let regionsGET: (request: Request) => Promise<Response>
 let categoriesGET: (request: Request) => Promise<Response>
@@ -13,9 +55,6 @@ let allegedPerpetratorsGET: (request: Request) => Promise<Response>
 
 describe('API reference data endpoints', () => {
   beforeAll(async () => {
-    apiDbMocks.setupMocks()
-    apiDbMocks.setupCommonResponses()
-
     const regionsMod = await import('@/app/api/regions/route')
     regionsGET = regionsMod.GET as unknown as (request: Request) => Promise<Response>
 
@@ -30,8 +69,9 @@ describe('API reference data endpoints', () => {
   })
 
   beforeEach(() => {
-    apiDbMocks.resetMocks()
-    apiDbMocks.setupCommonResponses()
+    vi.restoreAllMocks()
+    mockExecute.mockReset()
+    mockExecuteTakeFirst.mockReset()
   })
 
   // ---- Regions ----
@@ -43,7 +83,6 @@ describe('API reference data endpoints', () => {
         { id: 2, name: 'Israel/Palestine' },
       ])
 
-      // Regions route uses req.nextUrl.searchParams — provide it as a property
       const req = new Request('http://localhost/api/regions?locale=en') as any
       req.nextUrl = new URL('http://localhost/api/regions?locale=en')
 
