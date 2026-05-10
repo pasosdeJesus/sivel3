@@ -1345,16 +1345,6 @@ export interface Transaction {
   wallet: string;
 }
 
-export interface Userevent {
-  amount: Numeric | null;
-  currency: string | null;
-  id: Generated<number>;
-  metadata: Json | null;
-  path: string | null;
-  timestamp: Generated<Timestamp>;
-  type: string;
-}
-
 export interface Usuario {
   created_at: Timestamp | null;
   current_sign_in_at: Timestamp | null;
@@ -1530,7 +1520,6 @@ export interface DB {
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
   transaction: Transaction;
-  userevent: Userevent;
   usuario: Usuario;
   web_event: WebEvent;
 }
