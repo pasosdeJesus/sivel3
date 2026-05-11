@@ -15,6 +15,9 @@ export default function Header({ lang }: HeaderProps) {
   const pathname = usePathname()
   const { t } = useTranslation({})
 
+  // Dynamic title based on current route
+  const pageTitle = pathname.includes('/stats') ? 'siteStatistics' : 'mapOfCases'
+
   const changeLanguage = (newLocale: string) => {
     // Reemplaza el locale actual en la URL con el nuevo
     const newPath = pathname.replace(`/${lang}`, `/${newLocale}`)
@@ -29,7 +32,7 @@ export default function Header({ lang }: HeaderProps) {
             <Map className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {t('mapOfCases')}
+                {t(pageTitle)}
               </h1>
             </div>
           </div>

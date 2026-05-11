@@ -101,19 +101,24 @@ export default function StatsPage() {
 
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [timeline, setTimeline] = useState<TimelineDay[]>([])
+  const [regions, setRegions] = useState<{ id: number; name: string }[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
       fetch('/api/web-analytics/summary').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       fetch('/api/web-analytics/timeline').then(r => r.ok ? r.json() : Promise.reject(r.status)),
-    ]).then(([s, tl]) => {
+      fetch(`/api/regions?locale=${locale}`).then(r => r.ok ? r.json() : []),
+    ]).then(([s, tl, reg]: any) => {
       setSummary(s)
       setTimeline(tl.days || [])
+      setRegions(reg || [])
     }).catch(e => {
       setError(String(e))
     })
-  }, [])
+  }, [locale])
+
+  const regionNames = Object.fromEntries(regions.map(r => [r.id, r.name]))
 
   if (error) {
     return (
@@ -208,7 +213,7 @@ export default function StatsPage() {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('donationsByRegion')}</h2>
             <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={summary.onChain.donationsByRegion.map(r => ({ region: r.regionId, donations: r.count, usdt: parseFloat(r.total) }))}>
+                <BarChart data={summary.onChain.donationsByRegion.map(r => ({ region: regionNames[r.regionId] || `Region ${r.regionId}`, donations: r.count, usdt: parseFloat(r.total) }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="region" tick={{ fontSize: 11, fill: '#999' }} />
                   <YAxis tick={{ fontSize: 11, fill: '#999' }} allowDecimals={false} />
