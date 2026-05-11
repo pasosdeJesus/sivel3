@@ -147,6 +147,24 @@ export async function incrementLearningPoints(
     
     if (response.ok && data.success) {
       await updateNonce(db, nextNonce)
+      // Record learning points in transaction table for on-chain analytics
+      try {
+        await db.insertInto('transaction').values({
+          wallet: userWallet.toLowerCase(),
+          fecha: new Date(),
+          tipo: 'earning',
+          crypto: 'learningpoint',
+          cantidad: amount.toFixed(6),
+          impacto_balance: amount.toFixed(6),
+          hash_tx: txHash,
+          lp_tx_hash: txHash,
+          lp_nonce: nextNonce,
+          lp_success: true,
+          metadata: JSON.stringify({ newScore: data.new_learningscore }),
+        } as any).execute()
+      } catch (dbErr) {
+        console.error('⚠️ [LearningPoints] Error registrando transacción:', dbErr)
+      }
       console.log(`✅ [LearningPoints] Nonce actualizado a ${nextNonce}`)
       return {
         success: true,
