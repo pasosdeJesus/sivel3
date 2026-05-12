@@ -24,6 +24,7 @@ const localT = {
     lpSuccess: 'You earned Learning Points. Total score: {{0}}',
     lpFallbackError: 'Unable to update Learning Points. Contact the team.',
     donationError: 'Donation error',
+    viewStats: '📊 View Site Statistics',
   },
   es: {
     thanksTitle: '🙏 ¡Gracias por tu donación!',
@@ -32,6 +33,7 @@ const localT = {
     lpSuccess: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
     lpFallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
     donationError: 'Error en donación',
+    viewStats: '📊 Ver Estadísticas del Sitio',
   },
 }
 
@@ -195,6 +197,16 @@ export default function OSMMapPage() {
         {/* Versión desktop */}
         <div className="hidden lg:block">
           <OSMMapDesktop {...commonProps} />
+        </div>
+
+        {/* Link to stats */}
+        <div className="mt-6 text-center">
+          <a
+            href={`/${currentLocale}/stats`}
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded font-medium hover:bg-blue-700 transition-colors"
+          >
+            {t('viewStats')}
+          </a>
         </div>
       </main>
     </div>

@@ -33,6 +33,7 @@ const statsTranslations = {
     uniqueDonors: 'Unique Donors',
     totalLearningPoints: 'Learning Points',
     donationsByRegion: 'Donations by Region',
+    backToMap: '← Back to Case Map',
     region: 'Region',
     count: 'Count',
     amount: 'Amount',
@@ -64,6 +65,7 @@ const statsTranslations = {
     uniqueDonors: 'Donantes Únicos',
     totalLearningPoints: 'Puntos de Aprendizaje',
     donationsByRegion: 'Donaciones por Región',
+    backToMap: '← Ir al Mapa de Casos',
     region: 'Región',
     count: 'Cantidad',
     amount: 'Monto',
@@ -222,8 +224,18 @@ export default function StatsPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </>
-        )}
+
+          {/* Navigation back to map */}
+          <div className="mt-8 text-center">
+            <a
+              href={`/${locale}/cases/osmmap`}
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded font-medium hover:bg-blue-700 transition-colors"
+            >
+              {t('backToMap')}
+            </a>
+          </div>
+        </>
+      )}
       </div>
     </div>
   )
