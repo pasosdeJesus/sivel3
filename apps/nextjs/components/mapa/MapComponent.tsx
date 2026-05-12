@@ -85,6 +85,13 @@ export default function MapComponent({
       try {
         const datos = JSON.parse(text);
         setCasoSeleccionado(datos.caso);
+        // Track case view for analytics
+        fetch('/api/web-analytics/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}` }),
+          keepalive: true,
+        }).catch(() => {});
       } catch (e) {
         console.error("Error al parsear JSON:", e);
         console.error("Respuesta recibida del servidor:", text);
