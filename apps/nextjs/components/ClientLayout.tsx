@@ -1,6 +1,7 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 import Footer from './Footer'
 import Header from './Header'
@@ -14,6 +15,18 @@ interface ClientLayoutProps {
 }
 
 export default function ClientLayout({ children, locale }: ClientLayoutProps) {
+  const pathname = usePathname()
+
+  // Record page view on mount and on navigation (client-side, 1 per real view)
+  useEffect(() => {
+    fetch('/api/web-analytics/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: 'pageview', pathname, locale }),
+      keepalive: true,
+    }).catch(() => {})
+  }, [pathname, locale])
+
   return (
     <AppProvider locale={locale}>
       <div className="bg-gypsum overflow-hidden flex flex-col min-h-screen">
