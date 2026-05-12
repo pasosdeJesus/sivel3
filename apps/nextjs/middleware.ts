@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { match } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
+import { randomBytes } from 'crypto';
 
-const locales = ['en', 'es']; // inglés primero
+const locales = ['en', 'es'];
 const defaultLocale = 'en';
 const localeCache = new Map<string, string>();
 
@@ -18,7 +19,7 @@ function getLocale(request: NextRequest): string {
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
 
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages()
-    .filter(l => l !== '*')  // negotiator 1.0.0 devuelve ['*'] para headers vacíos
+    .filter(l => l !== '*')
   const locale = match(languages, locales, defaultLocale)
 
   localeCache.set(cacheKey, locale);
@@ -27,23 +28,37 @@ function getLocale(request: NextRequest): string {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  
-  // EXCLUIR rutas de API y assets de Next.js (inmediatamente, antes de cualquier lógica)
-  if (pathname === '/' || 
-      pathname.startsWith('/api/') || 
+
+  // Session cookie — set if missing (24h expiry)
+  const existingSid = request.cookies.get('sid')?.value
+  const response = NextResponse.next()
+
+  if (!existingSid) {
+    const sessionId = randomBytes(16).toString('hex')
+    response.cookies.set('sid', sessionId, {
+      maxAge: 60 * 60 * 24,
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    })
+  }
+
+  // Skip redirect for API / assets
+  if (pathname === '/' ||
+      pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/favicon.ico')) {
-    return NextResponse.next()
+    return response
   }
-  
-  // Verificar si ya tiene locale
+
+  // Check if path already has locale
   const pathnameHasLocale = locales.some(
     locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   )
-  
-  if (pathnameHasLocale) return NextResponse.next()
-  
-  // Redirigir agregando locale
+
+  if (pathnameHasLocale) return response
+
+  // Redirect adding locale
   let locale: string
   try {
     locale = getLocale(request)
@@ -51,7 +66,7 @@ export function middleware(request: NextRequest) {
     console.error('Middleware locale detection failed:', err)
     locale = defaultLocale
   }
-  
+
   request.nextUrl.pathname = `/${locale}${pathname}`
   return NextResponse.redirect(request.nextUrl, { status: 302 })
 }
