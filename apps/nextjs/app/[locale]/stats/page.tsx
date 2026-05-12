@@ -204,7 +204,7 @@ export default function StatsPage() {
           <MetricCard title={t('totalDonations')} value={summary.onChain.totalDonations} />
           <MetricCard title={t('totalUsdtDonated')} value={`${parseFloat(summary.onChain.totalUsdtDonated).toFixed(2)} USDT`} />
           <MetricCard title={t('uniqueDonors')} value={summary.onChain.uniqueDonors} />
-          <MetricCard title={t('totalLearningPoints')} value={summary.onChain.totalLearningPoints} />
+          <MetricCard title={t('totalLearningPoints')} value={parseFloat(summary.onChain.totalLearningPoints).toFixed(2)} />
         </div>
 
         {/* Donations by Region — Bar Chart */}
