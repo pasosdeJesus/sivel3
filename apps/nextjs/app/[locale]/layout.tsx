@@ -1,6 +1,6 @@
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
-import { headers, cookies } from 'next/headers'
+import { headers } from 'next/headers'
 
 import '@/app/globals.css'
 import ClientLayout from '@/components/ClientLayout'
@@ -33,9 +33,7 @@ export default async function LocaleLayout({
   // Record page view (server-side, no client JS needed)
   const h = await headers()
   const pathname = h.get('x-invoke-path') || h.get('next-url') || undefined
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get('sid')?.value
-  recordEvent({ event_type: 'pageview', session_id: sessionId, pathname, locale })
+  recordEvent({ event_type: 'pageview', pathname, locale })
 
   return (
     <ClientLayout locale={locale}>{children}</ClientLayout>

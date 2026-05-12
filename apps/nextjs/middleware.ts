@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { match } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
-import { randomBytes } from 'crypto';
 
 const locales = ['en', 'es'];
 const defaultLocale = 'en';
@@ -29,26 +28,12 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Session cookie — set if missing (24h expiry)
-  const existingSid = request.cookies.get('sid')?.value
-  const response = NextResponse.next()
-
-  if (!existingSid) {
-    const sessionId = randomBytes(16).toString('hex')
-    response.cookies.set('sid', sessionId, {
-      maxAge: 60 * 60 * 24,
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    })
-  }
-
   // Skip redirect for API / assets
   if (pathname === '/' ||
       pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/favicon.ico')) {
-    return response
+    return NextResponse.next()
   }
 
   // Check if path already has locale
@@ -56,7 +41,7 @@ export function middleware(request: NextRequest) {
     locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   )
 
-  if (pathnameHasLocale) return response
+  if (pathnameHasLocale) return NextResponse.next()
 
   // Redirect adding locale
   let locale: string
