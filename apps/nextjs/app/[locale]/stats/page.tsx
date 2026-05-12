@@ -12,7 +12,6 @@ const statsTranslations = {
     title: 'Site Statistics',
     description: 'Real-time usage analytics for sivel.xyz',
     pageViews: 'Page Views',
-    uniqueSessions: 'Unique Sessions',
     uniqueWallets: 'Unique Wallets',
     uniqueIps: 'Unique IPs',
     donationConversion: 'Donation Conversion (24h)',
@@ -44,7 +43,6 @@ const statsTranslations = {
     title: 'Estadísticas del Sitio',
     description: 'Analíticas de uso en tiempo real para sivel.xyz',
     pageViews: 'Vistas de Página',
-    uniqueSessions: 'Sesiones Únicas',
     uniqueWallets: 'Billeteras Únicas',
     uniqueIps: 'IPs Únicas',
     donationConversion: 'Conversión de Donaciones (24h)',
@@ -76,7 +74,6 @@ const statsTranslations = {
 
 interface SummaryData {
   pageViews: Record<string, number>
-  uniqueSessions: Record<string, number>
   uniqueWallets: Record<string, number>
   uniqueIps: Record<string, number>
   donationConversion: { started: number; completed: number; rate: number }
@@ -161,7 +158,6 @@ export default function StatsPage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <MetricCard title={t('pageViews')} value={summary.pageViews['24h']} subtitle={t('period24h')} />
-          <MetricCard title={t('uniqueSessions')} value={summary.uniqueSessions['24h']} subtitle={t('period24h')} />
           <MetricCard title={t('donationConversion')} value={`${summary.donationConversion.completed}/${summary.donationConversion.started}`} subtitle={`${t('rate')}: ${summary.donationConversion.rate}%`} />
           <MetricCard title={t('uniqueWallets')} value={summary.uniqueWallets['24h']} subtitle={t('period24h')} />
           <MetricCard title={t('uniqueIps')} value={summary.uniqueIps['24h']} subtitle={t('period24h')} />
