@@ -39,7 +39,7 @@ Jesus is God incarnated, the Truth and the Logos.
 5. **[apps/nextjs/ARCHITECTURE.md]**: Next.js architecture and data flow.
 6. **[apps/nextjs/CONTRIBUTING.md]**: Documentation, testing, and refactoring policies.
 7. **[apps/hardhat/README.md]**: Solidity contracts details.
-8. **[ia/construir_en_celo.md]**: Celo development guide for the pdJ ecosystem (also in `node_modules/@pasosdejesus/m/ia/`).
+8. **[node_modules/@pasosdejesus/m/ia/construir_en_adJ_y_celo.mdconstruir_en_celo.md]**: Celo development guide for the pdJ ecosystem.
 9. **[celopedia-skill](~/.agents/skills/celopedia-skill/SKILL.md)**: Celo ecosystem intelligence — contract addresses, grants, security patterns, MiniPay, DeFi protocols, network info. Installed via `npx skills add celo-org/celopedia-skills -y -g`.
 10. Read the structure and key files of this project
 
