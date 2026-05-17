@@ -25,7 +25,6 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@layerzerolabs/solidity-examples": "^1.1.0",
     "@nomicfoundation/hardhat-ignition": "0.15.0",
     "@openzeppelin/contracts": "^5.4.0",
     "dotenv": "^17.2.3",

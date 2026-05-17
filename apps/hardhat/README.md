@@ -8,7 +8,7 @@ Our architecture is designed to be modular and phased, allowing for secure and i
 
 1.  **`RegionalDonation.sol` (In Progress):** This is the heart of our sustainability model. This contract will allow anyone to donate funds (e.g., USDT) to specific, pre-approved geographic regions. It will serve as the treasury for on-the-ground operations.
 
-2.  **`SBTs.sol` (Planned):** A Soul-Bound Token (SBT) contract for on-chain identity and role management. This will be used to issue non-transferable tokens that represent the official roles within our ecosystem: **Administrator**, **Documenter**, and **Publishing Validator**. This ensures clear accountability.
+2.  **`PasosdeJesusCredentials.sol` (In Progress):** Unified credential contract (ERC1155 + AccessControl) for SBTs on Celo and NFTs on Base. Manages course completions, roles, achievements, and transferable collectibles across the Pasos de Jesús ecosystem.
 
 3.  **`CaseCertification.sol` (Planned):** This contract will provide the mechanism for creating an immutable, on-chain record of verified cases. After a case passes our rigorous 3-step verification process, its cryptographic hash will be stored permanently on the Celo blockchain via this contract.
 
@@ -16,7 +16,11 @@ Our architecture is designed to be modular and phased, allowing for secure and i
 
 ## Current Status: Foundational Development
 
-Currently, this directory contains a mock USDT contract (`MockUSDT.sol`) used for local and testnet development. For more details, see **[MOCK_USDT_README.md](./MOCK_USDT_README.md)**.
+Currently, this directory contains:
+
+- `MockUSDT.sol` — Fake USDT for local and testnet development. See **[MOCK_USDT_README.md](./MOCK_USDT_README.md)**.
+- `PasosdeJesusCredentials.sol` — Unified SBT + NFT contract (ERC1155 + AccessControl), deployable on Celo and Base.
+- `RegionalDonation.sol` / `SIVeL3RegionalDonationV2.sol` — Regional donation management on Celo.
 
 ## Prerequisites
 

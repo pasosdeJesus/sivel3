@@ -102,6 +102,7 @@ apps/nextjs/html-snapshots/
 .next
 tsconfig.tsbuildinfo
 apps/hardhat/tmpart
+apps/hardhat/deployments/
 contexto.md
 sivel2/config/credentials.yml.enc
 sivel2/config/master.key
