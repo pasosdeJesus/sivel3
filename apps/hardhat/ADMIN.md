@@ -1,36 +1,36 @@
-# PasosDeJesusCredentials — Administración
+# PasosDeJesusCredentials — Administration
 
-## 1. Variables de entorno (`apps/.env`)
+## 1. Environment Variables (`apps/.env`)
 
-| Variable | Propósito |
-|----------|-----------|
-| `CREDENTIALS_PRIVATE_KEY` | Deployer + `DEFAULT_ADMIN_ROLE`. Permite registrar tipos, fijar supply, cambiar URIs, grant/revoke roles |
-| `PRIVATE_KEY` | sivel.xyz backend (`MINTER_ROLE`). Mintea NFTs en Base y SBTs de rol en Celo |
-| `LEARNTG_ADDRESS` | learn.tg backend (dirección pública). Recibe `MINTER_ROLE` para mintear SBTs de cursos en Celo |
-| `NEXT_PUBLIC_BASE_NETWORK` | Red Base: `base` (mainnet) o `baseSepolia` (testnet) |
-| `NEXT_PUBLIC_BASE_RPC_URL` | RPC de Base |
-| `BLOCKSCOUT_API_KEY` | Verificación en Celo |
-| `BASESCAN_API_KEY` | Verificación en Base |
+| Variable | Purpose |
+|----------|---------|
+| `CREDENTIALS_PRIVATE_KEY` | Deployer + `DEFAULT_ADMIN_ROLE`. Register types, set supply, update URIs, grant/revoke roles |
+| `PRIVATE_KEY` | sivel.xyz backend (`MINTER_ROLE`). Mints NFTs on Base and role SBTs on Celo |
+| `LEARNTG_ADDRESS` | learn.tg backend (public address). Receives `MINTER_ROLE` for minting course SBTs on Celo |
+| `NEXT_PUBLIC_BASE_NETWORK` | Base network: `base` (mainnet) or `baseSepolia` (testnet) |
+| `NEXT_PUBLIC_BASE_RPC_URL` | Base RPC endpoint |
+| `BLOCKSCOUT_API_KEY` | Celo contract verification |
+| `BASESCAN_API_KEY` | Base contract verification |
 
-## 2. Direcciones desplegadas
+## 2. Deployed Addresses
 
-| Red | Dirección | Explorer |
-|-----|-----------|----------|
-| Celo Mainnet | _pendiente_ | [Celoscan](https://celoscan.io) |
-| Base Mainnet | _pendiente_ | [Basescan](https://basescan.org) |
-| Celo Sepolia | _pendiente_ | [Blockscout](https://celo-sepolia.blockscout.com) |
-| Base Sepolia | _pendiente_ | [Basescan](https://sepolia.basescan.org) |
+| Network | Address | Explorer |
+|---------|---------|----------|
+| Celo Mainnet | _pending_ | [Celoscan](https://celoscan.io) |
+| Base Mainnet | _pending_ | [Basescan](https://basescan.org) |
+| Celo Sepolia | _pending_ | [Blockscout](https://celo-sepolia.blockscout.com) |
+| Base Sepolia | _pending_ | [Basescan](https://sepolia.basescan.org) |
 
-## 3. Roles asignados
+## 3. Assigned Roles
 
-| Rol | Red | Wallet | Propósito |
-|-----|-----|--------|-----------|
-| `DEFAULT_ADMIN_ROLE` | Celo, Base | `CREDENTIALS_PRIVATE_KEY` | Administrar tipos, supply, URIs |
-| `MINTER_ROLE` | Celo | learn.tg backend | Mintea SBTs al completar cursos |
-| `MINTER_ROLE` | Celo | sivel.xyz backend | Mintea roles (Documenter, Validator, Founder User) |
-| `MINTER_ROLE` | Base | sivel.xyz backend | Mintea NFTs comprados |
+| Role | Network | Wallet | Purpose |
+|------|---------|--------|---------|
+| `DEFAULT_ADMIN_ROLE` | Celo, Base | `CREDENTIALS_PRIVATE_KEY` | Manage types, supply, URIs |
+| `MINTER_ROLE` | Celo | learn.tg backend | Mint course completion SBTs |
+| `MINTER_ROLE` | Celo | sivel.xyz backend | Mint role SBTs (Documenter, Validator, Founder User) |
+| `MINTER_ROLE` | Base | sivel.xyz backend | Mint purchased NFTs |
 
-## 4. Despliegue
+## 4. Deployment
 
 ```bash
 cd apps/hardhat
@@ -44,11 +44,11 @@ bin/deployPdJCredentials celo
 bin/deployPdJCredentials base
 ```
 
-El script guarda la dirección en `deployments/<red>.json`
+The script saves the address to `deployments/<network>.json`.
 
-## 5. Verificaciones
+## 5. Verification
 
-### 5.1 De código fuente
+### 5.1 Source Code
 
 ```bash
 # Testnet
@@ -60,7 +60,7 @@ bin/PdJCredentialsSourceVerification celo
 bin/PdJCredentialsSourceVerification base
 ```
 
-### 5.2 De funcionalidad mínima
+### 5.2 Functionality Check
 
 ```bash
 # Testnet
@@ -72,144 +72,142 @@ bin/verifyPdJCredentials celo
 bin/verifyPdJCredentials base
 ```
 
-## 6. Post-despliegue (`adminPdJCredentials.js`)
+## 6. Post-Deployment (`adminPdJCredentials.js`)
 
-### Otorgar MINTER_ROLE
+### Grant MINTER_ROLE
 
 ```bash
-# learn.tg en Celo (SBTs de cursos)
+# learn.tg on Celo (course SBTs)
 node scripts/adminPdJCredentials.js grant-minter --network celo --address $LEARNTG_ADDRESS
 
-# sivel.xyz en Celo (SBTs de roles)
-node scripts/adminPdJCredentials.js grant-minter --network celo --address <NEXT_PUBLIC_ADDRESS>
+# sivel.xyz on Celo (role SBTs)
+node scripts/adminPdJCredentials.js grant-minter --network celo --address $NEXT_PUBLIC_ADDRESS
 
-# sivel.xyz en Base (NFTs)
-node scripts/adminPdJCredentials.js grant-minter --network base --address <NEXT_PUBLIC_ADDRESS>
+# sivel.xyz on Base (NFTs)
+node scripts/adminPdJCredentials.js grant-minter --network base --address $NEXT_PUBLIC_ADDRESS
 ```
 
-### Registrar credenciales
+### Register Credential Types
 
 ```bash
-# Curso gratuito
+# Free course
 node scripts/adminPdJCredentials.js register-type \
   --network celo --site learn.tg --type course_completion \
-  --display "Curso Básico" --soulbound true --course-id 1
+  --display "Basic Course" --soulbound true --course-id 1
 
-# Curso premium
+# Premium course
 node scripts/adminPdJCredentials.js register-type \
   --network celo --site learn.tg --type course_completion \
-  --display "Curso Premium" --soulbound true --course-id 2 --premium true
+  --display "Premium Course" --soulbound true --course-id 2 --premium true
 
-# Founder User (sivel.xyz, rol, maxSupply=50)
+# Founder User (sivel.xyz, role, maxSupply=50)
 node scripts/adminPdJCredentials.js register-type \
   --network celo --site sivel.xyz --type role \
   --display "Founder User" --soulbound true
 
-# NFT coleccionable
+# Collectible NFT
 node scripts/adminPdJCredentials.js register-type \
   --network base --site sivel.xyz --type nft \
-  --display "Versículo Bíblico" --soulbound false
+  --display "Bible Verse" --soulbound false
 ```
 
-### Fijar maxSupply
+### Set maxSupply
 
 ```bash
-node scripts/adminPdJCredentials.js set-max-supply --network celo --token-id 3 --max 50
+node scripts/adminPdJCredentials.js set-max-supply --network celo --token-id 1 --max 50
 ```
 
-### Listar tipos registrados
+### List Registered Types
 
 ```bash
 node scripts/adminPdJCredentials.js list-types --network celo
 node scripts/adminPdJCredentials.js list-types --network base
 ```
 
-### Cambiar baseURI de un sitio
+### Update Site baseURI
 
 ```bash
 node scripts/adminPdJCredentials.js set-site-base-uri \
   --network celo --site stable-sl.pdJ.app --uri "https://stable-sl.pdJ.app/api/credential/"
 ```
 
-## 7. Credenciales registradas
+## 7. Registered Credentials
 
-_Completar tras el despliegue._
+| tokenId | Network | Site | Type | Name | Soulbound | Premium | maxSupply |
+|---------|---------|------|------|------|-----------|---------|-----------|
+| _pending_ | | | | | | | |
 
-| tokenId | Red | Sitio | Tipo | Nombre | Soulbound | Premium | maxSupply |
-|---------|-----|-------|------|--------|-----------|---------|-----------|
-| _pendiente_ | | | | | | | |
+## 8. Minting Flow
 
-## 8. Flujo de minteo
-
-### SBT de curso (Celo)
+### Course SBT (Celo)
 
 ```
-Usuario completa 100% de un curso en learn.tg
-  → Backend verifica credential_emission (off-chain) + hasCredential (on-chain)
-  → Si no existe: llama mintCourseCompletion(account, courseId, courseName, premium)
-  → Inserta fila en credential_emission con chain_id = 'celo'
+User completes 100% of a course on learn.tg
+  → Backend checks credential_emission (off-chain) + hasCredential (on-chain)
+  → If none exists: calls mintCourseCompletion(account, courseId, courseName, premium)
+  → Inserts row into credential_emission with chain_id = 'celo'
 ```
 
 ### NFT (Base)
 
 ```
-Usuario paga con SLEARN o USDT
-  → Backend verifica pago off-chain (SLEARN quemado o USDT en treasury)
-  → Llama mintCredential(account, tokenId, 1) en contrato de Base
-  → Inserta fila en credential_emission con chain_id = 'base'
+User pays with SLEARN or USDT
+  → Backend verifies payment off-chain (SLEARN burned or USDT in treasury)
+  → Calls mintCredential(account, tokenId, 1) on Base contract
+  → Inserts row into credential_emission with chain_id = 'base'
 ```
 
-### SBT de rol (Celo)
+### Role SBT (Celo)
 
 ```
-Admin de sivel.xyz asigna rol (Documenter, Validator)
-  → Backend llama mintCredential(account, tokenId, 1) en Celo
-  → Inserta fila en credential_emission con chain_id = 'celo'
+sivel.xyz admin assigns role (Documenter, Validator)
+  → Backend calls mintCredential(account, tokenId, 1) on Celo
+  → Inserts row into credential_emission with chain_id = 'celo'
 ```
 
-## 9. Revocación
+## 9. Revocation
 
-La revocación se rige por los **[Términos de Servicio](../../TERMS_OF_SERVICE.md)**. Causas:
-- Contenido ilegal o anti-cristiano en NFTs
-- Violación de términos de uso
-- Suplantación de identidad
-- Solicitud de verificador regional (SBTs de rol)
+Revocation is governed by the **[Terms of Service](../../TERMS_OF_SERVICE.md)**. Causes:
+- Illegal or anti-Christian content in NFTs
+- Terms of use violation
+- Impersonation or fraud
+- Request by regional validator (role SBTs)
 
 ```bash
-# Revocar MINTER_ROLE (emergencia)
-node scripts/adminPdJCredentials.js revoke-minter --network celo --address <WALLET_COMPROMETIDA>
+# Revoke MINTER_ROLE (emergency)
+node scripts/adminPdJCredentials.js revoke-minter --network celo --address <COMPROMISED_WALLET>
 
-# Revocar credencial a usuario (desde backend con MINTER_ROLE)
-# El contrato expone: revokeCredential(address account, uint256 tokenId, uint256 amount)
+# Revoke credential from user (backend with MINTER_ROLE)
+# Contract exposes: revokeCredential(address account, uint256 tokenId, uint256 amount)
 ```
 
-## 10. Emergencia — billetera minter comprometida
+## 10. Emergency — Compromised Minter Wallet
 
-1. Revocar `MINTER_ROLE` inmediatamente:
+1. Revoke `MINTER_ROLE` immediately:
    ```bash
-   node scripts/adminPdJCredentials.js revoke-minter --network celo --address 0xCOMPROMETIDA
-   node scripts/adminPdJCredentials.js revoke-minter --network base --address 0xCOMPROMETIDA
+   node scripts/adminPdJCredentials.js revoke-minter --network celo --address 0xCOMPROMISED
+   node scripts/adminPdJCredentials.js revoke-minter --network base --address 0xCOMPROMISED
    ```
-2. Rotar clave privada en `.env`
-3. Otorgar `MINTER_ROLE` a la nueva billetera
-4. Verificar `list-types` que no haya credenciales no autorizadas
-5. Si se mintearon tokens indebidos, el backend llama `revokeCredential` para quemarlos
+2. Rotate private key in `.env`
+3. Grant `MINTER_ROLE` to the new wallet
+4. Run `list-types` to verify no unauthorized credentials
+5. If unauthorized tokens were minted, the backend calls `revokeCredential` to burn them
 
-## 11. Integración con otros sistemas
+## 11. Integration
 
 ### stable-sl
 
-Consulta SBTs premium vía API de learn.tg (no on-chain):
+Queries premium SBTs via learn.tg API (not on-chain):
 ```
 GET https://learn.tg/api/users/{wallet}/premium-sbt-count
 ```
 
-Tiers: 0 SBTs → 100 SLE/día, 1 SBT → 200 SLE/día, 2+ SBTs → 400 SLE/día.
+Tiers: 0 SBTs → 100 SLE/day, 1 SBT → 200 SLE/day, 2+ SBTs → 400 SLE/day.
 
 ### sivel.xyz
 
-Usa `apps/nextjs/lib/credentials.ts` para interactuar con el contrato en ambas redes.
+Uses `apps/nextjs/lib/credentials.ts` to interact with the contract on both networks.
 
 ### Metadata
 
-Cada sitio sirve `GET /api/credential/{tokenId}.json` con atributos (Collection, Type, Premium).
+Each site serves `GET /api/credential/{tokenId}.json` with attributes (Collection, Type, Premium).
