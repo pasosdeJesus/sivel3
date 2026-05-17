@@ -46,19 +46,31 @@ bin/deployPdJCredentials base
 
 El script guarda la dirección en `deployments/<red>.json`
 
-## 5. Verificación
+## 5. Verificaciones
+
+### 5.1 De código fuente
 
 ```bash
-bin/PdJCredentialsVerification celoSepolia
-bin/PdJCredentialsVerification baseSepolia
+# Testnet
+bin/PdJCredentialsSourceVerification celoSepolia
+bin/PdJCredentialsSourceVerification baseSepolia
 
-node_modules/.bin/hardhat verify --network celo <DIRECCION> "https://sivel.xyz/api/credential/"
-node_modules/.bin/hardhat verify --network base <DIRECCION> "https://sivel.xyz/api/credential/"
-
-# Verificar estado on-chain
-node_modules/.bin/hardhat run scripts/verifyPdJCredentials.ts --network celo
-node_modules/.bin/hardhat run scripts/verifyPdJCredentials.ts --network base
+# Mainnet
+bin/PdJCredentialsSourceVerification celo
+bin/PdJCredentialsSourceVerification base
 ```
+
+### 5.2 De funcionalidad mínima
+
+```bash
+# Testnet
+bin/verifyPdJCredentials celoSepolia
+bin/verifyPdJCredentials baseSepolia
+
+# Mainnet
+bin/verifyPdJCredentials celo
+bin/verifyPdJCredentials base
+`
 
 ## 6. Post-despliegue (`adminPdJCredentials.js`)
 
