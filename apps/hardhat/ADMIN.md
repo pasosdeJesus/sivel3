@@ -70,7 +70,7 @@ bin/verifyPdJCredentials baseSepolia
 # Mainnet
 bin/verifyPdJCredentials celo
 bin/verifyPdJCredentials base
-`
+```
 
 ## 6. Post-despliegue (`adminPdJCredentials.js`)
 
@@ -78,13 +78,13 @@ bin/verifyPdJCredentials base
 
 ```bash
 # learn.tg en Celo (SBTs de cursos)
-node scripts/adminPdJCredentials.js grant-minter --network celo --address <LEARNTG_MINTER_ADDRESS>
+node scripts/adminPdJCredentials.js grant-minter --network celo --address $LEARNTG_ADDRESS
 
 # sivel.xyz en Celo (SBTs de roles)
-node scripts/adminPdJCredentials.js grant-minter --network celo --address <SIVEL3_ADDRESS>
+node scripts/adminPdJCredentials.js grant-minter --network celo --address <NEXT_PUBLIC_ADDRESS>
 
 # sivel.xyz en Base (NFTs)
-node scripts/adminPdJCredentials.js grant-minter --network base --address <SIVEL3_ADDRESS>
+node scripts/adminPdJCredentials.js grant-minter --network base --address <NEXT_PUBLIC_ADDRESS>
 ```
 
 ### Registrar credenciales
