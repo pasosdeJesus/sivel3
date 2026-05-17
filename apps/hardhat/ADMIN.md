@@ -36,26 +36,28 @@
 cd apps/hardhat
 
 # Testnet
-npx hardhat run scripts/deployPdJCredentials.ts --network celoSepolia
-npx hardhat run scripts/deployPdJCredentials.ts --network baseSepolia
+bin/deployPdJCredentials celoSepolia
+bin/deployPdJCredentials baseSepolia
 
 # Mainnet
-npx hardhat run scripts/deployPdJCredentials.ts --network celo
-npx hardhat run scripts/deployPdJCredentials.ts --network base
+bin/deployPdJCredentials celo
+bin/deployPdJCredentials base
 ```
 
-El script guarda la dirección en `deployments/<red>.json` y sugiere actualizar `apps/.env`.
+El script guarda la dirección en `deployments/<red>.json`
 
 ## 5. Verificación
 
 ```bash
-# Verificar en explorer
-npx hardhat verify --network celo <DIRECCION> "https://sivel.xyz/api/credential/"
-npx hardhat verify --network base <DIRECCION> "https://sivel.xyz/api/credential/"
+bin/PdJCredentialsVerification celoSepolia
+bin/PdJCredentialsVerification baseSepolia
+
+node_modules/.bin/hardhat verify --network celo <DIRECCION> "https://sivel.xyz/api/credential/"
+node_modules/.bin/hardhat verify --network base <DIRECCION> "https://sivel.xyz/api/credential/"
 
 # Verificar estado on-chain
-npx hardhat run scripts/verifyPdJCredentials.ts --network celo
-npx hardhat run scripts/verifyPdJCredentials.ts --network base
+node_modules/.bin/hardhat run scripts/verifyPdJCredentials.ts --network celo
+node_modules/.bin/hardhat run scripts/verifyPdJCredentials.ts --network base
 ```
 
 ## 6. Post-despliegue (`adminPdJCredentials.js`)

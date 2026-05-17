@@ -5,7 +5,7 @@ const path = require("path");
 
 require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 
-const ABI_PATH = path.join(__dirname, "../abis/PasosdeJesusCredentials.json");
+const ABI_PATH = path.join(__dirname, "../../nextjs/abis/PasosDeJesusCredentials.json");
 
 function usage() {
   console.log("Usage: node adminPdJCredentials.js <command> [args]");
