@@ -6,9 +6,9 @@ import path from "path";
 dotenv.config({ path: "../.env" });
 
 async function main() {
-  const adminKey = process.env.ADMIN_PRIVATE_KEY;
+  const adminKey = process.env.CREDENTIALS_PRIVATE_KEY;
   if (!adminKey) {
-    throw new Error("ADMIN_PRIVATE_KEY not set in apps/.env");
+    throw new Error("CREDENTIALS_PRIVATE_KEY not set in apps/.env");
   }
 
   const provider = ethers.provider;

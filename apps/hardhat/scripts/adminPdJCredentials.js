@@ -18,7 +18,7 @@ function usage() {
   console.log("  set-site-base-uri --network <celo|base> --site <name> --uri <url>");
   console.log("  list-types --network <celo|base>");
   console.log("");
-  console.log("Environment: ADMIN_PRIVATE_KEY must be set in apps/.env");
+  console.log("Environment: CREDENTIALS_PRIVATE_KEY must be set in apps/.env");
 }
 
 function getProvider(network) {
@@ -43,7 +43,7 @@ function getContractAddress(network) {
 async function getContract(network) {
   const abi = JSON.parse(fs.readFileSync(ABI_PATH, "utf-8"));
   const provider = getProvider(network);
-  const adminKey = process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY;
+  const adminKey = process.env.CREDENTIALS_PRIVATE_KEY || process.env.PRIVATE_KEY;
   const signer = new ethers.Wallet(adminKey, provider);
   const address = getContractAddress(network);
   return new ethers.Contract(address, abi, signer);

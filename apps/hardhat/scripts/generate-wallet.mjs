@@ -20,8 +20,8 @@ function generateWallet() {
     const envPath = path.join(__dirname, '../../.env');
     console.log(`\n💡 Agrega estas líneas a ${envPath}:\n`);
     console.log(`# Admin wallet (generada el ${new Date().toISOString()})`);
-    console.log(`ADMIN_PRIVATE_KEY="${wallet.privateKey}"`);
-    console.log(`ADMIN_ADDRESS="${wallet.address}"`);
+    console.log(`CREDENTIALS_PRIVATE_KEY="${wallet.privateKey}"`);
+    console.log(`CREDENTIALS_ADDRESS="${wallet.address}"`);
     console.log(`\n⚠️ GUARDA LA FRASE MNEMOTÉCNICA EN UN LUGAR SEGURO (no en el .env).\n`);
 }
 

@@ -40,7 +40,7 @@ cp ../.env.example ../.env
 Edit `apps/.env` with:
 
 - `PRIVATE_KEY`: The private key of the wallet used for deployment.
-- `ADMIN_PRIVATE_KEY`: Private key for `DEFAULT_ADMIN_ROLE` on `PasosDeJesusCredentials`.
+- `CREDENTIALS_PRIVATE_KEY`: Private key for `DEFAULT_ADMIN_ROLE` on `PasosDeJesusCredentials`.
 - `BLOCKSCOUT_API_KEY`: API key from [Celo Blockscout](https://explorer.celo.org/) for verification.
 - `BASESCAN_API_KEY`: API key from [BaseScan](https://basescan.org/) for Base verification.
 

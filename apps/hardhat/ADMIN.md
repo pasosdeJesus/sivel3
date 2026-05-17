@@ -4,9 +4,9 @@
 
 | Variable | Propósito |
 |----------|-----------|
-| `ADMIN_PRIVATE_KEY` | Deployer + `DEFAULT_ADMIN_ROLE`. Permite registrar tipos, fijar supply, cambiar URIs, grant/revoke roles |
+| `CREDENTIALS_PRIVATE_KEY` | Deployer + `DEFAULT_ADMIN_ROLE`. Permite registrar tipos, fijar supply, cambiar URIs, grant/revoke roles |
 | `PRIVATE_KEY` | sivel.xyz backend (`MINTER_ROLE`). Mintea NFTs en Base y SBTs de rol en Celo |
-| `LEARNTG_MINTER_ADDRESS` | learn.tg backend (dirección pública). Recibe `MINTER_ROLE` para mintear SBTs de cursos en Celo |
+| `LEARNTG_ADDRESS` | learn.tg backend (dirección pública). Recibe `MINTER_ROLE` para mintear SBTs de cursos en Celo |
 | `NEXT_PUBLIC_BASE_NETWORK` | Red Base: `base` (mainnet) o `baseSepolia` (testnet) |
 | `NEXT_PUBLIC_BASE_RPC_URL` | RPC de Base |
 | `BLOCKSCOUT_API_KEY` | Verificación en Celo |
@@ -25,7 +25,7 @@
 
 | Rol | Red | Wallet | Propósito |
 |-----|-----|--------|-----------|
-| `DEFAULT_ADMIN_ROLE` | Celo, Base | `ADMIN_PRIVATE_KEY` | Administrar tipos, supply, URIs |
+| `DEFAULT_ADMIN_ROLE` | Celo, Base | `CREDENTIALS_PRIVATE_KEY` | Administrar tipos, supply, URIs |
 | `MINTER_ROLE` | Celo | learn.tg backend | Mintea SBTs al completar cursos |
 | `MINTER_ROLE` | Celo | sivel.xyz backend | Mintea roles (Documenter, Validator, Founder User) |
 | `MINTER_ROLE` | Base | sivel.xyz backend | Mintea NFTs comprados |
