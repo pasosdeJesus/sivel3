@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { ethers } from 'ethers';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -17,21 +16,13 @@ function generateWallet() {
     console.log('\n📝 Frase mnemotécnica:');
     console.log(wallet.mnemonic.phrase);
     
-    // Guardar en .env (opcional)
-    const envPath = path.join(__dirname, '../apps/nextjs/.env');
-    const envContent = `\n# SBT Admin Wallet (generada el ${new Date().toISOString()})\nSBT_ADMIN_PRIVATE_KEY="${wallet.privateKey}"\nSBT_ADMIN_ADDRESS="${wallet.address}"\n`;
-    
-    if (fs.existsSync(envPath)) {
-        fs.appendFileSync(envPath, envContent);
-        console.log(`\n💾 Claves añadidas a: ${envPath}`);
-    } else {
-        console.log(`\n⚠️ No se encontró .env en ${envPath}`);
-        console.log('Agrega manualmente estas líneas:\n');
-        console.log(`SBT_ADMIN_PRIVATE_KEY="${wallet.privateKey}"`);
-        console.log(`SBT_ADMIN_ADDRESS="${wallet.address}"`);
-    }
-    
-    console.log('\n⚠️ GUARDA LA FRASE MNEMOTÉCNICA EN UN LUGAR SEGURO (no está en el .env).\n');
+    // Mostrar cómo agregar al .env unificado
+    const envPath = path.join(__dirname, '../../.env');
+    console.log(`\n💡 Agrega estas líneas a ${envPath}:\n`);
+    console.log(`# Admin wallet (generada el ${new Date().toISOString()})`);
+    console.log(`ADMIN_PRIVATE_KEY="${wallet.privateKey}"`);
+    console.log(`ADMIN_ADDRESS="${wallet.address}"`);
+    console.log(`\n⚠️ GUARDA LA FRASE MNEMOTÉCNICA EN UN LUGAR SEGURO (no en el .env).\n`);
 }
 
 generateWallet();

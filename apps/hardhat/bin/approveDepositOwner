@@ -1,4 +1,4 @@
 #!/bin/sh
 
-. ./.env
+. ../.env
 npx hardhat run scripts/approveDepositOwner.ts --network $NETWORK

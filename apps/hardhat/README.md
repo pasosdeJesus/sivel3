@@ -26,16 +26,19 @@ Currently, this directory contains a mock USDT contract (`MockUSDT.sol`) used fo
 
 ## 1. Environment Configuration
 
-First, create your environment file by copying the template:
+This project uses a **single unified `.env`**  file located at `apps/.env`.
+Copy the template if needed:
 
 ```sh
-cp .env.example .env
+cp ../.env.example ../.env
 ```
 
-Next, edit the `.env` file with the following information:
+Edit `apps/.env` with:
 
-- `PRIVATE_KEY`: The private key of the wallet you will use for deployment.
-- `BLOCKSCOUT_API_KEY`: Your API key from Blockscout for contract verification. You can generate one in your account settings on the [Celo Blockscout explorer](https://explorer.celo.org/).
+- `PRIVATE_KEY`: The private key of the wallet used for deployment.
+- `ADMIN_PRIVATE_KEY`: Private key for `DEFAULT_ADMIN_ROLE` on `PasosDeJesusCredentials`.
+- `BLOCKSCOUT_API_KEY`: API key from [Celo Blockscout](https://explorer.celo.org/) for verification.
+- `BASESCAN_API_KEY`: API key from [BaseScan](https://basescan.org/) for Base verification.
 
 **⚠️ Security Warning:** Never use a wallet containing real funds for development. Always generate and use a separate, dedicated wallet for testing.
 
@@ -73,7 +76,7 @@ Use the `yarn` scripts to deploy your contracts. For example, to deploy the mock
 yarn deploy-mock-usdt
 ```
 
-The script will output the contract address. **Copy this address** and update the `USDT_ADDRESS` variable in your `.env` file.
+The script will output the contract address. **Copy this address** and update `NEXT_PUBLIC_MOCK_USDT_ADDRESS` in `apps/.env`.
 
 ### Step 3.4: Verify a Contract on Blockscout
 

@@ -86,6 +86,13 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         uint256 timestamp
     );
 
+    event CredentialRevoked(
+        uint256 indexed tokenId,
+        address indexed account,
+        uint256 amount,
+        uint256 timestamp
+    );
+
     event BaseURIUpdated(bytes32 indexed siteHash, string newBaseURI);
 
     // ==================== CONSTRUCTOR ====================
@@ -246,6 +253,39 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         _mint(account, tokenId, 1, "");
         hasCredential[account][tokenId] = true;
         emit CredentialMinted(tokenId, account, tokenNames[tokenId], premium, block.timestamp);
+    }
+
+    // ==================== REVOCATION ====================
+    /**
+     * @dev Revoke (burn) a credential from a user. Only MINTER_ROLE.
+     * Works for both SBTs (isSoulbound = true) and NFTs (isSoulbound = false).
+     *
+     * Use cases: removing a role due to misconduct, removing an NFT that
+     * violates project rules (pornography, violence, anti‑Christian content).
+     *
+     * @param account Address to revoke from.
+     * @param tokenId Token ID to revoke.
+     * @param amount Amount to revoke (1 for SBTs, any for NFTs).
+     */
+    function revokeCredential(
+        address account,
+        uint256 tokenId,
+        uint256 amount
+    ) external onlyRole(MINTER_ROLE) {
+        require(
+            balanceOf(account, tokenId) >= amount,
+            "Insufficient balance to revoke"
+        );
+
+        _burn(account, tokenId, amount);
+
+        totalSupply[tokenId] -= amount;
+
+        if (balanceOf(account, tokenId) == 0) {
+            hasCredential[account][tokenId] = false;
+        }
+
+        emit CredentialRevoked(tokenId, account, amount, block.timestamp);
     }
 
     // ==================== INTERNAL VALIDATION ====================
