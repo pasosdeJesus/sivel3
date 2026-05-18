@@ -62,6 +62,19 @@ async function main() {
 
   fs.writeFileSync(deploymentFile, JSON.stringify(deployment, null, 2));
   console.log(`Deployment saved to ${deploymentFile}`);
+
+  // Configure siteBaseURIs per environment
+  const isTestnet = chainId === 11142220 || chainId === 84532;
+  const port = isTestnet ? ':9001' : '';
+  const sites = ['sivel.xyz', 'learn.tg', 'stable-sl.pdJ.app'];
+  for (const site of sites) {
+    const uri = `https://${site}${port}/api/credential/`;
+    const tx = await contract.setSiteBaseURI(site, uri);
+    await tx.wait();
+    console.log(`  siteBaseURI ${site}: ${uri}`);
+  }
+
+  console.log(`Deployment saved to ${deploymentFile}`);
   console.log("Next.js reads this file via: ../hardhat/deployments/${networkName}.json");
 }
 

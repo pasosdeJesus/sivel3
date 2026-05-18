@@ -32,7 +32,15 @@
 
 ## 4. Deploy and Verify
 
+Testnet URIs use port `:9001` for local development (set automatically by `deployPdJCredentials.ts`).
+
 See `apps/hardhat/README.md` sections 3.3–3.5 and `bin/{deployPdJCredentials,PdJCredentialsSourceVerification,verifyPdJCredentials}`.
+
+Run the Next.js server for metadata endpoints:
+
+```bash
+cd apps/nextjs && bin/dev     # development server on port 9001
+cd apps/nextjs && make prod   # production build + start
 
 ## 5. Post-Deployment (`scripts/adminCredentials.ts`)
 
