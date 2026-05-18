@@ -30,83 +30,47 @@
 | `MINTER_ROLE` | Celo | sivel.xyz backend | Mint role SBTs (Documenter, Validator, Founder User) |
 | `MINTER_ROLE` | Base | sivel.xyz backend | Mint purchased NFTs |
 
-## 4. Deployment
+## 4. Deploy and Verify
 
-```bash
-cd apps/hardhat
+See `apps/hardhat/README.md` sections 3.3–3.5 and `bin/{deployPdJCredentials,PdJCredentialsSourceVerification,verifyPdJCredentials}`.
 
-# Testnet
-bin/deployPdJCredentials celoSepolia
-bin/deployPdJCredentials baseSepolia
+## 5. Post-Deployment (`scripts/adminCredentials.ts`)
 
-# Mainnet
-bin/deployPdJCredentials celo
-bin/deployPdJCredentials base
-```
-
-The script saves the address to `deployments/<network>.json`.
-
-## 5. Verification
-
-### 5.1 Source Code
-
-```bash
-# Testnet
-bin/PdJCredentialsSourceVerification celoSepolia
-bin/PdJCredentialsSourceVerification baseSepolia
-
-# Mainnet
-bin/PdJCredentialsSourceVerification celo
-bin/PdJCredentialsSourceVerification base
-```
-
-### 5.2 Functionality Check
-
-```bash
-# Testnet
-bin/verifyPdJCredentials celoSepolia
-bin/verifyPdJCredentials baseSepolia
-
-# Mainnet
-bin/verifyPdJCredentials celo
-bin/verifyPdJCredentials base
-```
-
-## 6. Post-Deployment (`adminPdJCredentials.js`)
+Run from `apps/nextjs/`:
 
 ### Grant MINTER_ROLE
 
 ```bash
 # learn.tg on Celo (course SBTs)
-node scripts/adminPdJCredentials.js grant-minter --network celo --address $LEARNTG_ADDRESS
+npx tsx scripts/adminCredentials.ts grant-minter --network celo --address $LEARNTG_ADDRESS
 
 # sivel.xyz on Celo (role SBTs)
-node scripts/adminPdJCredentials.js grant-minter --network celo --address $NEXT_PUBLIC_ADDRESS
+npx tsx scripts/adminCredentials.ts grant-minter --network celo --address $NEXT_PUBLIC_ADDRESS
 
 # sivel.xyz on Base (NFTs)
-node scripts/adminPdJCredentials.js grant-minter --network base --address $NEXT_PUBLIC_ADDRESS
+npx tsx scripts/adminCredentials.ts grant-minter --network base --address $NEXT_PUBLIC_ADDRESS
 ```
 
 ### Register Credential Types
 
 ```bash
 # Free course
-node scripts/adminPdJCredentials.js register-type \
+npx tsx scripts/adminCredentials.ts register-type \
   --network celo --site learn.tg --type course_completion \
   --display "Basic Course" --soulbound true --course-id 1
 
 # Premium course
-node scripts/adminPdJCredentials.js register-type \
+npx tsx scripts/adminCredentials.ts register-type \
   --network celo --site learn.tg --type course_completion \
   --display "Premium Course" --soulbound true --course-id 2 --premium true
 
 # Founder User (sivel.xyz, role, maxSupply=50)
-node scripts/adminPdJCredentials.js register-type \
+npx tsx scripts/adminCredentials.ts register-type \
   --network celo --site sivel.xyz --type role \
   --display "Founder User" --soulbound true
 
 # Collectible NFT
-node scripts/adminPdJCredentials.js register-type \
+npx tsx scripts/adminCredentials.ts register-type \
   --network base --site sivel.xyz --type nft \
   --display "Bible Verse" --soulbound false
 ```
@@ -114,30 +78,30 @@ node scripts/adminPdJCredentials.js register-type \
 ### Set maxSupply
 
 ```bash
-node scripts/adminPdJCredentials.js set-max-supply --network celo --token-id 1 --max 50
+npx tsx scripts/adminCredentials.ts set-max-supply --network celo --token-id 1 --max 50
 ```
 
 ### List Registered Types
 
 ```bash
-node scripts/adminPdJCredentials.js list-types --network celo
-node scripts/adminPdJCredentials.js list-types --network base
+npx tsx scripts/adminCredentials.ts list-types --network celo
+npx tsx scripts/adminCredentials.ts list-types --network base
 ```
 
 ### Update Site baseURI
 
 ```bash
-node scripts/adminPdJCredentials.js set-site-base-uri \
+npx tsx scripts/adminCredentials.ts set-site-base-uri \
   --network celo --site stable-sl.pdJ.app --uri "https://stable-sl.pdJ.app/api/credential/"
 ```
 
-## 7. Registered Credentials
+## 6. Registered Credentials
 
 | tokenId | Network | Site | Type | Name | Soulbound | Premium | maxSupply |
 |---------|---------|------|------|------|-----------|---------|-----------|
 | _pending_ | | | | | | | |
 
-## 8. Minting Flow
+## 7. Minting Flow
 
 ### Course SBT (Celo)
 
@@ -165,7 +129,7 @@ sivel.xyz admin assigns role (Documenter, Validator)
   → Inserts row into credential_emission with chain_id = 'celo'
 ```
 
-## 9. Revocation
+## 8. Revocation
 
 Revocation is governed by the **[Terms of Service](../../TERMS_OF_SERVICE.md)**. Causes:
 - Illegal or anti-Christian content in NFTs
@@ -175,25 +139,25 @@ Revocation is governed by the **[Terms of Service](../../TERMS_OF_SERVICE.md)**.
 
 ```bash
 # Revoke MINTER_ROLE (emergency)
-node scripts/adminPdJCredentials.js revoke-minter --network celo --address <COMPROMISED_WALLET>
+npx tsx scripts/adminCredentials.ts revoke-minter --network celo --address <COMPROMISED_WALLET>
 
 # Revoke credential from user (backend with MINTER_ROLE)
 # Contract exposes: revokeCredential(address account, uint256 tokenId, uint256 amount)
 ```
 
-## 10. Emergency — Compromised Minter Wallet
+## 9. Emergency — Compromised Minter Wallet
 
 1. Revoke `MINTER_ROLE` immediately:
    ```bash
-   node scripts/adminPdJCredentials.js revoke-minter --network celo --address 0xCOMPROMISED
-   node scripts/adminPdJCredentials.js revoke-minter --network base --address 0xCOMPROMISED
+   npx tsx scripts/adminCredentials.ts revoke-minter --network celo --address 0xCOMPROMISED
+   npx tsx scripts/adminCredentials.ts revoke-minter --network base --address 0xCOMPROMISED
    ```
 2. Rotate private key in `.env`
 3. Grant `MINTER_ROLE` to the new wallet
 4. Run `list-types` to verify no unauthorized credentials
 5. If unauthorized tokens were minted, the backend calls `revokeCredential` to burn them
 
-## 11. Integration
+## 10. Integration
 
 ### stable-sl
 
@@ -206,7 +170,8 @@ Tiers: 0 SBTs → 100 SLE/day, 1 SBT → 200 SLE/day, 2+ SBTs → 400 SLE/day.
 
 ### sivel.xyz
 
-Uses `apps/nextjs/lib/credentials.ts` to interact with the contract on both networks.
+Uses `lib/credentials.ts` to interact with the contract on both networks.
+Admin operations via `scripts/adminCredentials.ts`.
 
 ### Metadata
 

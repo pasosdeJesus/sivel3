@@ -82,7 +82,23 @@ yarn deploy-mock-usdt
 
 The script will output the contract address. **Copy this address** and update `NEXT_PUBLIC_MOCK_USDT_ADDRESS` in `apps/.env`.
 
-### Step 3.4: Verify a Contract on Blockscout
+### Step 3.4: Deploy and Verify PasosDeJesusCredentials
+
+```sh
+# Deploy
+bin/deployPdJCredentials celoSepolia
+bin/deployPdJCredentials baseSepolia
+
+# Verify source on explorers
+bin/PdJCredentialsSourceVerification celoSepolia
+bin/PdJCredentialsSourceVerification baseSepolia
+
+# Functional verification
+bin/verifyPdJCredentials celoSepolia
+bin/verifyPdJCredentials baseSepolia
+```
+
+### Step 3.5: Verify a Contract on Blockscout
 
 To build trust and transparency, always verify your deployed contracts. For example, to verify the mock USDT token, run:
 
