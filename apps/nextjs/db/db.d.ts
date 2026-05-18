@@ -59,6 +59,14 @@ export interface Cben2 {
   victima_id: number | null;
 }
 
+export interface CredentialEmission {
+  chain_id: Generated<string>;
+  emitted_at: Generated<Timestamp>;
+  id: Generated<Int8>;
+  token_id: number;
+  wallet_address: string;
+}
+
 export interface Cvt1 {
   caso_id: number | null;
   categoria: string | null;
@@ -1345,6 +1353,16 @@ export interface Transaction {
   wallet: string;
 }
 
+export interface Userevent {
+  amount: Numeric | null;
+  currency: string | null;
+  id: Generated<number>;
+  metadata: Json | null;
+  path: string | null;
+  timestamp: Generated<Timestamp>;
+  type: string;
+}
+
 export interface Usuario {
   created_at: Timestamp | null;
   current_sign_in_at: Timestamp | null;
@@ -1394,6 +1412,7 @@ export interface DB {
   ar_internal_metadata: ArInternalMetadata;
   cben1: Cben1;
   cben2: Cben2;
+  credential_emission: CredentialEmission;
   cvt1: Cvt1;
   heb412_gen_campohc: Heb412GenCampohc;
   heb412_gen_campoplantillahcm: Heb412GenCampoplantillahcm;
@@ -1520,6 +1539,7 @@ export interface DB {
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
   transaction: Transaction;
+  userevent: Userevent;
   usuario: Usuario;
   web_event: WebEvent;
 }

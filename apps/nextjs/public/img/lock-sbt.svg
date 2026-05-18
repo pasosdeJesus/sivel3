@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 80">
+  <!-- Arco del candado -->
+ <path d="M 14 28 V 18 A 12 12 0 0 1 38 18 V 28" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Cuerpo del candado -->
+  <rect x="8" y="26" width="36" height="28" rx="6" fill="#10b981" opacity="0.9" />
+  
+  <!-- Ojo de la llave -->
+  <circle cx="26" cy="40" r="5" fill="#ffffff" />
+ 
+ <!-- Borde del cuerpo -->
+  <rect x="8" y="26" width="36" height="28" rx="6" fill="none" stroke="#10b981" stroke-width="2" /> 
+
+  <!-- Texto SBT debajo (fuente del sistema) -->
+  <text x="26" y="72" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="12" fill="#10b981" text-anchor="middle" letter-spacing="1">SBT</text>
+</svg>

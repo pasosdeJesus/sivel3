@@ -53,7 +53,15 @@ npx tsx scripts/adminCredentials.ts grant-minter --network base --address $NEXT_
 
 ### Register Credential Types
 
+Provide an SVG icon (`--icon`) for the credential image. The script validates the SVG (512×512, no scripts/remote resources), then composes the final badge with programmatic layers (colored border, site logo, lock/star overlays) and generates both SVG source and PNG.
+
 ```bash
+# SBT with icon (achievement, infinite supply)
+npx tsx scripts/adminCredentials.ts register-type \
+  --network celo --site sivel.xyz --type achievement \
+  --display "Connector" --soulbound true \
+  --icon public/img/credential/source/connector.svg
+
 # Free course
 npx tsx scripts/adminCredentials.ts register-type \
   --network celo --site learn.tg --type course_completion \
@@ -73,6 +81,26 @@ npx tsx scripts/adminCredentials.ts register-type \
 npx tsx scripts/adminCredentials.ts register-type \
   --network base --site sivel.xyz --type nft \
   --display "Bible Verse" --soulbound false
+```
+
+### Re-compose Credential Image
+
+Regenerates SVG and PNG for an existing credential type (e.g., to update the icon or logo).
+
+```bash
+npx tsx scripts/adminCredentials.ts recompose-image \
+  --token-id 2 \
+  --icon public/img/credential/source/connector.svg
+```
+
+Reads metadata from `credential_metadata` cache (no RPC calls).
+
+### Sync Cache from Blockchain
+
+Backfills `credential_metadata` from on-chain data for all registered tokens.
+
+```bash
+npx tsx scripts/adminCredentials.ts sync-cache --network celo
 ```
 
 ### Set maxSupply
@@ -99,7 +127,8 @@ npx tsx scripts/adminCredentials.ts set-site-base-uri \
 
 | tokenId | Network | Site | Type | Name | Soulbound | Premium | maxSupply |
 |---------|---------|------|------|------|-----------|---------|-----------|
-| _pending_ | | | | | | | |
+| 1 | Celo Sepolia | sivel.xyz | role | Founder User | ✅ | — | 50 |
+| 2 | Celo Sepolia | sivel.xyz | achievement | Connector | ✅ | — | 0 (∞) |
 
 ## 7. Minting Flow
 
@@ -173,6 +202,31 @@ Tiers: 0 SBTs → 100 SLE/day, 1 SBT → 200 SLE/day, 2+ SBTs → 400 SLE/day.
 Uses `lib/credentials.ts` to interact with the contract on both networks.
 Admin operations via `scripts/adminCredentials.ts`.
 
+### Image Composition
+
+**Site logos** are auto-detected from `public/img/logo-{short}.svg`:
+
+| Site | Short name | Logo file |
+|------|-----------|-----------|
+| sivel.xyz | `sivel` | `public/img/logo-sivel.svg` |
+| learn.tg | `learntg` | `public/img/logo-learntg.svg` |
+| stable-sl.pdJ.app | `stablesl` | `public/img/logo-stablesl.svg` |
+
+Logo specs: SVG, scaled to fit 64×64 px area in the bottom-right corner of the 512×512 badge.
+
+The badge is composed programmatically from the user's icon (512×512 SVG) plus:
+
+| Layer | Trigger | Position |
+|-------|---------|----------|
+| Colored border | By `type`: achievement=#10B981, role=#F59E0B, course=#3B82F6, nft=#8B5CF6 | Full frame |
+| Site logo | Auto-detected from `public/img/logo-{short}.svg` (e.g. `logo-sivel.svg`) | Bottom-right 64×64 |
+| Lock overlay | `isSoulbound = true` | Top-left 48×48 |
+| Star overlay | `isPremium = true` | Top-right 48×48 |
+
+**Icon requirements:** SVG, viewBox `0 0 512 512`, no scripts, no remote resources.
+Output: `public/img/credential/source/{tokenId}.svg` + `public/img/credential/{tokenId}.png` (via `rsvg-convert`).
+
 ### Metadata
 
-Each site serves `GET /api/credential/{tokenId}.json` with attributes (Collection, Type, Premium).
+Each site serves `GET /api/credential/{tokenId}.json` reading from `credential_metadata` cache.
+Sivel.xyz returns: `name`, `description`, `image` (PNG URL), `attributes` (Collection, Type, Premium).

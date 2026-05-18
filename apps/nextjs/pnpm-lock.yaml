@@ -19,7 +19,7 @@ importers:
         version: 0.8.6
       '@pasosdejesus/m':
         specifier: gitlab:pasosdejesus/m
-        version: https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=9c785edbe665b310cacdc23ad36683a31c3da41d
+        version: https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=e20eabaccefb4b2ca3ac9010766a165a258a870a
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -972,9 +972,9 @@ packages:
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=9c785edbe665b310cacdc23ad36683a31c3da41d':
-    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=9c785edbe665b310cacdc23ad36683a31c3da41d}
-    version: 0.4.6
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=e20eabaccefb4b2ca3ac9010766a165a258a870a':
+    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=e20eabaccefb4b2ca3ac9010766a165a258a870a}
+    version: 0.4.8
     hasBin: true
 
   '@paulmillr/qr@0.2.1':
@@ -1624,8 +1624,8 @@ packages:
   '@reown/appkit@1.7.8':
     resolution: {integrity: sha512-51kTleozhA618T1UvMghkhKfaPcc9JlKwLJ5uV+riHyvSoWPKPRIa5A6M1Wano5puNyW0s3fwywhyqTHSilkaA==}
 
-  '@rollup/wasm-node@4.60.3':
-    resolution: {integrity: sha512-SVhQ4TJk0BvnJKwceVsCWHtmquucfjU0eu+Bonrjb6W3zombkA/tqw1efaqT2BONX/TJniqkzumF6Sz/sXMJ2w==}
+  '@rollup/wasm-node@4.60.4':
+    resolution: {integrity: sha512-j6qaRjdDujJ5utX5l6+8eiWlvMLmBfPMBht8mHP2au3xuzf+4deu6PuCquH5GvDIvIOsWHZhA1UVz/s0FvvgAA==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -4063,8 +4063,8 @@ packages:
   preact@10.24.2:
     resolution: {integrity: sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==}
 
-  preact@10.29.1:
-    resolution: {integrity: sha512-gQCLc/vWroE8lIpleXtdJhTFDogTdZG9AjMUpVkDf2iTCNwYNWA+u16dL41TqUDJO4gm2IgrcMv3uTpjd4Pwmg==}
+  preact@10.29.2:
+    resolution: {integrity: sha512-7tNmwg/7mzzAoB/8kSg6Hl37JraAZw3Z3A0JSY7VXlZwo82Xn0G7wKbNNs2qoF4ZEEsQGTwDAroNdqKs1ofJxQ==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -5119,7 +5119,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.4
       keccak: 3.0.4
-      preact: 10.29.1
+      preact: 10.29.2
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -5738,7 +5738,7 @@ snapshots:
 
   '@panva/hkdf@1.2.1': {}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=9c785edbe665b310cacdc23ad36683a31c3da41d':
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdejesus%2Fm/repository/archive.tar.gz?sha=e20eabaccefb4b2ca3ac9010766a165a258a870a':
     dependencies:
       dotenv: 17.4.2
       execa: 9.6.1
@@ -6658,7 +6658,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@rollup/wasm-node@4.60.3':
+  '@rollup/wasm-node@4.60.4':
     dependencies:
       '@types/estree': 1.0.8
     optionalDependencies:
@@ -9303,8 +9303,8 @@ snapshots:
       next: 15.5.18(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       oauth: 0.9.15
       openid-client: 5.7.1
-      preact: 10.29.1
-      preact-render-to-string: 5.2.6(preact@10.29.1)
+      preact: 10.29.2
+      preact-render-to-string: 5.2.6(preact@10.29.2)
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       uuid: 8.3.2
@@ -9713,14 +9713,14 @@ snapshots:
 
   postgres@3.4.8: {}
 
-  preact-render-to-string@5.2.6(preact@10.29.1):
+  preact-render-to-string@5.2.6(preact@10.29.2):
     dependencies:
-      preact: 10.29.1
+      preact: 10.29.2
       pretty-format: 3.8.0
 
   preact@10.24.2: {}
 
-  preact@10.29.1: {}
+  preact@10.29.2: {}
 
   prelude-ls@1.2.1: {}
 
@@ -10378,7 +10378,7 @@ snapshots:
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.14
-      rollup: '@rollup/wasm-node@4.60.3'
+      rollup: '@rollup/wasm-node@4.60.4'
     optionalDependencies:
       '@types/node': 24.12.3
       fsevents: 2.3.3
