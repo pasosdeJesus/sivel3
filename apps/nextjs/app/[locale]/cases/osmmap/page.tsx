@@ -173,6 +173,7 @@ export default function OSMMapPage() {
     donationAmount,
     regionBalance,
     isConnected,
+    wallet: effectiveAddress,
     isTransacting,
     isProcessing,
     onFilterChange: handleFilterChange,

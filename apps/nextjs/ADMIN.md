@@ -179,7 +179,11 @@ Revocation is governed by the **[Terms of Service](../../TERMS_OF_SERVICE.md)**.
 npx tsx scripts/adminCredentials.ts revoke-minter --network celo --address <COMPROMISED_WALLET>
 
 # Revoke credential from user (backend with MINTER_ROLE)
-# Contract exposes: revokeCredential(address account, uint256 tokenId, uint256 amount)
+npx tsx scripts/adminCredentials.ts revoke-credential \
+  --network celo --token-id 2 --address 0xWALLET --amount 1
+```
+
+Removes (burns) a credential from a user. Only `MINTER_ROLE`. Use for rule violations per `TERMS_OF_SERVICE.md`.
 ```
 
 ## 9. Emergency — Compromised Minter Wallet

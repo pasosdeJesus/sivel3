@@ -108,3 +108,6 @@ sivel2/config/credentials.yml.enc
 sivel2/config/master.key
 sivel2/app/assets/builds/
 sivel2/public/sivelxyz-admin/
+apps/nextjs/public/img/credential/*.png
+apps/nextjs/public/img/credential/generated/
+apps/nextjs/public/img/credential/generated

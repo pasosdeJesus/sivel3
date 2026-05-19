@@ -17,6 +17,7 @@ interface OSMMapDesktopProps {
   donationAmount: string;
   regionBalance: string | null;
   isConnected: boolean;
+  wallet?: string | null;
   isTransacting: boolean;
   isProcessing: boolean;
   onFilterChange: (key: string, value: string) => void;
@@ -41,6 +42,7 @@ export function OSMMapDesktop({
   donationAmount,
   regionBalance,
   isConnected,
+  wallet,
   isTransacting,
   isProcessing,
   onFilterChange,
@@ -96,6 +98,7 @@ export function OSMMapDesktop({
               filtros={filtersObj}
               onCargarConteos={handleCountsLoad}
               isConnected={isConnected}
+              wallet={wallet}
             />
           </CardContent>
         </Card>

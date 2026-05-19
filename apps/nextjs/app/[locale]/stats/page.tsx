@@ -38,6 +38,13 @@ const statsTranslations = {
     amount: 'Amount',
     donations: 'Donations',
     loading: 'Loading...',
+    sbtsTitle: 'Soulbound Tokens (SBTs)',
+    totalSbts: 'Total SBTs Minted',
+    sbtBreakdown: 'SBT Breakdown',
+    topDonors: 'Top Donors',
+    donor: 'Donor',
+    sbtsEarned: 'SBTs',
+    noSbts: 'No SBTs minted yet. They will appear here when users earn them.',
   },
   es: {
     title: 'Estadísticas del Sitio',
@@ -69,6 +76,13 @@ const statsTranslations = {
     amount: 'Monto',
     donations: 'Donaciones',
     loading: 'Cargando...',
+    sbtsTitle: 'Soulbound Tokens (SBTs)',
+    totalSbts: 'Total SBTs Minteados',
+    sbtBreakdown: 'Desglose de SBTs',
+    topDonors: 'Mayores Donantes',
+    donor: 'Donante',
+    sbtsEarned: 'SBTs',
+    noSbts: 'Aún no hay SBTs minteados. Aparecerán aquí cuando los usuarios los obtengan.',
   },
 }
 
@@ -101,6 +115,8 @@ export default function StatsPage() {
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [timeline, setTimeline] = useState<TimelineDay[]>([])
   const [regions, setRegions] = useState<{ id: number; name: string }[]>([])
+  const [sbtBreakdown, setSbtBreakdown] = useState<{ tokenId: number; name: string; imageUrl: string; count: number }[]>([])
+  const [leaderboard, setLeaderboard] = useState<{ wallet: string; totalDonatedUsdt: string; sbtCount: number }[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -108,10 +124,14 @@ export default function StatsPage() {
       fetch('/api/web-analytics/summary').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       fetch('/api/web-analytics/timeline').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       fetch(`/api/regions?locale=${locale}`).then(r => r.ok ? r.json() : []),
-    ]).then(([s, tl, reg]: any) => {
+      fetch('/api/credential/breakdown')).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/credential/leaderboard?limit=10')).then(r => r.ok ? r.json() : []).catch(() => []),
+    ]).then(([s, tl, reg, breakdown, lb]: any) => {
       setSummary(s)
       setTimeline(tl.days || [])
       setRegions(reg || [])
+      setSbtBreakdown(breakdown || [])
+      setLeaderboard(lb || [])
     }).catch(e => {
       setError(String(e))
     })
@@ -204,6 +224,69 @@ export default function StatsPage() {
           <MetricCard title={t('uniqueDonors')} value={summary.onChain.uniqueDonors} />
           <MetricCard title={t('totalLearningPoints')} value={parseFloat(summary.onChain.totalLearningPoints).toFixed(2)} />
         </div>
+
+        {/* SBTs Section */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">{t('sbtsTitle')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <MetricCard
+            title={t('totalSbts')}
+            value={sbtBreakdown.reduce((sum, s) => sum + Number(s.count), 0)}
+          />
+          <MetricCard title={t('sbtBreakdown')} value={sbtBreakdown.length + ' types'} />
+        </div>
+
+        {/* SBT Breakdown */}
+        {sbtBreakdown.length > 0 && (
+          <div className="bg-white p-4 rounded shadow-sm mb-8">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">{t('sbtBreakdown')}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {sbtBreakdown.map((sbt) => (
+                <div key={sbt.tokenId} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <img src={'/' + sbt.imageUrl} alt={sbt.name} className="w-12 h-12 rounded-lg" />
+                  <div>
+                    <div className="font-medium text-sm text-gray-800">{sbt.name}</div>
+                    <div className="text-xs text-gray-500">{Number(sbt.count)} minted</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Leaderboard */}
+        {leaderboard.length > 0 && (
+          <div className="bg-white p-4 rounded shadow-sm mb-8">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">{t('topDonors')}</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-500 uppercase bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2">#</th>
+                    <th className="px-4 py-2">{t('donor')}</th>
+                    <th className="px-4 py-2">{t('sbtsEarned')}</th>
+                    <th className="px-4 py-2">{t('amount')} (USDT)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((row, i) => (
+                    <tr key={row.wallet} className="border-t">
+                      <td className="px-4 py-2 text-gray-500">{i + 1}</td>
+                      <td className="px-4 py-2 font-mono text-xs">
+                        <a href={`/${locale}/wallet/${row.wallet}`} className="text-blue-600 hover:underline">
+                          {row.wallet.slice(0, 6)}...{row.wallet.slice(-4)}
+                        </a>
+                      </td>
+                      <td className="px-4 py-2">{Number(row.sbtCount)}</td>
+                      <td className="px-4 py-2">{parseFloat(row.totalDonatedUsdt).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {sbtBreakdown.length === 0 && <p className="text-gray-400 italic mb-8">{t('noSbts')}</p>}
 
         {/* Donations by Region — Bar Chart */}
         {summary.onChain.donationsByRegion.length > 0 && (

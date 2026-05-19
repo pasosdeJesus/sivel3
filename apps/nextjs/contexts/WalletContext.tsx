@@ -113,6 +113,21 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (prevConnected.current !== effectiveIsConnected) {
       if (effectiveIsConnected && effectiveAddress) {
         recordWalletEvent('connect_wallet', effectiveAddress)
+        // Mint Connector SBT
+        fetch('/api/credential/mint-connector', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: effectiveAddress }),
+          keepalive: true,
+        }).then(async r => {
+          if (!r.ok) return
+          const data = await r.json()
+          if (data.minted) {
+            console.log('Connector SBT minted')
+          } else if (data.reason === 'not_verified') {
+            console.info('Self-verification on learn.tg required for SBTs')
+          }
+        }).catch(() => {})
       } else if (!effectiveIsConnected) {
         recordWalletEvent('disconnect_wallet')
       }

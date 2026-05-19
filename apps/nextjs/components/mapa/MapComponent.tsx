@@ -34,6 +34,7 @@ interface MapComponentProps {
   filtros?: any
   onCargarConteos?: (conteos: any) => void
   isConnected?: boolean
+  wallet?: string | null
 }
 
 interface CasoDetalle {
@@ -56,6 +57,7 @@ export default function MapComponent({
   filtros = {},
   onCargarConteos,
   isConnected = false,
+  wallet = null,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -89,9 +91,18 @@ export default function MapComponent({
         fetch('/api/web-analytics/event', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}` }),
+          body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}`, wallet }),
           keepalive: true,
-        }).catch(() => {});
+        }).catch(() => {})
+        // Check Explorer SBT eligibility (views 3+ distinct cases)
+        if (wallet) {
+          fetch('/api/credential/mint-explorer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wallet }),
+            keepalive: true,
+          }).catch(() => {})
+        };
       } catch (e) {
         console.error("Error al parsear JSON:", e);
         console.error("Respuesta recibida del servidor:", text);

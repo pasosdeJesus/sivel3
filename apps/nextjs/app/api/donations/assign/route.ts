@@ -4,6 +4,8 @@ import { celo, celoSepolia } from 'viem/chains'
 import { incrementLearningPoints } from '@/lib/learningPoints'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
+import { getCeloCredentialsAddress } from '@/lib/deployments'
+import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -283,6 +285,62 @@ export async function POST(request: NextRequest) {
         message: 'Error interno del servidor',
         userMessage: 'Could not update Learning Points due to internal error.'
       }
+    }
+
+    // ============================================================
+    // Mint donation SBTs if threshold reached
+    // ============================================================
+    try {
+      const sbtDb = newKyselyPostgresql()
+      const totalRow = await sbtDb
+        .selectFrom('transaction')
+        .select(sbtDb.fn.sum('cantidad').as('total'))
+        .where('wallet', '=', donor)
+        .where('tipo', '=', 'donation')
+        .where('crypto', '=', 'usdt')
+        .executeTakeFirst()
+      const total = parseFloat((totalRow?.total as string) || '0')
+
+      const thresholds: { tokenId: number; usdt: number }[] = [
+        { tokenId: 7, usdt: 0.02 },
+        { tokenId: 8, usdt: 5 },
+        { tokenId: 9, usdt: 20 },
+        { tokenId: 10, usdt: 50 },
+        { tokenId: 11, usdt: 100 },
+      ]
+
+      const existingRows = await sbtDb
+        .selectFrom('credential_emission')
+        .select('token_id')
+        .where('wallet_address', '=', donor)
+        .where('chain_id', '=', 'celo')
+        .execute()
+      const existingIds = new Set(existingRows.map(r => r.token_id))
+
+      const contractAddr = getCeloCredentialsAddress()
+      if (contractAddr) {
+        for (const t of thresholds) {
+          if (total >= t.usdt && !existingIds.has(t.tokenId)) {
+            try {
+              const hash = await walletClient.writeContract({
+                address: contractAddr,
+                abi: pasosDeJesusCredentialsAbi,
+                functionName: 'mintCredential',
+                args: [donor as `0x${string}`, BigInt(t.tokenId), BigInt(1)],
+                chain: walletClient.chain,
+                account: walletClient.account,
+              } as any)
+              await sbtDb.insertInto('credential_emission')
+                .values({ wallet_address: donor, token_id: t.tokenId, chain_id: 'celo' })
+                .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
+                .execute()
+              serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
+            } catch { /* best effort per threshold */ }
+          }
+        }
+      }
+    } catch (sbtError) {
+      serverLog.warn(`Donation SBT check failed: ${sbtError}`)
     }
 
     // ============================================================

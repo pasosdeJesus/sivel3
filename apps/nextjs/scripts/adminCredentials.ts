@@ -181,9 +181,9 @@ export async function composeCredentialImage(params: ComposeParams) {
   const siteLogo = getSiteLogo(site)
   if (!siteLogo) throw new Error(`Unknown site: ${site}`)
 
-  const sourceDir = path.join('public', 'img', 'credential', 'source')
+  const generatedDir = path.join('public', 'img', 'credential', 'generated')
   const pngDir = path.join('public', 'img', 'credential')
-  fs.mkdirSync(sourceDir, { recursive: true })
+  fs.mkdirSync(generatedDir, { recursive: true })
   fs.mkdirSync(pngDir, { recursive: true })
 
   // 2. Compose layers (bottom to top)
@@ -221,7 +221,7 @@ ${layers.join('\n')}
 `
 
   // 3. Write composed SVG
-  const svgPath = path.join(sourceDir, `${tokenId}.svg`)
+  const svgPath = path.join(generatedDir, `${tokenId}.svg`)
   fs.writeFileSync(svgPath, composedSvg, 'utf-8')
 
   // 4. Convert to PNG via rsvg-convert (librsvg, more faithful than ImageMagick)
@@ -409,6 +409,7 @@ function usage() {
   console.log('  recompose-image --token-id <id> --icon <path>')
   console.log('  sync-cache      --network <net>')
   console.log('  mint            --network <net> --token-id <id> --address <wallet> [--amount <n>]')
+  console.log('  revoke-credential --network <net> --token-id <id> --address <wallet> [--amount <n>]')
   console.log('')
   console.log('Networks: celo, celoSepolia, base, baseSepolia')
 }
@@ -509,8 +510,9 @@ async function main() {
               is_premium: premium,
               is_soulbound: sb,
               image_url: `img/credential/${tokenId}.png`,
+              chain_id: net.includes('base') ? 'base' : 'celo',
             })
-            .onConflict((oc) => oc.column('token_id').doUpdateSet({
+            .onConflict((oc) => oc.columns(['token_id', 'chain_id']).doUpdateSet({
               name: display, type, site,
               is_premium: premium, is_soulbound: sb,
               updated_at: new Date(),
@@ -586,6 +588,27 @@ async function main() {
         console.log(`  PNG: ${pngPath}`)
         break
       }
+      case 'revoke-credential': {
+        const net = getArg('--network')
+        const tokenId = parseInt(getArg('--token-id') || '')
+        const addr = getArg('--address')
+        const amount = parseInt(getArg('--amount') || '1')
+        if (!net || isNaN(tokenId) || !addr) throw new Error('--network, --token-id, --address required')
+        const key = process.env.PRIVATE_KEY
+        if (!key) throw new Error('PRIVATE_KEY not set')
+        const account = privateKeyToAccount(key as `0x${string}`)
+        const wc = createWalletClient({ chain: getChain(net), transport: http(), account })
+        const hash = await wc.writeContract({
+          address: getContractAddress(net),
+          abi: credentialsAbi,
+          functionName: 'revokeCredential',
+          args: [addr as `0x${string}`, BigInt(tokenId), BigInt(amount)],
+          chain: wc.chain,
+          account: wc.account,
+        } as any)
+        console.log(`Revoked token ${tokenId} x${amount} from ${addr} on ${net}. TX: ${hash}`)
+        break
+      }
       case 'mint': {
         const net = getArg('--network')
         const tokenId = parseInt(getArg('--token-id') || '')
@@ -605,6 +628,15 @@ async function main() {
           chain: wc.chain,
           account: wc.account,
         } as any)
+        // Track emission
+        try {
+          const db = newDb()
+          await db
+            .insertInto('credential_emission')
+            .values({ wallet_address: addr, token_id: tokenId, chain_id: net.includes('base') ? 'base' : 'celo' })
+            .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
+            .execute()
+        } catch (e: any) { console.warn(`Emission tracking failed: ${e.message}`) }
         console.log(`Minted token ${tokenId} x${amount} to ${addr} on ${net}. TX: ${hash}`)
         break
       }
@@ -644,8 +676,9 @@ async function main() {
                 token_id: i, name: name as string, type, site,
                 is_premium: premium as boolean, is_soulbound: sb as boolean,
                 image_url: `img/credential/${i}.png`,
+                chain_id: net.includes('base') ? 'base' : 'celo',
               })
-              .onConflict((oc) => oc.column('token_id').doUpdateSet({
+              .onConflict((oc) => oc.columns(['token_id', 'chain_id']).doUpdateSet({
                 name: name as string, type, site,
                 is_soulbound: sb as boolean, is_premium: premium as boolean,
                 updated_at: new Date(),

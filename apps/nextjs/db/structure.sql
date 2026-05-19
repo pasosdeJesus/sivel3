@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict qow7N832Mqtk1qGRspRBgke8vhyWTTRrpiWhocW3zwYNesacVTooDY0lwE4dcpH
+\restrict SPzJnQGYY7B6XP1TUVmeR5rHyLuKuj1EeWLd3YA5L8YzaMIOZ7UsMDJwXsqsoYi
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.6
@@ -1398,6 +1398,37 @@ CREATE TABLE public.ar_internal_metadata (
 
 
 --
+-- Name: case_views; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.case_views (
+    id bigint NOT NULL,
+    wallet_address character varying(42) NOT NULL,
+    case_id integer NOT NULL,
+    viewed_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: case_views_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.case_views_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: case_views_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.case_views_id_seq OWNED BY public.case_views.id;
+
+
+--
 -- Name: msip_persona_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1750,6 +1781,23 @@ CREATE SEQUENCE public.credential_emission_id_seq
 --
 
 ALTER SEQUENCE public.credential_emission_id_seq OWNED BY public.credential_emission.id;
+
+
+--
+-- Name: credential_metadata; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.credential_metadata (
+    token_id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    type character varying(50) NOT NULL,
+    site character varying(50) NOT NULL,
+    is_premium boolean DEFAULT false,
+    image_url text NOT NULL,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    is_soulbound boolean DEFAULT true,
+    chain_id character varying(20) DEFAULT 'celo'::character varying NOT NULL
+);
 
 
 --
@@ -5196,6 +5244,13 @@ ALTER SEQUENCE public.web_event_id_seq OWNED BY public.web_event.id;
 
 
 --
+-- Name: case_views id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views ALTER COLUMN id SET DEFAULT nextval('public.case_views_id_seq'::regclass);
+
+
+--
 -- Name: credential_emission id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5598,6 +5653,22 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
+-- Name: case_views case_views_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views
+    ADD CONSTRAINT case_views_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: case_views case_views_wallet_address_case_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views
+    ADD CONSTRAINT case_views_wallet_address_case_id_key UNIQUE (wallet_address, case_id);
+
+
+--
 -- Name: sivel2_gen_caso_etiqueta caso_etiqueta_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5635,6 +5706,14 @@ ALTER TABLE ONLY public.credential_emission
 
 ALTER TABLE ONLY public.credential_emission
     ADD CONSTRAINT credential_emission_wallet_address_token_id_chain_id_key UNIQUE (wallet_address, token_id, chain_id);
+
+
+--
+-- Name: credential_metadata credential_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.credential_metadata
+    ADD CONSTRAINT credential_metadata_pkey PRIMARY KEY (token_id, chain_id);
 
 
 --
@@ -6784,6 +6863,13 @@ CREATE INDEX caso_fecha_idx ON public.sivel2_gen_caso USING btree (fecha);
 --
 
 CREATE INDEX caso_fecha_idx1 ON public.sivel2_gen_caso USING btree (fecha);
+
+
+--
+-- Name: idx_case_views_wallet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_case_views_wallet ON public.case_views USING btree (wallet_address);
 
 
 --
@@ -8975,5 +9061,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict qow7N832Mqtk1qGRspRBgke8vhyWTTRrpiWhocW3zwYNesacVTooDY0lwE4dcpH
+\unrestrict SPzJnQGYY7B6XP1TUVmeR5rHyLuKuj1EeWLd3YA5L8YzaMIOZ7UsMDJwXsqsoYi
 

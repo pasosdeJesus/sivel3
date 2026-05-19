@@ -16,6 +16,7 @@ interface OSMMapMobileProps {
   donationAmount: string;
   regionBalance: string | null;
   isConnected: boolean;
+  wallet?: string | null;
   isTransacting: boolean;
   isProcessing: boolean;
   onFilterChange: (key: string, value: string) => void;
@@ -40,6 +41,7 @@ export function OSMMapMobile({
   donationAmount,
   regionBalance,
   isConnected,
+  wallet,
   isTransacting,
   isProcessing,
   onFilterChange,
@@ -116,6 +118,7 @@ export function OSMMapMobile({
           filtros={filtersObj}
           onCargarConteos={handleCountsLoad}
           isConnected={isConnected}
+          wallet={wallet}
         />
       </div>
     </>
