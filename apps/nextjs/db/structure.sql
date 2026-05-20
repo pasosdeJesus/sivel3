@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict e6n9zp1XQW9cVml84sgq2eh81tJN5WJeve3dTcmF1JFTxOubZUX3XxptmqPka0d
+\restrict 8bfpe6pga2Dp8zkIrmg2pf6cKtPL7paM3iyvSIg1p56BdJq8cSGttzDYNSNxn1a
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.9
@@ -3749,8 +3749,8 @@ CREATE TABLE public.region (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     name_es character varying(255) NOT NULL,
-    created_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL
+    created_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL
 );
 
 
@@ -5139,41 +5139,6 @@ ALTER SEQUENCE public.transaction_id_seq OWNED BY public.transaction.id;
 
 
 --
--- Name: userevent; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.userevent (
-    id integer NOT NULL,
-    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
-    type text NOT NULL,
-    path text,
-    amount numeric,
-    currency text,
-    metadata jsonb
-);
-
-
---
--- Name: userevent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.userevent_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: userevent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.userevent_id_seq OWNED BY public.userevent.id;
-
-
---
 -- Name: web_event; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5574,13 +5539,6 @@ ALTER TABLE ONLY public.sivel2_gen_resagresion ALTER COLUMN id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY public.transaction ALTER COLUMN id SET DEFAULT nextval('public.transaction_id_seq'::regclass);
-
-
---
--- Name: userevent id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.userevent ALTER COLUMN id SET DEFAULT nextval('public.userevent_id_seq'::regclass);
 
 
 --
@@ -6748,14 +6706,6 @@ ALTER TABLE ONLY public.sivel2_gen_tviolencia
 
 ALTER TABLE ONLY public.transaction
     ADD CONSTRAINT transaction_log_pkey PRIMARY KEY (id);
-
-
---
--- Name: userevent userevent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.userevent
-    ADD CONSTRAINT userevent_pkey PRIMARY KEY (id);
 
 
 --
@@ -9000,5 +8950,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict e6n9zp1XQW9cVml84sgq2eh81tJN5WJeve3dTcmF1JFTxOubZUX3XxptmqPka0d
+\unrestrict 8bfpe6pga2Dp8zkIrmg2pf6cKtPL7paM3iyvSIg1p56BdJq8cSGttzDYNSNxn1a
 
