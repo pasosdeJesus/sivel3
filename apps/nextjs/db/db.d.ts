@@ -34,13 +34,6 @@ export interface ArInternalMetadata {
   value: string | null;
 }
 
-export interface CaseViews {
-  case_id: number;
-  id: Generated<Int8>;
-  viewed_at: Generated<Timestamp>;
-  wallet_address: string;
-}
-
 export interface Cben1 {
   caso_id: number | null;
   npersona: number | null;
@@ -75,7 +68,6 @@ export interface CredentialEmission {
 }
 
 export interface CredentialMetadata {
-  chain_id: Generated<string>;
   image_url: string;
   is_premium: Generated<boolean | null>;
   is_soulbound: Generated<boolean | null>;
@@ -1429,7 +1421,6 @@ export interface WebEvent {
 
 export interface DB {
   ar_internal_metadata: ArInternalMetadata;
-  case_views: CaseViews;
   cben1: Cben1;
   cben2: Cben2;
   credential_emission: CredentialEmission;
