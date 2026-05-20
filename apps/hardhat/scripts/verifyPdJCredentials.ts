@@ -6,7 +6,7 @@ dotenv.config({ path: "../.env" });
 async function main() {
   // Get the deployed contract from the deployments directory
   const network = process.env.HARDHAT_NETWORK || "celoSepolia";
-  const deploymentPath = `../deployments/${network}.json`;
+  const deploymentPath = `../deployments/PasosDeJesusCredentials/${network}.json`;
 
   let deployment;
   try {
