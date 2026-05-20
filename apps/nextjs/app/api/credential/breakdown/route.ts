@@ -6,14 +6,18 @@ export async function GET() {
 
   const rows = await db
     .selectFrom('credential_emission as e')
-    .innerJoin('credential_metadata as m', 'e.token_id', 'm.token_id')
+    .innerJoin('credential_metadata as m', (join) =>
+      join.onRef('e.token_id', '=', 'm.token_id')
+        .onRef('e.chain_id', '=', 'm.chain_id')
+    )
     .select([
       'e.token_id as tokenId',
+      'e.chain_id as chainId',
       'm.name',
       'm.image_url as imageUrl',
       db.fn.countAll().as('count'),
     ])
-    .groupBy(['e.token_id', 'm.name', 'm.image_url'])
+    .groupBy(['e.token_id', 'e.chain_id', 'm.name', 'm.image_url'])
     .orderBy('tokenId', 'asc')
     .execute()
 

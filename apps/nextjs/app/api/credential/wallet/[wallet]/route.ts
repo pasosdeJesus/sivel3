@@ -15,7 +15,10 @@ export async function GET(
   // SBTs earned
   const sbts = await db
     .selectFrom('credential_emission as e')
-    .innerJoin('credential_metadata as m', 'e.token_id', 'm.token_id')
+    .innerJoin('credential_metadata as m', (join) =>
+      join.onRef('e.token_id', '=', 'm.token_id')
+        .onRef('e.chain_id', '=', 'm.chain_id')
+    )
     .select(['e.token_id as tokenId', 'm.name', 'm.image_url as imageUrl', 'e.emitted_at as earnedAt'])
     .where('e.wallet_address', '=', wallet)
     .orderBy('e.emitted_at', 'asc')

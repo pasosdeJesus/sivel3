@@ -24,6 +24,7 @@ export async function GET(
     .selectFrom('credential_metadata')
     .selectAll()
     .where('token_id', '=', tokenId)
+    .where('chain_id', '=', 'celo')
     .executeTakeFirst()
 
   if (!row) {

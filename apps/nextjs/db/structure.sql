@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict gnAYtdUd1q0yeBaLXKKslQW1HIh6xdWRncaftqfQdqXebdflojLjKw87vrFxddP
+\restrict fjPeRfx7fQyISaZWmwvGtte1uW9Js83xme84aoBeK2nGOuiGvIAzfRMsnGjNknY
 
 -- Dumped from database version 17.9
--- Dumped by pg_dump version 17.9
+-- Dumped by pg_dump version 17.6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1398,6 +1398,37 @@ CREATE TABLE public.ar_internal_metadata (
 
 
 --
+-- Name: case_views; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.case_views (
+    id bigint NOT NULL,
+    wallet_address character varying(42) NOT NULL,
+    case_id integer NOT NULL,
+    viewed_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: case_views_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.case_views_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: case_views_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.case_views_id_seq OWNED BY public.case_views.id;
+
+
+--
 -- Name: msip_persona_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1764,7 +1795,8 @@ CREATE TABLE public.credential_metadata (
     is_premium boolean DEFAULT false,
     image_url text NOT NULL,
     updated_at timestamp without time zone DEFAULT now() NOT NULL,
-    is_soulbound boolean DEFAULT true
+    is_soulbound boolean DEFAULT true,
+    chain_id character varying(20) DEFAULT 'celo'::character varying NOT NULL
 );
 
 
@@ -5212,6 +5244,13 @@ ALTER SEQUENCE public.web_event_id_seq OWNED BY public.web_event.id;
 
 
 --
+-- Name: case_views id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views ALTER COLUMN id SET DEFAULT nextval('public.case_views_id_seq'::regclass);
+
+
+--
 -- Name: credential_emission id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5614,6 +5653,22 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
+-- Name: case_views case_views_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views
+    ADD CONSTRAINT case_views_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: case_views case_views_wallet_address_case_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.case_views
+    ADD CONSTRAINT case_views_wallet_address_case_id_key UNIQUE (wallet_address, case_id);
+
+
+--
 -- Name: sivel2_gen_caso_etiqueta caso_etiqueta_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5658,7 +5713,7 @@ ALTER TABLE ONLY public.credential_emission
 --
 
 ALTER TABLE ONLY public.credential_metadata
-    ADD CONSTRAINT credential_metadata_pkey PRIMARY KEY (token_id);
+    ADD CONSTRAINT credential_metadata_pkey PRIMARY KEY (token_id, chain_id);
 
 
 --
@@ -6811,6 +6866,13 @@ CREATE INDEX caso_fecha_idx1 ON public.sivel2_gen_caso USING btree (fecha);
 
 
 --
+-- Name: idx_case_views_wallet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_case_views_wallet ON public.case_views USING btree (wallet_address);
+
+
+--
 -- Name: idx_credential_emission_token; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -7476,11 +7538,19 @@ CREATE TRIGGER tras_crear_o_actualizar_ubicacionpre BEFORE INSERT OR UPDATE OF p
 
 
 --
--- Name: msip_centropoblado $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_supracategoria $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.msip_centropoblado
-    ADD CONSTRAINT "$1" FOREIGN KEY (tcentropoblado_id) REFERENCES public.msip_tcentropoblado(id);
+ALTER TABLE ONLY public.sivel2_gen_supracategoria
+    ADD CONSTRAINT "$1" FOREIGN KEY (tviolencia_id) REFERENCES public.sivel2_gen_tviolencia(id);
+
+
+--
+-- Name: sivel2_gen_victimacolectiva $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_victimacolectiva
+    ADD CONSTRAINT "$1" FOREIGN KEY (organizacionarmada) REFERENCES public.sivel2_gen_presponsable(id);
 
 
 --
@@ -7492,10 +7562,10 @@ ALTER TABLE ONLY public.sivel2_gen_caso
 
 
 --
--- Name: sivel2_gen_caso_fotra $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_presponsable $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_fotra
+ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
     ADD CONSTRAINT "$1" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
 
 
@@ -7508,30 +7578,6 @@ ALTER TABLE ONLY public.sivel2_gen_caso_frontera
 
 
 --
--- Name: sivel2_gen_caso_fuenteprensa $1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_caso_fuenteprensa
-    ADD CONSTRAINT "$1" FOREIGN KEY (fuenteprensa_id) REFERENCES public.msip_fuenteprensa(id);
-
-
---
--- Name: sivel2_gen_caso_presponsable $1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
-    ADD CONSTRAINT "$1" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
-
-
---
--- Name: sivel2_gen_supracategoria $1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_supracategoria
-    ADD CONSTRAINT "$1" FOREIGN KEY (tviolencia_id) REFERENCES public.sivel2_gen_tviolencia(id);
-
-
---
 -- Name: sivel2_gen_victima $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7540,11 +7586,35 @@ ALTER TABLE ONLY public.sivel2_gen_victima
 
 
 --
--- Name: sivel2_gen_victimacolectiva $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_fuenteprensa $1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_victimacolectiva
-    ADD CONSTRAINT "$1" FOREIGN KEY (organizacionarmada) REFERENCES public.sivel2_gen_presponsable(id);
+ALTER TABLE ONLY public.sivel2_gen_caso_fuenteprensa
+    ADD CONSTRAINT "$1" FOREIGN KEY (fuenteprensa_id) REFERENCES public.msip_fuenteprensa(id);
+
+
+--
+-- Name: sivel2_gen_caso_fotra $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_caso_fotra
+    ADD CONSTRAINT "$1" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
+
+
+--
+-- Name: msip_centropoblado $1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.msip_centropoblado
+    ADD CONSTRAINT "$1" FOREIGN KEY (tcentropoblado_id) REFERENCES public.msip_tcentropoblado(id);
+
+
+--
+-- Name: sivel2_gen_caso_presponsable $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
+    ADD CONSTRAINT "$2" FOREIGN KEY (presponsable_id) REFERENCES public.sivel2_gen_presponsable(id);
 
 
 --
@@ -7556,18 +7626,26 @@ ALTER TABLE ONLY public.sivel2_gen_caso_categoria_presponsable
 
 
 --
--- Name: sivel2_gen_caso_fotra $2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_caso_fotra
-    ADD CONSTRAINT "$2" FOREIGN KEY (fotra_id) REFERENCES public.sivel2_gen_fotra(id);
-
-
---
 -- Name: sivel2_gen_caso_frontera $2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sivel2_gen_caso_frontera
+    ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
+
+
+--
+-- Name: sivel2_gen_victima $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_victima
+    ADD CONSTRAINT "$2" FOREIGN KEY (rangoedad_id) REFERENCES public.sivel2_gen_rangoedad(id);
+
+
+--
+-- Name: sivel2_gen_caso_usuario $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sivel2_gen_caso_usuario
     ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
 
 
@@ -7580,27 +7658,11 @@ ALTER TABLE ONLY public.sivel2_gen_caso_fuenteprensa
 
 
 --
--- Name: sivel2_gen_caso_presponsable $2; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sivel2_gen_caso_fotra $2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sivel2_gen_caso_presponsable
-    ADD CONSTRAINT "$2" FOREIGN KEY (presponsable_id) REFERENCES public.sivel2_gen_presponsable(id);
-
-
---
--- Name: sivel2_gen_caso_usuario $2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_caso_usuario
-    ADD CONSTRAINT "$2" FOREIGN KEY (caso_id) REFERENCES public.sivel2_gen_caso(id);
-
-
---
--- Name: sivel2_gen_victima $2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sivel2_gen_victima
-    ADD CONSTRAINT "$2" FOREIGN KEY (rangoedad_id) REFERENCES public.sivel2_gen_rangoedad(id);
+ALTER TABLE ONLY public.sivel2_gen_caso_fotra
+    ADD CONSTRAINT "$2" FOREIGN KEY (fotra_id) REFERENCES public.sivel2_gen_fotra(id);
 
 
 --
@@ -8999,5 +9061,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gnAYtdUd1q0yeBaLXKKslQW1HIh6xdWRncaftqfQdqXebdflojLjKw87vrFxddP
+\unrestrict fjPeRfx7fQyISaZWmwvGtte1uW9Js83xme84aoBeK2nGOuiGvIAzfRMsnGjNknY
 
