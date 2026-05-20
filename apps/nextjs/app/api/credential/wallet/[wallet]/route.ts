@@ -10,12 +10,12 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 })
   }
 
-  const db = newKyselyPostgresql()
+  const db = newKyselyPostgresql() as any
 
   // SBTs earned
   const sbts = await db
     .selectFrom('credential_emission as e')
-    .innerJoin('credential_metadata as m', (join) =>
+    .innerJoin('credential_metadata as m', (join: any) =>
       join.onRef('e.token_id', '=', 'm.token_id')
         .onRef('e.chain_id', '=', 'm.chain_id')
     )
@@ -28,16 +28,16 @@ export async function GET(
   const donationRow = await db
     .selectFrom('transaction')
     .select([
-      db.fn.sum('amount').as('totalDonated'),
+      db.fn.sum('cantidad').as('totalDonated'),
       db.fn.countAll().as('donationCount'),
       db.fn.min('created_at').as('firstDonation'),
     ])
     .where('wallet', '=', wallet)
-    .where('status', '=', 'completed')
+    .where('tipo', '=', 'donation')
     .executeTakeFirst()
 
   // First activity (earliest SBT or donation)
-  const firstSbt = sbts.length > 0 ? sbts[0].earnedAt : null
+  const firstSbt = sbts.length > 0 ? (sbts[0].earnedAt as string) : null
   const firstDonation = donationRow?.firstDonation as string | null
   const firstActivity = firstSbt && firstDonation
     ? (firstSbt < firstDonation ? firstSbt : firstDonation)
