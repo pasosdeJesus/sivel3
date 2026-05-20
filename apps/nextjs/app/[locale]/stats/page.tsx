@@ -11,13 +11,12 @@ const statsTranslations = {
   en: {
     title: 'Site Statistics',
     description: 'Real-time usage analytics for sivel.xyz',
-    pageViews: 'Page Views',
-    uniqueWallets: 'Unique Wallets',
-    uniqueIps: 'Unique IPs',
-    donationConversion: 'Donation Conversion (24h)',
-    errors24h: 'API Errors (24h)',
-    topCases: 'Top Viewed Cases (7d)',
     pageViewsTimeline: 'Daily Page Views (30d)',
+    uniqueWalletsTimeline: 'Daily Unique Wallets (30d)',
+    uniqueIpsTimeline: 'Daily Unique IPs (30d)',
+    errorsTimeline: 'Daily API Errors (30d)',
+    donationsTimeline: 'Daily Donations (30d)',
+    topCases: 'Top Viewed Cases (7d)',
     views: 'Views',
     started: 'Started',
     completed: 'Completed',
@@ -49,13 +48,12 @@ const statsTranslations = {
   es: {
     title: 'Estadísticas del Sitio',
     description: 'Analíticas de uso en tiempo real para sivel.xyz',
-    pageViews: 'Vistas de Página',
-    uniqueWallets: 'Billeteras Únicas',
-    uniqueIps: 'IPs Únicas',
-    donationConversion: 'Conversión de Donaciones (24h)',
-    errors24h: 'Errores de API (24h)',
-    topCases: 'Casos Más Vistos (7d)',
     pageViewsTimeline: 'Vistas Diarias (30d)',
+    uniqueWalletsTimeline: 'Billeteras Únicas Diarias (30d)',
+    uniqueIpsTimeline: 'IPs Únicas Diarias (30d)',
+    errorsTimeline: 'Errores de API Diarios (30d)',
+    donationsTimeline: 'Donaciones Diarias (30d)',
+    topCases: 'Casos Más Vistos (7d)',
     views: 'Vistas',
     started: 'Iniciadas',
     completed: 'Completadas',
@@ -113,7 +111,11 @@ export default function StatsPage() {
   const t = createTranslator(locale, statsTranslations)
 
   const [summary, setSummary] = useState<SummaryData | null>(null)
-  const [timeline, setTimeline] = useState<TimelineDay[]>([])
+  const [pageviewsTimeline, setPageviewsTimeline] = useState<TimelineDay[]>([])
+  const [walletsTimeline, setWalletsTimeline] = useState<TimelineDay[]>([])
+  const [ipsTimeline, setIpsTimeline] = useState<TimelineDay[]>([])
+  const [errorsTimeline, setErrorsTimeline] = useState<TimelineDay[]>([])
+  const [donationsTimeline, setDonationsTimeline] = useState<TimelineDay[]>([])
   const [regions, setRegions] = useState<{ id: number; name: string }[]>([])
   const [sbtBreakdown, setSbtBreakdown] = useState<{ tokenId: number; name: string; imageUrl: string; count: number }[]>([])
   const [leaderboard, setLeaderboard] = useState<{ wallet: string; totalDonatedUsdt: string; sbtCount: number }[]>([])
@@ -122,13 +124,21 @@ export default function StatsPage() {
   useEffect(() => {
     Promise.all([
       fetch('/api/web-analytics/summary').then(r => r.ok ? r.json() : Promise.reject(r.status)),
-      fetch('/api/web-analytics/timeline').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline?metric=pageviews&days=30').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline?metric=uniqueWallets&days=30').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline?metric=uniqueIps&days=30').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline?metric=errors&days=30').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch('/api/web-analytics/timeline?metric=donations&days=30').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       fetch(`/api/regions?locale=${locale}`).then(r => r.ok ? r.json() : []),
-      fetch('/api/credential/breakdown')).then(r => r.ok ? r.json() : []).catch(() => []),
-      fetch('/api/credential/leaderboard?limit=10')).then(r => r.ok ? r.json() : []).catch(() => []),
-    ]).then(([s, tl, reg, breakdown, lb]: any) => {
+      fetch('/api/credential/breakdown').then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('/api/credential/leaderboard?limit=10').then(r => r.ok ? r.json() : []).catch(() => []),
+    ]).then(([s, pv, wl, ip, er, dn, reg, breakdown, lb]: any) => {
       setSummary(s)
-      setTimeline(tl.days || [])
+      setPageviewsTimeline(pv.data || [])
+      setWalletsTimeline(wl.data || [])
+      setIpsTimeline(ip.data || [])
+      setErrorsTimeline(er.data || [])
+      setDonationsTimeline(dn.data || [])
       setRegions(reg || [])
       setSbtBreakdown(breakdown || [])
       setLeaderboard(lb || [])
@@ -175,31 +185,19 @@ export default function StatsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
         <p className="text-gray-500 mb-8">{t('description')}</p>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <MetricCard title={t('pageViews')} value={summary.pageViews['24h']} subtitle={t('period24h')} />
-          <MetricCard title={t('donationConversion')} value={`${summary.donationConversion.completed}/${summary.donationConversion.started}`} subtitle={`${t('rate')}: ${summary.donationConversion.rate}%`} />
-          <MetricCard title={t('uniqueWallets')} value={summary.uniqueWallets['24h']} subtitle={t('period24h')} />
-          <MetricCard title={t('uniqueIps')} value={summary.uniqueIps['24h']} subtitle={t('period24h')} />
-          <MetricCard title={t('errors24h')} value={summary.errors24h} subtitle={t('period24h')} />
+        {/* Timeline Charts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <TimelineChart title={t('pageViewsTimeline')} data={pageviewsTimeline} color="#7c3aed" />
+          <TimelineChart title={t('uniqueWalletsTimeline')} data={walletsTimeline} color="#0891b2" />
+          <TimelineChart title={t('uniqueIpsTimeline')} data={ipsTimeline} color="#059669" />
+          <TimelineChart title={t('errorsTimeline')} data={errorsTimeline} color="#dc2626" />
         </div>
 
-        {/* Page Views Timeline Chart */}
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('pageViewsTimeline')}</h2>
-        <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: 250 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={timeline}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} tickFormatter={d => d.slice(5)} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#999' }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#7c3aed" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        {/* Donations Timeline — full width */}
+        <TimelineChart title={t('donationsTimeline')} data={donationsTimeline} color="#f59e0b" />
 
         {/* Top Cases */}
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('topCases')}</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">{t('topCases')}</h2>
         {topCases.length === 0 ? (
           <p className="text-gray-400 italic mb-8">{t('noData')}</p>
         ) : (
@@ -303,18 +301,38 @@ export default function StatsPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </>
 
-          {/* Navigation back to map */}
-          <div className="mt-8 text-center">
-            <a
-              href={`/${locale}/cases/osmmap`}
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded font-medium hover:bg-blue-700 transition-colors"
-            >
-              {t('backToMap')}
-            </a>
-          </div>
-        </>
-      )}
+        )}
+
+        {/* Navigation back to map */}
+        <div className="mt-8 text-center">
+          <a
+            href={`/${locale}/cases/osmmap`}
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded font-medium hover:bg-blue-700 transition-colors"
+          >
+            {t('backToMap')}
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TimelineChart({ title, data, color }: { title: string; data: TimelineDay[]; color: string }) {
+  return (
+    <div className="bg-white p-4 rounded shadow-sm">
+      <h3 className="text-sm font-medium text-gray-500 mb-3">{title}</h3>
+      <div style={{ height: 180 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#999' }} tickFormatter={d => d.slice(5)} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#999' }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   )
