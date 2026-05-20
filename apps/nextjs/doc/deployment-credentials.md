@@ -46,26 +46,26 @@ Expected tables: `credential_emission`, `credential_metadata`. Explorer tracking
 cd apps/nextjs
 
 # Grant MINTER_ROLE to backends
-npx tsx scripts/adminCredentials.ts grant-minter --network celoSepolia --address $LEARNTG_ADDRESS
-npx tsx scripts/adminCredentials.ts grant-minter --network celoSepolia --address $NEXT_PUBLIC_ADDRESS
+bin/m credentials:grant-minter --network celoSepolia --address $LEARNTG_ADDRESS
+bin/m credentials:grant-minter --network celoSepolia --address $NEXT_PUBLIC_ADDRESS
 
 # Register all SBT types with icons
 for icon in connector donor donor-bronze donor-silver donor-gold donor-diamond global-founder explorer; do
   display=$(echo "$icon" | sed 's/-/ /g' | sed 's/\b./\U&/g')
-  npx tsx scripts/adminCredentials.ts register-type \
+  bin/m credentials:register-type \
     --network celoSepolia --site sivel.xyz --type achievement \
     --display "$display" --soulbound true \
     --icon public/img/credential/source/$icon.svg
 done
 
 # Set maxSupply for Global Founder
-npx tsx scripts/adminCredentials.ts set-max-supply --network celoSepolia --token-id 12 --max 50
+bin/m credentials:set-max-supply --network celoSepolia --token-id 12 --max 50
 
 # Verify types
-npx tsx scripts/adminCredentials.ts list-types --network celoSepolia
+bin/m credentials:list-types --network celoSepolia
 
 # OPTIONAL: Backfill cache if tokens exist from before cache code was added
-# npx tsx scripts/adminCredentials.ts sync-cache --network celoSepolia
+# bin/m credentials:sync-cache --network celoSepolia
 ```
 
 ## 5. Start Development Server
@@ -83,11 +83,11 @@ bin/dev   # runs on port 9001
 cd apps/nextjs
 
 # Mint Connector to a wallet
-npx tsx scripts/adminCredentials.ts mint \
+bin/m credentials:mint \
   --network celoSepolia --token-id 2 --address 0xYOUR_WALLET
 
 # Mint Explorer (after ≥3 case views)
-npx tsx scripts/adminCredentials.ts mint \
+bin/m credentials:mint \
   --network celoSepolia --token-id 13 --address 0xYOUR_WALLET
 ```
 
@@ -138,7 +138,7 @@ curl -s https://sivel.xyz:9001/en/api/credential/2.json | json_pp
 
 ```bash
 # Recompose a single token's image
-npx tsx scripts/adminCredentials.ts recompose-image \
+bin/m credentials:recompose-image \
   --token-id 2 --icon public/img/credential/source/connector.svg
 
 # Verify files exist
@@ -156,7 +156,7 @@ npx vitest run tests/credentials.test.ts tests/sbt-api.test.ts tests/deployments
 
 ```bash
 # Burn a credential from a user (MINTER_ROLE required)
-npx tsx scripts/adminCredentials.ts revoke-credential \
+bin/m credentials:revoke-credential \
   --network celoSepolia --token-id 2 --address 0xWALLET --amount 1
 ```
 
@@ -164,6 +164,6 @@ npx tsx scripts/adminCredentials.ts revoke-credential \
 
 ```bash
 # Revoke MINTER_ROLE from a wallet
-npx tsx scripts/adminCredentials.ts revoke-minter --network celoSepolia --address 0xWALLET
+bin/m credentials:revoke-minter --network celoSepolia --address 0xWALLET
 
 ```

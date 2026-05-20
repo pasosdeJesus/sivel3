@@ -4,7 +4,10 @@ import { celo, celoSepolia } from 'viem/chains'
 import { incrementLearningPoints } from '@/lib/learningPoints'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
-import { getCeloCredentialsAddress } from '@/lib/deployments'
+import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
+import path from 'path'
+
+const credentialsDeploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 'PasosDeJesusCredentials')
 import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 
 // Logger simple para el servidor (no usar el logger del cliente)
@@ -317,7 +320,7 @@ export async function POST(request: NextRequest) {
         .execute()
       const existingIds = new Set(existingRows.map(r => r.token_id))
 
-      const contractAddr = getCeloCredentialsAddress()
+      const contractAddr = getCeloCredentialsAddress(credentialsDeploymentsDir)
       if (contractAddr) {
         for (const t of thresholds) {
           if (total >= t.usdt && !existingIds.has(t.tokenId)) {

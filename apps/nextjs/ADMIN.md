@@ -42,7 +42,7 @@ Run the Next.js server for metadata endpoints:
 cd apps/nextjs && bin/dev     # development server on port 9001
 cd apps/nextjs && make prod   # production build + start
 
-## 5. Post-Deployment (`scripts/adminCredentials.ts`)
+## 5. Post-Deployment (`bin/m credentials:*`)
 
 Run from `apps/nextjs/`:
 
@@ -50,13 +50,13 @@ Run from `apps/nextjs/`:
 
 ```bash
 # learn.tg on Celo (course SBTs)
-npx tsx scripts/adminCredentials.ts grant-minter --network celo --address $LEARNTG_ADDRESS
+bin/m credentials:grant-minter --network celo --address $LEARNTG_ADDRESS
 
 # sivel.xyz on Celo (role SBTs)
-npx tsx scripts/adminCredentials.ts grant-minter --network celo --address $NEXT_PUBLIC_ADDRESS
+bin/m credentials:grant-minter --network celo --address $NEXT_PUBLIC_ADDRESS
 
 # sivel.xyz on Base (NFTs)
-npx tsx scripts/adminCredentials.ts grant-minter --network base --address $NEXT_PUBLIC_ADDRESS
+bin/m credentials:grant-minter --network base --address $NEXT_PUBLIC_ADDRESS
 ```
 
 ### Register Credential Types
@@ -65,28 +65,28 @@ Provide an SVG icon (`--icon`) for the credential image. The script validates th
 
 ```bash
 # SBT with icon (achievement, infinite supply)
-npx tsx scripts/adminCredentials.ts register-type \
+bin/m credentials:register-type \
   --network celo --site sivel.xyz --type achievement \
   --display "Connector" --soulbound true \
   --icon public/img/credential/source/connector.svg
 
 # Free course
-npx tsx scripts/adminCredentials.ts register-type \
+bin/m credentials:register-type \
   --network celo --site learn.tg --type course_completion \
   --display "Basic Course" --soulbound true --course-id 1
 
 # Premium course
-npx tsx scripts/adminCredentials.ts register-type \
+bin/m credentials:register-type \
   --network celo --site learn.tg --type course_completion \
   --display "Premium Course" --soulbound true --course-id 2 --premium true
 
 # Founder User (sivel.xyz, role, maxSupply=50)
-npx tsx scripts/adminCredentials.ts register-type \
+bin/m credentials:register-type \
   --network celo --site sivel.xyz --type role \
   --display "Founder User" --soulbound true
 
 # Collectible NFT
-npx tsx scripts/adminCredentials.ts register-type \
+bin/m credentials:register-type \
   --network base --site sivel.xyz --type nft \
   --display "Bible Verse" --soulbound false
 ```
@@ -96,7 +96,7 @@ npx tsx scripts/adminCredentials.ts register-type \
 Regenerates SVG and PNG for an existing credential type (e.g., to update the icon or logo).
 
 ```bash
-npx tsx scripts/adminCredentials.ts recompose-image \
+bin/m credentials:recompose-image \
   --token-id 2 \
   --icon public/img/credential/source/connector.svg
 ```
@@ -108,26 +108,26 @@ Reads metadata from `credential_metadata` cache (no RPC calls).
 Backfills `credential_metadata` from on-chain data for all registered tokens.
 
 ```bash
-npx tsx scripts/adminCredentials.ts sync-cache --network celo
+bin/m credentials:sync-cache --network celo
 ```
 
 ### Set maxSupply
 
 ```bash
-npx tsx scripts/adminCredentials.ts set-max-supply --network celo --token-id 1 --max 50
+bin/m credentials:set-max-supply --network celo --token-id 1 --max 50
 ```
 
 ### List Registered Types
 
 ```bash
-npx tsx scripts/adminCredentials.ts list-types --network celo
-npx tsx scripts/adminCredentials.ts list-types --network base
+bin/m credentials:list-types --network celo
+bin/m credentials:list-types --network base
 ```
 
 ### Update Site baseURI
 
 ```bash
-npx tsx scripts/adminCredentials.ts set-site-base-uri \
+bin/m credentials:set-site-uri \
   --network celo --site stable-sl.pdJ.app --uri "https://stable-sl.pdJ.app/api/credential/"
 ```
 
@@ -176,10 +176,10 @@ Revocation is governed by the **[Terms of Service](../../TERMS_OF_SERVICE.md)**.
 
 ```bash
 # Revoke MINTER_ROLE (emergency)
-npx tsx scripts/adminCredentials.ts revoke-minter --network celo --address <COMPROMISED_WALLET>
+bin/m credentials:revoke-minter --network celo --address <COMPROMISED_WALLET>
 
 # Revoke credential from user (backend with MINTER_ROLE)
-npx tsx scripts/adminCredentials.ts revoke-credential \
+bin/m credentials:revoke-credential \
   --network celo --token-id 2 --address 0xWALLET --amount 1
 ```
 
@@ -190,8 +190,8 @@ Removes (burns) a credential from a user. Only `MINTER_ROLE`. Use for rule viola
 
 1. Revoke `MINTER_ROLE` immediately:
    ```bash
-   npx tsx scripts/adminCredentials.ts revoke-minter --network celo --address 0xCOMPROMISED
-   npx tsx scripts/adminCredentials.ts revoke-minter --network base --address 0xCOMPROMISED
+   bin/m credentials:revoke-minter --network celo --address 0xCOMPROMISED
+   bin/m credentials:revoke-minter --network base --address 0xCOMPROMISED
    ```
 2. Rotate private key in `.env`
 3. Grant `MINTER_ROLE` to the new wallet
@@ -212,7 +212,7 @@ Tiers: 0 SBTs → 100 SLE/day, 1 SBT → 200 SLE/day, 2+ SBTs → 400 SLE/day.
 ### sivel.xyz
 
 Uses `lib/credentials.ts` to interact with the contract on both networks.
-Admin operations via `scripts/adminCredentials.ts`.
+Admin operations via `bin/m credentials:*`.
 
 ### Image Composition
 
@@ -236,7 +236,7 @@ The badge is composed programmatically from the user's icon (512×512 SVG) plus:
 | Star overlay | `isPremium = true` | Top-right 48×48 |
 
 **Icon requirements:** SVG, viewBox `0 0 512 512`, no scripts, no remote resources.
-Output: `public/img/credential/source/{tokenId}.svg` + `public/img/credential/{tokenId}.png` (via `rsvg-convert`).
+Output: `public/img/credential/generated/{tokenId}.svg` + `public/img/credential/{tokenId}.png` (via `rsvg-convert`).
 
 ### Metadata
 

@@ -3,7 +3,10 @@ import { createPublicClient, createWalletClient, http, keccak256, encodePacked }
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { getCeloCredentialsAddress } from '@/lib/deployments'
+import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
+import path from 'path'
+
+const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 'PasosDeJesusCredentials')
 import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 
 const EXPLORER_TOKEN_ID = 13
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Mint Explorer SBT
-  const contractAddress = getCeloCredentialsAddress()
+  const contractAddress = getCeloCredentialsAddress(deploymentsDir)
   if (!contractAddress) {
     return NextResponse.json({ error: 'Contract not configured' }, { status: 500 })
   }

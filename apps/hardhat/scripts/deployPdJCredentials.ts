@@ -34,7 +34,7 @@ async function main() {
   console.log(`Transaction: ${contract.deploymentTransaction()?.hash}`);
 
   // Save deployment address
-  const deploymentsDir = path.join(__dirname, "../deployments");
+  const deploymentsDir = path.join(__dirname, "../deployments/PasosDeJesusCredentials");
   if (!fs.existsSync(deploymentsDir)) {
     fs.mkdirSync(deploymentsDir, { recursive: true });
   }
@@ -75,7 +75,7 @@ async function main() {
   }
 
   console.log(`Deployment saved to ${deploymentFile}`);
-  console.log("Next.js reads this file via: ../hardhat/deployments/${networkName}.json");
+  console.log("Next.js reads this file via: ../hardhat/deployments/PasosDeJesusCredentials/${networkName}.json");
 }
 
 main()
