@@ -1,9 +1,8 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
-import { Contract } from 'ethers'
 
 describe('PasosDeJesusCredentials', () => {
-  let contract: Contract
+  let contract: any
   let owner: any
   let minter: any
   let user: any
