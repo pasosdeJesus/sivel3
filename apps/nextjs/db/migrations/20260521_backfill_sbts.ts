@@ -36,8 +36,8 @@ async function mintIfMissing(
   db: Kysely<any>,
   wallet: string,
   tokenId: number,
-  walletClient: ReturnType<typeof createWalletClient>,
-  publicClient: ReturnType<typeof createPublicClient>,
+  walletClient: any,
+  publicClient: any,
   contractAddress: `0x${string}`,
 ): Promise<boolean> {
   const existing = await db
@@ -49,6 +49,28 @@ async function mintIfMissing(
     .executeTakeFirst()
 
   if (existing) return false
+
+  // Also verify on-chain (credential may have been minted outside DB tracking)
+  try {
+    const hasOnChain = await publicClient.readContract({
+      address: contractAddress,
+      abi: pasosDeJesusCredentialsAbi,
+      functionName: 'hasCredential',
+      args: [wallet as `0x${string}`, BigInt(tokenId)],
+    }) as boolean
+    if (hasOnChain) {
+      // Record in DB for future idempotency
+      await db
+        .insertInto('credential_emission')
+        .values({ wallet_address: wallet, token_id: tokenId, chain_id: 'celo' })
+        .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
+        .execute()
+      console.log(`  - ${wallet.slice(0, 6)}...${wallet.slice(-4)} → tokenId ${tokenId} (already on-chain, recorded)`)
+      return true
+    }
+  } catch {
+    // Contract read failed — proceed with mint attempt
+  }
 
   const hash = await walletClient.writeContract({
     address: contractAddress,
