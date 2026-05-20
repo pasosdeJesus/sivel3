@@ -5,20 +5,20 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const limit = parseInt(searchParams.get('limit') || '10')
 
-  const db = newKyselyPostgresql()
+  const db = newKyselyPostgresql() as any
 
-  // Top wallets by total donated, with SBTs earned
+  // Top wallets by total donated (from donation transactions), with SBTs earned
   const rows = await db
     .selectFrom('transaction as t')
-    .leftJoin('credential_emission as e', (join) =>
+    .leftJoin('credential_emission as e', (join: any) =>
       join.onRef('e.wallet_address', '=', 't.wallet')
     )
     .select([
       't.wallet',
-      db.fn.sum('t.amount').as('totalDonatedUsdt'),
+      db.fn.sum('t.cantidad').as('totalDonatedUsdt'),
       db.fn.count('e.token_id').distinct().as('sbtCount'),
     ])
-    .where('t.status', '=', 'completed')
+    .where('t.tipo', '=', 'donation')
     .groupBy('t.wallet')
     .orderBy('totalDonatedUsdt', 'desc')
     .limit(limit)

@@ -173,11 +173,20 @@ export default function StatsPage() {
     )
   }
 
-  // Filter top pages to show only case paths
-  const topCases = summary.topPages
+  // Filter top pages to show only case paths, merging by normalized path
+  const casePages = summary.topPages
     .filter(p => p.path.includes('/cases/'))
-    .slice(0, 10)
     .map(p => ({ path: p.path.replace(/^\/[a-z]{2}\//, '/'), views: p.views }))
+
+  // Aggregate by path (locale-stripped paths may collide)
+  const merged = new Map<string, number>()
+  for (const p of casePages) {
+    merged.set(p.path, (merged.get(p.path) || 0) + p.views)
+  }
+  const topCases = Array.from(merged.entries())
+    .map(([path, views]) => ({ path, views }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 10)
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -289,7 +298,7 @@ export default function StatsPage() {
         {/* Donations by Region — Bar Chart */}
         {summary.onChain.donationsByRegion.length > 0 && (
           <>
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">{t('donationsByRegion')}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-3 mt-8">{t('donationsByRegion')}</h2>
             <div className="bg-white p-4 rounded shadow-sm mb-8" style={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={summary.onChain.donationsByRegion.map(r => ({ region: regionNames[r.regionId] || `Region ${r.regionId}`, donations: r.count, usdt: parseFloat(r.total) }))}>
