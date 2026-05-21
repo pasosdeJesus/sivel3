@@ -90,22 +90,22 @@ bin/m credentials:register-type \
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
   --display "Bronze Donor" --soulbound true --max-supply 0 \
-  --icon public/img/credential/source/donor-bronze.svg
+  --icon public/img/credential/source/bronze-donor.svg
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
   --display "Silver Donor" --soulbound true --max-supply 0 \
-  --icon public/img/credential/source/donor-silver.svg
+  --icon public/img/credential/source/silver-donor.svg
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
   --display "Gold Donor" --soulbound true --max-supply 0 \
-  --icon public/img/credential/source/donor-gold.svg
+  --icon public/img/credential/source/gold-donor.svg
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
   --display "Diamond Donor" --soulbound true --max-supply 0 \
-  --icon public/img/credential/source/donor-diamond.svg
+  --icon public/img/credential/source/diamond-donor.svg
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
