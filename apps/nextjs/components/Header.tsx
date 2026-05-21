@@ -16,7 +16,9 @@ export default function Header({ lang }: HeaderProps) {
   const { t } = useTranslation({})
 
   // Dynamic title based on current route
-  const pageTitle = pathname.includes('/stats') ? 'siteStatistics' : 'mapOfCases'
+  const pageTitle = pathname.includes('/stats') ? 'siteStatistics'
+    : pathname.includes('/wallet') ? 'walletProfile'
+    : 'mapOfCases'
 
   const changeLanguage = (newLocale: string) => {
     // Reemplaza el locale actual en la URL con el nuevo

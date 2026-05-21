@@ -102,7 +102,7 @@ async function checkLearnTgVerified(wallet: string, key: `0x${string}`): Promise
   const signature = await account.signMessage({ message })
 
   try {
-    const base = process.env.LEARNTG_URL || 'https://learn.tg'
+    const base = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'https://learn.tg' : 'https://learn.tg:9001'
     const url = `${base}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`
     const res = await fetch(url)
     if (!res.ok) return false

@@ -7,6 +7,7 @@ import { createTranslator } from '@pasosdejesus/m/i18n'
 const t = {
   en: {
     title: 'Wallet Profile',
+    backToMap: '← Back to Case Map',
     notFound: 'Wallet not found or has no activity.',
     activity: 'Activity',
     sbtsEarned: 'SBTs Earned',
@@ -20,6 +21,7 @@ const t = {
   },
   es: {
     title: 'Perfil de Billetera',
+    backToMap: '← Ir al Mapa de Casos',
     notFound: 'Billetera no encontrada o sin actividad.',
     activity: 'Actividad',
     sbtsEarned: 'SBTs Obtenidos',
@@ -143,6 +145,15 @@ export default function WalletPage() {
             </div>
           </div>
         )}
+
+        <div className="mt-8 text-center">
+          <a
+            href={`/${locale}/cases/osmmap`}
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded font-medium hover:bg-blue-700 transition-colors"
+          >
+            {tt('backToMap')}
+          </a>
+        </div>
       </div>
     </div>
   )

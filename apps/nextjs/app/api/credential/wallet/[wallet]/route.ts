@@ -36,12 +36,20 @@ export async function GET(
     .where('tipo', '=', 'donation')
     .executeTakeFirst()
 
-  // First activity (earliest SBT or donation)
+  // First wallet connection (from web_event)
+  const firstEventRow = await db
+    .selectFrom('web_event')
+    .select(db.fn.min('created_at').as('firstEvent'))
+    .where('wallet', '=', wallet)
+    .executeTakeFirst()
+
+  // First activity: earliest of SBT emission, donation, or wallet connection
   const firstSbt = sbts.length > 0 ? (sbts[0].earnedAt as string) : null
   const firstDonation = donationRow?.firstDonation as string | null
-  const firstActivity = firstSbt && firstDonation
-    ? (firstSbt < firstDonation ? firstSbt : firstDonation)
-    : (firstSbt || firstDonation)
+  const firstEvent = firstEventRow?.firstEvent as string | null
+  const firstActivity = [firstSbt, firstDonation, firstEvent]
+    .filter(Boolean)
+    .sort()[0] || null
 
   if (sbts.length === 0 && !donationRow?.donationCount) {
     return NextResponse.json({ error: 'No activity' }, { status: 404 })
