@@ -3,9 +3,34 @@
 ## 1. Prerequisites
 
 - adJ/OpenBSD environment
-- `apps/.env` configured with valid keys
 - PostgreSQL running
 - Node.js + pnpm installed
+
+### Environment variables (`apps/.env`)
+
+**On the deployment server** (where contracts are deployed):
+```env
+# Wallet with DEFAULT_ADMIN_ROLE — deploys contracts, grants roles
+CREDENTIALS_PRIVATE_KEY="0x..."
+
+# Backend wallet — receives MINTER_ROLE, mints SBTs, pays gas
+PRIVATE_KEY="0x..."
+```
+
+**On the operational server** (sivel.xyz backend):
+```env
+# Backend wallet with MINTER_ROLE
+PRIVATE_KEY="0x..."
+
+# learn.tg partner wallet (public address)
+LEARNTG_ADDRESS="0x..."
+
+# Network: celo (mainnet) or celoSepolia (testnet)
+NEXT_PUBLIC_NETWORK=celoSepolia
+NEXT_PUBLIC_RPC_URL="https://lb.drpc.org/celo-sepolia/x"
+```
+
+The contract address is resolved automatically from `apps/hardhat/deployments/PasosDeJesusCredentials/{network}.json` — no env var needed.
 
 ## 2. Smart Contracts
 
