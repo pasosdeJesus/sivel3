@@ -40,6 +40,8 @@ bin/m db:migrate
 
 Expected tables: `credential_emission`, `credential_metadata`. Explorer tracking uses existing `web_event` table (wallet + pathname like '/cases/%').
 
+> ⚠️ The first `db:migrate` will include the `sync_credential_metadata` migration (populates cache) and the `backfill_sbts` migration (mints retroactive SBTs). The backfill migration will **fail intentionally** if tokenIds are not yet registered — it will list the missing types and show the command to register them. Register the SBT types below, then **run `bin/m db:migrate` again** to complete the backfill.
+
 ## 4. Register SBT Types + Images
 
 ```bash
@@ -95,6 +97,10 @@ bin/m credentials:set-max-supply --network celoSepolia --token-id 7 --max 50
 
 # Verify types
 bin/m credentials:list-types --network celoSepolia
+
+# Re-run db:migrate to complete the SBT backfill
+# (the backfill_sbts migration failed earlier because types weren't registered yet)
+bin/m db:migrate
 ```
 
 **Note:** `--custom-uri` is optional — pass an IPFS/Arweave URL for NFTs. `--max-supply` defaults to 0 (unlimited). TokenIds are sequential across registrations (1-8 for the above).
