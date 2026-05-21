@@ -9,10 +9,10 @@ import fs from 'fs'
 
 const DONOR_THRESHOLDS: { name: string; minUsdt: number }[] = [
   { name: 'Donor', minUsdt: 0.02 },
-  { name: 'Donor Bronze', minUsdt: 5 },
-  { name: 'Donor Silver', minUsdt: 20 },
-  { name: 'Donor Gold', minUsdt: 50 },
-  { name: 'Donor Diamond', minUsdt: 100 },
+  { name: 'Bronze Donor', minUsdt: 5 },
+  { name: 'Silver Donor', minUsdt: 20 },
+  { name: 'Gold Donor', minUsdt: 50 },
+  { name: 'Diamond Donor', minUsdt: 100 },
 ]
 
 async function getTokenId(
@@ -164,9 +164,23 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   console.log(`TokenIds: Connector=${connectorId}, Donor levels=${donorIds.map(d => d.tokenId).join(',')}, Founder=${founderId}`)
 
-  if (!connectorId && donorIds.length === 0 && !founderId) {
-    console.log('No hay tipos registrados en credential_metadata. Ejecuta sync_credential_metadata primero.')
-    return
+  // Verify all required tokenIds are registered
+  const missing: string[] = []
+  if (!connectorId) missing.push('Connector')
+  const expectedDonorCount = DONOR_THRESHOLDS.length
+  const foundDonorCount = donorIds.length
+  if (foundDonorCount < expectedDonorCount) {
+    const missingDonors = DONOR_THRESHOLDS.filter(t => !donorIds.find(d => d.minUsdt === t.minUsdt))
+    missing.push(...missingDonors.map(t => t.name))
+  }
+  if (!founderId) missing.push('Global Founder')
+  if (missing.length > 0) {
+    throw new Error(
+      `Faltan los siguientes tipos en credential_metadata: ${missing.join(', ')}.\n` +
+      'Regístralos con:\n' +
+      '  bin/m credentials:register-type --network celoSepolia --site sivel.xyz --type achievement --display "<name>" --soulbound true --max-supply 0\n' +
+      'Luego ejecuta db:migrate de nuevo.'
+    )
   }
 
   let totalMinted = 0
