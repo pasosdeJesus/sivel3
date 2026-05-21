@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
     const hasOnChain = await publicClient.readContract({
       address: contractAddress,
       abi: pasosDeJesusCredentialsAbi,
-      functionName: 'hasCredential',
+      functionName: 'balanceOf',
       args: [wallet as `0x${string}`, BigInt(CONNECTOR_TOKEN_ID)],
-    })
-    if (hasOnChain) {
+    }) as bigint
+    if (hasOnChain > 0n) {
       // Record in cache even if already on-chain
       await db.insertInto('credential_emission')
         .values({ wallet_address: wallet, token_id: CONNECTOR_TOKEN_ID, chain_id: 'celo' })

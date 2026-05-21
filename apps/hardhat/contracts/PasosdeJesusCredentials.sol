@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
@@ -15,17 +16,26 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  *
  * Features:
  * - SBTs (Soulbound Tokens): Non‑transferable credentials for courses, roles, achievements.
- * - Transferable NFTs: For biblical verses, collectible art, etc.
+ * - Transferable NFTs: For biblical verses, collectible art, personalized NFTs, etc.
  * - Dynamic tokenId allocation: Sequential `nextTokenId` (no fixed ranges).
- * - Metadata: Dynamic `uri` based on `siteBaseURI` and `tokenSiteHash`.
+ * - Metadata: Dynamic `uri` based on `siteBaseURI` and `tokenSiteHash`, with optional
+ *   per‑token custom URI for NFTs (e.g., ipfs://, ar:// for user‑paid permanent storage).
+ * - Pausable: Admin can pause/unpause all transfers and mints in emergencies.
  *
- * Standards: ERC-1155, AccessControl.
+ * NFT maxSupply behavior:
+ * - NFT with customURI → maxSupply = 1, permanently locked (unique, user‑paid storage
+ *   on Arweave/IPFS).
+ * - NFT without customURI → maxSupply set at registration, permanently locked
+ *   (platform‑hosted collection, user pays platform service fee).
+ * - SBTs (course, role, achievement) → maxSupply adjustable by admin via setMaxSupply.
+ *
+ * Standards: ERC-1155, AccessControl, Pausable.
  *
  * Deployment:
  * - Celo: SBTs only — course completions, roles, donor recognition, achievements.
- * - Base: NFTs only — transferable collectibles.
+ * - Base: NFTs only — transferable collectibles, personalized art, biblical verses.
  */
-contract PasosDeJesusCredentials is ERC1155, AccessControl {
+contract PasosDeJesusCredentials is ERC1155, AccessControl, Pausable {
     using Strings for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -52,9 +62,8 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
     mapping(uint256 => string) public tokenNames;
     mapping(uint256 => uint256) public maxSupply; // 0 = unlimited
     mapping(uint256 => uint256) public totalSupply;
-    mapping(address => mapping(uint256 => bool)) public hasCredential;
 
-    // EIP-5633: Soulbound flag (true = cannot transfer, false = transferable)
+    // Soulbound flag (non-transferable when true, behavior compatible with EIP-5633)
     mapping(uint256 => bool) public isSoulbound;
 
     // For learn.tg courses only (1:1 mapping between courseId and tokenId)
@@ -64,6 +73,9 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
 
     // Base URIs per site (configurable by admin)
     mapping(bytes32 => string) public siteBaseURI;
+
+    // Per‑token custom URI (set at registration, correctable by DEFAULT_ADMIN_ROLE)
+    mapping(uint256 => string) private _customTokenURI;
 
     // ==================== EVENTS ====================
     event CredentialTypeRegistered(
@@ -108,9 +120,25 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         siteBaseURI[STABLE_SL_HASH] = "https://stable-sl.pdJ.app/api/credential/";
     }
 
+    // ==================== PAUSABLE ====================
+    /**
+     * @dev Pause all mints and transfers. Only DEFAULT_ADMIN_ROLE.
+     */
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause all mints and transfers. Only DEFAULT_ADMIN_ROLE.
+     */
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
     // ==================== SOULBOUND ENFORCEMENT ====================
     /**
      * @dev Override safeTransferFrom to enforce soulbound.
+     * For NFTs (isSoulbound[tokenId] = false), transfers proceed normally.
      */
     function safeTransferFrom(
         address from,
@@ -118,7 +146,7 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         uint256 tokenId,
         uint256 amount,
         bytes memory data
-    ) public override {
+    ) public override whenNotPaused {
         if (isSoulbound[tokenId]) {
             revert("Soulbound: cannot transfer this credential");
         }
@@ -131,7 +159,7 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) public override {
+    ) public override whenNotPaused {
         for (uint256 i = 0; i < ids.length; i++) {
             if (isSoulbound[ids[i]]) {
                 revert("Soulbound: cannot transfer this credential");
@@ -140,15 +168,29 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
-    // ==================== ADMIN: REGISTER CREDENTIAL TYPE ====================
+    // ==================== REGISTER CREDENTIAL TYPE ====================
     /**
      * @dev Register a new credential type (course, role, achievement, or NFT).
+     *      Only MINTER_ROLE so that backends (learn.tg, sivel.xyz) can register
+     *      new types without the admin wallet.
+     *
+     * NFT maxSupply rules:
+     * - NFT with customURI → maxSupply = 1 (unique, user‑paid permanent storage
+     *   on Arweave/IPFS).
+     * - NFT without customURI → maxSupply = maxSupply_ parameter (platform‑hosted
+     *   collection, user pays platform service fee).
+     * - NFT maxSupply is permanently locked and cannot be changed by setMaxSupply.
+     *
      * @param siteName Site name (e.g., "learn.tg", "sivel.xyz").
      * @param typeName Type name (e.g., "course_completion", "role", "nft").
      * @param displayName Human-readable name for the credential.
      * @param soulbound Whether this credential is soulbound (non‑transferable).
      * @param courseId For course_completion only: learn.tg course ID. 0 otherwise.
      * @param premium For course_completion only: whether the course is premium.
+     * @param customURI Optional per‑token URI (e.g., ipfs://..., ar://... for NFTs).
+     *                  Pass empty string to use the site's base URI.
+     * @param maxSupply_ Maximum supply for this credential type.
+     *                   0 = unlimited (for courses). Ignored for NFTs with customURI.
      */
     function registerCredentialType(
         string memory siteName,
@@ -156,12 +198,17 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         string memory displayName,
         bool soulbound,
         uint256 courseId,
-        bool premium
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256 tokenId) {
+        bool premium,
+        string memory customURI,
+        uint256 maxSupply_
+    ) external onlyRole(MINTER_ROLE) whenNotPaused returns (uint256 tokenId) {
         bytes32 siteHash = keccak256(bytes(siteName));
         bytes32 typeHash = keccak256(bytes(typeName));
 
-        require(bytes(siteBaseURI[siteHash]).length > 0, "Site not supported");
+        require(
+            bytes(siteBaseURI[siteHash]).length > 0 || bytes(customURI).length > 0,
+            "Site not supported: provide a customURI or ensure siteBaseURI is set"
+        );
         require(bytes(displayName).length > 0, "Display name required");
 
         tokenId = nextTokenId;
@@ -172,16 +219,28 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         tokenNames[tokenId] = displayName;
         isSoulbound[tokenId] = soulbound;
 
+        if (bytes(customURI).length > 0) {
+            _customTokenURI[tokenId] = customURI;
+        }
+
         if (typeHash == COURSE_COMPLETION_HASH) {
             require(courseId > 0, "Course ID required for course_completion");
+            require(courseIdToTokenId[courseId] == 0, "Course already registered");
             require(soulbound, "Courses must be soulbound");
             courseIdToTokenId[courseId] = tokenId;
             tokenIdToCourseId[tokenId] = courseId;
             isPremiumCourse[tokenId] = premium;
+            maxSupply[tokenId] = maxSupply_;
         } else if (typeHash == NFT_HASH) {
             require(!soulbound, "NFTs must be transferable");
+            if (bytes(customURI).length > 0) {
+                maxSupply[tokenId] = 1;
+            } else {
+                maxSupply[tokenId] = maxSupply_;
+            }
         } else {
             require(soulbound, "Roles and achievements must be soulbound");
+            maxSupply[tokenId] = maxSupply_;
         }
 
         emit CredentialTypeRegistered(
@@ -192,14 +251,29 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
     }
 
     // ==================== ADMIN: CONFIGURATION ====================
+    /**
+     * @dev Set max supply for a credential type. Only DEFAULT_ADMIN_ROLE.
+     * Cannot be used on NFTs (their maxSupply is locked at registration).
+     * Cannot set max below current supply.
+     */
     function setMaxSupply(uint256 tokenId, uint256 max)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        require(max >= totalSupply[tokenId], "Cannot set max below current supply");
+        require(
+            tokenTypeHash[tokenId] != NFT_HASH,
+            "Cannot change maxSupply for NFTs"
+        );
+        require(
+            max >= totalSupply[tokenId],
+            "Cannot set max below current supply"
+        );
         maxSupply[tokenId] = max;
     }
 
+    /**
+     * @dev Set base URI for a site. Only DEFAULT_ADMIN_ROLE.
+     */
     function setSiteBaseURI(string memory siteName, string memory newBaseURI)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -210,49 +284,74 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         emit BaseURIUpdated(siteHash, newBaseURI);
     }
 
+    /**
+     * @dev Set or correct a custom token URI. Only DEFAULT_ADMIN_ROLE.
+     * Useful if a customURI was set incorrectly at registration.
+     */
+    function setCustomTokenURI(uint256 tokenId, string memory newURI)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _customTokenURI[tokenId] = newURI;
+    }
+
     // ==================== MINTING FUNCTIONS ====================
     /**
-     * @dev Mint a credential (role, achievement, or NFT). Admin only.
+     * @dev Mint a credential (role, achievement, or NFT). Only MINTER_ROLE.
+     * For NFTs, anyone can receive multiple units (amount > 1).
+     * balanceOf prevents duplicate SBTs.
      */
-    function mintCredential(address account, uint256 tokenId, uint256 amount)
-        external
-        onlyRole(MINTER_ROLE)
-    {
+    function mintCredential(
+        address account,
+        uint256 tokenId,
+        uint256 amount
+    ) external onlyRole(MINTER_ROLE) whenNotPaused {
         bytes32 typeHash = tokenTypeHash[tokenId];
         require(typeHash != bytes32(0), "Credential type not registered");
-        require(typeHash != COURSE_COMPLETION_HASH, "Use mintCourseCompletion for courses");
+        require(
+            typeHash != COURSE_COMPLETION_HASH,
+            "Use mintCourseCompletion for courses"
+        );
         require(bytes(tokenNames[tokenId]).length > 0, "Credential not configured");
 
         _validateMint(account, tokenId, amount);
         totalSupply[tokenId] += amount;
         _mint(account, tokenId, amount, "");
-        hasCredential[account][tokenId] = true;
-        emit CredentialMinted(tokenId, account, tokenNames[tokenId], false, block.timestamp);
+
+        emit CredentialMinted(
+            tokenId,
+            account,
+            tokenNames[tokenId],
+            false,
+            block.timestamp
+        );
     }
 
     /**
-     * @dev Mint a course completion credential (for learn.tg). Admin only.
+     * @dev Mint a course completion credential (for learn.tg). Only MINTER_ROLE.
+     * SBTs are always amount = 1. balanceOf prevents duplicate SBTs.
+     * The contract already knows the course name and premium status from
+     * registration — no need to pass them again.
      */
     function mintCourseCompletion(
         address account,
-        uint256 courseId,
-        string memory courseName,
-        bool premium
-    ) external onlyRole(MINTER_ROLE) {
+        uint256 courseId
+    ) external onlyRole(MINTER_ROLE) whenNotPaused {
         uint256 tokenId = courseIdToTokenId[courseId];
         require(tokenId != 0, "Course not registered");
-        require(
-            keccak256(bytes(courseName)) == keccak256(bytes(tokenNames[tokenId])),
-            "Course name mismatch"
-        );
-        require(premium == isPremiumCourse[tokenId], "Premium status mismatch");
         require(isSoulbound[tokenId], "Course credential must be soulbound");
 
         _validateMint(account, tokenId, 1);
         totalSupply[tokenId] += 1;
         _mint(account, tokenId, 1, "");
-        hasCredential[account][tokenId] = true;
-        emit CredentialMinted(tokenId, account, tokenNames[tokenId], premium, block.timestamp);
+
+        emit CredentialMinted(
+            tokenId,
+            account,
+            tokenNames[tokenId],
+            isPremiumCourse[tokenId],
+            block.timestamp
+        );
     }
 
     // ==================== REVOCATION ====================
@@ -271,7 +370,7 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
         address account,
         uint256 tokenId,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(MINTER_ROLE) whenNotPaused {
         require(
             balanceOf(account, tokenId) >= amount,
             "Insufficient balance to revoke"
@@ -281,34 +380,46 @@ contract PasosDeJesusCredentials is ERC1155, AccessControl {
 
         totalSupply[tokenId] -= amount;
 
-        if (balanceOf(account, tokenId) == 0) {
-            hasCredential[account][tokenId] = false;
-        }
-
         emit CredentialRevoked(tokenId, account, amount, block.timestamp);
     }
 
     // ==================== INTERNAL VALIDATION ====================
+    /**
+     * @dev Pre-mint validation: prevents duplicate SBTs and enforces max supply.
+     */
     function _validateMint(address account, uint256 tokenId, uint256 amount)
         private
         view
     {
-        require(
-            !hasCredential[account][tokenId],
-            "Account already has this credential"
-        );
+        // For SBTs, prevent duplicate minting
+        if (isSoulbound[tokenId]) {
+            require(
+                balanceOf(account, tokenId) == 0,
+                "Account already has this soulbound credential"
+            );
+        }
+
         uint256 max = maxSupply[tokenId];
         if (max > 0) {
-            require(totalSupply[tokenId] + amount <= max, "Would exceed max supply");
+            require(
+                totalSupply[tokenId] + amount <= max,
+                "Would exceed max supply"
+            );
         }
     }
 
     // ==================== METADATA ====================
     /**
      * @dev Returns the metadata URI for a given tokenId.
-     * The actual JSON with attributes is served by the respective site's API.
+     * If a custom URI was set at registration, it is returned.
+     * Otherwise the URI is built from the site's base URI.
      */
     function uri(uint256 tokenId) public view override returns (string memory) {
+        string memory custom = _customTokenURI[tokenId];
+        if (bytes(custom).length > 0) {
+            return custom;
+        }
+
         bytes32 siteHash = tokenSiteHash[tokenId];
         require(siteHash != bytes32(0), "Token ID not configured");
 

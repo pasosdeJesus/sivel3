@@ -55,10 +55,10 @@ async function mintIfMissing(
     const hasOnChain = await publicClient.readContract({
       address: contractAddress,
       abi: pasosDeJesusCredentialsAbi,
-      functionName: 'hasCredential',
+      functionName: 'balanceOf',
       args: [wallet as `0x${string}`, BigInt(tokenId)],
-    }) as boolean
-    if (hasOnChain) {
+    }) as bigint
+    if (hasOnChain > 0n) {
       // Record in DB for future idempotency
       await db
         .insertInto('credential_emission')

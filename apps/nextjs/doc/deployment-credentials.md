@@ -49,24 +49,55 @@ cd apps/nextjs
 bin/m credentials:grant-minter --network celoSepolia --address $LEARNTG_ADDRESS
 bin/m credentials:grant-minter --network celoSepolia --address $NEXT_PUBLIC_ADDRESS
 
-# Register all SBT types with icons
-for icon in connector donor donor-bronze donor-silver donor-gold donor-diamond global-founder explorer; do
-  display=$(echo "$icon" | sed 's/-/ /g' | sed 's/\b./\U&/g')
-  bin/m credentials:register-type \
-    --network celoSepolia --site sivel.xyz --type achievement \
-    --display "$display" --soulbound true \
-    --icon public/img/credential/source/$icon.svg
-done
+# Register all SBT types (order matters — tokenIds are sequential)
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Connector" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/connector.svg
 
-# Set maxSupply for Global Founder
-bin/m credentials:set-max-supply --network celoSepolia --token-id 12 --max 50
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Donor" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/donor.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Bronze Donor" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/donor-bronze.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Silver Donor" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/donor-silver.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Gold Donor" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/donor-gold.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Diamond Donor" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/donor-diamond.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Global Founder" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/global-founder.svg
+
+bin/m credentials:register-type \
+  --network celoSepolia --site sivel.xyz --type achievement \
+  --display "Explorer" --soulbound true --max-supply 0 \
+  --icon public/img/credential/source/explorer.svg
+
+# Set maxSupply for Global Founder (tokenId 7 on fresh deployment)
+bin/m credentials:set-max-supply --network celoSepolia --token-id 7 --max 50
 
 # Verify types
 bin/m credentials:list-types --network celoSepolia
-
-# OPTIONAL: Backfill cache if tokens exist from before cache code was added
-# bin/m credentials:sync-cache --network celoSepolia
 ```
+
+**Note:** `--custom-uri` is optional — pass an IPFS/Arweave URL for NFTs. `--max-supply` defaults to 0 (unlimited). TokenIds are sequential across registrations (1-8 for the above).
 
 ## 5. Start Development Server
 
@@ -77,6 +108,19 @@ bin/dev   # runs on port 9001
 
 ## 6. Test SBT Flow
 
+Expected tokenIds on fresh deployment:
+
+| tokenId | Name |
+|---------|------|
+| 1 | Connector |
+| 2 | Donor |
+| 3 | Bronze Donor |
+| 4 | Silver Donor |
+| 5 | Gold Donor |
+| 6 | Diamond Donor |
+| 7 | Global Founder |
+| 8 | Explorer |
+
 ### 6.1 Manual Mint Test
 
 ```bash
@@ -84,11 +128,11 @@ cd apps/nextjs
 
 # Mint Connector to a wallet
 bin/m credentials:mint \
-  --network celoSepolia --token-id 2 --address 0xYOUR_WALLET
+  --network celoSepolia --token-id 1 --address 0xYOUR_WALLET
 
 # Mint Explorer (after ≥3 case views)
 bin/m credentials:mint \
-  --network celoSepolia --token-id 13 --address 0xYOUR_WALLET
+  --network celoSepolia --token-id 8 --address 0xYOUR_WALLET
 ```
 
 ### 6.2 Wallet Connection → Connector
@@ -96,7 +140,7 @@ bin/m credentials:mint \
 1. Open `https://sivel.xyz:9001/en/cases/osmmap`
 2. Connect wallet
 3. Check Blockscout: `https://celo-sepolia.blockscout.com/address/<WALLET>/tokens`
-4. Should see Connector SBT (token ID 2)
+4. Should see Connector SBT (tokenId 1)
 
 ### 6.3 Case Views → Explorer
 
@@ -106,8 +150,8 @@ bin/m credentials:mint \
 ### 6.4 Donation → Donor SBTs
 
 1. Donate ≥ $0.02 USDT on Celo testnet
-2. Verify Donor SBT appears (token ID 7)
-3. Cumulative: $5 → Bronze (8), $20 → Silver (9), $50 → Gold (10), $100 → Diamond (11)
+2. Verify Donor SBT appears (tokenId 2)
+3. Cumulative: $5 → Bronze (3), $20 → Silver (4), $50 → Gold (5), $100 → Diamond (6)
 
 ## 7. Check `/stats` Page
 
@@ -139,17 +183,17 @@ curl -s https://sivel.xyz:9001/en/api/credential/2.json | json_pp
 ```bash
 # Recompose a single token's image
 bin/m credentials:recompose-image \
-  --token-id 2 --icon public/img/credential/source/connector.svg
+  --network celoSepolia --token-id 1 --icon public/img/credential/source/connector.svg
 
 # Verify files exist
-ls -la public/img/credential/{2.png,generated/2.svg}
+ls -la public/img/credential/{1.png,generated/1.svg}
 ```
 
 ## 11. Run Tests
 
 ```bash
 cd apps/nextjs
-npx vitest run tests/credentials.test.ts tests/sbt-api.test.ts tests/deployments.test.ts
+npx vitest run tests/credential-api.test.ts tests/credential-metadata.test.ts tests/deployments.test.ts
 ```
 
 ## 12. Revoke a Credential
@@ -157,7 +201,7 @@ npx vitest run tests/credentials.test.ts tests/sbt-api.test.ts tests/deployments
 ```bash
 # Burn a credential from a user (MINTER_ROLE required)
 bin/m credentials:revoke-credential \
-  --network celoSepolia --token-id 2 --address 0xWALLET --amount 1
+  --network celoSepolia --token-id 1 --address 0xWALLET --amount 1
 ```
 
 ## 13. Cleanup Test Data (optional)
@@ -165,5 +209,4 @@ bin/m credentials:revoke-credential \
 ```bash
 # Revoke MINTER_ROLE from a wallet
 bin/m credentials:revoke-minter --network celoSepolia --address 0xWALLET
-
 ```
