@@ -7,16 +7,13 @@ export async function GET(request: NextRequest) {
 
   const db = newKyselyPostgresql() as any
 
-  // Top wallets by total donated (from donation transactions), with SBTs earned
+  // Sum donations per wallet (no join to avoid row multiplication)
   const rows = await db
     .selectFrom('transaction as t')
-    .leftJoin('credential_emission as e', (join: any) =>
-      join.onRef('e.wallet_address', '=', 't.wallet')
-    )
     .select([
       't.wallet',
       db.fn.sum('t.cantidad').as('totalDonatedUsdt'),
-      db.fn.count('e.token_id').distinct().as('sbtCount'),
+      db.fn.countAll().as('donationCount'),
     ])
     .where('t.tipo', '=', 'donation')
     .groupBy('t.wallet')
@@ -24,5 +21,21 @@ export async function GET(request: NextRequest) {
     .limit(limit)
     .execute()
 
-  return NextResponse.json(rows)
+  // For each wallet, count distinct SBTs
+  const result = []
+  for (const row of rows) {
+    const sbtCount = await db
+      .selectFrom('credential_emission')
+      .select(db.fn.countAll().as('count'))
+      .where('wallet_address', '=', row.wallet)
+      .executeTakeFirst()
+
+    result.push({
+      wallet: row.wallet,
+      totalDonatedUsdt: row.totalDonatedUsdt,
+      sbtCount: Number(sbtCount?.count || 0),
+    })
+  }
+
+  return NextResponse.json(result)
 }

@@ -34,6 +34,13 @@ export interface ArInternalMetadata {
   value: string | null;
 }
 
+export interface CaseViews {
+  case_id: number;
+  id: Generated<Int8>;
+  viewed_at: Generated<Timestamp>;
+  wallet_address: string;
+}
+
 export interface Cben1 {
   caso_id: number | null;
   npersona: number | null;
@@ -1365,6 +1372,16 @@ export interface Transaction {
   wallet: string;
 }
 
+export interface Userevent {
+  amount: Numeric | null;
+  currency: string | null;
+  id: Generated<number>;
+  metadata: Json | null;
+  path: string | null;
+  timestamp: Generated<Timestamp>;
+  type: string;
+}
+
 export interface Usuario {
   created_at: Timestamp | null;
   current_sign_in_at: Timestamp | null;
@@ -1412,6 +1429,7 @@ export interface WebEvent {
 
 export interface DB {
   ar_internal_metadata: ArInternalMetadata;
+  case_views: CaseViews;
   cben1: Cben1;
   cben2: Cben2;
   credential_emission: CredentialEmission;
@@ -1542,6 +1560,7 @@ export interface DB {
   sivel2_gen_victimacolectiva_vinculoestado: Sivel2GenVictimacolectivaVinculoestado;
   sivel2_gen_vinculoestado: Sivel2GenVinculoestado;
   transaction: Transaction;
+  userevent: Userevent;
   usuario: Usuario;
   web_event: WebEvent;
 }
