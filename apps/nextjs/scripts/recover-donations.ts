@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
 
+console.log(`PGDATABASE=${process.env.PGDATABASE} PGHOST=${process.env.PGHOST} PGUSER=${process.env.PGUSER}`)
+
 const RPC_URL = 'https://forno.celo.org'
 const CHAIN = celo
 
@@ -128,6 +130,12 @@ async function processEvent(
 }
 
 async function main() {
+  const before = await db
+    .selectFrom('transaction')
+    .select(db.fn.countAll().as('total'))
+    .executeTakeFirst()
+  console.log(`transaction tiene ${before?.total || 0} filas antes de recuperar\n`)
+
   for (const c of CONTRACTS) {
     // V2: try DonationAssigned first (has richer data)
     if (c.label === 'V2') {
@@ -137,6 +145,18 @@ async function main() {
     await processEvent(c, donationReceivedEvent, 'DonationReceived')
   }
   console.log('\nRecuperación completa.')
+
+  const after = await db
+    .selectFrom('transaction')
+    .select(db.fn.countAll().as('total'))
+    .executeTakeFirst()
+  const sum = await db
+    .selectFrom('transaction')
+    .select(db.fn.sum('cantidad').as('s'))
+    .where('tipo', '=', 'donation')
+    .executeTakeFirst()
+  console.log(`transaction ahora tiene ${after?.total || 0} filas totales, ${sum?.s || '0'} USDT en donaciones`)
+
   process.exit(0)
 }
 
