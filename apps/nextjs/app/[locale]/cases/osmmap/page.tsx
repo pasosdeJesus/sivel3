@@ -86,7 +86,10 @@ export default function OSMMapPage() {
   }, [selectedRegion, fetchBalance]);
 
   // Función para refrescar balance después de donar (con confetti y toast)
-  const refreshBalanceAfterDonation = (learningPoints?: { success: boolean; newScore?: number; message?: string; userMessage?: string }) => {
+  const refreshBalanceAfterDonation = (
+    learningPoints?: { success: boolean; newScore?: number; message?: string; userMessage?: string },
+    mintedSbts?: { name: string; imageUrl: string }[]
+  ) => {
     if (selectedRegion) {
       confetti({
         particleCount: 150,
@@ -124,6 +127,17 @@ export default function OSMMapPage() {
         });
       }
 
+      // Mostrar SBTs minteados
+      if (mintedSbts && mintedSbts.length > 0) {
+        for (const sbt of mintedSbts) {
+          toast({
+            title: '🎖️ SBT Obtained!',
+            description: sbt.name,
+            duration: isMiniPay ? 0 : 4000,
+          })
+        }
+      }
+
       // Limpiar monto después de donar
       setDonationAmount('');
 
@@ -138,7 +152,7 @@ export default function OSMMapPage() {
   const onDonate = async (amount: string) => {
     try {
       const result = await donate(parseInt(selectedRegion, 10), amount, currentLocale);
-      refreshBalanceAfterDonation(result.learningPoints);
+      refreshBalanceAfterDonation(result.learningPoints, result.mintedSbts);
 
       logger.info(`✅ Donación completada. TX: ${result.txHash}${result.learningPoints?.success ? ' + Learning Points' : ''}`, 'DonatePage')
       

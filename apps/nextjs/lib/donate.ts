@@ -21,6 +21,7 @@ export interface DonateResult {
     newScore?: number
     message?: string
   }
+  mintedSbts?: { name: string; imageUrl: string }[]
 }
 
 // Local TypeScript Objects para i18n (ver doc/I18N.md)
@@ -226,6 +227,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
     return {
       txHash: result.txHash || txHash,
       learningPoints: result.learningPoints,
+      mintedSbts: result.mintedSbts || [],
     } as DonateResult
   } catch (err: any) {
     logMsg(`❌ Error detectado:`)

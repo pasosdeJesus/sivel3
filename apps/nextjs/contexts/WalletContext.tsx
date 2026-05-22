@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import { useAccount, useDisconnect, useChainId, useConnect } from 'wagmi'
 import { useMiniPay } from '@/hooks/useMiniPay'
 import { donate as donateFn } from '@/lib/donate'
+import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
 
 function recordWalletEvent(eventType: string, wallet?: string | null) {
   if (typeof window === 'undefined') return

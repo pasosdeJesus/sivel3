@@ -293,6 +293,7 @@ export async function POST(request: NextRequest) {
     // ============================================================
     // Mint donation SBTs if threshold reached
     // ============================================================
+    let mintedSbts: { name: string; imageUrl: string }[] = []
     try {
       const sbtDb = newKyselyPostgresql()
       const totalRow = await sbtDb
@@ -338,6 +339,13 @@ export async function POST(request: NextRequest) {
                 .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
                 .execute()
               serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
+              const meta = await sbtDb
+                .selectFrom('credential_metadata')
+                .select(['name', 'image_url'])
+                .where('token_id', '=', t.tokenId)
+                .where('chain_id', '=', 'celo')
+                .executeTakeFirst()
+              if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
             } catch { /* best effort per threshold */ }
           }
         }
@@ -378,6 +386,7 @@ export async function POST(request: NextRequest) {
       message: 'Donación asignada correctamente',
       txHash: hash,
       learningPoints: learningPointsResult,
+      mintedSbts,
     })
   } catch (error) {
     serverLog.error(`Error en POST /api/donations/assign: ${error}`)

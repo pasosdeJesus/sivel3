@@ -186,7 +186,27 @@ export async function POST(request: NextRequest) {
       // Founder mint is best-effort — don't fail the Connector mint
     }
 
-    return NextResponse.json({ minted: true, txHash: hash, founderMinted })
+    // Resolve SBT names for toast
+    const [connectorMeta, founderMeta] = await Promise.all([
+      db.selectFrom('credential_metadata')
+        .select(['name', 'image_url'])
+        .where('token_id', '=', CONNECTOR_TOKEN_ID)
+        .where('chain_id', '=', chainId)
+        .executeTakeFirst(),
+      founderMinted
+        ? db.selectFrom('credential_metadata')
+            .select(['name', 'image_url'])
+            .where('token_id', '=', founderTokenId)
+            .where('chain_id', '=', chainId)
+            .executeTakeFirst()
+        : Promise.resolve(null),
+    ])
+
+    const mintedSbts: { name: string; imageUrl: string }[] = []
+    if (connectorMeta) mintedSbts.push({ name: connectorMeta.name, imageUrl: connectorMeta.image_url })
+    if (founderMeta) mintedSbts.push({ name: founderMeta.name, imageUrl: founderMeta.image_url })
+
+    return NextResponse.json({ minted: true, txHash: hash, founderMinted, mintedSbts })
   } catch (err: any) {
     console.error('Connector mint failed:', err.message || err)
     return NextResponse.json({ minted: false, reason: 'tx_failed' }, { status: 500 })

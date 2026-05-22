@@ -110,7 +110,19 @@ export async function POST(request: NextRequest) {
       .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
       .execute()
 
-    return NextResponse.json({ minted: true, txHash: hash, casesViewed: count })
+    const meta = await db
+      .selectFrom('credential_metadata')
+      .select(['name', 'image_url'])
+      .where('token_id', '=', EXPLORER_TOKEN_ID)
+      .where('chain_id', '=', 'celo')
+      .executeTakeFirst()
+
+    return NextResponse.json({
+      minted: true,
+      txHash: hash,
+      casesViewed: count,
+      mintedSbt: meta ? { name: meta.name, imageUrl: meta.image_url } : null,
+    })
   } catch (err: any) {
     console.error('Explorer mint failed:', err.message || err)
     return NextResponse.json({ minted: false, reason: 'tx_failed' }, { status: 500 })
