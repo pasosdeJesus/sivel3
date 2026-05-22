@@ -82,7 +82,11 @@ export default function MapComponent({
     'OpenStreetMap',
   ])
 
+  const walletRef = useRef(wallet)
+  walletRef.current = wallet
+
   const cargarDetalleCaso = useCallback(async (codigo: string) => {
+    const currentWallet = walletRef.current
     setMostrarInfo(true)
     setCasoSeleccionado(null)
     try {
@@ -100,15 +104,15 @@ export default function MapComponent({
         fetch('/api/web-analytics/event', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}`, wallet }),
+          body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}`, wallet: currentWallet }),
           keepalive: true,
         }).catch(() => {})
         // Check Explorer SBT eligibility (views 3+ distinct cases)
-        if (wallet) {
+        if (currentWallet) {
           fetch('/api/credential/mint-explorer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wallet }),
+            body: JSON.stringify({ wallet: currentWallet }),
             keepalive: true,
           }).then(async r => {
             if (!r.ok) return
