@@ -63,9 +63,9 @@ graph TD
 - **Language:** Solidity
 - **Network:** Celo
 - **Contracts:**
-    - `SBTs.sol` (planned): For issuing Soul-Bound Tokens that define roles (Administrator, Documenter, Validator).
+    - `PasosDeJesusCredentials.sol` (deployed): Unified credential contract (ERC1155 + AccessControl) for SBTs on Celo and NFTs on Base. Manages roles (Founder User, Documenter, Validator) and achievements (Connector, Explorer, Donor levels, Global Founder).
+    - `RegionalDonation.sol` / `SIVeL3RegionalDonationV2.sol` (deployed): Manages reception and distribution of donations by region on Celo.
     - `CaseCertification.sol` (planned): Immutably records the hash of cases that have passed the 3-filter validation process.
-    - `RegionalDonation.sol` (planned): Will manage the reception and distribution of donations by region.
 
 ---
 

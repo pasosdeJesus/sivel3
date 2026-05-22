@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from '@pasosdejesus/m/shadcn-components/ui/card'
 import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
+import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
 import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
 import { ScrollArea } from '@pasosdejesus/m/shadcn-components/ui/scroll-area'
@@ -51,6 +53,11 @@ interface CasoDetalle {
   presponsables: string[]
 }
 
+const sbtToastT = {
+  en: { sbtTitle: '🎖️ SBT Obtained!' },
+  es: { sbtTitle: '🎖️ ¡SBT Obtenido!' },
+}
+
 export default function MapComponent({
   center = [4.6682, -74.071],
   zoom = 6,
@@ -63,6 +70,8 @@ export default function MapComponent({
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<any>(null)
   const filtrosAnterioresRef = useRef<any>({})
+  const { toast } = useToast()
+  const { t } = useTranslation(sbtToastT)
 
   const [cargando, setCargando] = useState(true)
   const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(
@@ -101,6 +110,12 @@ export default function MapComponent({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ wallet }),
             keepalive: true,
+          }).then(async r => {
+            if (!r.ok) return
+            const data = await r.json()
+            if (data.minted && data.mintedSbt) {
+              toast({ title: t('sbtTitle'), description: data.mintedSbt.name, duration: 4000 })
+            }
           }).catch(() => {})
         };
       } catch (e) {

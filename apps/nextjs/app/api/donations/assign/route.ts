@@ -4,11 +4,8 @@ import { celo, celoSepolia } from 'viem/chains'
 import { incrementLearningPoints } from '@/lib/learningPoints'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
-import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
-import path from 'path'
-
-const credentialsDeploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 'PasosDeJesusCredentials')
-import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
+import { mintSBT, getDonorThresholds, getChainId } from '@/lib/credentials'
+import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -136,6 +133,12 @@ async function verifyTransferAndGetRegion(
       serverLog.success(`Transferencia verificada correctamente: ${txHash} - Región ${regionId}`)
       return { isValid: true, regionId }
     } else if (isValid && (regionId === null || (regionId !== 1 && regionId !== 2))) {
+      // If extracted regionId looks like an ERC-20 amount (> 1000), treat as
+      // non-region-aware transfer — use body's regionId as fallback.
+      if (regionId !== null && regionId > 1000) {
+        serverLog.warn(`RegionId extraído parece ser un monto (${regionId}), usando body`)
+        return { isValid: true, regionId: null }
+      }
       serverLog.error(`Región inválida en data: ${regionId}`)
       return { isValid: false, regionId: null }
     }
@@ -293,6 +296,7 @@ export async function POST(request: NextRequest) {
     // ============================================================
     // Mint donation SBTs if threshold reached
     // ============================================================
+    const chainId = getChainId()
     let mintedSbts: { name: string; imageUrl: string }[] = []
     try {
       const sbtDb = newKyselyPostgresql()
@@ -305,49 +309,24 @@ export async function POST(request: NextRequest) {
         .executeTakeFirst()
       const total = parseFloat((totalRow?.total as string) || '0')
 
-      const thresholds: { tokenId: number; usdt: number }[] = [
-        { tokenId: 7, usdt: 0.02 },
-        { tokenId: 8, usdt: 5 },
-        { tokenId: 9, usdt: 20 },
-        { tokenId: 10, usdt: 50 },
-        { tokenId: 11, usdt: 100 },
-      ]
+      const thresholds = await getDonorThresholds(sbtDb, chainId)
 
       const existingRows = await sbtDb
         .selectFrom('credential_emission')
         .select('token_id')
         .where('wallet_address', '=', donor)
-        .where('chain_id', '=', 'celo')
+        .where('chain_id', '=', chainId)
         .execute()
       const existingIds = new Set(existingRows.map(r => r.token_id))
 
-      const contractAddr = getCeloCredentialsAddress(credentialsDeploymentsDir)
-      if (contractAddr) {
-        for (const t of thresholds) {
-          if (total >= t.usdt && !existingIds.has(t.tokenId)) {
-            try {
-              const hash = await walletClient.writeContract({
-                address: contractAddr,
-                abi: pasosDeJesusCredentialsAbi,
-                functionName: 'mintCredential',
-                args: [donor as `0x${string}`, BigInt(t.tokenId), BigInt(1)],
-                chain: walletClient.chain,
-                account: walletClient.account,
-              } as any)
-              await sbtDb.insertInto('credential_emission')
-                .values({ wallet_address: donor, token_id: t.tokenId, chain_id: 'celo' })
-                .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
-                .execute()
-              serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
-              const meta = await sbtDb
-                .selectFrom('credential_metadata')
-                .select(['name', 'image_url'])
-                .where('token_id', '=', t.tokenId)
-                .where('chain_id', '=', 'celo')
-                .executeTakeFirst()
-              if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
-            } catch { /* best effort per threshold */ }
-          }
+      for (const t of thresholds) {
+        if (total >= t.minUsdt && !existingIds.has(t.tokenId)) {
+          try {
+            await mintSBT(donor, t.tokenId, chainId)
+            serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
+            const meta = await getCredentialMetadata(sbtDb, t.tokenId, chainId)
+            if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
+          } catch { /* best effort per threshold */ }
         }
       }
     } catch (sbtError) {

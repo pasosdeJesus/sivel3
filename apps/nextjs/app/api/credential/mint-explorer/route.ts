@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPublicClient, createWalletClient, http, keccak256, encodePacked } from 'viem'
+import { keccak256, encodePacked } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
-import path from 'path'
-
-const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 'PasosDeJesusCredentials')
-import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
+import { mintSBT, getChainId } from '@/lib/credentials'
+import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
 
 const EXPLORER_TOKEN_ID = 13
 const MIN_CASES = 3
@@ -39,33 +35,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 })
   }
 
+  const chainId = getChainId()
   const db = newKyselyPostgresql()
 
-  // Check if already minted
-  const existing = await db
-    .selectFrom('credential_emission')
-    .selectAll()
-    .where('wallet_address', '=', wallet)
-    .where('token_id', '=', EXPLORER_TOKEN_ID)
-    .where('chain_id', '=', 'celo')
-    .executeTakeFirst()
-
-  if (existing) {
-    return NextResponse.json({ minted: false, reason: 'already_has' })
-  }
-
-  // Verify self-verification on learn.tg
-  const isVerified = await isLearnTgVerified(wallet)
-
-  if (!isVerified) {
-    return NextResponse.json({
-      minted: false,
-      reason: 'not_verified',
-      message: 'Complete self-verification on learn.tg to earn this SBT',
-    })
-  }
-
-  // Count distinct cases viewed (from web_event)
+  // Count distinct cases viewed
   const rows = await db
     .selectFrom('web_event')
     .select(db.fn.countAll().as('count'))
@@ -79,47 +52,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ minted: false, reason: 'insufficient_views', count })
   }
 
-  // Mint Explorer SBT
-  const contractAddress = getCeloCredentialsAddress(deploymentsDir)
-  if (!contractAddress) {
-    return NextResponse.json({ error: 'Contract not configured' }, { status: 500 })
-  }
-
-  const key = process.env.PRIVATE_KEY
-  if (!key) {
-    return NextResponse.json({ error: 'PRIVATE_KEY not configured' }, { status: 500 })
+  const isVerified = await isLearnTgVerified(wallet)
+  if (!isVerified) {
+    return NextResponse.json({
+      minted: false,
+      reason: 'not_verified',
+      message: 'Complete self-verification on learn.tg to earn this SBT',
+    })
   }
 
   try {
-    const chain = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? celo : celoSepolia
-    const account = privateKeyToAccount(key as `0x${string}`)
-    const walletClient = createWalletClient({ chain, transport: http(), account })
+    const result = await mintSBT(wallet, EXPLORER_TOKEN_ID, chainId)
+    if (!result) {
+      return NextResponse.json({ minted: false, reason: 'already_has' })
+    }
 
-    const hash = await walletClient.writeContract({
-      address: contractAddress,
-      abi: pasosDeJesusCredentialsAbi,
-      functionName: 'mintCredential',
-      args: [wallet as `0x${string}`, BigInt(EXPLORER_TOKEN_ID), BigInt(1)],
-      chain,
-      account,
-    } as any)
-
-    // Record emission
-    await db.insertInto('credential_emission')
-      .values({ wallet_address: wallet, token_id: EXPLORER_TOKEN_ID, chain_id: 'celo' })
-      .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
-      .execute()
-
-    const meta = await db
-      .selectFrom('credential_metadata')
-      .select(['name', 'image_url'])
-      .where('token_id', '=', EXPLORER_TOKEN_ID)
-      .where('chain_id', '=', 'celo')
-      .executeTakeFirst()
+    const meta = await getCredentialMetadata(db, EXPLORER_TOKEN_ID, chainId)
 
     return NextResponse.json({
       minted: true,
-      txHash: hash,
+      txHash: result.txHash,
       casesViewed: count,
       mintedSbt: meta ? { name: meta.name, imageUrl: meta.image_url } : null,
     })

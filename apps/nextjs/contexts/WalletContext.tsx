@@ -5,6 +5,12 @@ import { useAccount, useDisconnect, useChainId, useConnect } from 'wagmi'
 import { useMiniPay } from '@/hooks/useMiniPay'
 import { donate as donateFn } from '@/lib/donate'
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
+import { useTranslation } from '@/hooks/useTranslation'
+
+const sbtToastT = {
+  en: { sbtTitle: '🎖️ SBT Obtained!' },
+  es: { sbtTitle: '🎖️ ¡SBT Obtenido!' },
+}
 
 function recordWalletEvent(eventType: string, wallet?: string | null) {
   if (typeof window === 'undefined') return
@@ -24,7 +30,7 @@ interface WalletContextType {
   effectiveAddress: `0x${string}` | null
   chainId: number | null
   disconnect: () => void
-  donate: (regionId: number, amount: string, locale?: string) => Promise<{ txHash: string; learningPoints?: { success: boolean; newScore?: number; message?: string } }>
+  donate: (regionId: number, amount: string, locale?: string) => Promise<{ txHash: string; learningPoints?: { success: boolean; newScore?: number; message?: string }; mintedSbts?: { name: string; imageUrl: string }[] }>
   isTransacting: boolean
   isProcessing: boolean
   // Nuevas propiedades para MiniPay
@@ -49,6 +55,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { connect, connectors } = useConnect()
   const chainId = useChainId()
   const { isMiniPay, phoneNumber, isConnected: isMiniPayConnected, address: miniPayAddress } = useMiniPay()
+  const { toast } = useToast()
+  const { t } = useTranslation(sbtToastT)
 
   // Sincronizar el estado de MiniPay con el estado de wagmi
   const effectiveIsConnected = isConnected || (isMiniPay && isMiniPayConnected)
@@ -125,6 +133,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           const data = await r.json()
           if (data.minted) {
             console.log('Connector SBT minted')
+            if (data.mintedSbts) {
+              for (const sbt of data.mintedSbts) {
+                toast({ title: t('sbtTitle'), description: sbt.name, duration: 4000 })
+              }
+            }
           } else if (data.reason === 'not_verified') {
             console.info('Self-verification on learn.tg required for SBTs')
           }
@@ -137,7 +150,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [effectiveIsConnected, effectiveAddress])
 
   // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
-  const donate = useCallback(async (regionId: number, amount: string, locale?: string): Promise<{ txHash: string; learningPoints?: any }> => {
+  const donate = useCallback(async (regionId: number, amount: string, locale?: string): Promise<{ txHash: string; learningPoints?: any; mintedSbts?: { name: string; imageUrl: string }[] }> => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
 

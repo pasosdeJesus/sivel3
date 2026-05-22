@@ -12,5 +12,6 @@ Directory of logic modules shared between components and API routes.
 | `logger.ts` | Unified logging system with floating debug console for MiniPay. See `doc/mobile-debug-console.md`. |
 | `debug.ts` | Debug utilities: `safeStringify` for circular objects, `debugLog`. |
 | `utils.ts` | General utilities (`cn()` for Tailwind class merging). |
+|| `web-analytics.ts` | Web analytics helpers: `recordEvent()` for pageviews, donations, wallet connects. |
 
 For detailed feature and protocol documentation, see `doc/`.

@@ -17,13 +17,21 @@ These endpoints are consumed by the frontend and in turn query the sivel2 Rails 
 | `/api/regions` | GET | Donation regions (supports `?locale=es`) | Kysely → PostgreSQL |
 | `/api/regions/[id]/balance` | GET | On-chain balance of a region | Viem → Celo blockchain |
 | `/api/alleged-perpetrators` | GET | Enabled alleged perpetrators | Kysely → PostgreSQL |
-| `/api/donations/assign` | POST | Assign donation: verifies tx on-chain, calls the V2 contract, and increments Learning Points on learn.tg | Viem + Kysely + HTTP |
+| `/api/donations/assign` | POST | Assign donation: verifies tx on-chain, calls the V2 contract, mints donation SBTs, and increments Learning Points on learn.tg | Viem + Kysely + HTTP |
+|| `/api/credential/breakdown` | GET | SBT counts by type (JOIN `credential_emission` + `credential_metadata`) | Kysely → PostgreSQL |
+|| `/api/credential/leaderboard` | GET | Top donors with SBT counts (`?limit=10`) | Kysely → PostgreSQL |
+|| `/api/credential/wallet/[wallet]` | GET | SBTs + donation summary for a specific wallet | Kysely → PostgreSQL |
+|| `/api/credential/mint-connector` | POST | Mints Connector + Global Founder SBTs on wallet connect | Viem + Kysely |
+|| `/api/credential/mint-explorer` | POST | Mints Explorer SBT when user has viewed ≥3 distinct cases | Viem + Kysely |
+|| `/api/web-analytics/event` | POST | Records a web event (pageview, donation, wallet connect) | Kysely → PostgreSQL |
+|| `/api/web-analytics/summary` | GET | Aggregated analytics (page views, wallets, IPs, donations, SBTs) | Kysely → PostgreSQL |
+|| `/api/web-analytics/timeline` | GET | Daily timeline for a metric (`?metric=pageviews&days=30`) | Kysely → PostgreSQL |
 
 ## Key endpoints detail
 
 ### `POST /api/donations/assign`
 
-Full flow documented in `doc/donation-flow.md`. Receives `{ regionId, donor, amount, txHash }`, verifies the USDT transfer on-chain, executes `assignDonation` on the contract, and finally notifies learn.tg to increment Learning Points.
+Full flow documented in `doc/donation-flow.md`. Receives `{ regionId, donor, amount, txHash }`, verifies the USDT transfer on-chain, executes `assignDonation` on the contract, mints cumulative donation SBTs (Donor, Bronze, Silver, Gold, Diamond) when thresholds are reached, and finally notifies learn.tg to increment Learning Points.
 
 ### `GET /api/cases/datos-osm`
 

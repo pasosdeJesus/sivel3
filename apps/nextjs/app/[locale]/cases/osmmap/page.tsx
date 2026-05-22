@@ -24,6 +24,7 @@ const localT = {
     lpSuccess: 'You earned Learning Points. Total score: {{0}}',
     lpFallbackError: 'Unable to update Learning Points. Contact the team.',
     donationError: 'Donation error',
+    sbtTitle: '🎖️ SBT Obtained!',
     viewStats: '📊 View Site Statistics',
   },
   es: {
@@ -33,6 +34,7 @@ const localT = {
     lpSuccess: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
     lpFallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
     donationError: 'Error en donación',
+    sbtTitle: '🎖️ ¡SBT Obtenido!',
     viewStats: '📊 Ver Estadísticas del Sitio',
   },
 }
@@ -131,7 +133,7 @@ export default function OSMMapPage() {
       if (mintedSbts && mintedSbts.length > 0) {
         for (const sbt of mintedSbts) {
           toast({
-            title: '🎖️ SBT Obtained!',
+            title: t('sbtTitle'),
             description: sbt.name,
             duration: isMiniPay ? 0 : 4000,
           })
