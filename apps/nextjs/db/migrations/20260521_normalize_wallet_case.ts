@@ -7,12 +7,49 @@ export async function up(db: Kysely<any>): Promise<void> {
   // but PostgreSQL VARCHAR is case-sensitive. This prevents
   // duplicate entries like 0xABC... and 0xabc...
 
-  // 1. Normalize existing data
+  // 1. Drop duplicates before lowering (avoid unique constraint violations)
+  // credential_emission: keep earliest by id for each (wallet_address_lower, token_id, chain_id)
+  await sql`
+    DELETE FROM credential_emission WHERE id IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+          PARTITION BY LOWER(wallet_address), token_id, chain_id ORDER BY id
+        ) AS rn
+        FROM credential_emission
+      ) sub WHERE rn > 1
+    )
+  `.execute(db)
+
+  // transaction: keep earliest by id for each (wallet_lower, tipo)
+  await sql`
+    DELETE FROM transaction WHERE id IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+          PARTITION BY LOWER(wallet), tipo ORDER BY id
+        ) AS rn
+        FROM transaction WHERE wallet IS NOT NULL
+      ) sub WHERE rn > 1
+    )
+  `.execute(db)
+
+  // web_event: keep earliest by id for each (wallet_lower, event_type, created_at)
+  await sql`
+    DELETE FROM web_event WHERE id IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+          PARTITION BY LOWER(wallet), event_type, created_at ORDER BY id
+        ) AS rn
+        FROM web_event WHERE wallet IS NOT NULL
+      ) sub WHERE rn > 1
+    )
+  `.execute(db)
+
+  // 2. Normalize existing data to lowercase
   await sql`UPDATE transaction SET wallet = LOWER(wallet) WHERE wallet IS NOT NULL`.execute(db)
   await sql`UPDATE credential_emission SET wallet_address = LOWER(wallet_address) WHERE wallet_address IS NOT NULL`.execute(db)
   await sql`UPDATE web_event SET wallet = LOWER(wallet) WHERE wallet IS NOT NULL`.execute(db)
 
-  // 2. Create trigger function
+  // 3. Create trigger function
   await sql`
     CREATE OR REPLACE FUNCTION normalize_wallet() RETURNS trigger AS $$
     BEGIN
@@ -26,7 +63,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     $$ LANGUAGE plpgsql
   `.execute(db)
 
-  // 3. Attach triggers
+  // 4. Attach triggers
   await sql`
     CREATE TRIGGER trg_normalize_wallet_transaction
     BEFORE INSERT OR UPDATE ON transaction
