@@ -10,6 +10,22 @@ const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 
 import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 
 const CONNECTOR_TOKEN_ID = 2
+const MAX_FOUNDERS = 50
+
+async function getFounderTokenId(
+  db: ReturnType<typeof newKyselyPostgresql>,
+  chainId: string,
+): Promise<number | null> {
+  const row = await db
+    .selectFrom('credential_metadata')
+    .select('token_id')
+    .where('site', '=', 'sivel.xyz')
+    .where('type', '=', 'achievement')
+    .where('name', '=', 'Global Founder')
+    .where('chain_id', '=', chainId)
+    .executeTakeFirst()
+  return row ? row.token_id : null
+}
 
 /**
  * Check if a wallet is self-verified on learn.tg.
@@ -79,6 +95,7 @@ export async function POST(request: NextRequest) {
   }
 
   const chain = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? celo : celoSepolia
+  const chainId = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
   const publicClient = createPublicClient({ chain, transport: http() })
 
   try {
@@ -125,7 +142,51 @@ export async function POST(request: NextRequest) {
       .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
       .execute()
 
-    return NextResponse.json({ minted: true, txHash: hash })
+    // Global Founder: mint if < 50 total and user doesn't already have it
+    let founderMinted = false
+    try {
+      const founderTokenId = await getFounderTokenId(db, chainId)
+      if (founderTokenId !== null) {
+        const founderCount = await db
+          .selectFrom('credential_emission')
+          .select(db.fn.countAll().as('count'))
+          .where('token_id', '=', founderTokenId)
+          .where('chain_id', '=', chainId)
+          .executeTakeFirst()
+
+        if (Number(founderCount?.count || 0) < MAX_FOUNDERS) {
+          const existingFounder = await db
+            .selectFrom('credential_emission')
+            .selectAll()
+            .where('wallet_address', '=', wallet)
+            .where('token_id', '=', founderTokenId)
+            .where('chain_id', '=', chainId)
+            .executeTakeFirst()
+
+          if (!existingFounder) {
+            await walletClient.writeContract({
+              address: contractAddress,
+              abi: pasosDeJesusCredentialsAbi,
+              functionName: 'mintCredential',
+              args: [wallet as `0x${string}`, BigInt(founderTokenId), BigInt(1)],
+              chain,
+              account,
+            } as any)
+
+            await db.insertInto('credential_emission')
+              .values({ wallet_address: wallet, token_id: founderTokenId, chain_id: chainId })
+              .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
+              .execute()
+
+            founderMinted = true
+          }
+        }
+      }
+    } catch {
+      // Founder mint is best-effort — don't fail the Connector mint
+    }
+
+    return NextResponse.json({ minted: true, txHash: hash, founderMinted })
   } catch (err: any) {
     console.error('Connector mint failed:', err.message || err)
     return NextResponse.json({ minted: false, reason: 'tx_failed' }, { status: 500 })
