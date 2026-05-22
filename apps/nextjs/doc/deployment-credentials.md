@@ -109,16 +109,13 @@ bin/m credentials:register-type \
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
-  --display "Global Founder" --soulbound true --max-supply 0 \
+  --display "Global Founder" --soulbound true --max-supply 50 \
   --icon public/img/credential/source/global-founder.svg
 
 bin/m credentials:register-type \
   --network celoSepolia --site sivel.xyz --type achievement \
   --display "Explorer" --soulbound true --max-supply 0 \
   --icon public/img/credential/source/explorer.svg
-
-# Set maxSupply for Global Founder (tokenId 7 on fresh deployment)
-bin/m credentials:set-max-supply --network celoSepolia --token-id 7 --max 50
 
 # Verify types
 bin/m credentials:list-types --network celoSepolia
