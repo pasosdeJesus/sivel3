@@ -49,6 +49,9 @@ async function processEvent(
 
   for (let from = fromBlock; from <= latestBlock; from += CHUNK_SIZE) {
     const to = from + CHUNK_SIZE - 1n > latestBlock ? latestBlock : from + CHUNK_SIZE - 1n
+    let chunkLogs = 0
+    let chunkInserted = 0
+    let chunkSkipped = 0
 
     try {
       const logs = await publicClient.getLogs({
@@ -59,6 +62,7 @@ async function processEvent(
       })
 
       for (const log of logs) {
+        chunkLogs++
         totalLogs++
 
         let donor: string
@@ -99,6 +103,7 @@ async function processEvent(
 
         if (existing) {
           skipped++
+          chunkSkipped++
           continue
         }
 
@@ -118,17 +123,20 @@ async function processEvent(
           .execute()
 
         inserted++
-        process.stdout.write(`\r  ${contract.label} ${eventName}: ${inserted} nuevos, ${skipped} existentes | ult: ${donor.slice(0,6)}...${donor.slice(-4)} region ${regionId} ${amount.toFixed(2)} USDT`)
+        chunkInserted++
+        console.log(`    ${donor.slice(0,6)}...${donor.slice(-4)} → region ${regionId}, ${amount.toFixed(2)} USDT, tx=${txHash.slice(0,10)}...`)
       }
     } catch (err: any) {
+      console.log(`\n  ⚠️  Rango ${from}-${to}: ${err.message?.slice(0, 100)}`)
       if (err.message?.includes('range') || err.message?.includes('limit') || err.message?.includes('exceed')) {
-        process.stderr.write(`\n  Rango ${from}-${to} rechazado por RPC (límite de bloques), continuando...\n`)
         continue
       }
       throw err
     }
 
-    process.stdout.write(`\r${contract.label} ${eventName}: bloque ${from}-${to}: ${inserted} nuevos, ${skipped} existentes`)
+    if (chunkLogs > 0 || chunkInserted > 0 || chunkSkipped > 0) {
+      console.log(`  Chunk ${from}-${to}: ${chunkLogs} eventos, ${chunkInserted} nuevos, ${chunkSkipped} existentes`)
+    }
   }
 
   console.log(`\n${contract.label} ${eventName} — Total: ${totalLogs} eventos, ${inserted} insertados, ${skipped} existentes`)
