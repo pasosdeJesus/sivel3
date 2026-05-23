@@ -341,7 +341,7 @@ export async function POST(request: NextRequest) {
         .insertInto('transaction')
         .values({
           wallet: donor,
-          tipo: 'donation',
+          tipo: 'learningpoint',
           crypto: 'learningpoint',
           cantidad: '1',
           impacto_balance: '1',

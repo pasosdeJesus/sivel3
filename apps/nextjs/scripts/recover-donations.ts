@@ -87,9 +87,9 @@ async function processEvent(
         const existing = await db
           .selectFrom('transaction')
           .select('id')
-          .where((eb: any) =>
-            eb('hash_tx', '=', txHash).or('hash_assign', '=', txHash)
-          )
+          .where('hash_tx', '=', txHash)
+          .where('wallet', '=', donor)
+          .where('tipo', '=', 'donation')
           .executeTakeFirst()
 
         if (existing) {
