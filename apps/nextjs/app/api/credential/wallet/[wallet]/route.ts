@@ -5,7 +5,8 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ wallet: string }> }
 ) {
-  const { wallet } = await params
+  const { wallet: raw } = await params
+  const wallet = (raw || '').toLowerCase()
   if (!wallet || wallet.length !== 42 || !wallet.startsWith('0x')) {
     return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 })
   }

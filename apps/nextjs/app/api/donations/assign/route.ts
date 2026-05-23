@@ -148,7 +148,8 @@ async function verifyTransferAndGetRegion(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { regionId, donor, amount, txHash } = body
+    const { regionId, amount, txHash } = body
+    const donor = (body.donor || '').toLowerCase()
 
     serverLog.info(`Solicitud de asignación de donación: región=${regionId}, donor=${donor}, amount=${amount}, txHash=${txHash}`)
 
@@ -297,7 +298,7 @@ export async function POST(request: NextRequest) {
       const totalRow = await sbtDb
         .selectFrom('transaction')
         .select(sbtDb.fn.sum('cantidad').as('total'))
-        .where('wallet', '=', donor.toLowerCase())
+        .where('wallet', '=', donor)
         .where('tipo', '=', 'donation')
         .where('crypto', '=', 'usdt')
         .executeTakeFirst()
@@ -308,7 +309,7 @@ export async function POST(request: NextRequest) {
       const existingRows = await sbtDb
         .selectFrom('credential_emission')
         .select('token_id')
-        .where('wallet_address', '=', donor.toLowerCase())
+        .where('wallet_address', '=', donor)
         .where('chain_id', '=', chainId)
         .execute()
       const existingIds = new Set(existingRows.map(r => r.token_id))

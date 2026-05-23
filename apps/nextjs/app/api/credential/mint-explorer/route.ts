@@ -41,7 +41,8 @@ async function hasDonated(db: ReturnType<typeof newKyselyPostgresql>, wallet: st
 }
 
 export async function POST(request: NextRequest) {
-  const { wallet } = await request.json().catch(() => ({}))
+  const { wallet: raw } = await request.json().catch(() => ({}))
+  const wallet = (raw || '').toLowerCase()
   if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
     return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 })
   }
