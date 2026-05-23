@@ -98,7 +98,8 @@ async function processEvent(
               .or('hash_tx', '=', txHashAssigned || '')
               .or('hash_assign', '=', txHashAssigned || '')
           )
-          .where('wallet', '=', donor)
+          .where('tipo', '=', 'donation')
+          .where('crypto', '=', 'usdt')
           .executeTakeFirst()
 
         if (existing) {
