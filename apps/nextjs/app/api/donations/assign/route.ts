@@ -339,10 +339,18 @@ export async function POST(request: NextRequest) {
     const MAX_FOUNDERS = 50
     try {
       const sbtDb2 = newKyselyPostgresql()
-      // Connector
-      await mintSBT(donor, CONNECTOR_ID, chainId).then(() => {
-        serverLog.success(`Connector SBT minted for donor ${donor}`)
-      }).catch(() => {})
+      // Resolve Connector tokenId dynamically
+      const connRow = await sbtDb2
+        .selectFrom('credential_metadata')
+        .select('token_id')
+        .where('name', '=', 'Connector')
+        .where('chain_id', '=', chainId)
+        .executeTakeFirst()
+      if (connRow) {
+        await mintSBT(donor, connRow.token_id, chainId).then(() => {
+          serverLog.success(`Connector SBT minted for donor ${donor}`)
+        }).catch(() => {})
+      }
       // Global Founder (if < 50 total)
       const founderRow = await sbtDb2
         .selectFrom('credential_metadata')

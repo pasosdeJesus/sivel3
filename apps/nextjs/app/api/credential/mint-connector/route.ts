@@ -5,17 +5,17 @@ import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintSBT, getChainId } from '@/lib/credentials'
 import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
 
-const CONNECTOR_TOKEN_ID = 2
 const MAX_FOUNDERS = 50
 
-async function getFounderTokenId(
+async function getTokenId(
   db: ReturnType<typeof newKyselyPostgresql>,
+  name: string,
   chainId: string,
 ): Promise<number | null> {
   const row = await db
     .selectFrom('credential_metadata')
     .select('token_id')
-    .where('name', '=', 'Global Founder')
+    .where('name', '=', name)
     .where('chain_id', '=', chainId)
     .executeTakeFirst()
   return row ? row.token_id : null
@@ -76,7 +76,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const connectorResult = await mintSBT(wallet, CONNECTOR_TOKEN_ID, chainId)
+    const connectorId = await getTokenId(db, 'Connector', chainId)
+    if (!connectorId) {
+      return NextResponse.json({ error: 'Connector type not registered' }, { status: 500 })
+    }
+    const connectorResult = await mintSBT(wallet, connectorId, chainId)
     if (!connectorResult) {
       return NextResponse.json({ minted: false, reason: 'already_has' })
     }
@@ -84,7 +88,7 @@ export async function POST(request: NextRequest) {
     let founderMinted = false
     let founderTokenId: number | null = null
     try {
-      founderTokenId = await getFounderTokenId(db, chainId)
+      founderTokenId = await getTokenId(db, 'Global Founder', chainId)
       if (founderTokenId !== null) {
         const founderCount = await db
           .selectFrom('credential_emission')
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
     } catch { /* best effort */ }
 
     const [connectorMeta, founderMeta] = await Promise.all([
-      getCredentialMetadata(db, CONNECTOR_TOKEN_ID, chainId),
+      getCredentialMetadata(db, connectorId, chainId),
       founderMinted && founderTokenId !== null
         ? getCredentialMetadata(db, founderTokenId, chainId)
         : Promise.resolve(null),
