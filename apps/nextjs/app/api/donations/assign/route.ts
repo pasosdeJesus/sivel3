@@ -133,12 +133,6 @@ async function verifyTransferAndGetRegion(
       serverLog.success(`Transferencia verificada correctamente: ${txHash} - Región ${regionId}`)
       return { isValid: true, regionId }
     } else if (isValid && (regionId === null || (regionId !== 1 && regionId !== 2))) {
-      // If extracted regionId looks like an ERC-20 amount (> 1000), treat as
-      // non-region-aware transfer — use body's regionId as fallback.
-      if (regionId !== null && regionId > 1000) {
-        serverLog.warn(`RegionId extraído parece ser un monto (${regionId}), usando body`)
-        return { isValid: true, regionId: null }
-      }
       serverLog.error(`Región inválida en data: ${regionId}`)
       return { isValid: false, regionId: null }
     }
