@@ -29,6 +29,17 @@ async function isLearnTgVerified(wallet: string): Promise<boolean> {
   } catch { return true }
 }
 
+async function hasDonated(db: ReturnType<typeof newKyselyPostgresql>, wallet: string): Promise<boolean> {
+  const row = await db
+    .selectFrom('transaction')
+    .select('id')
+    .where('wallet', '=', wallet)
+    .where('tipo', '=', 'donation')
+    .where('crypto', '=', 'usdt')
+    .executeTakeFirst()
+  return !!row
+}
+
 export async function POST(request: NextRequest) {
   const { wallet } = await request.json().catch(() => ({}))
   if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
@@ -38,7 +49,6 @@ export async function POST(request: NextRequest) {
   const chainId = getChainId()
   const db = newKyselyPostgresql()
 
-  // Count distinct cases viewed
   const rows = await db
     .selectFrom('web_event')
     .select(db.fn.countAll().as('count'))
@@ -53,11 +63,12 @@ export async function POST(request: NextRequest) {
   }
 
   const isVerified = await isLearnTgVerified(wallet)
-  if (!isVerified) {
+  const donated = await hasDonated(db, wallet)
+  if (!isVerified && !donated) {
     return NextResponse.json({
       minted: false,
       reason: 'not_verified',
-      message: 'Complete self-verification on learn.tg to earn this SBT',
+      message: 'Complete self-verification on learn.tg or make a donation to earn SBTs',
     })
   }
 

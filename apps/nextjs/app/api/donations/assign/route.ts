@@ -333,6 +333,39 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================
+    // Connector + Global Founder: every donor gets them
+    // ============================================================
+    const CONNECTOR_ID = 2
+    const MAX_FOUNDERS = 50
+    try {
+      const sbtDb2 = newKyselyPostgresql()
+      // Connector
+      await mintSBT(donor, CONNECTOR_ID, chainId).then(() => {
+        serverLog.success(`Connector SBT minted for donor ${donor}`)
+      }).catch(() => {})
+      // Global Founder (if < 50 total)
+      const founderRow = await sbtDb2
+        .selectFrom('credential_metadata')
+        .select('token_id')
+        .where('name', '=', 'Global Founder')
+        .where('chain_id', '=', chainId)
+        .executeTakeFirst()
+      if (founderRow) {
+        const founderCount = await sbtDb2
+          .selectFrom('credential_emission')
+          .select(sbtDb2.fn.countAll().as('count'))
+          .where('token_id', '=', founderRow.token_id)
+          .where('chain_id', '=', chainId)
+          .executeTakeFirst()
+        if (Number(founderCount?.count || 0) < MAX_FOUNDERS) {
+          await mintSBT(donor, founderRow.token_id, chainId).then(() => {
+            serverLog.success(`Global Founder SBT minted for donor ${donor}`)
+          }).catch(() => {})
+        }
+      }
+    } catch { /* best effort */ }
+
+    // ============================================================
     // Record Learning Points request in transaction
     // ============================================================
     try {

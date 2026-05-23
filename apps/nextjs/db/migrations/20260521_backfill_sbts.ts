@@ -189,16 +189,26 @@ export async function up(db: Kysely<any>): Promise<void> {
   // ── 1. Connector ──────────────────────────────────────
   if (connectorId) {
     console.log('\n── Connector (tokenId=' + connectorId + ') ──')
-    const wallets = await db
+    // Wallets from web_event AND transaction (donors)
+    const webWallets = await db
       .selectFrom('web_event')
       .select('wallet')
       .where('wallet', 'is not', null)
       .groupBy('wallet')
       .execute()
+    const donorWallets = await db
+      .selectFrom('transaction')
+      .select('wallet')
+      .where('tipo', '=', 'donation')
+      .where('crypto', '=', 'usdt')
+      .groupBy('wallet')
+      .execute()
+    const allWallets = [...new Set([...webWallets, ...donorWallets].map(r => (r.wallet as string).toLowerCase()))]
+    console.log(`  ${allWallets.length} wallets (${webWallets.length} from web, ${donorWallets.length} donors)`)
 
-    for (const row of wallets) {
+    for (const row of allWallets) {
       try {
-        const minted = await mintIfMissing(db, row.wallet as string, connectorId, walletClient, publicClient, resolvedAddress)
+        const minted = await mintIfMissing(db, row as string, connectorId, walletClient, publicClient, resolvedAddress)
         if (minted) totalMinted++
       } catch (err: any) {
         console.error(`  ✗ ${row.wallet}: ${err.message}`)
@@ -235,23 +245,34 @@ export async function up(db: Kysely<any>): Promise<void> {
   // ── 3. Global Founder (first 50 by date + learn.tg verified) ──
   if (founderId) {
     console.log(`\n── Global Founder (tokenId=${founderId}) ──`)
-    const earliestWallets = await db
+    // First 50 wallets by date: merge web_event + transaction donors
+    const webEarly = await db
       .selectFrom('web_event')
       .select(['wallet', db.fn.min('created_at').as('first_seen')])
       .where('wallet', 'is not', null)
       .groupBy('wallet')
-      .orderBy('first_seen', 'asc')
-      .limit(50)
       .execute()
+    const donorEarly = await db
+      .selectFrom('transaction')
+      .select(['wallet', db.fn.min('fecha').as('first_seen')])
+      .where('tipo', '=', 'donation')
+      .where('crypto', '=', 'usdt')
+      .groupBy('wallet')
+      .execute()
+    const walletDates = new Map<string, Date>()
+    for (const r of [...webEarly, ...donorEarly]) {
+      const w = (r.wallet as string).toLowerCase()
+      const d = new Date(r.first_seen as string)
+      if (!walletDates.has(w) || d < walletDates.get(w)!) walletDates.set(w, d)
+    }
+    const earliestWallets = [...walletDates.entries()]
+      .sort((a, b) => a[1].getTime() - b[1].getTime())
+      .slice(0, 50)
+      .map(([w]) => w)
+    console.log(`  ${earliestWallets.length} candidates (from ${walletDates.size} unique wallets)`)
 
     let verifiedFounders = 0
-    for (const row of earliestWallets) {
-      const wallet = row.wallet as string
-      const verified = await checkLearnTgVerified(wallet, PRIVATE_KEY)
-      if (!verified) {
-        console.log(`  - ${wallet.slice(0, 6)}...${wallet.slice(-4)} (no verificado en learn.tg)`)
-        continue
-      }
+    for (const wallet of earliestWallets) {
       try {
         const minted = await mintIfMissing(db, wallet, founderId, walletClient, publicClient, resolvedAddress)
         if (minted) {

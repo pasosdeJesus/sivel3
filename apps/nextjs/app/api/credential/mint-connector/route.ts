@@ -15,8 +15,6 @@ async function getFounderTokenId(
   const row = await db
     .selectFrom('credential_metadata')
     .select('token_id')
-    .where('site', '=', 'sivel.xyz')
-    .where('type', '=', 'achievement')
     .where('name', '=', 'Global Founder')
     .where('chain_id', '=', chainId)
     .executeTakeFirst()
@@ -46,6 +44,17 @@ async function isLearnTgVerified(wallet: string): Promise<boolean> {
   }
 }
 
+async function hasDonated(db: ReturnType<typeof newKyselyPostgresql>, wallet: string): Promise<boolean> {
+  const row = await db
+    .selectFrom('transaction')
+    .select('id')
+    .where('wallet', '=', wallet)
+    .where('tipo', '=', 'donation')
+    .where('crypto', '=', 'usdt')
+    .executeTakeFirst()
+  return !!row
+}
+
 export async function POST(request: NextRequest) {
   const { wallet } = await request.json().catch(() => ({}))
   if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
@@ -53,25 +62,25 @@ export async function POST(request: NextRequest) {
   }
 
   const chainId = getChainId()
+  const db = newKyselyPostgresql()
+
+  // Verify: either learn.tg verified OR has donated
   const isVerified = await isLearnTgVerified(wallet)
-  if (!isVerified) {
+  const donated = await hasDonated(db, wallet)
+  if (!isVerified && !donated) {
     return NextResponse.json({
       minted: false,
       reason: 'not_verified',
-      message: 'Complete self-verification on learn.tg to earn this SBT',
+      message: 'Complete self-verification on learn.tg or make a donation to earn SBTs',
     })
   }
 
-  const db = newKyselyPostgresql()
-
   try {
-    // Mint Connector
     const connectorResult = await mintSBT(wallet, CONNECTOR_TOKEN_ID, chainId)
     if (!connectorResult) {
       return NextResponse.json({ minted: false, reason: 'already_has' })
     }
 
-    // Global Founder: mint if < 50 total
     let founderMinted = false
     let founderTokenId: number | null = null
     try {
@@ -89,11 +98,8 @@ export async function POST(request: NextRequest) {
           if (result) founderMinted = true
         }
       }
-    } catch {
-      // Founder mint is best-effort
-    }
+    } catch { /* best effort */ }
 
-    // Resolve SBT names for toast
     const [connectorMeta, founderMeta] = await Promise.all([
       getCredentialMetadata(db, CONNECTOR_TOKEN_ID, chainId),
       founderMinted && founderTokenId !== null
@@ -105,12 +111,7 @@ export async function POST(request: NextRequest) {
     if (connectorMeta) mintedSbts.push({ name: connectorMeta.name, imageUrl: connectorMeta.image_url })
     if (founderMeta) mintedSbts.push({ name: founderMeta.name, imageUrl: founderMeta.image_url })
 
-    return NextResponse.json({
-      minted: true,
-      txHash: connectorResult.txHash,
-      founderMinted,
-      mintedSbts,
-    })
+    return NextResponse.json({ minted: true, txHash: connectorResult.txHash, founderMinted, mintedSbts })
   } catch (err: any) {
     console.error('Connector mint failed:', err.message || err)
     return NextResponse.json({ minted: false, reason: 'tx_failed' }, { status: 500 })
