@@ -84,12 +84,17 @@ async function processEvent(
           amount = Number(args.amount) / 1_000_000
         }
 
+        // Dedup: check by hash_tx OR hash_assign matching either the tx hash or the assigned hash
         const existing = await db
           .selectFrom('transaction')
           .select('id')
-          .where('hash_tx', '=', txHash)
+          .where((eb: any) =>
+            eb('hash_tx', '=', txHash)
+              .or('hash_assign', '=', txHash)
+              .or('hash_tx', '=', txHashAssigned || '')
+              .or('hash_assign', '=', txHashAssigned || '')
+          )
           .where('wallet', '=', donor)
-          .where('tipo', '=', 'donation')
           .executeTakeFirst()
 
         if (existing) {
