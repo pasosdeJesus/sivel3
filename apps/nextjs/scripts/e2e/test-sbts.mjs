@@ -21,7 +21,8 @@ if (BASE_URL === 'https://sivel.xyz') {
   console.error('E2E solo contra desarrollo, no producción.')
   process.exit(1)
 }
-const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || 'https://forno.celo-sepolia.celo-testnet.org').replace(/"/g, '')
+const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || 'https://forno.celo-sepolia.celo-testnet.org'
+const RPC_DONATION = 'https://forno.celo-sepolia.celo-testnet.org' // forno for custom-data txs
 const USDT = process.env.NEXT_PUBLIC_USDT_ADDRESS
 const DONATION = BASE_URL === 'https://sivel.xyz:9001'
   ? '0xc50123FB87e4167Fe9275Cab90Ae35551fE1248e' // Sepolia deployment
@@ -95,8 +96,8 @@ async function testConnector() {
 async function testDonation() {
   if (!USDT || !DONATION) { fail('Addresses not set'); return }
   console.log('\n── Donation ($100, MiniPay flow) ──')
-  const pc = createPublicClient({ chain: celoSepolia, transport: http(RPC_URL) })
-  const wc = createWalletClient({ chain: celoSepolia, transport: http(RPC_URL), account: testAccount })
+  const pc = createPublicClient({ chain: celoSepolia, transport: http(RPC_DONATION) })
+  const wc = createWalletClient({ chain: celoSepolia, transport: http(RPC_DONATION), account: testAccount })
 
   try {
     // Build custom transfer data with regionId appended (same as lib/donate.ts:79)
