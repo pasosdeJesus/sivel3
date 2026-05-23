@@ -313,7 +313,12 @@ export async function POST(request: NextRequest) {
         .execute()
       const existingIds = new Set(existingRows.map(r => r.token_id))
 
+      serverLog.info(`[SBT] Total donado: ${total}, thresholds encontrados: ${thresholds.length}, chainId=${chainId}`)
+      if (thresholds.length === 0) {
+        serverLog.warn('[SBT] No se encontraron thresholds de donación en credential_metadata')
+      }
       for (const t of thresholds) {
+        serverLog.info(`[SBT] Threshold: ${t.name} (tokenId=${t.tokenId}) min=${t.minUsdt} total=${total} tiene=${existingIds.has(t.tokenId)}`)
         if (total >= t.minUsdt && !existingIds.has(t.tokenId)) {
           try {
             await mintSBT(donor, t.tokenId, chainId)

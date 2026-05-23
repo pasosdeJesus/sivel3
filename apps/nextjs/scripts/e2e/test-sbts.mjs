@@ -23,7 +23,9 @@ if (BASE_URL === 'https://sivel.xyz') {
 }
 const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || 'https://forno.celo-sepolia.celo-testnet.org').replace(/"/g, '')
 const USDT = process.env.NEXT_PUBLIC_USDT_ADDRESS
-const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
+const DONATION = BASE_URL === 'https://sivel.xyz:9001'
+  ? '0xc50123FB87e4167Fe9275Cab90Ae35551fE1248e' // Sepolia deployment
+  : process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 if (!PRIVATE_KEY) { console.error('PRIVATE_KEY not set'); process.exit(1) }
@@ -121,6 +123,7 @@ async function testDonation() {
     ok('Assigned')
 
     const sbts = r.data.mintedSbts || []
+    console.log(`  mintedSbts response: ${JSON.stringify(sbts)}`)
     if (sbts.length) {
       ok(`Toast: ${sbts.map(s=>s.name).join(', ')}`)
       for (const lvl of ['Donor','Bronze Donor','Silver Donor','Gold Donor','Diamond Donor'])

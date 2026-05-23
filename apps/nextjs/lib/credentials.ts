@@ -122,11 +122,10 @@ export async function getDonorThresholds(
     const row = await db
       .selectFrom('credential_metadata')
       .select('token_id')
-      .where('site', '=', 'sivel.xyz')
-      .where('type', '=', 'achievement')
       .where('name', '=', t.name)
       .where('chain_id', '=', chainId)
       .executeTakeFirst()
+    console.log(`[credentials] getDonorThresholds: ${t.name} chain=${chainId} → ${row ? row.token_id : 'NOT FOUND'}`)
     if (row) {
       result.push({ tokenId: row.token_id, name: t.name, minUsdt: t.minUsdt })
     }
