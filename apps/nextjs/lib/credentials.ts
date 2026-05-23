@@ -94,7 +94,7 @@ export async function mintSBT(
   const hash = await mintRoleSBT(walletClient, contractAddress, wallet as `0x${string}`, tokenId)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
-  await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 60_000 })
+  await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
 
   // Record emission
   await db.insertInto('credential_emission')
