@@ -133,6 +133,30 @@ async function testDonation() {
   } catch(e) { fail('Donation', e.response?.data?.error||e.message?.slice(0,60)) }
 }
 
+// ─── Explorer: record 3 case views then mint ───
+async function testExplorer() {
+  console.log('\n── Explorer SBT ──')
+  if (await walletHasSbt('Explorer')) { ok('Already minted'); return }
+
+  const cases = ['171399', '171491', '171287']
+  for (const c of cases) {
+    await api.post('/api/web-analytics/event', {
+      event_type: 'pageview', pathname: `/cases/${c}`, wallet,
+    }).catch(() => {})
+  }
+  console.log(`  Recorded ${cases.length} case views`)
+
+  try {
+    const r = await api.post('/api/credential/mint-explorer', { wallet })
+    if (!r.data.minted) {
+      if (r.data.reason === 'already_has') { ok('Already minted'); return }
+      fail('Explorer', JSON.stringify(r.data)); return
+    }
+    ok('Explorer minted!')
+    if (r.data.mintedSbt) ok(`Toast: ${r.data.mintedSbt.name}`)
+  } catch(e) { fail('Explorer', e.message?.slice(0,60)) }
+}
+
 // ─── Verify ───
 async function verify() {
   console.log('\n── Verify ──')
@@ -161,6 +185,7 @@ async function main() {
   const bal = await fund()
   if (bal >= 100) await testDonation()
   await verify()
+  await testExplorer()
   await stats()
   console.log(`\n${'='.repeat(40)}\n${passed} passed, ${failed} failed`)
   if (failed) process.exit(1)

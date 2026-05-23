@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
       const totalRow = await sbtDb
         .selectFrom('transaction')
         .select(sbtDb.fn.sum('cantidad').as('total'))
-        .where('wallet', '=', donor)
+        .where('wallet', '=', donor.toLowerCase())
         .where('tipo', '=', 'donation')
         .where('crypto', '=', 'usdt')
         .executeTakeFirst()
@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
       const existingRows = await sbtDb
         .selectFrom('credential_emission')
         .select('token_id')
-        .where('wallet_address', '=', donor)
+        .where('wallet_address', '=', donor.toLowerCase())
         .where('chain_id', '=', chainId)
         .execute()
       const existingIds = new Set(existingRows.map(r => r.token_id))

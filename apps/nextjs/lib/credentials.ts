@@ -66,11 +66,12 @@ export async function mintSBT(
   const db = newKyselyPostgresql()
   const contractAddress = getCredentialsContractAddress()
 
+  const w = wallet.toLowerCase()
   // Off-chain cache check
   const existing = await db
     .selectFrom('credential_emission')
     .select('id')
-    .where('wallet_address', '=', wallet)
+    .where('wallet_address', '=', w)
     .where('token_id', '=', tokenId)
     .where('chain_id', '=', chainId)
     .executeTakeFirst()
@@ -79,10 +80,10 @@ export async function mintSBT(
 
   // On-chain check (SBT may have been minted outside our DB)
   const publicClient = getPublicClient()
-  const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, wallet as `0x${string}`, tokenId)
+  const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, w as `0x${string}`, tokenId)
   if (hasOnChain) {
     await db.insertInto('credential_emission')
-      .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
+      .values({ wallet_address: w, token_id: tokenId, chain_id: chainId })
       .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
       .execute()
     return null
@@ -91,14 +92,14 @@ export async function mintSBT(
   // Mint on-chain
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
-  const hash = await mintRoleSBT(walletClient, contractAddress, wallet as `0x${string}`, tokenId)
+  const hash = await mintRoleSBT(walletClient, contractAddress, w as `0x${string}`, tokenId)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
   await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
 
   // Record emission
   await db.insertInto('credential_emission')
-    .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
+    .values({ wallet_address: w, token_id: tokenId, chain_id: chainId })
     .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
     .execute()
 
