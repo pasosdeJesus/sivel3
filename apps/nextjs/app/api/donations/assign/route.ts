@@ -347,9 +347,12 @@ export async function POST(request: NextRequest) {
         .where('chain_id', '=', chainId)
         .executeTakeFirst()
       if (connRow) {
-        await mintSBT(donor, connRow.token_id, chainId).then(() => {
+        const r = await mintSBT(donor, connRow.token_id, chainId)
+        if (r) {
           serverLog.success(`Connector SBT minted for donor ${donor}`)
-        }).catch(() => {})
+          const meta = await getCredentialMetadata(sbtDb2, connRow.token_id, chainId)
+          if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
+        }
       }
       // Global Founder (if < 50 total)
       const founderRow = await sbtDb2
@@ -366,9 +369,12 @@ export async function POST(request: NextRequest) {
           .where('chain_id', '=', chainId)
           .executeTakeFirst()
         if (Number(founderCount?.count || 0) < MAX_FOUNDERS) {
-          await mintSBT(donor, founderRow.token_id, chainId).then(() => {
+          const r2 = await mintSBT(donor, founderRow.token_id, chainId)
+          if (r2) {
             serverLog.success(`Global Founder SBT minted for donor ${donor}`)
-          }).catch(() => {})
+            const meta = await getCredentialMetadata(sbtDb2, founderRow.token_id, chainId)
+            if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
+          }
         }
       }
     } catch { /* best effort */ }
