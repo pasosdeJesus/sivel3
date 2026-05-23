@@ -20,14 +20,14 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
   `.execute(db)
 
-  // transaction: keep earliest by id for each (wallet_lower, tipo)
+  // transaction: keep earliest by unique (wallet_lower, tipo, hash_tx)
   await sql`
     DELETE FROM transaction WHERE id IN (
       SELECT id FROM (
         SELECT id, ROW_NUMBER() OVER (
-          PARTITION BY LOWER(wallet), tipo ORDER BY id
+          PARTITION BY LOWER(wallet), tipo, hash_tx ORDER BY id
         ) AS rn
-        FROM transaction WHERE wallet IS NOT NULL
+        FROM transaction WHERE wallet IS NOT NULL AND hash_tx IS NOT NULL
       ) sub WHERE rn > 1
     )
   `.execute(db)
