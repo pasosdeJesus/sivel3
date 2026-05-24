@@ -17,10 +17,10 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import {
+  mintRoleSBT,
   hasCredentialOnChain,
   getCeloCredentialsAddress,
 } from '@pasosdejesus/m/blockchain'
-import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 import path from 'path'
 import type { Kysely } from 'kysely'
 
@@ -95,22 +95,10 @@ export async function mintSBT(
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
   console.log(`[credentials] mintSBT: minting tokenId=${tokenId} for ${wallet} on ${chainId}`)
-  // Call writeContract directly with explicit gas for Celo
-  // (mintRoleSBT lets viem auto-estimate, which gives ~480 gwei on Alchemy)
-  const hash = await walletClient.writeContract({
-    address: contractAddress,
-    abi: pasosDeJesusCredentialsAbi,
-    functionName: 'mintCredential',
-    args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
-    chain: walletClient.chain,
-    account: walletClient.account,
-    gas: 200000n,
-    maxFeePerGas: 20000000000n,   // 20 gwei max
-    maxPriorityFeePerGas: 2000000000n, // 2 gwei tip
-  } as any)
+  const hash = await mintRoleSBT(walletClient, contractAddress, wallet as `0x${string}`, tokenId)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
-  await publicClient2.waitForTransactionReceipt({ hash, timeout: 120_000 })
+  await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
 
   // Record emission
   await db.insertInto('credential_emission')
