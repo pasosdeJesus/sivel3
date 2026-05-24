@@ -91,15 +91,14 @@ export async function mintSBT(
     return null
   }
 
-  // Mint on-chain — bypass mintRoleSBT to use pending nonce (avoids
-  // 'replacement transaction underpriced' when previous mint attempts
-  // left pending txs in the mempool)
+  // Mint on-chain — use pending nonce and explicit gasPrice to avoid
+  // viem's auto-nonce getting stuck on rejected txs in the mempool
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
   const contractAddress2 = getCredentialsContractAddress()
   const nonce = await publicClient2.getTransactionCount({
     address: walletClient.account.address,
-    blockTag: 'pending',
+    blockTag: 'latest',
   })
   const gasPrice = await publicClient2.getGasPrice()
   console.log(`[credentials] mintSBT: tokenId=${tokenId} for ${wallet} nonce=${nonce} gasPrice=${Number(gasPrice)/1e9}gwei`)

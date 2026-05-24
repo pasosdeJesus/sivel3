@@ -18,6 +18,10 @@ const CONTRACT = '0x9522F056fA74eDBFE72988c002BE37048D5D6604'
 const TARGET = '0x84272a6dd0D5fE9ea2Ab28Cf96e72f4F7da00C5C'
 const TOKEN_ID = 2 // Donor
 
+// Force nonce to reproduce error — use 'latest' to see nonce gap,
+// or set to specific number to test replacement
+const FORCE_NONCE = parseInt(process.env.FORCE_NONCE || '0') || undefined
+
 const key = process.env.PRIVATE_KEY
 if (!key) { console.error('PRIVATE_KEY not set'); process.exit(1) }
 
@@ -54,19 +58,17 @@ async function main() {
   // Nonce
   const nonceLatest = await pc.getTransactionCount({ address: account.address })
   const noncePending = await pc.getTransactionCount({ address: account.address, blockTag: 'pending' })
-  console.log(`Nonce: ${nonceLatest} (latest) / ${noncePending} (pending)`)
-  if (noncePending > nonceLatest) {
-    console.log(`⚠️  ${noncePending - nonceLatest} pending txs. May need to clear mempool first.`)
-  }
-
+  const nonceToUse = FORCE_NONCE || noncePending
+  console.log(`Nonce: ${nonceLatest} (latest) / ${noncePending} (pending) → using ${nonceToUse}`)
+  
   // Gas price
   const gasPrice = await pc.getGasPrice()
   console.log(`Gas price: ${Number(gasPrice)/1e9} gwei`)
 
-  // Mint
-  console.log(`\nMinting Donor SBT for ${TARGET}...`)
-  const wc = createWalletClient({ chain: celo, transport: http(rpc), account })
+  // Try 'pending' first (likely fails with "replacement underpriced")
+  console.log(`\nAttempt 1: nonce=pending (${noncePending})`)
   try {
+    const wc = createWalletClient({ chain: celo, transport: http(rpc), account })
     const hash = await wc.writeContract({
       address: CONTRACT, abi,
       functionName: 'mintCredential',
@@ -75,16 +77,30 @@ async function main() {
       nonce: noncePending,
       gasPrice,
     })
-    console.log(`✅ txHash: ${hash}`)
-    console.log('Waiting for receipt...')
+    console.log(`✅ nonce=${noncePending}: txHash ${hash.slice(0,10)}...`)
     await pc.waitForTransactionReceipt({ hash, timeout: 60_000 })
     console.log('✅ Confirmed!')
-
-    // Verify
-    const bal = await pc.readContract({ address: CONTRACT, abi, functionName: 'balanceOf', args: [TARGET, BigInt(TOKEN_ID)] })
-    console.log(`Target Donor balance: ${bal}`)
   } catch (e) {
-    console.log(`❌ ${e.message?.slice(0,200)}`)
+    console.log(`❌ nonce=${noncePending}: ${e.message?.slice(0,160)}`)
+  }
+
+  // Try 'latest' (should work since it skips stuck pending txs)
+  console.log(`\nAttempt 2: nonce=latest (${nonceLatest})`)
+  try {
+    const wc2 = createWalletClient({ chain: celo, transport: http(rpc), account })
+    const hash = await wc2.writeContract({
+      address: CONTRACT, abi,
+      functionName: 'mintCredential',
+      args: [TARGET, BigInt(TOKEN_ID), BigInt(1)],
+      chain: celo, account,
+      nonce: nonceLatest,
+      gasPrice,
+    })
+    console.log(`✅ nonce=${nonceLatest}: txHash ${hash.slice(0,10)}...`)
+    await pc.waitForTransactionReceipt({ hash, timeout: 60_000 })
+    console.log('✅ Confirmed!')
+  } catch (e) {
+    console.log(`❌ nonce=${nonceLatest}: ${e.message?.slice(0,160)}`)
   }
 }
 
