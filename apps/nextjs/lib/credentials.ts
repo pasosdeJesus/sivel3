@@ -44,13 +44,15 @@ function getWalletClient() {
   const key = process.env.PRIVATE_KEY
   if (!key) throw new Error('PRIVATE_KEY not configured')
   const chain = getViemChain()
+  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
   const account = privateKeyToAccount(key as `0x${string}`)
-  return createWalletClient({ chain, transport: http(), account })
+  return createWalletClient({ chain, transport: http(rpc), account })
 }
 
 function getPublicClient() {
   const chain = getViemChain()
-  return createPublicClient({ chain, transport: http() })
+  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
+  return createPublicClient({ chain, transport: http(rpc) })
 }
 
 /**
