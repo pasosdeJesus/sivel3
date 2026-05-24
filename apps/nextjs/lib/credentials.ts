@@ -99,7 +99,7 @@ export async function mintSBT(
     address: walletClient.account.address,
     blockTag: 'pending',
   })
-  console.log(`[credentials] mintSBT: tokenId=${tokenId} nonce=${myNonce}`)
+  console.log(`[credentials#v2] mintSBT: tokenId=${tokenId} for ${wallet.slice(0,6)} nonce=${myNonce}`)
   const hash = await walletClient.writeContract({
     address: contractAddress,
     abi: pasosDeJesusCredentialsAbi,
