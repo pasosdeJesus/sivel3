@@ -2,15 +2,13 @@
 // Project-specific SBT minting wrapper — uses @pasosdejesus/m/blockchain for
 // on-chain interactions, adds credential_emission tracking and metadata queries.
 //
-// What stays in the shared m package (per its README):
-//   - mintRoleSBT, hasCredentialOnChain (contract interaction)
-//   - getCeloCredentialsAddress (deployment resolution)
-//   - composeCredentialImage (badge generation)
-//
-// What stays in the project:
-//   - credential_emission inserts (table structure differs per project)
-//   - getDonorThresholds (business logic: which thresholds = donor SBTs)
-//   - getChainId (project-specific env var resolution)
+// Nonce handling on Celo L2:
+//   Celo's OP Stack sequencer rejects txs that try to replace pending ones
+//   ("replacement transaction underpriced"). To work around this:
+//   1. Use blockTag: 'pending' to get the next available nonce
+//   2. Pass explicit gasPrice from the network (viem auto-estimate is unreliable)
+//   3. On failure, wait and retry with fresher nonce — stuck txs eventually clear
+//   4. Fallback: use blockTag: 'latest' to skip stuck pending txs
 
 import { createPublicClient, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -40,15 +38,6 @@ function getCredentialsContractAddress(): `0x${string}` {
   return addr
 }
 
-function getWalletClient() {
-  const key = process.env.PRIVATE_KEY
-  if (!key) throw new Error('PRIVATE_KEY not configured')
-  const chain = getViemChain()
-  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-  const account = privateKeyToAccount(key as `0x${string}`)
-  return createWalletClient({ chain, transport: http(rpc), account })
-}
-
 let _publicClient: ReturnType<typeof createPublicClient> | null = null
 function getPublicClient() {
   if (!_publicClient) {
@@ -60,9 +49,9 @@ function getPublicClient() {
 }
 
 /**
- * Mints a single SBT on-chain (via @pasosdejesus/m) and records it in
- * credential_emission. Returns the tx hash on success, or null if already
- * minted (off-chain cache or on-chain check). Throws on RPC errors.
+ * Mints a single SBT on-chain and records it in credential_emission.
+ * Retries with nonce strategies on Celo-specific failures.
+ * Returns { txHash } on success, null if already minted. Throws if all retries fail.
  */
 export async function mintSBT(
   wallet: string,
@@ -83,7 +72,7 @@ export async function mintSBT(
 
   if (existing) { console.log(`[credentials] mintSBT: tokenId=${tokenId} already in credential_emission`); return null }
 
-  // On-chain check (SBT may have been minted outside our DB)
+  // On-chain check
   const publicClient = getPublicClient()
   const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, wallet as `0x${string}`, tokenId)
   if (hasOnChain) {
@@ -95,42 +84,64 @@ export async function mintSBT(
     return null
   }
 
-  // Mint — reuse same client pattern as direct script
+  // Mint on-chain with retry
+  const key = process.env.PRIVATE_KEY!
   const chain = getViemChain()
   const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-  const pc2 = getPublicClient() // reuse same public client
-  const acc = privateKeyToAccount((process.env.PRIVATE_KEY || '') as `0x${string}`)
-  const wc = createWalletClient({ chain, transport: http(rpc), account: acc })
+  const acc = privateKeyToAccount(key as `0x${string}`)
 
-  const myNonce = await pc2.getTransactionCount({ address: acc.address, blockTag: 'pending' })
-  const gasPrice = await pc2.getGasPrice()
-  console.log(`[credentials#v3] mintSBT: tokenId=${tokenId} nonce=${myNonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
-  const hash = await wc.writeContract({
-    address: contractAddress,
-    abi: pasosDeJesusCredentialsAbi,
-    functionName: 'mintCredential',
-    args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
-    chain,
-    account: acc,
-    nonce: myNonce,
-    gasPrice,
-  } as any)
+  let lastError: any
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    const wc = createWalletClient({ chain, transport: http(rpc), account: acc })
+    const pc2 = getPublicClient()
 
-  // Wait for confirmation to avoid nonce collisions on subsequent mints
-  await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
+    const nonce = await pc2.getTransactionCount({
+      address: acc.address,
+      blockTag: attempt <= 3 ? 'pending' : 'latest',
+    })
+    const gasPrice = await pc2.getGasPrice()
 
-  // Record emission
-  await db.insertInto('credential_emission')
-    .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
-    .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
-    .execute()
+    console.log(`[credentials] mintSBT: tokenId=${tokenId} attempt=${attempt} nonce=${nonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
 
-  return { txHash: hash }
+    try {
+      const hash = await wc.writeContract({
+        address: contractAddress,
+        abi: pasosDeJesusCredentialsAbi,
+        functionName: 'mintCredential',
+        args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
+        chain,
+        account: acc,
+        nonce,
+        gasPrice,
+      } as any)
+
+      // Wait for confirmation
+      await pc2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
+
+      // Record emission
+      await db.insertInto('credential_emission')
+        .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
+        .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
+        .execute()
+
+      return { txHash: hash }
+    } catch (err: any) {
+      lastError = err
+      const msg = err.message || ''
+      if (msg.includes('replacement') || msg.includes('underpriced') || msg.includes('Missing or invalid')) {
+        console.log(`[credentials] mintSBT: retryable error, waiting 2s...`)
+        await new Promise(r => setTimeout(r, 2000))
+        continue
+      }
+      throw err // non-retryable error
+    }
+  }
+
+  throw lastError
 }
 
 /**
  * Resolves donor threshold tokenIds from credential_metadata.
- * Returns thresholds sorted by minUsdt ascending.
  */
 export async function getDonorThresholds(
   db: Kysely<any>,
@@ -152,9 +163,11 @@ export async function getDonorThresholds(
       .where('name', '=', t.name)
       .where('chain_id', '=', chainId)
       .executeTakeFirst()
-    console.log(`[credentials] getDonorThresholds: ${t.name} chain=${chainId} → ${row ? row.token_id : 'NOT FOUND'}`)
     if (row) {
+      console.log(`[credentials] getDonorThresholds: ${t.name} chain=${chainId} → ${row.token_id}`)
       result.push({ tokenId: row.token_id, name: t.name, minUsdt: t.minUsdt })
+    } else {
+      console.log(`[credentials] getDonorThresholds: ${t.name} chain=${chainId} → NOT FOUND`)
     }
   }
 
