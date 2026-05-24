@@ -91,26 +91,23 @@ export async function mintSBT(
     return null
   }
 
-  // Mint on-chain — use pending nonce and explicit gasPrice to avoid
-  // viem's auto-nonce getting stuck on rejected txs in the mempool
+  // Mint on-chain — use explicit nonce from 'latest' to avoid
+  // auto-nonce getting stuck on rejected pending txs
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
-  const contractAddress2 = getCredentialsContractAddress()
-  const nonce = await publicClient2.getTransactionCount({
+  const myNonce = await publicClient2.getTransactionCount({
     address: walletClient.account.address,
-    blockTag: 'latest',
+    blockTag: 'pending',
   })
-  const gasPrice = await publicClient2.getGasPrice()
-  console.log(`[credentials] mintSBT: tokenId=${tokenId} for ${wallet} nonce=${nonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
+  console.log(`[credentials] mintSBT: tokenId=${tokenId} nonce=${myNonce}`)
   const hash = await walletClient.writeContract({
-    address: contractAddress2,
+    address: contractAddress,
     abi: pasosDeJesusCredentialsAbi,
     functionName: 'mintCredential',
     args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
     chain: walletClient.chain,
     account: walletClient.account,
-    nonce: nonce,
-    gasPrice: gasPrice,
+    nonce: myNonce,
   } as any)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
