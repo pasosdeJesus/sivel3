@@ -99,7 +99,8 @@ export async function mintSBT(
     address: walletClient.account.address,
     blockTag: 'pending',
   })
-  console.log(`[credentials#v2] mintSBT: tokenId=${tokenId} for ${wallet.slice(0,6)} nonce=${myNonce}`)
+  const gasPrice = await publicClient2.getGasPrice()
+  console.log(`[credentials#v2] mintSBT: tokenId=${tokenId} for ${wallet.slice(0,6)} nonce=${myNonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
   const hash = await walletClient.writeContract({
     address: contractAddress,
     abi: pasosDeJesusCredentialsAbi,
@@ -108,6 +109,7 @@ export async function mintSBT(
     chain: walletClient.chain,
     account: walletClient.account,
     nonce: myNonce,
+    gasPrice,
   } as any)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
