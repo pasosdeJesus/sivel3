@@ -105,8 +105,8 @@ export async function mintSBT(
     chain: walletClient.chain,
     account: walletClient.account,
     gas: 200000n,
-    maxFeePerGas: 5000000000n,   // 5 gwei max
-    maxPriorityFeePerGas: 1000000000n, // 1 gwei tip
+    maxFeePerGas: 20000000000n,   // 20 gwei max
+    maxPriorityFeePerGas: 2000000000n, // 2 gwei tip
   } as any)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
