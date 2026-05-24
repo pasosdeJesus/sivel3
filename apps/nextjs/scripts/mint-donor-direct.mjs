@@ -15,7 +15,7 @@ import { celo } from 'viem/chains'
 import { readFileSync } from 'fs'
 
 const CONTRACT = '0x9522F056fA74eDBFE72988c002BE37048D5D6604'
-const TARGET = '0x84272a6dd0D5fE9ea2Ab28Cf96e72f4F7da00C5C'
+const TARGET = '0x0C0b44461C041F161CC5A82b31effD799f098aA6'
 const TOKEN_ID = 2 // Donor
 
 // Force nonce to reproduce error — use 'latest' to see nonce gap,
