@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
             serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
             const meta = await getCredentialMetadata(sbtDb, t.tokenId, chainId)
             if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
-          } catch { /* best effort per threshold */ }
+          } catch (e: any) { serverLog.warn(`Donation SBT mint failed: tokenId=${t.tokenId} ${e.message || e}`) }
         }
       }
     } catch (sbtError) {

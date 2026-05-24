@@ -75,12 +75,13 @@ export async function mintSBT(
     .where('chain_id', '=', chainId)
     .executeTakeFirst()
 
-  if (existing) return null
+  if (existing) { console.log(`[credentials] mintSBT: tokenId=${tokenId} already in credential_emission`); return null }
 
   // On-chain check (SBT may have been minted outside our DB)
   const publicClient = getPublicClient()
   const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, wallet as `0x${string}`, tokenId)
   if (hasOnChain) {
+    console.log(`[credentials] mintSBT: tokenId=${tokenId} already on-chain, recording emission`)
     await db.insertInto('credential_emission')
       .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
       .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
@@ -91,6 +92,7 @@ export async function mintSBT(
   // Mint on-chain
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
+  console.log(`[credentials] mintSBT: minting tokenId=${tokenId} for ${wallet} on ${chainId}`)
   const hash = await mintRoleSBT(walletClient, contractAddress, wallet as `0x${string}`, tokenId)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
