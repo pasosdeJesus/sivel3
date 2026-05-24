@@ -73,6 +73,31 @@ async function main() {
       console.log(`  MINTER_ROLE: ${hasMinter ? '✅ YES' : '❌ NO'}`)
       const celoBal = await pc.getBalance({ address: BACKEND })
       console.log(`  CELO: ${(Number(celoBal)/1e18).toFixed(4)}`)
+
+      // Nonce info
+      try {
+        const nonce = await pc.getTransactionCount({ address: BACKEND })
+        const pendingNonce = await pc.getTransactionCount({ address: BACKEND, blockTag: 'pending' })
+        console.log(`  Nonce: ${nonce} (latest) / ${pendingNonce} (pending)`)
+        if (pendingNonce > nonce) {
+          console.log(`  ⚠️  ${pendingNonce - nonce} transacciones pendientes atascando el nonce!`)
+          console.log(`  → Envía una self-transfer de 0 CELO con gasPrice alto para destrabar`)
+        }
+      } catch (e) {
+        console.log(`  Nonce: error — ${e.message?.slice(0,60)}`)
+      }
+
+      // Gas price
+      try {
+        const gp = await pc.getGasPrice()
+        console.log(`  Gas price (red): ${Number(gp)/1e9} gwei`)
+      } catch {}
+
+      // Check for pending tx
+      try {
+        const block = await pc.getBlock()
+        console.log(`  Último bloque: ${block.number} (baseFeePerGas: ${block.baseFeePerGas ? Number(block.baseFeePerGas)/1e9 + ' gwei' : 'N/A'})`)
+      } catch {}
     } catch (e) {
       console.log(`  ❌ ${e.message?.slice(0, 80)}`)
     }
