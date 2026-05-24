@@ -49,10 +49,14 @@ function getWalletClient() {
   return createWalletClient({ chain, transport: http(rpc), account })
 }
 
+let _publicClient: ReturnType<typeof createPublicClient> | null = null
 function getPublicClient() {
-  const chain = getViemChain()
-  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-  return createPublicClient({ chain, transport: http(rpc) })
+  if (!_publicClient) {
+    const chain = getViemChain()
+    const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
+    _publicClient = createPublicClient({ chain, transport: http(rpc) })
+  }
+  return _publicClient
 }
 
 /**
@@ -91,23 +95,23 @@ export async function mintSBT(
     return null
   }
 
-  // Mint on-chain — use explicit nonce from 'latest' to avoid
-  // auto-nonce getting stuck on rejected pending txs
-  const walletClient = getWalletClient()
-  const publicClient2 = getPublicClient()
-  const myNonce = await publicClient2.getTransactionCount({
-    address: walletClient.account.address,
-    blockTag: 'pending',
-  })
-  const gasPrice = await publicClient2.getGasPrice()
-  console.log(`[credentials#v2] mintSBT: tokenId=${tokenId} for ${wallet.slice(0,6)} nonce=${myNonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
-  const hash = await walletClient.writeContract({
+  // Mint — reuse same client pattern as direct script
+  const chain = getViemChain()
+  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
+  const pc2 = getPublicClient() // reuse same public client
+  const acc = privateKeyToAccount((process.env.PRIVATE_KEY || '') as `0x${string}`)
+  const wc = createWalletClient({ chain, transport: http(rpc), account: acc })
+
+  const myNonce = await pc2.getTransactionCount({ address: acc.address, blockTag: 'pending' })
+  const gasPrice = await pc2.getGasPrice()
+  console.log(`[credentials#v3] mintSBT: tokenId=${tokenId} nonce=${myNonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
+  const hash = await wc.writeContract({
     address: contractAddress,
     abi: pasosDeJesusCredentialsAbi,
     functionName: 'mintCredential',
     args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
-    chain: walletClient.chain,
-    account: walletClient.account,
+    chain,
+    account: acc,
     nonce: myNonce,
     gasPrice,
   } as any)
