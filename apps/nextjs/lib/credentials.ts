@@ -17,10 +17,10 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import {
-  mintRoleSBT,
   hasCredentialOnChain,
   getCeloCredentialsAddress,
 } from '@pasosdejesus/m/blockchain'
+import pasosDeJesusCredentialsAbi from '@/abis/PasosDeJesusCredentials.json'
 import path from 'path'
 import type { Kysely } from 'kysely'
 
@@ -91,11 +91,28 @@ export async function mintSBT(
     return null
   }
 
-  // Mint on-chain
+  // Mint on-chain — bypass mintRoleSBT to use pending nonce (avoids
+  // 'replacement transaction underpriced' when previous mint attempts
+  // left pending txs in the mempool)
   const walletClient = getWalletClient()
   const publicClient2 = getPublicClient()
-  console.log(`[credentials] mintSBT: minting tokenId=${tokenId} for ${wallet} on ${chainId}`)
-  const hash = await mintRoleSBT(walletClient, contractAddress, wallet as `0x${string}`, tokenId)
+  const contractAddress2 = getCredentialsContractAddress()
+  const nonce = await publicClient2.getTransactionCount({
+    address: walletClient.account.address,
+    blockTag: 'pending',
+  })
+  const gasPrice = await publicClient2.getGasPrice()
+  console.log(`[credentials] mintSBT: tokenId=${tokenId} for ${wallet} nonce=${nonce} gasPrice=${Number(gasPrice)/1e9}gwei`)
+  const hash = await walletClient.writeContract({
+    address: contractAddress2,
+    abi: pasosDeJesusCredentialsAbi,
+    functionName: 'mintCredential',
+    args: [wallet as `0x${string}`, BigInt(tokenId), BigInt(1)],
+    chain: walletClient.chain,
+    account: walletClient.account,
+    nonce: nonce,
+    gasPrice: gasPrice,
+  } as any)
 
   // Wait for confirmation to avoid nonce collisions on subsequent mints
   await publicClient2.waitForTransactionReceipt({ hash: hash as `0x${string}`, timeout: 120_000 })
