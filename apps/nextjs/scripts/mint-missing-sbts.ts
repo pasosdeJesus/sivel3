@@ -1,20 +1,23 @@
 // scripts/mint-missing-sbts.ts
-// Mints missing SBTs for a wallet. Tests mintCredentialWithRetry from @pasosdejesus/m.
-// Usage: npx tsx scripts/mint-missing-sbts.ts 0xWALLET
+// Mints missing SBTs for a wallet. Usage: npx tsx scripts/mint-missing-sbts.ts 0xWALLET
 
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import path from 'path'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
+
 import { createPublicClient, http } from 'viem'
-import { celo, celoSepolia } from 'viem/chains'
+import { celo } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintCredentialWithRetry, hasCredentialOnChain, getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
 
 const wallet = process.argv[2]
-if (!wallet) { console.error('Usage: npx tsx scripts/mint-missing-sbts.ts 0xWALLET'); process.exit(1) }
+if (!wallet || !wallet.startsWith('0x')) { console.error('Usage: npx tsx scripts/mint-missing-sbts.ts 0xWALLET'); process.exit(1) }
 
 const w = wallet.toLowerCase()
-const chainId = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
-const chain = chainId === 'celo' ? celo : celoSepolia
+const chainId = 'celo'
+const chain = celo
 const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
 
 const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments', 'PasosDeJesusCredentials')
