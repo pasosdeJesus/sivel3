@@ -47,6 +47,7 @@ export async function mintSBT(
   tokenId: number,
   chainId: string,
 ): Promise<{ txHash: string } | null> {
+  console.log(`OJO mintSBT wallet=${wallet}, tokenId=${tokenId}, chainId=${chainId}`)
   const db = newKyselyPostgresql()
   const contractAddress = getCredentialsContractAddress()
 
@@ -73,6 +74,7 @@ export async function mintSBT(
   }
 
   // Mint on-chain with Celo L2 retry (handled by @pasosdejesus/m)
+  console.log(`[credentials] mintCredentialWithRetry privateKey, rpcUrl=${process.env.NEXT_PUBLIC_RPC_URL}, chain=${getViemChain()}, contractAddress=${contractAddress}, userAddress=${wallet}, tokenId=${tokenId}`)
   const hash = await mintCredentialWithRetry({
     privateKey: process.env.PRIVATE_KEY as `0x${string}`,
     rpcUrl: (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, ''),
