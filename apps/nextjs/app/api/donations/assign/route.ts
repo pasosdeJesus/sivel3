@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
           try {
             await mintSBT(donor, t.tokenId, chainId)
             serverLog.success(`Donation SBT minted: tokenId=${t.tokenId} for ${donor}`)
-            const meta = await getCredentialMetadata(sbtDb, t.tokenId, chainId)
+            const meta = await getCredentialMetadata(sbtDb as any, t.tokenId, chainId)
             if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
           } catch (e: any) { serverLog.warn(`Donation SBT mint failed: tokenId=${t.tokenId} ${e.message || e}`) }
         }
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
         const r = await mintSBT(donor, connRow.token_id, chainId)
         if (r) {
           serverLog.success(`Connector SBT minted for donor ${donor}`)
-          const meta = await getCredentialMetadata(sbtDb2, connRow.token_id, chainId)
+          const meta = await getCredentialMetadata(sbtDb2 as any, connRow.token_id, chainId)
           if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
         }
       }
@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
           const r2 = await mintSBT(donor, founderRow.token_id, chainId)
           if (r2) {
             serverLog.success(`Global Founder SBT minted for donor ${donor}`)
-            const meta = await getCredentialMetadata(sbtDb2, founderRow.token_id, chainId)
+            const meta = await getCredentialMetadata(sbtDb2 as any, founderRow.token_id, chainId)
             if (meta) mintedSbts.push({ name: meta.name, imageUrl: meta.image_url })
           }
         }

@@ -106,9 +106,9 @@ export async function POST(request: NextRequest) {
     } catch { /* best effort */ }
 
     const [connectorMeta, founderMeta] = await Promise.all([
-      getCredentialMetadata(db, connectorId, chainId),
+      getCredentialMetadata(db as any, connectorId, chainId),
       founderMinted && founderTokenId !== null
-        ? getCredentialMetadata(db, founderTokenId, chainId)
+        ? getCredentialMetadata(db as any, founderTokenId, chainId)
         : Promise.resolve(null),
     ])
 

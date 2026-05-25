@@ -5,8 +5,21 @@ import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintSBT, getChainId } from '@/lib/credentials'
 import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
 
-const EXPLORER_TOKEN_ID = 13
 const MIN_CASES = 3
+
+async function getTokenId(
+  db: ReturnType<typeof newKyselyPostgresql>,
+  name: string,
+  chainId: string,
+): Promise<number | null> {
+  const row = await db
+    .selectFrom('credential_metadata')
+    .select('token_id')
+    .where('name', '=', name)
+    .where('chain_id', '=', chainId)
+    .executeTakeFirst()
+  return row ? row.token_id : null
+}
 
 async function isLearnTgVerified(wallet: string): Promise<boolean> {
   const key = process.env.PRIVATE_KEY
@@ -74,12 +87,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await mintSBT(wallet, EXPLORER_TOKEN_ID, chainId)
+    const explorerTokenId = await getTokenId(db, 'Explorer', chainId)
+    if (!explorerTokenId) {
+      return NextResponse.json({ error: 'Explorer type not registered' }, { status: 500 })
+    }
+
+    const result = await mintSBT(wallet, explorerTokenId, chainId)
     if (!result) {
       return NextResponse.json({ minted: false, reason: 'already_has' })
     }
 
-    const meta = await getCredentialMetadata(db, EXPLORER_TOKEN_ID, chainId)
+    const meta = await getCredentialMetadata(db as any, explorerTokenId, chainId)
 
     return NextResponse.json({
       minted: true,
