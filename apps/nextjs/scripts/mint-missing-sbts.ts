@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
 
 import { createPublicClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts' 
 import { celo } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintCredentialWithRetry, hasCredentialOnChain, getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
@@ -78,8 +79,9 @@ for (const { name, tokenId } of tokenIds) {
   // Mint
   console.log(`[${name}] minting...`)
   try {
+    let account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
     const hash = await mintCredentialWithRetry({
-      privateKey: process.env.PRIVATE_KEY as `0x${string}`,
+      account,
       rpcUrl: rpc || '',
       chain,
       contractAddress,
