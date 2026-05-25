@@ -28,7 +28,7 @@ console.log(`Chain: ${chainId}`)
 console.log(`Contract: ${contractAddress}`)
 console.log(`RPC: ${rpc?.slice(0, 50)}...`)
 
-const pc = createPublicClient({ chain, transport: http(rpc) })
+const pc = createPublicClient({ chain, transport: http(rpc) }) as any
 const db = newKyselyPostgresql() as any
 
 // Resolve tokenIds from credential_metadata
