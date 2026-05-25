@@ -34,7 +34,7 @@ function getCredentialsContractAddress(): `0x${string}` {
 function getPublicClient() {
   const chain = getViemChain()
   const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-  return createPublicClient({ chain, transport: http(rpc) })
+  return createPublicClient({ chain, transport: http(rpc) }) as any
 }
 
 /**

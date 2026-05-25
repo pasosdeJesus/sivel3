@@ -208,10 +208,10 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     for (const row of allWallets) {
       try {
-        const minted = await mintIfMissing(db, row as string, connectorId, walletClient, publicClient, resolvedAddress)
+        const minted = await mintIfMissing(db, row, connectorId, walletClient, publicClient, resolvedAddress)
         if (minted) totalMinted++
       } catch (err: any) {
-        console.error(`  ✗ ${row.wallet}: ${err.message}`)
+        console.error(`  ✗ ${row}: ${err.message}`)
         errors++
       }
     }
