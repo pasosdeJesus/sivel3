@@ -38,14 +38,11 @@ function getCredentialsContractAddress(): `0x${string}` {
   return addr
 }
 
-let _publicClient: ReturnType<typeof createPublicClient> | null = null
 function getPublicClient() {
-  if (!_publicClient) {
-    const chain = getViemChain()
-    const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-    _publicClient = createPublicClient({ chain, transport: http(rpc) })
-  }
-  return _publicClient
+  // Don't cache — nonce can change between calls
+  const chain = getViemChain()
+  const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
+  return createPublicClient({ chain, transport: http(rpc) })
 }
 
 /**
