@@ -100,8 +100,8 @@ export default function MapComponent({
       try {
         const datos = JSON.parse(text);
         setCasoSeleccionado(datos.caso);
-        // Track case view for analytics
-        fetch('/api/web-analytics/event', {
+        // Track case view and wait for it to be recorded
+        await fetch('/api/web-analytics/event', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event_type: 'pageview', pathname: `/cases/${codigo}`, wallet: currentWallet }),
@@ -109,6 +109,7 @@ export default function MapComponent({
         }).catch(() => {})
         // Check Explorer SBT eligibility (views 3+ distinct cases)
         if (currentWallet) {
+          console.log(`[Explorer] Checking eligibility for ${currentWallet.slice(0,6)}...`)
           fetch('/api/credential/mint-explorer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

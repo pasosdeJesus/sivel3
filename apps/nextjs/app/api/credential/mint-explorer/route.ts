@@ -72,13 +72,17 @@ export async function POST(request: NextRequest) {
     .executeTakeFirst()
 
   const count = Number(rows?.count || 0)
+  console.log(`[Explorer] wallet=${wallet.slice(0,6)} views=${count} minCases=${MIN_CASES}`)
   if (count < MIN_CASES) {
+    console.log(`[Explorer] insufficient views: ${count} < ${MIN_CASES}`)
     return NextResponse.json({ minted: false, reason: 'insufficient_views', count })
   }
 
   const isVerified = await isLearnTgVerified(wallet)
   const donated = await hasDonated(db, wallet)
+  console.log(`[Explorer] wallet=${wallet.slice(0,6)} verified=${isVerified} donated=${donated}`)
   if (!isVerified && !donated) {
+    console.log(`[Explorer] blocked: not verified and no donations`)
     return NextResponse.json({
       minted: false,
       reason: 'not_verified',
@@ -94,8 +98,10 @@ export async function POST(request: NextRequest) {
 
     const result = await mintSBT(wallet, explorerTokenId, chainId)
     if (!result) {
+      console.log(`[Explorer] already has Explorer SBT`)
       return NextResponse.json({ minted: false, reason: 'already_has' })
     }
+    console.log(`[Explorer] ✅ minted! tx=${result.txHash.slice(0,10)} views=${count}`)
 
     const meta = await getCredentialMetadata(db as any, explorerTokenId, chainId)
 
