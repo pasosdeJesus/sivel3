@@ -77,11 +77,10 @@ export async function mintSBT(
     return null
   }
 
-  let account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
   // Mint on-chain with Celo L2 retry (handled by @pasosdejesus/m)
-  console.log(`[credentials] mintCredentialWithRetry account, rpcUrl=${process.env.NEXT_PUBLIC_RPC_URL}, chain=${getViemChain()}, contractAddress=${contractAddress}, userAddress=${wallet}, tokenId=${tokenId}`)
+  const acc = privateKeyToAccount((process.env.PRIVATE_KEY || '') as `0x${string}`)
   const hash = await mintCredentialWithRetry({
-    account: account,
+    account: acc,
     rpcUrl: (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, ''),
     chain: getViemChain(),
     contractAddress,
