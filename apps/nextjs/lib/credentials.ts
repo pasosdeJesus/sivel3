@@ -52,6 +52,7 @@ export async function mintSBT(
   chainId: string,
 ): Promise<{ txHash: string } | null> {
   console.log(`OJO mintSBT wallet=${wallet}, tokenId=${tokenId}, chainId=${chainId}`)
+  const w = wallet.toLowerCase()
   const db = newKyselyPostgresql()
   const contractAddress = getCredentialsContractAddress()
 
@@ -59,7 +60,7 @@ export async function mintSBT(
   const existing = await db
     .selectFrom('credential_emission')
     .select('id')
-    .where('wallet_address', '=', wallet)
+    .where('wallet_address', '=', w)
     .where('token_id', '=', tokenId)
     .where('chain_id', '=', chainId)
     .executeTakeFirst()
@@ -68,10 +69,10 @@ export async function mintSBT(
 
   // On-chain check
   const publicClient = getPublicClient()
-  const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, wallet as `0x${string}`, tokenId)
+  const hasOnChain = await hasCredentialOnChain(publicClient, contractAddress, w as `0x${string}`, tokenId)
   if (hasOnChain) {
     await db.insertInto('credential_emission')
-      .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
+      .values({ wallet_address: w, token_id: tokenId, chain_id: chainId })
       .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
       .execute()
     return null
@@ -84,7 +85,7 @@ export async function mintSBT(
     rpcUrl: (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, ''),
     chain: getViemChain(),
     contractAddress,
-    userAddress: wallet as `0x${string}`,
+    userAddress: w as `0x${string}`,
     tokenId,
   })
 
@@ -93,7 +94,7 @@ export async function mintSBT(
 
   // Record emission
   await db.insertInto('credential_emission')
-    .values({ wallet_address: wallet, token_id: tokenId, chain_id: chainId })
+    .values({ wallet_address: w, token_id: tokenId, chain_id: chainId })
     .onConflict((oc) => oc.columns(['wallet_address', 'token_id', 'chain_id']).doNothing())
     .execute()
 

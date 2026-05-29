@@ -15,7 +15,7 @@ import { readFileSync } from 'fs'
 
 const abi = JSON.parse(readFileSync(path.join(__dirname, '..', 'abis', 'PasosDeJesusCredentials.json'), 'utf-8'))
 
-const CONTRACT = '0x9522F056fA74eDBFE72988c002BE37048D5D6604'
+const CONTRACT = '0x9522f056fa74edbfe72988c002be37048d5d6604'
 const BACKEND = process.env.PRIVATE_KEY
   ? privateKeyToAccount(process.env.PRIVATE_KEY).address
   : null

@@ -25,7 +25,7 @@ const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || 'ht
 const RPC_DONATION = 'https://forno.celo-sepolia.celo-testnet.org' // forno for custom-data txs
 const USDT = process.env.NEXT_PUBLIC_USDT_ADDRESS
 const DONATION = BASE_URL === 'https://sivel.xyz:9001'
-  ? '0xc50123FB87e4167Fe9275Cab90Ae35551fE1248e' // Sepolia deployment
+  ? '0xc50123fb87e4167fe9275cab90ae35551fe1248e' // Sepolia deployment
   : process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY

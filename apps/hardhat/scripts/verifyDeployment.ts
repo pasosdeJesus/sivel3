@@ -71,7 +71,7 @@ async function main() {
   }
 
   // 6. Check old Hardhat account #0 (common test account)
-  const hardhatAccount0 = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+  const hardhatAccount0 = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
   const hardhatUSDTBalance = await usdtContract.balanceOf(hardhatAccount0);
   const hardhatCELOBalance = await provider.getBalance(hardhatAccount0);
   console.log(`\n🧪 Hardhat account #0 (common test):`);

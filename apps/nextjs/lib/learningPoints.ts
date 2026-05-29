@@ -28,7 +28,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 // Configuración desde variables de entorno
 const LEARN_API_URL = process.env.LEARNTG_INCREMENT_API_URL || 'https://learn.tg/api/learning-points/increment'
-const SITE_ADDRESS = process.env.LEARNTG_ADDRESS || '0x9F636E5653b649b44c9375E6E103600AE55aF979'
+const SITE_ADDRESS = process.env.LEARNTG_ADDRESS || '0x9f636e5653b649b44c9375e6e103600ae55af979'
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`
 
 if (!PRIVATE_KEY) {
@@ -117,6 +117,7 @@ export async function incrementLearningPoints(
   amount: number = 1,
   retryCount: number = 0
 ): Promise<LearningPointsResult> {
+  const w = userWallet.toLowerCase()
   const maxRetries = 3
   
   try {
@@ -124,7 +125,7 @@ export async function incrementLearningPoints(
     const nextNonce = nonce + 1
     const timestamp = Date.now()
     
-    const message = buildMessage(userWallet, amount, nextNonce, timestamp, txHash)
+    const message = buildMessage(w, amount, nextNonce, timestamp, txHash)
     console.log(`🔍 [LearningPoints] Mensaje a firmar: ${message}`)
     
     const signature = await signMessage(message)
@@ -134,7 +135,7 @@ export async function incrementLearningPoints(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_wallet: userWallet,
+        user_wallet: w,
         amount,
         nonce: nextNonce,
         timestamp,
@@ -150,7 +151,7 @@ export async function incrementLearningPoints(
       // Record learning points in transaction table for on-chain analytics
       try {
         await db.insertInto('transaction').values({
-          wallet: userWallet.toLowerCase(),
+          wallet: w,
           fecha: new Date(),
           tipo: 'earning',
           crypto: 'learningpoint',
@@ -180,7 +181,7 @@ export async function incrementLearningPoints(
     if (data.error === 'Nonce out of order' && data.expectedNonce) {
       console.log(`🔄 [LearningPoints] Nonce out of order. Esperado: ${data.expectedNonce}`)
       await updateNonce(db, data.expectedNonce - 1)
-      return incrementLearningPoints(db, userWallet, txHash, amount, retryCount + 1)
+      return incrementLearningPoints(db, w, txHash, amount, retryCount + 1)
     }
     if (response.status >= 400 && response.status < 500) {
       console.log(`⚠️ [LearningPoints] Error 4xx de learn.tg: ${response.status}`)
@@ -213,7 +214,7 @@ export async function incrementLearningPoints(
       const delay = Math.pow(2, retryCount) * 1000
       console.log(`🔄 [LearningPoints] Reintentando en ${delay}ms (intento ${retryCount + 1}/${maxRetries})...`)
       await new Promise(resolve => setTimeout(resolve, delay))
-      return incrementLearningPoints(db, userWallet, txHash, amount, retryCount + 1)
+      return incrementLearningPoints(db, w, txHash, amount, retryCount + 1)
     }
     
     return {
@@ -229,7 +230,7 @@ export async function incrementLearningPoints(
       const delay = Math.pow(2, retryCount) * 1000
       console.log(`🔄 [LearningPoints] Error de red, reintentando en ${delay}ms...`)
       await new Promise(resolve => setTimeout(resolve, delay))
-      return incrementLearningPoints(db, userWallet, txHash, amount, retryCount + 1)
+      return incrementLearningPoints(db, w, txHash, amount, retryCount + 1)
     }
     
     return {

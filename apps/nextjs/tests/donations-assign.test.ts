@@ -20,7 +20,7 @@ vi.mock('viem', async () => {
       writeContract: vi.fn(),
     })),
     getContract: vi.fn(() => ({
-      address: '0x563A7b5E6f4806b6ab179050326070cCbD3C1f5b' as `0x${string}`,
+      address: '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b' as `0x${string}`,
       write: {
         assignDonation: mockWriteAssignDonation,
       },
@@ -69,9 +69,9 @@ const { setupMocks: setupDbMocks, resetMocks: resetDbMocks } = apiDbMocks
 // Constants
 // ============================================================
 const VALID_TX_HASH = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
-const DONOR_ADDRESS = '0x383b1cC3ddB5D02C8c3B0Dc8eA7E5f3A2b1C0d9E'
-const CONTRACT_ADDRESS = '0x563A7b5E6f4806b6ab179050326070cCbD3C1f5b'
-const USDT_ADDRESS = '0x4806b6ab179050326070cCbD3C1f5b0C7A1b5E6f'
+const DONOR_ADDRESS = '0x383b1cc3ddb5d02c8c3b0dc8ea7e5f3a2b1c0d9e'
+const CONTRACT_ADDRESS = '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b'
+const USDT_ADDRESS = '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f'
 const ASSIGN_TX_HASH = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 let POST: (request: Request) => Promise<Response>
@@ -86,7 +86,7 @@ describe('POST /api/donations/assign', () => {
     process.env.NEXT_PUBLIC_USDT_ADDRESS = USDT_ADDRESS
     process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = CONTRACT_ADDRESS
     process.env.PRIVATE_KEY = '0x7ca1a247f5ea85228506abcb86cefda2c7090b5e46d0518c80c65a7f949da67e'
-    process.env.LEARNTG_ADDRESS = '0x9F636E5653b649b44c9375E6E103600AE55aF979'
+    process.env.LEARNTG_ADDRESS = '0x9f636e5653b649b44c9375e6e103600ae55af979'
     process.env.LEARNTG_INCREMENT_API_URL = 'https://learn.tg/api/learning-points/increment'
 
     const mod = await import('@/app/api/donations/assign/route')

@@ -14,8 +14,8 @@ const RPC_URL = 'https://forno.celo.org'
 const CHAIN = celo
 
 const CONTRACTS = [
-  { address: '0xE7E8e4Fb2d52C35392aBf4436569c93Aa752C050', label: 'V1' },
-  { address: '0x563AbB7492bb496B9DD74d54D6daDd41374924E5', label: 'V2' },
+  { address: '0xe7e8e4fb2d52c35392abf4436569c93aa752c050', label: 'V1' },
+  { address: '0x563abb7492bb496b9dd74d54d6dadd41374924e5', label: 'V2' },
 ]
 
 const donationAssignedEvent = parseAbiItem(

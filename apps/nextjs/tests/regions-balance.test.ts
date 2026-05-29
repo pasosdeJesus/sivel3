@@ -36,7 +36,7 @@ let GET: (request: Request, context: { params: Promise<{ id: string }> }) => Pro
 
 describe('GET /api/regions/[id]/balance', () => {
   beforeAll(async () => {
-    process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = '0x563A7b5E6f4806b6ab179050326070cCbD3C1f5b'
+    process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b'
     process.env.NEXT_PUBLIC_NETWORK = 'celoSepolia'
 
     const mod = await import('@/app/api/regions/[id]/balance/route')

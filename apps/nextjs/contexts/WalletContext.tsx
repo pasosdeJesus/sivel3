@@ -121,12 +121,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (prevConnected.current !== effectiveIsConnected) {
       if (effectiveIsConnected && effectiveAddress) {
-        recordWalletEvent('connect_wallet', effectiveAddress)
+        recordWalletEvent('connect_wallet', effectiveAddress.toLowerCase())
         // Mint Connector SBT
         fetch('/api/credential/mint-connector', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: effectiveAddress }),
+          body: JSON.stringify({ wallet: effectiveAddress.toLowerCase() }),
           keepalive: true,
         }).then(async r => {
           if (!r.ok) return

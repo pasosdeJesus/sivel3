@@ -38,7 +38,7 @@ describe('lib/learningPoints', () => {
     setupMocks()
     // Set env vars before importing the module (read at module level)
     process.env.PRIVATE_KEY = '0x7ca1a247f5ea85228506abcb86cefda2c7090b5e46d0518c80c65a7f949da67e'
-    process.env.LEARNTG_ADDRESS = '0x9F636E5653b649b44c9375E6E103600AE55aF979'
+    process.env.LEARNTG_ADDRESS = '0x9f636e5653b649b44c9375e6e103600ae55af979'
     process.env.LEARNTG_INCREMENT_API_URL = LEARN_API_URL
 
     const lp = await import('@/lib/learningPoints')

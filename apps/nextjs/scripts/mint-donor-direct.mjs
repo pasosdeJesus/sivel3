@@ -14,8 +14,8 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { celo } from 'viem/chains'
 import { readFileSync } from 'fs'
 
-const CONTRACT = '0x9522F056fA74eDBFE72988c002BE37048D5D6604'
-const TARGET = '0x8fD27bdC1d1D53eBF7AB31225e7663b49d3573f7'
+const CONTRACT = '0x9522f056fa74edbfe72988c002be37048d5d6604'
+const TARGET = '0x8fd27bdc1d1d53ebf7ab31225e7663b49d3573f7'
 const TOKEN_ID = 2 // Donor
 
 // Force nonce to reproduce error — use 'latest' to see nonce gap,
