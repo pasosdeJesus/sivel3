@@ -495,7 +495,7 @@ Puerto Guzmán al iniciar la Semana por la Paz"
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE relatos SYSTEM
-"http://sincodh.pasosdejesus.org/relatos/relatos-099.dtd">
+"http://sincodh.pasosdejesus.org/relatos-099.dtd">
 <relatos>
      <relato>
        <organizacion_responsable>Banco de Datos del
@@ -600,6 +600,54 @@ O DIÁLOGO</observaciones>
 
 ---
 
+## Errores comunes
+
+### Campos que van vacíos, NO "SIN INFORMACIÓN"
+
+| Campo | Regla |
+|-------|-------|
+| `<hora>` | Vacío si no se conoce |
+| `<centro_poblado>` | Vacío si es zona rural (solo para cabeceras/corregimientos) |
+| `<observaciones tipo="anotaciones">` | Vacío — es para información confidencial |
+| `<observaciones tipo="grinformacion">` | Vacío — lo llena el sistema |
+| `<observaciones tipo="grconfiabilidad">` | Vacío — solo tras fallo judicial |
+| `<duracion>` | Vacío si no aplica |
+
+### Campos que SÍ usan "SIN INFORMACIÓN"
+
+| Campo | Nota |
+|-------|------|
+| `<fecha_nacimiento>` | Usar `-00-00` si se desconoce día/mes |
+| `<observaciones tipo="etnia">` | `SIN INFORMACIÓN` |
+| `<observaciones tipo="filiacion">` | `SIN INFORMACIÓN` |
+| `<observaciones tipo="vinculoestado">` | `SIN INFORMACIÓN` |
+| `<observaciones tipo="rangoedad">` | `SIN INFORMACIÓN` |
+| `<observaciones tipo="frontera">` | `SIN INFORMACIÓN` |
+| `<orientacionsexual>` | `S` = SIN INFORMACIÓN |
+| `<organizacion>` | `SIN INFORMACIÓN` |
+| `<sector_condicion>` | `SIN INFORMACIÓN` |
+| `<iglesia>` | `SIN INFORMACIÓN` |
+| `id_grupo` | `35` = Sin Información |
+
+### Errores frecuentes en el memo (`<hechos>`)
+
+- ❌ No comenzar con responsable + acción + víctima
+- ❌ Usar tiempo presente en lugar de pasado
+- ❌ Incluir opiniones o calificativos ("lamentablemente", "cruel")
+- ❌ Usar regionalismos o jerga militar ("dieron de baja" → "ejecutaron")
+- ❌ Exceder 50 caracteres en `<titulo>`
+- ❌ Usar minúsculas en campos que requieren MAYÚSCULAS SOSTENIDAS
+
+### Errores frecuentes en estructura XML
+
+- ❌ `<acto>` sin `id_victima_individual` o `id_presunto_responsable_individual`
+- ❌ Responsable no identificado sin usar `id_grupo=35`
+- ❌ `<ubicacion_secundaria>` incompleta (falta departamento y municipio)
+- ❌ `<fuente>` sin `nombre_fuente`
+- ❌ `<persona>` sin `id_persona` o con `id_persona` repetido
+
+---
+
 ## Notas importantes
 - La memoria es un acto de fe en la paz: documentar es resistir al olvido
 - Todos los casos deben ser tratados con respeto a las víctimas y sus familias
@@ -609,5 +657,143 @@ O DIÁLOGO</observaciones>
 ## Contacto y referencias
 - Banco de Datos del CINEP: https://www.cinep.org.co
 - Marco conceptual: https://www.cinep.org.co/publicaciones
-- DTD: http://sincodh.pasosdejesus.org/relatos/relatos-099.dtd
+- DTD: http://sincodh.pasosdejesus.org/relatos-099.dtd
+
+---
+
+## Apéndice A: DTD (relatos-099.dtd)
+
+```dtd
+<!ELEMENT relatos (relato+)>
+
+<!ELEMENT relato (organizacion_responsable, derechos, id_relato, forma_compartir, titulo?, hechos, persona*, grupo*, victima*, presunto_responsable_individual*, fecha?, hora?, duracion?, ubicacion_secundaria*, departamento?, municipio?, centro_poblado?, longitud?, latitud?, acto*, contexto?, fuente*, acciones_juridicas?, otras_acciones?, fecha_publicacion?, anexo?, combatiente*, observaciones*)>
+
+<!ELEMENT organizacion_responsable (#PCDATA)>
+
+<!ELEMENT derechos (#PCDATA)>
+
+<!ELEMENT id_relato (#PCDATA)>
+
+<!ELEMENT forma_compartir (#PCDATA)>
+
+<!ELEMENT titulo (#PCDATA)>
+
+<!ELEMENT hechos (#PCDATA)>
+
+<!ELEMENT persona (id_persona, nombre?, nombre2?, apellido?, apellido2?, docid?, fecha_nacimiento?, sexo?, observaciones*)>
+
+<!ELEMENT id_persona (#PCDATA)>
+
+<!ELEMENT nombre (#PCDATA)>
+
+<!ELEMENT nombre2 (#PCDATA)>
+
+<!ELEMENT apellido (#PCDATA)>
+
+<!ELEMENT apellido2 (#PCDATA)>
+
+<!ELEMENT docid (#PCDATA)>
+
+<!ELEMENT fecha_nacimiento (#PCDATA)>
+
+<!ELEMENT sexo (#PCDATA)>
+
+<!ELEMENT observaciones (#PCDATA)>
+<!ATTLIST observaciones
+  tipo CDATA #IMPLIED
+>
+<!ELEMENT grupo (id_grupo, nombre_grupo?, sigla?, subgrupo_de?, agresion_sin_vicd*, observaciones*)>
+
+<!ELEMENT id_grupo (#PCDATA)>
+
+<!ELEMENT nombre_grupo (#PCDATA)>
+
+<!ELEMENT sigla (#PCDATA)>
+
+<!ELEMENT subgrupo_de (#PCDATA)>
+
+<!ELEMENT agresion_sin_vicd (#PCDATA)>
+
+<!ELEMENT victima (id_persona, ocupacion?, sector_condicion?, iglesia?, organizacion?, id_grupo?, estado_tras_hecho?, danio_directo?, danio_indirecto?, personas_dependientes?, observaciones*)>
+
+<!ELEMENT ocupacion (#PCDATA)>
+
+<!ELEMENT sector_condicion (#PCDATA)>
+
+<!ELEMENT iglesia (#PCDATA)>
+
+<!ELEMENT organizacion (#PCDATA)>
+
+<!ELEMENT estado_tras_hecho (#PCDATA)>
+
+<!ELEMENT danio_directo (#PCDATA)>
+
+<!ELEMENT danio_indirecto (#PCDATA)>
+
+<!ELEMENT personas_dependientes (#PCDATA)>
+
+<!ELEMENT presunto_responsable_individual (id_persona, id_grupo?, alias?, agresion_sin_vicd*, observaciones*)>
+
+<!ELEMENT alias (#PCDATA)>
+
+<!ELEMENT fecha (#PCDATA)>
+
+<!ELEMENT hora (#PCDATA)>
+
+<!ELEMENT duracion (#PCDATA)>
+
+<!ELEMENT ubicacion_secundaria (departamento?, municipio?, centro_poblado?, longitud?, latitud?, observaciones*)>
+
+<!ELEMENT departamento (#PCDATA)>
+
+<!ELEMENT municipio (#PCDATA)>
+
+<!ELEMENT centro_poblado (#PCDATA)>
+
+<!ELEMENT longitud (#PCDATA)>
+
+<!ELEMENT latitud (#PCDATA)>
+
+<!ELEMENT acto (agresion, agresion_particular?,  (id_victima_individual | id_grupo_victima) ,  (id_presunto_grupo_responsable | id_presunto_responsable_individual) )>
+
+<!ELEMENT agresion (#PCDATA)>
+
+<!ELEMENT agresion_particular (#PCDATA)>
+
+<!ELEMENT id_victima_individual (#PCDATA)>
+
+<!ELEMENT id_grupo_victima (#PCDATA)>
+
+<!ELEMENT id_presunto_grupo_responsable (#PCDATA)>
+
+<!ELEMENT id_presunto_responsable_individual (#PCDATA)>
+
+<!ELEMENT contexto (#PCDATA)>
+
+<!ELEMENT fuente (nombre_fuente, fecha_fuente?, ubicacion_fuente?, observaciones*)>
+
+<!ELEMENT nombre_fuente (#PCDATA)>
+
+<!ELEMENT fecha_fuente (#PCDATA)>
+
+<!ELEMENT ubicacion_fuente (#PCDATA)>
+
+<!ELEMENT acciones_juridicas (observaciones*)>
+
+<!ELEMENT otras_acciones (#PCDATA)>
+
+<!ELEMENT fecha_publicacion (#PCDATA)>
+
+<!ELEMENT anexo (observaciones*)>
+
+<!ELEMENT combatiente (nombre?, alias?, edad?, sexo?, ocupacion?, filiacion?, sector_condicion?, organizacion?, organizacion_armada?, resultado_agresion?, observaciones*)>
+
+<!ELEMENT edad (#PCDATA)>
+
+<!ELEMENT filiacion (#PCDATA)>
+
+<!ELEMENT organizacion_armada (#PCDATA)>
+
+<!ELEMENT resultado_agresion (#PCDATA)>
+```
 

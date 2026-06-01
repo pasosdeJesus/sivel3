@@ -27,7 +27,7 @@ Used for technical documentation and Web3-aligned components:
 ### Spanish
 Used for domain-specific documentation, legal context, and the legacy engine:
 *   All documentation and comments in `sivel2/`.
-*   Ethical and theological alignment documents in `ia/`.
+*   Ethical and theological alignment documents in `@pasosdejesus/m/ia/`.
 *   Legal documents (`LICENCIA.md`, `CREDITOS.md`).
 
 ---
@@ -44,7 +44,7 @@ Maintain consistency by using the established tools in each directory:
 
 ## 4. Guiding Principles
 
-All human contributors are encouraged to act with **Love, Respect, and Humility** (as outlined in `ia/principios.md`), recognizing our work as a service to justice. 
+All human contributors are encouraged to act with **Love, Respect, and Humility** (as outlined in `@pasosdejesus/m/ia/principios.md`), recognizing our work as a service to justice. 
 
 *Note: The operational directives in `AGENTS.md` apply strictly to AI Agents; human collaborators should refer to this document (`CONTRIBUTING.md`) and the project principles.*
 
