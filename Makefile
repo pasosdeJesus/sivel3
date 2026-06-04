@@ -11,3 +11,6 @@ type:
 	@(cd apps/nextjs && $(MAKE) type)
 	@echo "Type-checking in apps/hardhat..."
 	@(cd apps/hardhat && $(MAKE) type)
+
+update-skills:
+	npx skills add celo-org/celopedia-skills

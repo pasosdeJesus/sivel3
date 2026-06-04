@@ -5,25 +5,26 @@
 SIVeL 3 is a pioneering Web3 protocol designed to transform the ethical
 documentation of socio-political violence. We are creating a self-sustaining
 ecosystem, operating from **https://sivel.xyz**, funded through a hybrid
-model that combines community donations with value-added services for
-institutional users and credit-based incentives for active contributors.
+model that combines community donations, value-added services for
+institutional users, credit-based incentives, ownership of identity
+by verified victims or relatives who decide it and a pre-alert market
+where citizens purchase and improve AI-generated alerts.
+Initial operations are supported by the founder's own capital
+until the model achieves sustainable revenue.
 
-This system empowers citizen witnesses by rewarding them for verified alerts,
-provides stabilizing stipends to a structured team of human rights documenters,
-and establishes an immutable, blockchain-certified record of events on the Celo
-network. Our mission is to foster a transparent, sustainable, and auditable
-cycle of ethical documentation, governed by clear editorial authority and
-powered by a **diversified funding model** that reduces dependency on volatile
-international donations.
+This system empowers an AI agent to autonomously detect potential
+events from public sources, enables citizen witnesses to verify and
+improve those alerts, rewards them for their contributions, provides a
+pathway for professional researchers to access valuable data, and
+establishes an immutable, blockchain-certified record of events on
+the CELO network.
 
-**Crucially, SIVeL 3 never charges for accessing case data.** Information about
-human rights violations belongs to victims and to society; it must remain free
-and open. What may be charged to professionals who rely on the platform for
-their work through subscriptions, credits, or value-added services is the
-**use of infrastructure** required to keep the platform running: servers,
-bandwidth, development, support, advanced features (e.g., AI
-queries, bulk exports) and stipends for documenters. The goal is not profit,
-but the long-term sustainability of a public good.
+**Crucially, SIVeL 3 never charges victims or the general public for
+accessing case data.** Information about human rights violations belongs
+to victims and to society; it must remain free and open. Professional
+users (researchers, journalists, security firms, government agencies) who
+require bulk access or sensitive data may contribute to the
+platform's sustainability.
 
 ---
 
@@ -32,158 +33,211 @@ but the long-term sustainability of a public good.
 SIVeL 3 introduces a multi-tiered ecosystem that serves different types of
 users while ensuring the integrity of every documented case:
 
-- **General public** can check cases and if possible pray for the victims and
-  the end of the conflict. Once they connect their wallet they will receive an
-  SBT of **SIVeL 3 user** and during the initial launch phase they will receive
-  a second **"Founder User"** SBT. The gas of their limited transaction is 
-  paid by the platform.
-- **Citizen witnesses and victims** can submit geo-located alerts (first-hand
-  information), their contributions are essential and rewarded with credits
-  and USDT when verified. The gas for their limited transactions is paid by
-  the platform.
-- **Donors** donate USDT to document cases in a specific region (among those
-  supported by sivel.xyz), they receive courtesy credits. The gas 
-  of the donation is paid by the platform.
-- **Professional users (researchers, journalists, judicial operators,
-  institutions)** access the case database and specialized tools (AI powered
-  features, reports, etc.) for work-related purposes with credits that must be
-  paid. Those who actively contribute verified alerts may earn credits, but
-  usage of the platform without contribution requires payment of credits or
-  a subscription for monthly credits and paying gas of their transactions.
-- **Documenters** investigate alerts, transform them into structured cases, and
-  participate in peer review. They receive stipends funded by donations and
-  subscription revenue. Documenters have a **generous subscription with monthy
-  credits and gas for transactions** (sufficient for their documentation work)
-  as long as they remain active. Inactive documenters may lose these privileges
-  and be downgraded to regular users.
-- **Regional Publishing Validators (e.g., Banco de Datos del CINEP in 
-  Colombia):** A renowned human rights organization that performs the final 
-  audit for its region and certifies cases on the Celo blockchain. It 
-  maintains its own internal information system with full access to all 
-  case data of its region. To streamline its work, the platform supports 
-  bulk exports (from the public database to its system) and bulk imports 
-  (from its system to the public database).
+- **General public** can browse cases on an interactive map, view aggregated
+  data and learn about the conflict. Basic access is free and requires no
+  wallet.
+
+- **AI Agent:** An autonomous agent that continuously monitors public
+  sources (news, RSS, APIs) to detect potential human rights violations.
+  It generates **pre-alerts** (structured preliminary reports) and publishes
+  them onchain.
+
+- **Citizen witnesses and victims** can browse available pre-alerts, purchase
+  access to a pre-alert for a small fee (discouraging spam), investigate the
+  event using their own sources, improve the pre-alert with verified
+  information (photos, exact location, witness testimony), and submit it as a
+  **citizen alert**. If verified, they receive a reward. Citizens can also
+  submit direct alerts (without purchasing a pre-alert) if they have
+  first-hand information of a case not discovered by an AI agent.
+
+- **Documenters** investigate citizen alerts, transform them into structured
+  cases, and participate in peer review. If the system reaches financial
+  stability, they will receive a monthly stipend but meanwhile they will
+  receive a donation per case documented with according to the funds in the
+  alerts and documenters fund.
+
+- **Regional Publishing Validators (e.g., Banco de Datos de Violencia Política
+  del CINEP in Colombia):** A renowned human rights organization that performs
+  the final audit for its region and certifies cases on the Celo blockchain.
+  It maintains its own internal information system with full access to all
+  case data of its region. 
+
+- **Professional users (researchers, journalists, security firms,
+  institutions)** can access the case database and specialized tools through a
+  **subscription or credit-based system**. They pay for bulk access,
+  API usage, and in the future, for access to case details with possibility
+  to pay to victims/relatives enrolled to acces the victim's identity.
+
+- **Donors** donate USDT to document cases in specific regions. They receive
+  recognition and courtesy credits.
 
 All roles are defined by non-transferable Soul-Bound Tokens (SBTs), creating a
 system of clear accountability.
 
 ---
 
+## The AI Agent & Pre-alert Market
+
+The AI agent is a core innovation of SIVeL 3. It:
+
+1. **Monitors public sources** (RSS feeds, ReliefWeb API, HRW, Amnesty, etc.)
+   at no cost, using freely available data.
+2. **Detects potential events** using a small LLM (BERT-based NER) that runs on
+   hardware provided initially by the Banco de Datos del CINEP.
+3. **Generates pre-alerts** – structured JSON reports following the Banco
+   de Datos methodology – and publishes them onchain.
+4. **Checks for duplicates** by querying the existing database, ensuring no
+   redundant pre-alerts are published.
+
+**Market for pre-alerts:**
+
+- Citizens can browse available pre-alerts on an interactive map.
+- To access full details, a citizen pays a small fee
+  (currently **$1.00 USDT** to be adjusted according to balance
+   accesibility for citizens and long term sustainability).
+- After purchase, the citizen can investigate, improve, and submit the
+  pre-alert as a citizen alert.
+- If the alert is verified by a Documenter, the citizen receives a reward from
+  $2 (simple validation) to $5 (full investigation) USDT, based on the
+  significance of their contribution.
+- Reward pool transparency: The contract address is public. Anyone can
+  verify the available funds and track all reward payments.
+
+
+---
+
+
+## Sustainable Funding Model (Future)
+
+We are building a multi-layered sustainability model to ensure long-term
+operation without relying solely on donations.
+
+| Tier | Access | Price | Audience |
+| :--- | :--- | :--- | :--- |
+| **Free (no wallet)** | Map + 8 cases/month (1/day) | $0 | Casual visitors |
+| **Free (with wallet)** | 16 cases/month (2/day) | $0 | Registered with wallet |
+| **Free (with verified wallet)** | 24 cases/month (3/day) | $0 | Registered and verified in learn.tg |
+| **Basic Researcher (with verified wallet) ** | 240 cases/month + API | $10 USDT/month | Academics, journalists |
+| **Professional (with verified wallet)** | 1,000 cases/month + full API | $40 USDT/month | NGOs, security firms |
+| **Institutional (verified wallet of representative)** | Custom (bulk export, priority support) | $200-500 USDT/month | Governments, universities |
+| **Victim consent access** | One-time payment to reveal identity and inform the victim/relative who is the payer | $2 USDT (70% to victim) | Any researcher |
+
+
+**Revenue distribution:**
+
+Percentages apply from the first dollar received (including donations).
+
+| Recipient | Share | Notes |
+| :--- | :--- | :--- |
+| **Banco de Datos del CINEP** | 20% | Data access, methodology, and their internal process  |
+| **Pasos de Jesús (operator)** | 30% | Capped at **$1,500 USD per month**. Operation, development, hosting, AI agent, seed capital |
+| **Independent Documenters** | 30% | $5-$20 per verified case (territory work with victims), depending on donations received |
+| **Restoration Fund (victims)** | 5% | Welcome reparation bonusfor victims that claim their case, reparations, memorial events, activities and goods. |
+| **Church Fund** | 5% | Verified pacifist churches (via learn.tg) |
+| **Reinvestment** | 10% | Marketing, new features, hackathons |
+
+**Cap mechanism:** In the event that 30% of monthly revenue for pdJ exceeds $1,500 USD, the surplus will be distributed equally to the Restoration Fund, Church Fund and each region in the Regional Contract.
+
+pdJ may change the percentages to adjust to operational, ethical, legal
+concerns, and will inform all the users of the platform.
+
+**Data license:** The cases used and contributed by AI-agents and users have the **Creative Commons Attribution (CC/By)** license. The copyright holder is "Banco de Datos del CINEP". This open license allows sivel.xyz to use, redistribute, and build upon the data as long as attribution is given.
+
+
+### Victim Recognition & Consent
+
+When a victim or family member is authenticated by a documenter, they receive a **$2 welcome gift** from the Restoration Fund. They become eligible for future reparations organized by sivel.xyz.
+
+After registration, they choose how their information is handled on sivel.xyz:
+
+| Option | What happens on sivel.xyz | Free tiers see | Researchers see |
+| :--- | :--- | :--- | :--- |
+| **Anonymize** | Name hidden from all users | ❌ Hidden | ❌ Hidden |
+| **Public without royalties** | Name visible (as originally published) | ✅ Visible | ✅ Visible |
+| **Public with royalties** | Name hidden by default. Researchers can pay **$2** to reveal it. | ❌ Hidden | ❌ Hidden, but **$2 payment reveals name** (only to that researcher) |
+
+**For cases without registered victims:** All information (including victim names) remains fully visible to all users, as originally published by the Banco de Datos del CINEP.
+
+**For the "Public with royalties" option:**
+
+- When a researcher pays $2, the transaction is recorded on-chain as a receipt.
+- The researcher can use the victim's name in their publications.
+- The victim receives $1.40 (70%) and the researcher's contact information.
+- sivel.xyz does not intermediate beyond this.
+
+**If a victim changes their choice later:**
+
+- If a victim who previously chose "Public with royalties" switches to "Anonymize", researchers who already paid will no longer see the name on sivel.xyz.
+- Those researchers are notified (via the transaction record) that the victim may contact them directly. sivel.xyz does not refund payments or enforce further changes.
+
+**Why $2?** Meaningful for victims, low enough for researchers, comparable to similar models (e.g., DOVU offered above $5 in tokens).
+
+
+---
+
 ## Core Components
 
-1.  **Blockchain Certification on Celo:** A smart contract that immutably 
-    records the cryptographic hash of verified cases on the Celo blockchain.
+SIVeL 3 is built on four core pillars already described above:
 
-2.  **SBT-Based Roles and Recognition:** Smart contracts for issuing
-    non-transferable SBTs that define platform roles (Administrator, 
-    Documenter, "Regional Publishing Validator", "SIVeL 3 User" and 
-    "SIVeL 3 Founder User").
+1. **Blockchain Certification** – Immutable case records on Celo.
+2. **SBT-Based Roles** – Connector, Global Founder, Documenter, Validator, AI Agent.
+3. **AI Agent & Pre-alert Market** – AI-generated pre-alerts, citizen purchase and improvement.
+4. **Regional Donation Contract** – USDT donations, revenue distribution, reward pools.
 
-3.  **Map and Citizen Alert Module:** An interactive map to learn about the
-    conflict and to submit geo-located alerts. Verified alerts earn rewards 
-    as described in point 6.
-
-4.  **Regional Donation and Payments Contract:** A smart contract that accepts
-    donations (USDT) and payment (from subscriptions/credits), allocates funds
-    to specific geographic regions, and immediately distributes them as 
-    follows:
-    | Recipient | Percentage | Notes |
-    |-----------|------------|-------|
-    | Regional Publishin Validator | 20% | Regional good reputation, audit, certification |
-    | Pasos de Jesús | 20% | Infrastructure, development, maintenance |
-    | Documenters (stipend pool) | 40% | Monthly stipends (max US$800/month per documenter, prorated if insufficient) |
-    | Citizen Alert Rewards | 10% | Monthly pool for alert rewards (max US$10 per alert, prorated if insufficient) |
-    | Local Church (verified in learn.tg) | 5% | Supporting local pacifist churches (verification managed by learn.tg) |
-    | Restoration Fund (on-chain) | 5% | Accumulated in the contract for future campaigns for verified victims |
-
-5.  **Credit and Subscription System:** A backend system that manages
-    credits. Credits can be obtained through (1) one-time donations,
-    (2) monthly or annual subscriptions (with discounts for longer 
-    commitments), (3) creating alerts and (4) a **referral program** that 
-    rewards users who invite new active participants (credits in the
-    referral program are capped monthly to prevent abuse).
-
-6.  **Automated Incentive Distribution:** A system that automatically 
-    distributes monthly stipends to Documenters (from the stipend pool) and 
-    rewards to citizens (from the alert reward pool). Stipends are capped at 
-    US$800/month per documenter; alert rewards are capped at US$10 per 
-    verified alert. If funds are insufficient, amounts are prorated 
-    proportionally. Surplus in the stipend pool remains for future months or 
-    to invite new Documenters.
-
-7.  **Public Education:** A `learn.tg` course ("From Witness to Documenter")
-    to train potential documenters. **Prerequisite:** The user must have 
-    submitted at least 3 citizen alerts (from any of the priority regions: 
-    Colombia, Israel/Palestine, or future regions) through the `sivel.xyz` 
-    platform. Completion of the course is a prerequisite for entering the
-    **documenter pipeline**, where candidates are evaluated based on
-    activity, demonstrated trust, and resource availability. The **Documenter
-    SBT** is issued only after these criteria are met.
-
-8.  **Data Access for Professional Users:** Professional users interact with
-    case data through the interactive map and public interface (which requires
-    a connected wallet). For institutional partners with special agreements
-    (e.g. universities, NGOs), additional access methods may be
-    provided:
-    - **API Access (restricted):** Programmatic access to case data, designed
-      for partners who need to integrate SIVeL 3 with their own systems.
-    - **Bulk Import/Export:** Using the existing **REXML** (Relato en XML)
-      format. Not available to the general public.
-
-9.  **Case Management System for Documenters:** A secure interface (currently
-    SIVeL 2.2) for Documenters to register, edit, and manage cases. This system
-    will be enhanced to support **wallet-based authentication** (via SBTs),
-    replacing or complementing traditional credentials.
-
-10. **Advanced Research Tools (Credits-Based):** Professional users can 
-     access the following features by spending credits:
-    - **Analytics and Reporting:** Interactive charts, graphs, and statistical
-      reports (initially from SIVeL 2.2) to visualize trends, geographical
-      distribution, and temporal patterns of violence. Access requires wallet
-      authentication and consumes credits per report or per data refresh.
-    - **AI-Powered Natural Language Query (future):** Allows researchers to
-      ask complex questions in plain language (e.g., "Show me displacement
-      cases in Antioquia between 2020 and 2022"). Each query consumes credits.
+Future components (credit system, advanced research tools, API access, documenter case management) will be added as the platform grows and investigator revenue allows.
 
 ---
 
 ## Future Governance
 
-When a region's restoration fund accumulates sufficient resources 
-(e.g., $5,000), a **regional governance body** will be established
-to decide on the use of those funds (e.g., reparations for victims in that
-region). Each region will have its own body, including representatives of
-local actors: verified victims, active donors, active recruiters, 
-active alerters. Detailed mechanisms will be defined in `PRINCIPLES.md` 
-when the time comes.  Documenters, regional validator and operator will 
-not have vote but voice and veto power.
+### Regional Governance
+When a region's Restoration Fund reaches $5,000, a **Regional Council** is formed with victims/relatives, active donors, citizen alerters, and community leaders to decide how those funds will be used to repair victims. Documenters and Validators have voice but no vote. The operator (Pasos de Jesús) retains technical veto for operational, legal and security compliance.
 
-When we have at least 2 regional governance bodies, we will propose a 
-general governance body based on the experience with regional governance bodies
-to ensure legal and operation aligned with our principles.
+### Donor Acceptance Policy
+We welcome donors who share our commitment to ethical documentation, without conditions that compromise our principles:
+
+1. **No censorship** — No donor may demand removal or modification of documented cases.
+2. **No ideological conditionality** — Donations are accepted without political, religious, or Zionist propaganda agendas.
+3. **Transparency** — All donations are recorded on-chain and publicly visible.
+4. **No governance rights** — Donors receive recognition and may be elected
+   for regional governance with one vote (not according to their donation).
+
+Donors who violate these principles will be rejected.
+
+
+### Protection of Principles
+Foundational principles (see `PRINCIPLES.md`) — including open-source licensing, non-commercialization of victim data, and alignment with IHL — cannot be altered by any governance body or donor. Pasos de Jesús retains permanent technical veto to enforce them.
 
 ---
 
 ## Scalability
 
 This decentralized, hybrid funding mechanism is inherently scalable. As the
-project grows, new regions can be added to the contracts, allowing the
-system to expand organically wherever there is a need for ethical 
-witnessing and a community to support it. Similarly, the range of value-added 
-services can grow based on researchers needs and institutional demand.
+project grows, new regions can be added, allowing the system to expand
+organically wherever there is a need for ethical witnessing and community
+support. The investigator payment model ensures sustainability without
+relying solely on volatile donations.
 
-**Note:** When we start working in a region the service operator 
-(Pasos de Jesús) may also fulfill the documentor role, while documenters
-emerge.
+**Note:** When we start working in a new region, the service operator
+(Pasos de Jesús) may initially fulfill the documenter role while local
+documenters emerge.
 
 ---
 
 ## Metrics for Success
 
-*   **System Integrity:** 1 Publishing Validator and at least 3 Documenters onboarded with SBTs and sustained by stipends from the donation contract.
-*   **Citizen Engagement:** A growing number of active citizen reporters submitting high-quality, verifiable alerts.
-*   **Immutable Record:** A steady stream of cases of socio-political violence being documented and certified on the Celo blockchain.
-*   **Community Support:** Successful deployment and funding of the Regional Donation Contract, demonstrating the viability of the community-driven model.
-*   **Education:** A consistent number of students successfully completing the "From Witness to Documenter" course.
-*   **Platform Launch:** All functionality fully implemented and operational in production at sivel.xyz.
-
+*   **System Integrity:** 1 Publishing Validator and at least 3 Documenters
+    onboarded with SBTs.
+*   **AI Agent Effectiveness:** The AI agent consistently generates relevant
+    pre-alerts that lead to verified citizen alerts.
+*   **Citizen Engagement:** A growing number of active citizen reporters
+    purchasing, investigating, and improving pre-alerts.
+*   **Immutable Record:** A steady stream of cases being documented and
+    certified on the Celo blockchain.
+*   **Sustainability:** The investigator payment model generates sufficient
+    revenue to cover operational costs, hardware, and stipends for
+    Documenters.
+*   **Victim Compensation:** Victims receive fair compensation when their
+    identity is accessed (with consent).
+*   **Platform Launch:** All core functionality fully implemented and
+    operational in production at sivel.xyz.
