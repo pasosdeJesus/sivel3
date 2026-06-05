@@ -19,7 +19,7 @@ importers:
         version: 0.8.9
       '@pasosdejesus/m':
         specifier: gitlab:pasosdeJesus/m
-        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=2684506911d802542ae6d9228ed3cd3e33a2f00f
+        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=b6d47f0b8a1cb92ec049e26c902629b5318f04d4
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -967,8 +967,8 @@ packages:
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=2684506911d802542ae6d9228ed3cd3e33a2f00f':
-    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=2684506911d802542ae6d9228ed3cd3e33a2f00f}
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=b6d47f0b8a1cb92ec049e26c902629b5318f04d4':
+    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=b6d47f0b8a1cb92ec049e26c902629b5318f04d4}
     version: 0.6.2
     hasBin: true
 
@@ -1619,8 +1619,8 @@ packages:
   '@reown/appkit@1.7.8':
     resolution: {integrity: sha512-51kTleozhA618T1UvMghkhKfaPcc9JlKwLJ5uV+riHyvSoWPKPRIa5A6M1Wano5puNyW0s3fwywhyqTHSilkaA==}
 
-  '@rollup/wasm-node@4.61.0':
-    resolution: {integrity: sha512-UpYM5v/7Quee4u+VWHuNSgSlvIEQMQL7T/jEaOuaNJQ+JJcqSVvcqN6s1cLiDH5DuJMWRqJzvaCnyexp/UGftQ==}
+  '@rollup/wasm-node@4.61.1':
+    resolution: {integrity: sha512-mSYYG8nIVGzK2rU38h9wIUncwwkP4z/qyv70+TbFDYK0u1aZIrKDEYnmNs4CBtNy5Ru4pmjo6Zi7kIhJk4RMYQ==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -4297,6 +4297,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.2:
+    resolution: {integrity: sha512-c8jsqUZm3omBOI66G90z1Dyw5z622G8oLG+omfsHBJf3CWQTlOcwOjvOG6wtiNfW6anKm/eA39LMwMtMez2TiQ==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
 
@@ -5636,7 +5641,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.13
       debug: 4.4.3
-      semver: 7.8.1
+      semver: 7.8.2
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -5729,7 +5734,7 @@ snapshots:
 
   '@panva/hkdf@1.2.1': {}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=2684506911d802542ae6d9228ed3cd3e33a2f00f':
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=b6d47f0b8a1cb92ec049e26c902629b5318f04d4':
     dependencies:
       dotenv: 17.4.2
       execa: 9.6.1
@@ -6649,7 +6654,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@rollup/wasm-node@4.61.0':
+  '@rollup/wasm-node@4.61.1':
     dependencies:
       '@types/estree': 1.0.9
     optionalDependencies:
@@ -9932,6 +9937,8 @@ snapshots:
 
   semver@7.8.1: {}
 
+  semver@7.8.2: {}
+
   set-blocking@2.0.0: {}
 
   set-function-length@1.2.2:
@@ -10368,7 +10375,7 @@ snapshots:
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.15
-      rollup: '@rollup/wasm-node@4.61.0'
+      rollup: '@rollup/wasm-node@4.61.1'
     optionalDependencies:
       '@types/node': 24.12.4
       fsevents: 2.3.3

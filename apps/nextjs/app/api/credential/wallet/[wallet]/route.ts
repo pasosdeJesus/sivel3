@@ -29,12 +29,12 @@ export async function GET(
   const donationRow = await db
     .selectFrom('transaction')
     .select([
-      db.fn.sum('cantidad').as('totalDonated'),
+      db.fn.sum('amount').as('totalDonated'),
       db.fn.countAll().as('donationCount'),
       db.fn.min('created_at').as('firstDonation'),
     ])
     .where('wallet', '=', wallet)
-    .where('tipo', '=', 'donation')
+    .where('type', '=', 'donation')
     .executeTakeFirst()
 
   // First wallet connection (from web_event)

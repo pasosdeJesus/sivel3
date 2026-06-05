@@ -1,6 +1,7 @@
 // tests/credentials.test.ts
 /// <reference types="vitest" />
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { Kysely } from 'kysely'
 
 const mockDb = vi.hoisted(() => ({
   selectFrom: vi.fn().mockReturnThis(),
@@ -60,13 +61,13 @@ describe('getChainId', () => {
 describe('getDonorThresholds', () => {
   it('vacío sin metadata', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    expect(await getDonorThresholds(mockDb, 'celo')).toEqual([])
+    expect(await getDonorThresholds(mockDb as unknown as Kysely<any>, 'celo')).toEqual([])
   })
 
   it('retorna 5 umbrales ordenados', async () => {
     const rows = [{ token_id: 2 }, { token_id: 3 }, { token_id: 4 }, { token_id: 5 }, { token_id: 6 }]
     mockDb.executeTakeFirst.mockImplementation(() => Promise.resolve(rows.shift() || null))
-    const r = await getDonorThresholds(mockDb, 'celo')
+    const r = await getDonorThresholds(mockDb as unknown as Kysely<any>, 'celo')
     expect(r.length).toBe(5)
     expect(r[0].name).toBe('Donor')
     expect(r[4].name).toBe('Diamond Donor')
@@ -81,7 +82,7 @@ describe('getDonorThresholds', () => {
       if (call === 2) return Promise.resolve({ token_id: 3 })
       return Promise.resolve(null)
     })
-    const r = await getDonorThresholds(mockDb, 'celo')
+    const r = await getDonorThresholds(mockDb as unknown as Kysely<any>, 'celo')
     expect(r.length).toBe(2)
     expect(r[0].name).toBe('Donor')
     expect(r[0].minUsdt).toBe(0.02)
@@ -90,7 +91,7 @@ describe('getDonorThresholds', () => {
 
   it('respeta chainId en la consulta', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    await getDonorThresholds(mockDb, 'celoSepolia')
+    await getDonorThresholds(mockDb as unknown as Kysely<any>, 'celoSepolia')
     const calls = mockDb.where.mock.calls.filter((c: any[]) => c[0] === 'chain_id')
     expect(calls.length).toBeGreaterThan(0)
     expect(calls[0][2]).toBe('celoSepolia')

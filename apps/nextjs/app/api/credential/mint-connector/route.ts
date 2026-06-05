@@ -49,7 +49,7 @@ async function hasDonated(db: ReturnType<typeof newKyselyPostgresql>, wallet: st
     .selectFrom('transaction')
     .select('id')
     .where('wallet', '=', wallet)
-    .where('tipo', '=', 'donation')
+    .where('type', '=', 'donation')
     .where('crypto', '=', 'usdt')
     .executeTakeFirst()
   return !!row

@@ -231,10 +231,10 @@ export async function POST(request: NextRequest) {
         .insertInto('transaction')
         .values({
           wallet: donor,
-          tipo: 'donation',
+          type: 'donation',
           crypto: 'usdt',
-          cantidad: amount,
-          impacto_balance: (-parseFloat(amount)).toString(),
+          amount: amount,
+          balance_impact: (-parseFloat(amount)).toString(),
           region_id: finalRegionId,
           hash_tx: txHash,
           hash_assign: hash,
@@ -297,9 +297,9 @@ export async function POST(request: NextRequest) {
       const sbtDb = newKyselyPostgresql()
       const totalRow = await sbtDb
         .selectFrom('transaction')
-        .select(sbtDb.fn.sum('cantidad').as('total'))
+        .select(sbtDb.fn.sum('amount').as('total'))
         .where('wallet', '=', donor)
-        .where('tipo', '=', 'donation')
+        .where('type', '=', 'donation')
         .where('crypto', '=', 'usdt')
         .executeTakeFirst()
       const total = parseFloat((totalRow?.total as string) || '0')
@@ -389,10 +389,10 @@ export async function POST(request: NextRequest) {
         .insertInto('transaction')
         .values({
           wallet: donor,
-          tipo: 'learningpoint',
+          type: 'learningpoint',
           crypto: 'learningpoint',
-          cantidad: '1',
-          impacto_balance: '1',
+          amount: '1',
+          balance_impact: '1',
           region_id: finalRegionId,
           hash_tx: txHash,
           lp_tx_hash: txHash,

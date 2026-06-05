@@ -152,11 +152,11 @@ export async function incrementLearningPoints(
       try {
         await db.insertInto('transaction').values({
           wallet: w,
-          fecha: new Date(),
-          tipo: 'earning',
+          date: new Date(),
+          type: 'earning',
           crypto: 'learningpoint',
-          cantidad: amount.toFixed(6),
-          impacto_balance: amount.toFixed(6),
+          amount: amount.toFixed(6),
+          balance_impact: amount.toFixed(6),
           hash_tx: txHash,
           lp_tx_hash: txHash,
           lp_nonce: nextNonce,

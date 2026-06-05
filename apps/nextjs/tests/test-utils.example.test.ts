@@ -7,7 +7,7 @@
  * "Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres" (Colosenses 3:23)
  */
 
-import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { createFsMocks } from '@pasosdejesus/m/test-utils/fs-mocks';
 import { createMockKysely } from '@pasosdejesus/m/test-utils/kysely-mocks';
 import { createAuthMocks } from '@pasosdejesus/m/test-utils/rainbowkit-mocks';
@@ -18,7 +18,7 @@ import '@pasosdejesus/m/test-utils/radix-mocks';
 describe('Example: Using test-utils in your project', () => {
   // Example 1: Mocking filesystem operations
   describe('fs-mocks: Mocking filesystem', () => {
-    let fsMocks;
+    let fsMocks: any;
 
     beforeAll(() => {
       fsMocks = createFsMocks();
@@ -50,7 +50,7 @@ describe('Example: Using test-utils in your project', () => {
 
   // Example 2: Mocking database operations with Kysely
   describe('kysely-mocks: Mocking database queries', () => {
-    let dbMocks;
+    let dbMocks: ReturnType<typeof createMockKysely>;
 
     beforeAll(() => {
       dbMocks = createMockKysely();
@@ -76,7 +76,7 @@ describe('Example: Using test-utils in your project', () => {
 
   // Example 3: Mocking authentication and wallet state
   describe('rainbowkit-mocks: Mocking authentication', () => {
-    let authMocks;
+    let authMocks: ReturnType<typeof createAuthMocks>;
 
     beforeAll(() => {
       authMocks = createAuthMocks({
@@ -114,10 +114,12 @@ describe('Example: Using test-utils in your project', () => {
     it('should mock public client', () => {
       // Configure the mock
       viemMocks.createPublicClient.mockReturnValue({
+        getBlock: vi.fn(),
+        getTransactionReceipt: vi.fn(),
         getBlockNumber: vi.fn().mockResolvedValue(123456n),
-      });
+      } as any);
 
-      const client = viemMocks.createPublicClient();
+      const client = viemMocks.createPublicClient() as any;
       expect(client.getBlockNumber).toBeDefined();
       expect(viemMocks.createPublicClient).toHaveBeenCalled();
     });
@@ -134,7 +136,7 @@ describe('Example: Using test-utils in your project', () => {
 
   // Example 5: Cleanup and teardown
   describe('Setup and teardown patterns', () => {
-    let fsMocks;
+    let fsMocks: ReturnType<typeof createFsMocks>;
 
     beforeEach(() => {
       fsMocks = createFsMocks();

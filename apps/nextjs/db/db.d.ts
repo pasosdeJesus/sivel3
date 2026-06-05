@@ -1346,21 +1346,21 @@ export interface Sivel2GenVinculoestado {
 }
 
 export interface Transaction {
-  cantidad: Numeric;
+  amount: Numeric;
+  balance_impact: Numeric;
   created_at: Timestamp | null;
   crypto: string;
-  fecha: Generated<Timestamp>;
+  date: Generated<Timestamp>;
   hash_assign: string | null;
   hash_tx: string | null;
   id: Generated<number>;
-  impacto_balance: Numeric;
   lp_nonce: number | null;
   lp_response: Json | null;
   lp_success: boolean | null;
   lp_tx_hash: string | null;
   metadata: Json | null;
   region_id: number | null;
-  tipo: string;
+  type: string;
   updated_at: Timestamp | null;
   wallet: string;
 }

@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
     .selectFrom('transaction as t')
     .select([
       't.wallet',
-      db.fn.sum('t.cantidad').as('totalDonatedUsdt'),
+      db.fn.sum('t.amount').as('totalDonatedUsdt'),
       db.fn.countAll().as('donationCount'),
     ])
-    .where('t.tipo', '=', 'donation')
+    .where('t.type', '=', 'donation')
     .groupBy('t.wallet')
     .orderBy('totalDonatedUsdt', 'desc')
     .limit(limit)

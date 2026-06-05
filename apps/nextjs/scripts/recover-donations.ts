@@ -98,7 +98,7 @@ async function processEvent(
               .or('hash_tx', '=', txHashAssigned || '')
               .or('hash_assign', '=', txHashAssigned || '')
           )
-          .where('tipo', '=', 'donation')
+          .where('type', '=', 'donation')
           .where('crypto', '=', 'usdt')
           .executeTakeFirst()
 
@@ -113,9 +113,9 @@ async function processEvent(
           .values({
             wallet: donor,
             region_id: regionId,
-            cantidad: amount.toFixed(6),
-            impacto_balance: (-amount).toFixed(6),
-            tipo: 'donation',
+            amount: amount.toFixed(6),
+            balance_impact: (-amount).toFixed(6),
+            type: 'donation',
             crypto: 'usdt',
             hash_tx: txHash,
             hash_assign: txHashAssigned,
@@ -166,8 +166,8 @@ async function main() {
     .executeTakeFirst()
   const sum = await db
     .selectFrom('transaction')
-    .select(db.fn.sum('cantidad').as('s'))
-    .where('tipo', '=', 'donation')
+    .select(db.fn.sum('amount').as('s'))
+    .where('type', '=', 'donation')
     .executeTakeFirst()
   console.log(`transaction ahora tiene ${after?.total || 0} filas totales, ${sum?.s || '0'} USDT en donaciones`)
 
