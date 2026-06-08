@@ -1,29 +1,26 @@
-# Visión: SIVeL 3 - Un protocolo para atestiguar violencia socio política de forma ética
+# Visión: SIVeL 3 - Un protocolo para atestiguar violencia política de forma ética
 
 ## 1. Principios Fundamentales
 
 SIVeL 3 se rige por los siguientes principios formulados por el
 sacerdote Javier Giraldo
 
-- **Dignidad humana inalienable** – La información sobre violaciones
-  de derechos humanos pertenece a las víctimas y a la sociedad. Debe
-  ser libre y abierta.
-- **Acceso universal gratuito** – El público general y las víctimas nunca
-  pagan por acceder a los casos documentados.
-- **Código abierto y auditable** – Licencia ISC para el código fuente y
-  licencia CC/BY para los datos.
-- **Reserva de fuentes de información** por seguridad personal.
-- **Alineación con el Derecho Internacional Humanitario** – Clasificación
-  según el marco conceptual del Banco de Datos del CINEP.
+- **Máxima accesibilidad** - a información sobre violaciones  de derechos
+  humanos pertenece a las víctimas y a la sociedad. Debe ser libre y abierta.
+  Licencia ISC para el código fuente y licencia CC/BY para los datos. El público
+  general y las víctimas nunca pagan por acceder a los casos documentados. 
+- **Reserva de las fuentes de información** - por seguridad personal.
 - **No comercialización de datos de víctimas** – Los ingresos provienen
   de servicios institucionales y créditos, no de la venta de información.
+- **Alineación con el Derecho Internacional Humanitario** – Clasificación
+  según el marco conceptual del Banco de Datos del CINEP.
 
 ---
 
 ## 2. Resumen
 
 SIVeL 3 es un protocolo Web3 pionero diseñado para transformar la
-documentación ética de la violencia sociopolítica. Estamos creando un
+documentación ética de la violencia política. Estamos creando un
 ecosistema autosostenible, operando desde **https://sivel.xyz**,
 financiado mediante un modelo híbrido que combina donaciones,
  servicios de valor agregado para usuarios institucionales,
@@ -44,8 +41,8 @@ por acceder a los datos de los casos.** La información sobre
 violaciones de derechos humanos pertenece a las víctimas y a la
 sociedad; debe permanecer libre y abierta. Los usuarios profesionales
 (investigadores, periodistas, empresas de seguridad, agencias
-gubernamentales) que requieren acceso masivo o datos sensibles
-pueden contribuir a la sostenibilidad de la plataforma.
+gubernamentales) que requieren acceso masivo pueden contribuir a la sostenibilidad de la plataforma recordando que no compartimos fuentes de
+información.
 
 ---
 
@@ -64,7 +61,8 @@ definido por Soul-Bound Tokens (SBTs) no transferibles:
   spam), investigan el evento usando sus propias fuentes, mejoran la
   pre-alerta con información verificada (fotos, ubicación exacta, testimonio)
   y la envían como **alerta ciudadana**. Si es verificada, reciben una
-  recompensa.
+  recompensa proveniente del fonod de alertas y documentadores (sujeto a
+  disponibilidad).
   También pueden enviar alertas directas sin pasar por una pre-alerta si
   tienen información de primera mano de un caso no descubierto por el agente IA.
 
@@ -85,8 +83,7 @@ definido por Soul-Bound Tokens (SBTs) no transferibles:
 - **Agente IA** – Monitorea autonomamente fuentes públicas (noticias, RSS,
   APIs) para detectar posibles violaciones de derechos humanos.
   Genera **pre-alertas** (reportes estructurados en JSON siguiendo la
-  metodología del Banco de Datos del CINEP) y las publica en una sección de
-  sivel.xyz
+  metodología del SIVeL) y las publica en una sección de sivel.xyz
 
 - **Documentadores** – Investigan las alertas ciudadanas, las transforman en
   casos estructurados y participan en revisión por pares. No son trabajadores
@@ -116,8 +113,8 @@ definido por Soul-Bound Tokens (SBTs) no transferibles:
 
 - **Donantes** – Donan USDT para documentar casos en regiones específicas o
   como micro-reparación a víctimas registradas en la plataforma. Reciben
-  reconocimiento y créditos de cortesía. No tienen derechos de gobernanza,
-  pero pueden ser elegidos para consejos regionales con un voto
+  reconocimiento y créditos de cortesía. En caso de que un donante sea elegido
+  para un consejos regionale por un periodo, tendrá un voto
   (independientemente del monto donado).
 
 ---
@@ -131,7 +128,7 @@ Amnistía, etc.) sin costo.
 2. **Detecta eventos potenciales** usando un LLM pequeño que corre en
   hardware proporcionado inicialmente por el Banco de Datos del CINEP.
 3. **Genera pre-alertas** – reportes estructurados en JSON siguiendo
-  la metodología del Banco de Datos – y las publica en la sección para
+  la metodología de SIVeL – y las publica en la sección para
   esto de sivel.xyz con certificación en el blockchain.
 4. **Verifica duplicados** consultando la base de datos existente,
   asegurando que no se publiquen pre-alertas redundantes.
@@ -281,3 +278,4 @@ mientras surgen documentadores locales.
   la plataforma).
 - **Operatividad de la plataforma:** Toda la funcionalidad central
   completamente implementada y operativa en producción en sivel.xyz.
+
