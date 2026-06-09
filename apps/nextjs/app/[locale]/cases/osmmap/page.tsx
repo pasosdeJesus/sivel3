@@ -89,7 +89,7 @@ export default function OSMMapPage() {
 
   // Función para refrescar balance después de donar (con confetti y toast)
   const refreshBalanceAfterDonation = (
-    learningPoints?: { success: boolean; newScore?: number; message?: string; userMessage?: string },
+    slearn?: { success: boolean; slearnMinted?: string; message?: string; userMessage?: string },
     mintedSbts?: { name: string; imageUrl: string }[]
   ) => {
     if (selectedRegion) {
@@ -111,20 +111,20 @@ export default function OSMMapPage() {
         duration: isMiniPay ? 0 : 4000,
       });
 
-      // Mostrar toast de Learning Points si se incrementaron exitosamente
-      if (learningPoints?.success) {
+      // Mostrar toast de SLEARN si se minteó exitosamente
+      if (slearn?.success) {
         toast({
           title: t('lpTitle'),
-          description: t('lpSuccess').replace('{{0}}', String(learningPoints.newScore)),
+          description: t('lpSuccess').replace('{{0}}', slearn.slearnMinted || ''),
           duration: isMiniPay ? 0 : 4000,
         });
       }
 
-      // Mostrar toast informativo si Learning Points fallaron
-      if (learningPoints && !learningPoints.success) {
+      // Mostrar toast informativo si SLEARN falló
+      if (slearn && !slearn.success) {
         toast({
           title: t('lpTitle'),
-          description: learningPoints.userMessage || t('lpFallbackError'),
+          description: slearn.userMessage || t('lpFallbackError'),
           duration: 0, // Sin auto-dismiss
         });
       }
@@ -154,9 +154,9 @@ export default function OSMMapPage() {
   const onDonate = async (amount: string) => {
     try {
       const result = await donate(parseInt(selectedRegion, 10), amount, currentLocale);
-      refreshBalanceAfterDonation(result.learningPoints, result.mintedSbts);
+      refreshBalanceAfterDonation(result.slearn, result.mintedSbts);
 
-      logger.info(`✅ Donación completada. TX: ${result.txHash}${result.learningPoints?.success ? ' + Learning Points' : ''}`, 'DonatePage')
+      logger.info(`✅ Donación completada. TX: ${result.txHash}${result.slearn?.success ? ` + ${result.slearn.slearnMinted} SLEARN cashback` : ''}`, 'DonatePage')
       
     } catch (err: unknown) {
       console.error('Error en donación:', err);

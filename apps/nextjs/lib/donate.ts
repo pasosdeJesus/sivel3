@@ -16,10 +16,11 @@ export interface DonateParams {
 
 export interface DonateResult {
   txHash: string
-  learningPoints?: {
+  slearn?: {
     success: boolean
-    newScore?: number
+    slearnMinted?: string
     message?: string
+    userMessage?: string
   }
   mintedSbts?: { name: string; imageUrl: string }[]
 }
@@ -226,7 +227,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
     logMsg(`✅ Donación asignada correctamente. TX: ${result.txHash || 'pendiente'}`)
     return {
       txHash: result.txHash || txHash,
-      learningPoints: result.learningPoints,
+      slearn: result.slearn,
       mintedSbts: result.mintedSbts || [],
     } as DonateResult
   } catch (err: any) {

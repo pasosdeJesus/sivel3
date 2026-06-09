@@ -1,0 +1,9 @@
+{
+  "name": "SIVeL 3 Scout Agent",
+  "description": "Autonomous agent detecting political violence in Colombia and Palestine",
+  "version": "1.0.0",
+  "agentType": "Scout",
+  "ownerAddress": "0x9F636E5653b649b44c9375E6E103600AE55aF979",
+  "endpoint": "https://sivel.xyz/api/agent/webhook",
+  "createdAt": "2026-06-07T00:00:00Z"
+}

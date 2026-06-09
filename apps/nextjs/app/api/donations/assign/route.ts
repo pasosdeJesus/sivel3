@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, getContract } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
-import { incrementLearningPoints } from '@/lib/learningPoints'
+import { mintSlearnCashback, getCashbackPercent } from '@/lib/slearn'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
 import { mintSBT, getDonorThresholds, getChainId } from '@/lib/credentials'
@@ -247,44 +247,59 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================
-    // Incrementar Learning Points en learn.tg (una sola vez)
+    // SLEARN cashback for verified donors (replaces Learning Points)
     // ============================================================
-    let learningPointsResult: { 
-      success: boolean; 
-      message: string; 
-      userMessage?: string; 
-      newScore?: number;
-      nonce?: number
-    } = { success: false, message: 'No se intentó actualizar' }
-    
+    let slearnResult: {
+      success: boolean
+      usdtToReserve?: string
+      slearnMinted?: string
+      txHash?: string
+      message?: string
+      userMessage?: string
+    } = { success: false, message: 'Not attempted' }
+
     try {
-      const learnDb = newKyselyPostgresql()
-      serverLog.info(`Incrementando Learning Points para ${donor}...`)
-      const lpResult = await incrementLearningPoints(learnDb, donor, txHash, 1)
-      
-      if (lpResult.success) {
-        serverLog.success(`Learning Points incrementados: ${lpResult.message}`)
-        learningPointsResult = {
+      const donationAmount = parseFloat(amount)
+      serverLog.info(`Minting SLEARN cashback for ${donor}...`)
+      const result = await mintSlearnCashback(donor, donationAmount)
+
+      if (result) {
+        serverLog.success(`SLEARN cashback: ${result.slearnMinted} SLEARN, tx=${result.txHash.slice(0, 10)}...`)
+        slearnResult = {
           success: true,
-          message: lpResult.message,
-          userMessage: lpResult.userMessage,
-          newScore: (lpResult as any).newScore,
-          nonce: (lpResult as any).nonce
+          usdtToReserve: result.usdtToReserve,
+          slearnMinted: result.slearnMinted,
+          txHash: result.txHash,
+          message: `Minted ${result.slearnMinted} SLEARN`,
+          userMessage: `🎓 +${result.slearnMinted} SLEARN cashback`,
+        }
+
+        // Record SLEARN transaction
+        try {
+          const sDb = newKyselyPostgresql()
+          await sDb.insertInto('transaction').values({
+            wallet: donor,
+            type: 'earning',
+            crypto: 'slearn',
+            amount: result.slearnMinted,
+            balance_impact: result.slearnMinted,
+            region_id: finalRegionId,
+            hash_tx: result.txHash,
+          } as any).execute()
+          serverLog.success(`SLEARN transaction recorded: ${result.txHash}`)
+        } catch (sTxError) {
+          serverLog.error(`Error recording SLEARN transaction: ${sTxError}`)
         }
       } else {
-        serverLog.warn(`No se pudieron incrementar Learning Points: ${lpResult.message}`)
-        learningPointsResult = {
-          success: false,
-          message: lpResult.message,
-          userMessage: lpResult.userMessage
-        }
+        serverLog.info(`Skipped SLEARN cashback (user not verified or amount too small)`)
+        slearnResult = { success: false, message: 'Not verified or amount too small' }
       }
-    } catch (lpError) {
-      serverLog.error(`Error en incrementLearningPoints: ${lpError}`)
-      learningPointsResult = { 
-        success: false, 
-        message: 'Error interno del servidor',
-        userMessage: 'Could not update Learning Points due to internal error.'
+    } catch (slearnError) {
+      serverLog.error(`Error in mintSlearnCashback: ${slearnError}`)
+      slearnResult = {
+        success: false,
+        message: 'Internal SLEARN error',
+        userMessage: 'Could not mint SLEARN cashback due to internal error.',
       }
     }
 
@@ -381,37 +396,14 @@ export async function POST(request: NextRequest) {
     } catch { /* best effort */ }
 
     // ============================================================
-    // Record Learning Points request in transaction
+    // All done — skip deprecated LP transaction recording
     // ============================================================
-    try {
-      const lpDb = newKyselyPostgresql()
-      await lpDb
-        .insertInto('transaction')
-        .values({
-          wallet: donor,
-          type: 'learningpoint',
-          crypto: 'learningpoint',
-          amount: '1',
-          balance_impact: '1',
-          region_id: finalRegionId,
-          hash_tx: txHash,
-          lp_tx_hash: txHash,
-          lp_nonce: learningPointsResult.nonce ?? null,
-          lp_response: JSON.stringify(learningPointsResult),
-          lp_success: learningPointsResult.success,
-        })
-        .execute()
-      serverLog.success(`Learning Points request recorded in transaction for ${txHash}`)
-    } catch (lpTxError) {
-      // Non-critical: log but don't fail the response
-      serverLog.error(`Error recording LP in transaction: ${lpTxError}`)
-    }
 
     return NextResponse.json({
       success: true,
       message: 'Donación asignada correctamente',
       txHash: hash,
-      learningPoints: learningPointsResult,
+      slearn: slearnResult,
       mintedSbts,
     })
   } catch (error) {

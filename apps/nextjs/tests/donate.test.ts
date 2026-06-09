@@ -85,7 +85,7 @@ describe('lib/donate', () => {
       mockRequest.mockResolvedValue(VALID_HASH)
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ txHash: VALID_HASH, learningPoints: { success: true, newScore: 10 } }),
+        json: () => Promise.resolve({ txHash: VALID_HASH, slearn: { success: true, slearnMinted: '220.00' } }),
       })
 
       const { donate } = await import('@/lib/donate')
@@ -103,7 +103,7 @@ describe('lib/donate', () => {
       })
       expect(mockFetch).toHaveBeenCalledWith('/api/donations/assign', expect.any(Object))
       expect(result.txHash).toBe(VALID_HASH)
-      expect(result.learningPoints?.success).toBe(true)
+      expect(result.slearn?.success).toBe(true)
     })
   })
 

@@ -50,14 +50,12 @@ vi.mock('@/lib/web-analytics', () => ({
 }))
 
 // ============================================================
-// Mocks for learningPoints module
+// Mocks for slearn module
 // ============================================================
-const mockIncrementLearningPoints = vi.fn()
-vi.mock('@/lib/learningPoints', () => ({
-  incrementLearningPoints: (...args: any[]) => mockIncrementLearningPoints(...args),
-  getCurrentNonce: vi.fn(),
-  updateNonce: vi.fn(),
-  buildMessage: vi.fn(),
+const mockMintSlearnCashback = vi.fn()
+vi.mock('@/lib/slearn', () => ({
+  mintSlearnCashback: (...args: any[]) => mockMintSlearnCashback(...args),
+  getCashbackPercent: vi.fn(() => 10),
 }))
 
 // ============================================================
@@ -99,7 +97,7 @@ describe('POST /api/donations/assign', () => {
     mockGetTransaction.mockReset()
     mockGetTransactionReceipt.mockReset()
     mockWriteAssignDonation.mockReset()
-    mockIncrementLearningPoints.mockReset()
+    mockMintSlearnCashback.mockReset()
   })
 
   // ---- Parameter validation ----
@@ -157,7 +155,7 @@ describe('POST /api/donations/assign', () => {
 
   // ---- Successful donation assignment ----
 
-  it('verifies tx, assigns donation, and increments Learning Points on success', async () => {
+  it('verifies tx, assigns donation, and mints SLEARN cashback on success', async () => {
     // Mock transaction data with regionId=1 embedded in input
     const regionIdHex = BigInt(1).toString(16).padStart(64, '0')
     const dummyInput = '0xa9059cbb' + '00'.repeat(64) + '00'.repeat(64) + regionIdHex
@@ -187,12 +185,11 @@ describe('POST /api/donations/assign', () => {
     // Mock contract write
     mockWriteAssignDonation.mockResolvedValue(ASSIGN_TX_HASH)
 
-    // Mock Learning Points success
-    mockIncrementLearningPoints.mockResolvedValue({
-      success: true,
-      message: 'Learning Points incremented',
-      userMessage: 'Score: 10',
-      newScore: 10,
+    // Mock SLEARN cashback success
+    mockMintSlearnCashback.mockResolvedValue({
+      usdtToReserve: '10.00',
+      slearnMinted: '220.00',
+      txHash: ASSIGN_TX_HASH,
     })
 
     const req = new Request('http://localhost/api/donations/assign', {
@@ -211,8 +208,8 @@ describe('POST /api/donations/assign', () => {
     const body = await res.json()
     expect(body.success).toBe(true)
     expect(body.txHash).toBe(ASSIGN_TX_HASH)
-    expect(body.learningPoints.success).toBe(true)
-    expect(body.learningPoints.newScore).toBe(10)
+    expect(body.slearn.success).toBe(true)
+    expect(body.slearn.slearnMinted).toBe('220.00')
   })
 
   // ---- Transfer verification: wrong donor ----
@@ -342,7 +339,7 @@ describe('POST /api/donations/assign', () => {
 
   // ---- Learning Points failure is non-blocking ----
 
-  it('succeeds with learningPoints success=false when learn.tg is down', async () => {
+  it('succeeds with slearn success=false when SLEARN minting fails', async () => {
     const regionIdHex = BigInt(2).toString(16).padStart(64, '0')
     const dummyInput = '0xa9059cbb' + '00'.repeat(64) + '00'.repeat(64) + regionIdHex
 
@@ -368,8 +365,8 @@ describe('POST /api/donations/assign', () => {
 
     mockWriteAssignDonation.mockResolvedValue(ASSIGN_TX_HASH)
 
-    // Learning Points throws
-    mockIncrementLearningPoints.mockRejectedValue(new Error('learn.tg down'))
+    // SLEARN cashback throws
+    mockMintSlearnCashback.mockRejectedValue(new Error('SLEARN mint failed'))
 
     const req = new Request('http://localhost/api/donations/assign', {
       method: 'POST',
@@ -386,7 +383,7 @@ describe('POST /api/donations/assign', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
-    expect(body.learningPoints.success).toBe(false)
+    expect(body.slearn.success).toBe(false)
   })
 
   // ---- Contract call failure ----
