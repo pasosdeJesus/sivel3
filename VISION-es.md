@@ -8,7 +8,7 @@ sacerdote Javier Giraldo
 - **Máxima accesibilidad** - a información sobre violaciones  de derechos
   humanos pertenece a las víctimas y a la sociedad. Debe ser libre y abierta.
   Licencia ISC para el código fuente y licencia CC/BY para los datos. El público
-  general y las víctimas nunca pagan por acceder a los casos documentados. 
+  general y las víctimas nunca pagan por acceder a los casos documentados.
 - **Reserva de las fuentes de información** - por seguridad personal.
 - **No comercialización de datos de víctimas** – Los ingresos provienen
   de servicios institucionales y créditos, no de la venta de información.
@@ -36,13 +36,14 @@ contribuciones, proporciona un camino para que investigadores
 profesionales accedan a datos valiosos, y establece un registro
 inmutable y certificado en blockchain de los eventos en la red Celo.
 
-**Crucialmente, SIVeL 3 nunca cobra a víctimas o al público general
+**SIVeL 3 nunca cobra a víctimas o al público general
 por acceder a los datos de los casos.** La información sobre
 violaciones de derechos humanos pertenece a las víctimas y a la
 sociedad; debe permanecer libre y abierta. Los usuarios profesionales
 (investigadores, periodistas, empresas de seguridad, agencias
-gubernamentales) que requieren acceso masivo pueden contribuir a la sostenibilidad de la plataforma recordando que no compartimos fuentes de
-información.
+gubernamentales) que requieren acceso masivo pueden contribuir a la
+sostenibilidad de la plataforma mientras recuerden que no compartimos
+fuentes de información.
 
 ---
 
@@ -83,21 +84,22 @@ definido por Soul-Bound Tokens (SBTs) no transferibles:
 - **Agente IA** – Monitorea autonomamente fuentes públicas (noticias, RSS,
   APIs) para detectar posibles violaciones de derechos humanos.
   Genera **pre-alertas** (reportes estructurados en JSON siguiendo la
-  metodología del SIVeL) y las publica en una sección de sivel.xyz
+  metodología del SIVeL y el marco conceptual del Banco de Datos) y las
+  publica en una sección de sivel.xyz
 
 - **Documentadores** – Investigan las alertas ciudadanas, las transforman en
   casos estructurados y participan en revisión por pares. No son trabajadores
-  ni voluntarios del validador. Reciben una donación por caso documentado 
-  desde el fondo de alertas y documentadores ($5–$20 por caso, según 
-  disponibilidad).  También ayudan a certificar víctimas y familiares 
-  cuando reclaman un caso. Si el sistema alcanza estabilidad financiera, 
-  recibirán un estipendio mensual en lugar de retribución por caso. Para 
-  Colombia, los miembros de la Red de Bancos de Datos ya están capacitados 
-  en la metodología y basta que registren su billetera para recibir el SBT 
-  de Documentador y ser preferidos para autenticar víctimas de su región.
+  de tiempo completo. Reciben una donación por caso documentado desde el fondo
+  de alertas y documentadores ($5–$20 por caso, según disponibilidad).  También
+  ayudan a certificar víctimas y familiares cuando reclaman un caso. Si el
+  sistema alcanza estabilidad financiera, recibirán un estipendio mensual en
+  lugar de retribución por caso. Para Colombia, los miembros de la Red de
+  Bancos de Datos ya están capacitados en el marco conceptual y basta que
+  registren su billetera para recibir el SBT de Documentador y ser preferidos
+  para autenticar víctimas de su región.
 
 - **Validadores Regionales de Publicación** (ej. Banco de Datos de Violencia
-  Política del CINEP en Colombia) – Organización reconocida en derechos
+  Política del CINEP en Colombia) – Organización de la región reconocida en derechos
   humanos que realiza la auditoría final para su región y certifica los
   casos en la blockchain de Celo. Mantiene su propio sistema de información
   interno con acceso completo a todos los datos de su región. También ayuda
@@ -128,7 +130,8 @@ Amnistía, etc.) sin costo.
 2. **Detecta eventos potenciales** usando un LLM pequeño que corre en
   hardware proporcionado inicialmente por el Banco de Datos del CINEP.
 3. **Genera pre-alertas** – reportes estructurados en JSON siguiendo
-  la metodología de SIVeL – y las publica en la sección para
+  la metodología de SIVeL y el marco conceptual del Banco de Datos – y las
+  publica en la sección para
   esto de sivel.xyz con certificación en el blockchain.
 4. **Verifica duplicados** consultando la base de datos existente,
   asegurando que no se publiquen pre-alertas redundantes.
@@ -171,7 +174,7 @@ donaciones).
 
 | Destinatario | Porcentaje | Notas |
 | :--- | :--- | :--- |
-| **Banco de Datos del CINEP** | 20% | Acceso a datos, metodología, proceso interno |
+| **Banco de Datos del CINEP** | 20% | Acceso a datos, marco conceptual, proceso interno |
 | **Pasos de Jesús (operador)** | 30% | Tope de **$1,500 USD por mes**. Operación, desarrollo, hospedaje, agente IA, capital semilla |
 | **Documentadores Independientes** | 30% | $5–$20 por caso verificado (trabajo en territorio), según donaciones recibidas |
 | **Fondo de Restauración (víctimas)** | 5% | Bono de bienvenida, reparaciones, eventos conmemorativos, reforestación |
@@ -226,7 +229,7 @@ Aceptamos donantes que compartan nuestro compromiso con la documentación
 1. **Sin censura** – Ningún donante puede exigir la eliminación o
   modificación de casos documentados.
 2. **Sin condicionalidad ideológica** – Las donaciones se aceptan sin agendas
-   políticas, religiosas o de propaganda sionista.
+   políticas, sionista o de propaganda no cristiana.
 3. **Transparencia** – Todas las donaciones se registran en la blockchain
    y son públicamente visibles.
 4. **Sin derechos de gobernanza** – Los donantes reciben reconocimiento
@@ -262,8 +265,8 @@ mientras surgen documentadores locales.
 ## 9. Métricas de Éxito
 
 - **Integridad del sistema:** 1 Validador Regional y al menos 3
-  Documentadores incorporados con SBTs (de los cuales al menos 2
-  son de la Red de Bancos de Datos en Colombia).
+  Documentadores incorporados con SBTs (de los cuales al menos 1
+  es de la Red de Bancos de Datos en Colombia).
 - **Efectividad del Agente IA:** El agente genera consistentemente
   pre-alertas relevantes que conducen a alertas ciudadanas verificadas.
 - **Participación ciudadana:** Número creciente de ciudadanos activos
