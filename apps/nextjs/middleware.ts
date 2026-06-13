@@ -28,9 +28,10 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip redirect for API / assets
+  // Skip redirect for API / assets / agents
   if (pathname === '/' ||
       pathname.startsWith('/api/') ||
+      pathname.startsWith('/agent/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/img/') ||
       pathname.startsWith('/favicon.ico')) {

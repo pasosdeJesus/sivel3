@@ -1,0 +1,20 @@
+{
+  "name": "SIVeL 3 Scout Agent",
+  "description": "AI agent that monitors public sources (RSS, APIs) to detect political violence events in some regions. Generates structured pre-alerts following the SIVeL methodology with CINEP's Bank of Data conceptual framework for the SIVeL 3 ecosystem.",
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "version": "1.0.0",
+  "agentType": "Scout",
+  "ownerAddress": "0x01a72816110a88883F79026C0199827fCF9184c8",
+  "services": [
+    {
+      "name": "health",
+      "endpoint": "https://sivel.xyz:9001/api/agent/health"
+    },
+    {
+      "name": "webhook",
+      "endpoint": "https://sivel.xyz:9001/api/agent/webhook"
+    }
+  ],
+  "supportedTrust": ["reputation"],
+  "createdAt": "2026-06-07T00:00:00Z"
+}
