@@ -42,7 +42,7 @@ Jesus is God incarnated, the Truth and the Logos.
 8. **[apps/nextjs/ADMIN.md]**: Admin guide for PasosDeJesusCredentials contract.
 9. **[apps/nextjs/doc/donation-flow.md]**: Donation + Learning Points flow.
 10. **[apps/hardhat/README.md]**: Solidity contracts details.
-11. **[node_modules/@pasosdejesus/m/ia/construir_en_adJ_y_celo.md]**: Celo development guide for the pdJ ecosystem.
+11. **[node_modules/@pasosdejesus/m/ia/construir_en_adJ_y_celo.md]**: Celo development guide for the pdJ ecosystem
 12. **[celopedia-skill](~/.agents/skills/celopedia-skill/SKILL.md)**: Celo ecosystem intelligence.
 13. Read the structure and key files of this project
 

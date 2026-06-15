@@ -37,7 +37,7 @@ vi.mock('viem/chains', () => ({
 // Mock viem/accounts
 vi.mock('viem/accounts', () => ({
   privateKeyToAccount: vi.fn(() => ({
-    address: '0xb9c0dba5c5aae5fe81b327ff895227ee7fc44d81',
+    address: '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b',
     signMessage: vi.fn(),
   })),
 }))
@@ -85,7 +85,6 @@ describe('POST /api/donations/assign', () => {
     process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = CONTRACT_ADDRESS
     process.env.PRIVATE_KEY = '0x7ca1a247f5ea85228506abcb86cefda2c7090b5e46d0518c80c65a7f949da67e'
     process.env.LEARNTG_ADDRESS = '0x9f636e5653b649b44c9375e6e103600ae55af979'
-    process.env.LEARNTG_INCREMENT_API_URL = 'https://learn.tg/api/learning-points/increment'
 
     const mod = await import('@/app/api/donations/assign/route')
     POST = mod.POST as unknown as (request: Request) => Promise<Response>
@@ -337,7 +336,7 @@ describe('POST /api/donations/assign', () => {
     expect(res.status).toBe(400)
   })
 
-  // ---- Learning Points failure is non-blocking ----
+  // ---- SLEARN failure is non-blocking ----
 
   it('succeeds with slearn success=false when SLEARN minting fails', async () => {
     const regionIdHex = BigInt(2).toString(16).padStart(64, '0')

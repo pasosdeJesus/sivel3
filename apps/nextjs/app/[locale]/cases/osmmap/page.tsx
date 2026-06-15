@@ -20,9 +20,9 @@ const localT = {
   en: {
     thanksTitle: '🙏 Thank you for your donation!',
     thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.',
-    lpTitle: '🎓 Learning Points',
-    lpSuccess: 'You earned Learning Points. Total score: {{0}}',
-    lpFallbackError: 'Unable to update Learning Points. Contact the team.',
+    lpTitle: '🎓 SLEARN Cashback',
+    lpSuccess: 'You earned SLEARN cashback: {{0}}',
+    lpFallbackError: 'Unable to mint SLEARN cashback. Contact the team.',
     donationError: 'Donation error',
     sbtTitle: '🎖️ SBT Obtained!',
     viewStats: '📊 View Site Statistics',
@@ -30,9 +30,9 @@ const localT = {
   es: {
     thanksTitle: '🙏 ¡Gracias por tu donación!',
     thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.',
-    lpTitle: '🎓 Puntos de Aprendizaje',
-    lpSuccess: 'Has ganado puntos de aprendizaje. Puntaje total: {{0}}',
-    lpFallbackError: 'No se pudieron actualizar los Puntos de Aprendizaje. Contacta al equipo.',
+    lpTitle: '🎓 SLEARN Cashback',
+    lpSuccess: 'Has ganado SLEARN cashback: {{0}}',
+    lpFallbackError: 'No se pudo mintear SLEARN cashback. Contacta al equipo.',
     donationError: 'Error en donación',
     sbtTitle: '🎖️ ¡SBT Obtenido!',
     viewStats: '📊 Ver Estadísticas del Sitio',
@@ -150,7 +150,7 @@ export default function OSMMapPage() {
     }
   };
 
-  // Función de donación unificada con manejo de errores y Learning Points
+  // Función de donación unificada con manejo de errores y SLEARN cashback
   const onDonate = async (amount: string) => {
     try {
       const result = await donate(parseInt(selectedRegion, 10), amount, currentLocale);

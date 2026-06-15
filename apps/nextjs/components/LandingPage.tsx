@@ -23,8 +23,8 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
       ? 'SIVeL 3 empodera a ciudadanos, documentadores y validadores para crear un registro inmutable y transparente de casos de violencia, financiado mediante donaciones regionales en la red Celo.'
       : 'SIVeL 3 empowers citizens, documenters, and validators to create an immutable, transparent record of violence cases, funded by regional donations on the Celo network.',
     incentives: isSpanish
-      ? '✨ Donantes reciben Learning Points (SLEARN). ✨ Ciudadanos que reportan alertas verificadas reciben recompensas en USDT.'
-      : '✨ Donors earn Learning Points (SLEARN). ✨ Citizens who submit verified alerts earn USDT rewards.',
+      ? '✨ Donantes verificados reciben SLEARN cashback. ✨ Ciudadanos que reportan alertas verificadas reciben recompensas en USDT.'
+      : '✨ Verified donors earn SLEARN cashback. ✨ Citizens who submit verified alerts earn USDT rewards.',
     stats: {
       cases: isSpanish ? 'Casos documentados' : 'Documented Cases',
       regions: isSpanish ? 'Regiones activas' : 'Active Regions',

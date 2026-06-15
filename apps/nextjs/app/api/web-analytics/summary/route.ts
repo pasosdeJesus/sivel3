@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
  * Returns aggregated web + on-chain analytics for the dashboard.
  * Extends the shared handler with project-specific queries:
  * - donationsByRegion (USDT donations grouped by region_id)
- * - totalLearningPoints (sum of learningpoint transactions)
+ * - totalLearningPoints (sum of slearn transactions)
  */
 const baseHandler = makeSummaryHandler(
   () => newKyselyPostgresql() as any,
@@ -45,10 +45,10 @@ export async function GET(req: NextRequest) {
       count: Number(r.count),
     }))
 
-    // Total learning points
+    // Total SLEARN minted
     const lpRows = await sql<{ v: string }>`
       SELECT coalesce(sum(amount::numeric), 0)::text AS v
-      FROM transaction WHERE crypto = 'learningpoint'
+      FROM transaction WHERE crypto = 'slearn'
     `.execute(db)
 
     data.onChain.totalLearningPoints = lpRows.rows[0]?.v || '0'

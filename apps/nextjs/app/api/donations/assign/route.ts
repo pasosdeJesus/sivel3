@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPublicClient, http, getContract } from 'viem'
+import { createPublicClient, http, getContract, parseAbi } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
 import { mintSlearnCashback, getCashbackPercent } from '@/lib/slearn'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
@@ -161,13 +162,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar que la transacción sea válida y extraer región
-    const contractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS!
+    // Derive backend address (user sends donation to backend, backend splits 90/10)
+    const PRIVATE_KEY = process.env.PRIVATE_KEY! as `0x${string}`
+    const backendAddress = privateKeyToAccount(PRIVATE_KEY).address.toLowerCase()
+
     const { isValid, regionId: extractedRegionId } = await verifyTransferAndGetRegion(
       txHash, 
       donor, 
       amount, 
-      contractAddress
+      backendAddress
     )
 
     if (!isValid) {
@@ -181,37 +184,67 @@ export async function POST(request: NextRequest) {
     const finalRegionId = extractedRegionId || parseInt(regionId, 10)
     serverLog.info(`Región final para asignación: ${finalRegionId}`)
 
-    // Conectar al contrato V2
+    // ============================================================
+    // Split: 10% to SLEARN for verified users (via mintSlearnCashback)
+    // Not verified: 100% to RegionalDonation
+    // ============================================================
     const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
     const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
-    const PRIVATE_KEY = process.env.PRIVATE_KEY! as `0x${string}`
+    const regionalDonationAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS!
+
+    const account = privateKeyToAccount(PRIVATE_KEY)
+    const chain = NETWORK == 'celo' ? celo : celoSepolia
 
     const viem = await import('viem')
-    const viemAccounts = await import('viem/accounts')
-    
-    const account = viemAccounts.privateKeyToAccount(PRIVATE_KEY)
-    const walletClient = viem.createWalletClient({
-      account,
-      chain: NETWORK == 'celo' ? celo : celoSepolia,
-      transport: viem.http(RPC_URL),
+    const walletClient = viem.createWalletClient({ account, chain, transport: viem.http(RPC_URL) })
+
+    const donationAmount = parseFloat(amount)
+    const amountInSmallest = BigInt(Math.floor(donationAmount * 1_000_000))
+
+    let slearnResult: any = { success: false, message: 'Not attempted' }
+    let assignAmount = amountInSmallest
+
+    try {
+      // mintSlearnCashback handles: verify on learn.tg → transfer USDT to SLEARN → mintAndReserve
+      const cashback = await mintSlearnCashback(donor, donationAmount)
+
+      if (cashback) {
+        const slearnUsdt = BigInt(Math.round(donationAmount * 0.1 * 1_000_000))
+        assignAmount = amountInSmallest - slearnUsdt
+        slearnResult = { success: true, usdtToReserve: cashback.usdtToReserve, slearnMinted: cashback.slearnMinted, txHash: cashback.txHash }
+        serverLog.success(`Split: ${cashback.usdtToReserve} USDT → SLEARN, ${(Number(assignAmount)/1_000_000).toFixed(2)} USDT → RegionalDonation`)
+      } else {
+        serverLog.info('Not verified or no SLEARN — 100% to RegionalDonation')
+      }
+    } catch (slearnError) {
+      serverLog.error(`SLEARN cashback error: ${slearnError}`)
+    }
+
+    // Transfer USDT from backend to RegionalDonation (90% or 100%)
+    const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS!
+    const usdtAbi = parseAbi(['function transfer(address to, uint256 amount) returns (bool)'])
+    await walletClient.writeContract({
+      address: usdtAddress as `0x${string}`, abi: usdtAbi,
+      functionName: 'transfer', args: [regionalDonationAddress as `0x${string}`, assignAmount],
+      chain, account,
     })
 
+    // Call assignDonation
     const contract = getContract({
-      address: contractAddress as `0x${string}`,
+      address: regionalDonationAddress as `0x${string}`,
       abi: REGIONAL_DONATION_V2_ABI,
       client: walletClient,
     })
 
-    // Llamar a assignDonation con la región extraída
-    serverLog.info(`Llamando a assignDonation en el contrato...`)
+    serverLog.info(`assignDonation: ${(Number(assignAmount)/1_000_000).toFixed(2)} USDT, region=${finalRegionId}`)
     const hash = await contract.write.assignDonation([
       BigInt(finalRegionId),
       donor as `0x${string}`,
-      BigInt(Math.floor(parseFloat(amount) * 1_000_000)),
+      assignAmount,
       txHash as `0x${string}`,
     ])
     
-    serverLog.success(`Donación asignada correctamente. TX: ${hash}`)
+    serverLog.success(`Donación asignada. TX: ${hash}`)
 
     // ============================================================
     // Record donation in web_event (analytics)
@@ -247,59 +280,23 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================
-    // SLEARN cashback for verified donors (replaces Learning Points)
+    // Record SLEARN transaction if minted
     // ============================================================
-    let slearnResult: {
-      success: boolean
-      usdtToReserve?: string
-      slearnMinted?: string
-      txHash?: string
-      message?: string
-      userMessage?: string
-    } = { success: false, message: 'Not attempted' }
-
-    try {
-      const donationAmount = parseFloat(amount)
-      serverLog.info(`Minting SLEARN cashback for ${donor}...`)
-      const result = await mintSlearnCashback(donor, donationAmount)
-
-      if (result) {
-        serverLog.success(`SLEARN cashback: ${result.slearnMinted} SLEARN, tx=${result.txHash.slice(0, 10)}...`)
-        slearnResult = {
-          success: true,
-          usdtToReserve: result.usdtToReserve,
-          slearnMinted: result.slearnMinted,
-          txHash: result.txHash,
-          message: `Minted ${result.slearnMinted} SLEARN`,
-          userMessage: `🎓 +${result.slearnMinted} SLEARN cashback`,
-        }
-
-        // Record SLEARN transaction
-        try {
-          const sDb = newKyselyPostgresql()
-          await sDb.insertInto('transaction').values({
-            wallet: donor,
-            type: 'earning',
-            crypto: 'slearn',
-            amount: result.slearnMinted,
-            balance_impact: result.slearnMinted,
-            region_id: finalRegionId,
-            hash_tx: result.txHash,
-          } as any).execute()
-          serverLog.success(`SLEARN transaction recorded: ${result.txHash}`)
-        } catch (sTxError) {
-          serverLog.error(`Error recording SLEARN transaction: ${sTxError}`)
-        }
-      } else {
-        serverLog.info(`Skipped SLEARN cashback (user not verified or amount too small)`)
-        slearnResult = { success: false, message: 'Not verified or amount too small' }
-      }
-    } catch (slearnError) {
-      serverLog.error(`Error in mintSlearnCashback: ${slearnError}`)
-      slearnResult = {
-        success: false,
-        message: 'Internal SLEARN error',
-        userMessage: 'Could not mint SLEARN cashback due to internal error.',
+    if (slearnResult.success && slearnResult.txHash) {
+      try {
+        const sDb = newKyselyPostgresql()
+        await sDb.insertInto('transaction').values({
+          wallet: donor,
+          type: 'earning',
+          crypto: 'slearn',
+          amount: slearnResult.slearnMinted,
+          balance_impact: slearnResult.slearnMinted,
+          region_id: finalRegionId,
+          hash_tx: slearnResult.txHash,
+        } as any).execute()
+        serverLog.success(`SLEARN transaction recorded: ${slearnResult.txHash}`)
+      } catch (sTxError) {
+        serverLog.error(`Error recording SLEARN transaction: ${sTxError}`)
       }
     }
 
