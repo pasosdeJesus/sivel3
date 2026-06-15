@@ -223,11 +223,14 @@ export async function POST(request: NextRequest) {
     // Transfer USDT from backend to RegionalDonation (90% or 100%)
     const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS!
     const usdtAbi = parseAbi(['function transfer(address to, uint256 amount) returns (bool)'])
-    await walletClient.writeContract({
+    const txRegional = await walletClient.writeContract({
       address: usdtAddress as `0x${string}`, abi: usdtAbi,
       functionName: 'transfer', args: [regionalDonationAddress as `0x${string}`, assignAmount],
       chain, account,
     })
+    await viem.createPublicClient({ chain, transport: viem.http(RPC_URL) })
+      .waitForTransactionReceipt({ hash: txRegional, timeout: 60_000 })
+    serverLog.success(`USDT transfer to RegionalDonation confirmed: ${txRegional}`)
 
     // Call assignDonation
     const contract = getContract({
