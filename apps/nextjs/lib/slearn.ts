@@ -58,7 +58,10 @@ export interface SlearnResult {
  */
 async function isVerifiedOnLearnTg(wallet: string): Promise<boolean> {
   const timestamp = Math.floor(Date.now() / 1000)
-  const account = privateKeyToAccount((process.env.PRIVATE_KEY || '') as `0x${string}`)
+  const pk = process.env.PRIVATE_KEY || ''
+  console.log(`[slearn] PK length=${pk.length}, starts=${pk.slice(0,6)}...`)
+  const account = privateKeyToAccount(pk as `0x${string}`)
+  console.log(`[slearn] Signing verify request with: ${account.address}`)
 
   // Sign: keccak256(encodePacked(['address', 'uint256'], [wallet, timestamp]))
   const message = `${wallet}${timestamp}`

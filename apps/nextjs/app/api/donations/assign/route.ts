@@ -193,6 +193,7 @@ export async function POST(request: NextRequest) {
     const regionalDonationAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS!
 
     const account = privateKeyToAccount(PRIVATE_KEY)
+    serverLog.info(`[route] Backend address: ${account.address}`)
     const chain = NETWORK == 'celo' ? celo : celoSepolia
 
     const viem = await import('viem')
