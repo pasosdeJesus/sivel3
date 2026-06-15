@@ -76,7 +76,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
   // Codificar transferencia ERC-20: transfer(address to, uint256 amount)
   // Donation goes to sivel.xyz backend (splits 90% to RegionalDonation, 10% to SLEARN reserve)
   const transferSelector = '0xa9059cbb'
-  const backendAddress = (process.env.NEXT_PUBLIC_BACKEND_ADDRESS || regionalDonationContractAddress) as string
+  const backendAddress = (process.env.NEXT_PUBLIC_ADDRESS || regionalDonationContractAddress) as string
   const toHex = backendAddress.slice(2).toLowerCase().padStart(64, '0')
   const amountHex = amountInSmallestUnit.toString(16).padStart(64, '0')
   const transferData = transferSelector + toHex + amountHex + regionIdHex
