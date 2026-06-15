@@ -215,6 +215,7 @@ export async function POST(request: NextRequest) {
         serverLog.success(`Split: ${cashback.usdtToReserve} USDT → SLEARN, ${(Number(assignAmount)/1_000_000).toFixed(2)} USDT → RegionalDonation`)
       } else {
         serverLog.info('Not verified or no SLEARN — 100% to RegionalDonation')
+        slearnResult = { success: false, message: 'Not verified' }
       }
     } catch (slearnError) {
       serverLog.error(`SLEARN cashback error: ${slearnError}`)

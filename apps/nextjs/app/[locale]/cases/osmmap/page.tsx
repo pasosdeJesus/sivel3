@@ -23,6 +23,7 @@ const localT = {
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'You earned SLEARN cashback: {{0}}',
     lpFallbackError: 'Unable to mint SLEARN cashback. Contact the team.',
+    lpNotVerified: 'Not verified on learn.tg — no SLEARN cashback. Full donation goes to the region.',
     donationError: 'Donation error',
     sbtTitle: '🎖️ SBT Obtained!',
     viewStats: '📊 View Site Statistics',
@@ -33,6 +34,7 @@ const localT = {
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'Has ganado SLEARN cashback: {{0}}',
     lpFallbackError: 'No se pudo mintear SLEARN cashback. Contacta al equipo.',
+    lpNotVerified: 'No verificado en learn.tg — sin SLEARN cashback. La donación completa va a la región.',
     donationError: 'Error en donación',
     sbtTitle: '🎖️ ¡SBT Obtenido!',
     viewStats: '📊 Ver Estadísticas del Sitio',
@@ -122,10 +124,11 @@ export default function OSMMapPage() {
 
       // Mostrar toast informativo si SLEARN falló
       if (slearn && !slearn.success) {
+        const isNotVerified = slearn.message === 'Not verified'
         toast({
           title: t('lpTitle'),
-          description: slearn.userMessage || t('lpFallbackError'),
-          duration: 0, // Sin auto-dismiss
+          description: isNotVerified ? t('lpNotVerified') : (slearn.userMessage || t('lpFallbackError')),
+          duration: isNotVerified ? 4000 : 0,
         });
       }
 
