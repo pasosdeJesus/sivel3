@@ -773,6 +773,28 @@ export interface Nobelicas {
   caso_id: number | null;
 }
 
+export interface PreAlert {
+  bought_at: Timestamp | null;
+  buyer_wallet: string | null;
+  contract_pre_alert_id: number | null;
+  conversion_deadline: Timestamp | null;
+  converted_at: Timestamp | null;
+  created_at: Generated<Timestamp | null>;
+  event_hash: string;
+  id: Generated<number>;
+  json_data: Json;
+  publisher_wallet: string;
+  rejection_reason: string | null;
+  score: number | null;
+  scored_at: Timestamp | null;
+  scored_by: string | null;
+  source_summary: string | null;
+  source_urls: Generated<Json | null>;
+  status: Generated<string>;
+  tx_hash: string | null;
+  updated_at: Generated<Timestamp | null>;
+}
+
 export interface Region {
   created_at: Generated<Timestamp>;
   id: Generated<number>;
@@ -1476,6 +1498,7 @@ export interface DB {
   msip_ubicacionpre: MsipUbicacionpre;
   msip_vereda: MsipVereda;
   nobelicas: Nobelicas;
+  pre_alert: PreAlert;
   region: Region;
   schema_migrations: SchemaMigrations;
   site_nonces: SiteNonces;

@@ -1,6 +1,7 @@
 import { verifyMessage } from 'viem'
 import { NextRequest, NextResponse } from 'next/server'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import type { JsonValue } from '@/db/db.d.ts'
 
 const AGENT_WALLET_ADDRESS =
   (process.env.AGENT_WALLET_ADDRESS || '').toLowerCase()
@@ -48,18 +49,38 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!body.source_urls || body.source_urls.length === 0) {
+      return NextResponse.json(
+        { error: 'source_urls must be non-empty' },
+        { status: 400 },
+      )
+    }
+
+    // Basic json_data validation (full schema validation with ajv pending)
+    if (!body.json_data.hechos || !body.json_data.titulo) {
+      return NextResponse.json(
+        { error: 'json_data must include at least "hechos" and "titulo"' },
+        { status: 400 },
+      )
+    }
+
     // Verify signature
     const message = `${body.event_hash}:${timestamp}`
-    let recovered: string
+    let valid: boolean
     try {
-      recovered = await verifyMessage({ message, signature: signature as `0x${string}` })
+      valid = await verifyMessage({
+        message,
+        signature: signature as `0x${string}`,
+        address: AGENT_WALLET_ADDRESS as `0x${string}`,
+      })
     } catch {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
-    if (recovered.toLowerCase() !== AGENT_WALLET_ADDRESS) {
+    if (!valid) {
+      console.warn('[pre-alerts/sync] Signature verification failed')
       return NextResponse.json(
-        { error: `Signer ${recovered} not authorized. Expected ${AGENT_WALLET_ADDRESS}` },
+        { error: 'Unauthorized' },
         { status: 401 },
       )
     }
@@ -82,15 +103,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Insert
+    // Insert (json_data and source_urls stored as jsonb, pass objects directly)
     const result = await db
       .insertInto('pre_alert')
       .values({
         event_hash: body.event_hash,
-        json_data: JSON.stringify(body.json_data),
+        json_data: body.json_data as unknown as JsonValue,
         status: 'pending',
         publisher_wallet: body.publisher_wallet.toLowerCase(),
-        source_urls: JSON.stringify(body.source_urls || []),
+        source_urls: body.source_urls as unknown as JsonValue,
         source_summary: body.source_summary || null,
       })
       .returning('id')
