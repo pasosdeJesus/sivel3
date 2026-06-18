@@ -15,6 +15,7 @@ vi.mock('viem', async () => {
     createPublicClient: vi.fn(() => ({
       getTransaction: mockGetTransaction,
       getTransactionReceipt: mockGetTransactionReceipt,
+      waitForTransactionReceipt: vi.fn().mockResolvedValue({ status: 'success' }),
     })),
     createWalletClient: vi.fn(() => ({
       writeContract: vi.fn(),
