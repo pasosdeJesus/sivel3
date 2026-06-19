@@ -103,15 +103,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Insert (json_data and source_urls stored as jsonb, pass objects directly)
+    // Insert (json_data and source_urls stored as jsonb.
+    // PostgresDialect + pg driver requires JSON columns as strings,
+    // not raw JS objects. See sivel3agent generate-and-send.ts for the
+    // agent side that sends this payload.)
     const result = await db
       .insertInto('pre_alert')
       .values({
         event_hash: body.event_hash,
-        json_data: body.json_data as unknown as JsonValue,
+        json_data: JSON.stringify(body.json_data) as unknown as JsonValue,
         status: 'pending',
         publisher_wallet: body.publisher_wallet.toLowerCase(),
-        source_urls: body.source_urls as unknown as JsonValue,
+        source_urls: JSON.stringify(body.source_urls) as unknown as JsonValue,
         source_summary: body.source_summary || null,
       })
       .returning('id')
