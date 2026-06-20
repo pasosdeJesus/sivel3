@@ -1,0 +1,4 @@
+#!/bin/sh
+
+. ../.env
+node_modules/.bin/hardhat run scripts/deployPreAlertMarket.ts --network $NEXT_PUBLIC_NETWORK

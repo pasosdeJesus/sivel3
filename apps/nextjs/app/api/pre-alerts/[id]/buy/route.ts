@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
+import path from 'path'
+
+const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
+const network = (process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia') as 'celo' | 'celoSepolia'
+
+function getPreAlertMarketAddress(): `0x${string}` | null {
+  const dep = readDeployment(network, deploymentsDir, {
+    contract: 'SIVeL3PreAlertMarket',
+    version: 'V1',
+  })
+  return dep ? (dep.address as `0x${string}`) : null
+}
 
 export async function POST(
   req: NextRequest,
@@ -43,10 +56,11 @@ export async function POST(
       )
     }
 
-    // TODO(#43): Call buyPreAlert on PreAlertMarket.sol
-    // For now, update DB state directly. When #43 is deployed:
-    // const txReceipt = await buyPreAlertOnChain(preAlertId, buyerWallet)
-    // if (!txReceipt) return 500 error
+    // TODO(#43): Verify on-chain PreAlertBought event via tx_hash
+    // const contractAddress = getPreAlertMarketAddress()
+    // if (contractAddress && body.tx_hash) {
+    //   verify PreAlertBought event: id matches preAlertId, buyer matches
+    // }
 
     const conversionDeadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 

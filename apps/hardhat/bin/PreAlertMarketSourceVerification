@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. ../.env
+
+NETWORK=$NEXT_PUBLIC_NETWORK
+if [ "$NETWORK" = "celo" ]; then
+  NETFILE="celo"
+else
+  NETFILE="celoSepolia"
+fi
+
+ADDR=$(node -e "console.log(require('./deployments/SIVeL3PreAlertMarket/V1/${NETFILE}.json').address)")
+
+cmd="node_modules/.bin/hardhat verify --network $NETWORK $ADDR $NEXT_PUBLIC_USDT_ADDRESS $AGENT_WALLET_ADDRESS"
+echo $cmd
+eval $cmd

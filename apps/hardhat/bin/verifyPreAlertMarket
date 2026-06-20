@@ -1,0 +1,5 @@
+#!/bin/sh
+
+. ../.env
+
+node_modules/.bin/hardhat run scripts/verifyPreAlertMarket.ts --network $NEXT_PUBLIC_NETWORK
