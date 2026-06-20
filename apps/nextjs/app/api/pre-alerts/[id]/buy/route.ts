@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createPublicClient, http, parseAbi } from 'viem'
+import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
 import path from 'path'
 
 const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
 const network = (process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia') as 'celo' | 'celoSepolia'
+const viemChain = network === 'celo' ? celo : celoSepolia
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
 
 function getPreAlertMarketAddress(): `0x${string}` | null {
   const dep = readDeployment(network, deploymentsDir, {
@@ -12,6 +16,51 @@ function getPreAlertMarketAddress(): `0x${string}` | null {
     version: 'V1',
   })
   return dep ? (dep.address as `0x${string}`) : null
+}
+
+const ERC20_ABI = parseAbi([
+  'event Transfer(address indexed from, address indexed to, uint256 value)',
+])
+
+async function verifyPreAlertPurchase(
+  txHash: string,
+  expectedBuyer: string,
+  expectedAmount: bigint,
+): Promise<{ valid: boolean; preAlertId: number | null }> {
+  try {
+    const client = createPublicClient({ chain: viemChain, transport: http(RPC_URL) })
+    const tx = await client.getTransaction({ hash: txHash as `0x${string}` })
+    const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` })
+    if (!tx || !receipt) return { valid: false, preAlertId: null }
+
+    // Extract preAlertId from calldata (last 32 bytes)
+    const input = tx.input
+    if (input.length < 136) return { valid: false, preAlertId: null }
+    const preAlertIdHex = '0x' + input.slice(-64)
+    const preAlertId = Number(BigInt(preAlertIdHex))
+
+    // Find Transfer event
+    const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS?.toLowerCase()
+    const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+    const transferLog = receipt.logs.find(
+      l => l.address.toLowerCase() === usdtAddress && l.topics[0] === transferTopic,
+    )
+    if (!transferLog || transferLog.topics.length < 3) return { valid: false, preAlertId: null }
+
+    const from = `0x${transferLog.topics[1]!.slice(26)}`.toLowerCase()
+    const to = `0x${transferLog.topics[2]!.slice(26)}`.toLowerCase()
+    const value = BigInt(transferLog.data)
+    const contractAddr = getPreAlertMarketAddress()?.toLowerCase()
+
+    const valid =
+      from === expectedBuyer.toLowerCase() &&
+      to === contractAddr &&
+      value === expectedAmount
+
+    return { valid, preAlertId: valid ? preAlertId : null }
+  } catch {
+    return { valid: false, preAlertId: null }
+  }
 }
 
 export async function POST(
@@ -56,11 +105,21 @@ export async function POST(
       )
     }
 
-    // TODO(#43): Verify on-chain PreAlertBought event via tx_hash
-    // const contractAddress = getPreAlertMarketAddress()
-    // if (contractAddress && body.tx_hash) {
-    //   verify PreAlertBought event: id matches preAlertId, buyer matches
-    // }
+    // Verify on-chain USDT transfer
+    if (body.tx_hash) {
+      const price = 1_000_000n // 1 USDT (6 decimals)
+      const verification = await verifyPreAlertPurchase(
+        body.tx_hash,
+        body.buyer_wallet,
+        price,
+      )
+      if (!verification.valid || verification.preAlertId !== preAlertId) {
+        return NextResponse.json(
+          { error: 'On-chain verification failed — transfer does not match expected pre-alert purchase' },
+          { status: 400 },
+        )
+      }
+    }
 
     const conversionDeadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 

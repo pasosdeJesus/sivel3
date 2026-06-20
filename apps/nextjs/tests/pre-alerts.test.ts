@@ -44,14 +44,31 @@ vi.mock('kysely', () => ({
 }))
 
 // ============================================================
-// viem mock (for sync endpoint's verifyMessage)
+// viem mock
 // ============================================================
 const mockVerifyMessage = vi.fn()
+const mockGetTransaction = vi.fn()
+const mockGetTransactionReceipt = vi.fn()
 
 vi.mock('viem', async () => {
   const actual = await vi.importActual('viem')
-  return { ...actual, verifyMessage: mockVerifyMessage }
+  return {
+    ...actual,
+    verifyMessage: mockVerifyMessage,
+    createPublicClient: vi.fn(() => ({
+      getTransaction: mockGetTransaction,
+      getTransactionReceipt: mockGetTransactionReceipt,
+    })),
+    createWalletClient: vi.fn(() => ({ writeContract: vi.fn() })),
+    http: vi.fn(() => ({})),
+    parseAbi: vi.fn((x: any) => x),
+  }
 })
+
+vi.mock('viem/chains', () => ({
+  celo: { id: 42220, name: 'Celo' },
+  celoSepolia: { id: 11142220, name: 'Celo Sepolia' },
+}))
 
 // ============================================================
 // Constants
@@ -105,6 +122,8 @@ describe('Pre-Alerts API', () => {
     mockExecute.mockReset()
     mockExecuteTakeFirst.mockReset()
     mockVerifyMessage.mockReset()
+    mockGetTransaction.mockReset()
+    mockGetTransactionReceipt.mockReset()
   })
 
   // ==========================================================
@@ -351,6 +370,23 @@ describe('Pre-Alerts API', () => {
     it('returns 200 on successful purchase', async () => {
       mockExecuteTakeFirst.mockResolvedValue({ id: 1, status: 'pending' })
       mockExecute.mockResolvedValue(undefined)
+      // Mock on-chain verification: Transfer event from buyer to PreAlertMarket
+      const preAlertIdHex = BigInt(1).toString(16).padStart(64, '0')
+      mockGetTransaction.mockResolvedValue({
+        input: '0xa9059cbb' + '00'.repeat(64) + '00'.repeat(64) + preAlertIdHex,
+      })
+      process.env.NEXT_PUBLIC_USDT_ADDRESS = '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f'
+      mockGetTransactionReceipt.mockResolvedValue({
+        logs: [{
+          address: '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f',
+          topics: [
+            '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+            '0x000000000000000000000000' + BUYER_WALLET.slice(2).toLowerCase(),
+            '0x000000000000000000000000' + '892373D6930dd38Cb54A28Ea8573e6d838570426'.toLowerCase(),
+          ],
+          data: '0x00000000000000000000000000000000000000000000000000000000000f4240', // 1 USDT
+        }],
+      })
       const req = new Request('http://localhost/api/pre-alerts/1/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

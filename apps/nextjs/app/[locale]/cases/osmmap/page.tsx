@@ -15,6 +15,7 @@ import { useRegionBalance } from './hooks/useRegionBalance';
 import { useOSMMapData } from './hooks/useOSMMapData';
 import { usePreAlerts } from '@/hooks/usePreAlerts';
 import { PreAlertModal } from '@/components/PreAlertModal';
+import { buyPreAlert as buyPreAlertOnChain } from '@/lib/buyPreAlert';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 
@@ -85,14 +86,23 @@ export default function OSMMapPage() {
   const { regionBalance, balanceLoading, fetchBalance } = useRegionBalance(selectedRegion);
 
   // Pre-alerts
-  const { preAlerts, loading: preLoading, fetchPreAlerts, fetchDetail, buyPreAlert, convertPreAlert } = usePreAlerts()
+  const { preAlerts, loading: preLoading, fetchPreAlerts, fetchDetail, convertPreAlert } = usePreAlerts()
   const [selectedPreAlert, setSelectedPreAlert] = useState<any>(null)
   const [showPreModal, setShowPreModal] = useState(false)
   const [preDetailLoading, setPreDetailLoading] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
     fetchPreAlerts()
   }, [fetchPreAlerts])
+
+  useEffect(() => {
+    if (!effectiveAddress) return
+    fetch(`/api/verify?wallet=${effectiveAddress}`)
+      .then(r => r.json())
+      .then(d => setIsVerified(!!d.verified))
+      .catch(() => {})
+  }, [effectiveAddress])
 
   const handlePreAlertClick = async (id: number) => {
     setShowPreModal(true)
@@ -105,8 +115,13 @@ export default function OSMMapPage() {
 
   const handleBuy = async (id: number) => {
     if (!effectiveAddress) return
-    await buyPreAlert(id, effectiveAddress)
-    // Refresh after purchase
+    try {
+      await buyPreAlertOnChain(id, effectiveAddress, currentLocale)
+      toast({ title: '✅ Purchase confirmed', duration: 3000 })
+    } catch (e: any) {
+      toast({ title: '❌ Purchase failed', description: e.message, variant: 'destructive', duration: 0 })
+      return
+    }
     const detail = await fetchDetail(id, effectiveAddress)
     setSelectedPreAlert(detail)
     fetchPreAlerts()
@@ -244,6 +259,7 @@ export default function OSMMapPage() {
     handleCountsLoad,
     preAlerts,
     onPreAlertClick: handlePreAlertClick,
+    isVerified,
   };
 
   return (

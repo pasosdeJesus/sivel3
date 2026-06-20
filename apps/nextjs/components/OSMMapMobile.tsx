@@ -30,6 +30,7 @@ interface OSMMapMobileProps {
   handleCountsLoad: (counts: any) => void;
   preAlerts?: any[];
   onPreAlertClick?: (id: number) => void;
+  isVerified?: boolean;
 }
 
 export function OSMMapMobile({
@@ -56,7 +57,8 @@ export function OSMMapMobile({
   filtersObj,
   handleCountsLoad,
   preAlerts,
-  onPreAlertClick
+  onPreAlertClick,
+  isVerified,
 }: OSMMapMobileProps) {
   const { t } = useTranslation({});
   return (
@@ -125,6 +127,7 @@ export function OSMMapMobile({
           wallet={wallet}
           preAlerts={preAlerts}
           onPreAlertClick={onPreAlertClick}
+          isVerified={isVerified}
         />
       </div>
     </>

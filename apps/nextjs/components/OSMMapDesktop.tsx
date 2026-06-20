@@ -31,6 +31,7 @@ interface OSMMapDesktopProps {
   handleCountsLoad: (counts: any) => void;
   preAlerts?: any[];
   onPreAlertClick?: (id: number) => void;
+  isVerified?: boolean;
 }
 
 export function OSMMapDesktop({
@@ -57,7 +58,8 @@ export function OSMMapDesktop({
   filtersObj,
   handleCountsLoad,
   preAlerts,
-  onPreAlertClick
+  onPreAlertClick,
+  isVerified,
 }: OSMMapDesktopProps) {
   const { t } = useTranslation({});
   return (
@@ -105,6 +107,7 @@ export function OSMMapDesktop({
               wallet={wallet}
               preAlerts={preAlerts}
               onPreAlertClick={onPreAlertClick}
+              isVerified={isVerified}
             />
           </CardContent>
         </Card>
