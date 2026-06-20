@@ -1,0 +1,19 @@
+#!/bin/sh
+
+. ../.env
+
+NETWORK=$NEXT_PUBLIC_NETWORK
+if [ "$NETWORK" = "celo" ]; then
+  NETFILE="celo"
+else
+  NETFILE="celoSepolia"
+fi
+
+ADDR=$(node -e "console.log(require('./deployments/SIVeL3RewardEscrow/V1/${NETFILE}.json').address)")
+
+# Backend wallet: use AGENT_WALLET_ADDRESS for Sepolia, BACKEND_WALLET_MAINNET for mainnet
+BACKEND_WALLET=${BACKEND_WALLET_MAINNET:-$AGENT_WALLET_ADDRESS}
+
+cmd="node_modules/.bin/hardhat verify --network $NETWORK $ADDR $NEXT_PUBLIC_USDT_ADDRESS $BACKEND_WALLET"
+echo $cmd
+eval $cmd

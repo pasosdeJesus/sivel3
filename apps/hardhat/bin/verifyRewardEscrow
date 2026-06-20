@@ -1,0 +1,5 @@
+#!/bin/sh
+
+. ../.env
+
+node_modules/.bin/hardhat run scripts/verifyRewardEscrow.ts --network $NEXT_PUBLIC_NETWORK

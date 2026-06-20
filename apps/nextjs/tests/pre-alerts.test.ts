@@ -568,11 +568,12 @@ describe('Pre-Alerts API', () => {
       expect(body.citizen_reward).toBe('0 USDT')
     })
 
-    it('returns 200 on score 4', async () => {
+    it('returns 200 on score 4 (falls back to pending_reward without RPC)', async () => {
       mockExecuteTakeFirst.mockResolvedValue({
         id: 1, status: 'converted', buyer_wallet: BUYER_WALLET,
       })
       mockExecute.mockResolvedValue(undefined)
+      process.env.PRIVATE_KEY = undefined
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -584,9 +585,8 @@ describe('Pre-Alerts API', () => {
       const res = await scorePOST(req, { params: { id: '1' } })
       expect(res.status).toBe(200)
       const body = await res.json()
-      expect(body.status).toBe('scored')
+      expect(body.status).toBe('pending_reward')
       expect(body.score).toBe(4)
-      expect(body.citizen_reward).toBe('4 USDT')
     })
   })
 })

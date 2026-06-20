@@ -1,5 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
+import path from 'path'
+
+const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
+const chainEnv = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
+const viemChain = chainEnv === 'celo' ? celo : celoSepolia
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
+
+const REWARD_ESCROW_ABI = [
+  {
+    inputs: [],
+    name: 'balance',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'recipient', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    name: 'releasePayment',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const
+
+function getRewardEscrowAddress(): `0x${string}` | null {
+  const dep = readDeployment(chainEnv, deploymentsDir, {
+    contract: 'SIVeL3RewardEscrow',
+    version: 'V1',
+  })
+  return dep ? (dep.address as `0x${string}`) : null
+}
 
 // TODO(#9): Replace with SBT-based DOCUMENTER_ROLE verification
 async function isDocumenter(wallet: string): Promise<boolean> {
@@ -98,7 +136,7 @@ export async function POST(
       })
     }
 
-    // Score 2-5 — trigger USDT payment
+    // Score 2-5 — release USDT payment via RewardEscrow
     const citizenWallet = preAlert.buyer_wallet
     if (!citizenWallet) {
       return NextResponse.json(
@@ -107,16 +145,121 @@ export async function POST(
       )
     }
 
-    // TODO: Execute USDT payment to citizen_wallet for `body.score` USDT
-    // On mainnet, use a secure contract call:
-    //   const txHash = await sendUSDT(citizenWallet, body.score)
-    // For now, record the score without executing payment
+    const rewardAmount = BigInt(body.score) * 1_000_000n // USDT 6 decimals
+    const escrowAddress = getRewardEscrowAddress()
 
+    if (!escrowAddress || !process.env.PRIVATE_KEY) {
+      // No contract or no key — record score, payment pending
+      await db
+        .updateTable('pre_alert')
+        .set({
+          status: 'pending_reward',
+          score: body.score,
+          scored_by: body.documenter_wallet.toLowerCase(),
+          scored_at: new Date() as unknown as string,
+          updated_at: new Date() as unknown as string,
+        })
+        .where('id', '=', preAlertId)
+        .execute()
+
+      return NextResponse.json({
+        success: true,
+        pre_alert_id: preAlertId,
+        status: 'pending_reward',
+        score: body.score,
+        citizen_reward: `${body.score} USDT (pending — reward escrow not configured)`,
+      })
+    }
+
+    // Check escrow balance
+    let balance = 0n
+    try {
+      const publicClient = createPublicClient({
+        chain: viemChain,
+        transport: http(RPC_URL),
+      })
+
+      balance = await publicClient.readContract({
+        address: escrowAddress,
+        abi: REWARD_ESCROW_ABI,
+        functionName: 'balance',
+      })
+    } catch {
+      // RPC unavailable — record as pending
+      console.warn('[score] Could not read escrow balance — marking as pending_reward')
+    }
+
+    if (balance < rewardAmount) {
+      await db
+        .updateTable('pre_alert')
+        .set({
+          status: 'pending_reward',
+          score: body.score,
+          scored_by: body.documenter_wallet.toLowerCase(),
+          scored_at: new Date() as unknown as string,
+          updated_at: new Date() as unknown as string,
+        })
+        .where('id', '=', preAlertId)
+        .execute()
+
+      return NextResponse.json({
+        success: false,
+        reason: 'Insufficient funds in reward escrow',
+        pre_alert_id: preAlertId,
+        status: 'pending_reward',
+        score: body.score,
+      })
+    }
+
+    // Release payment
+    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+    const walletClient = createWalletClient({
+      chain: viemChain,
+      transport: http(RPC_URL),
+      account,
+    })
+
+    let txHash: `0x${string}`
+    try {
+      txHash = await walletClient.writeContract({
+        address: escrowAddress,
+        abi: REWARD_ESCROW_ABI,
+        functionName: 'releasePayment',
+        args: [citizenWallet as `0x${string}`, rewardAmount],
+      })
+
+      await createPublicClient({ chain: viemChain, transport: http(RPC_URL) })
+        .waitForTransactionReceipt({ hash: txHash, timeout: 60_000 })
+    } catch (e) {
+      console.error('[score] Payment transaction failed:', e)
+      await db
+        .updateTable('pre_alert')
+        .set({
+          status: 'pending_reward',
+          score: body.score,
+          scored_by: body.documenter_wallet.toLowerCase(),
+          scored_at: new Date() as unknown as string,
+          updated_at: new Date() as unknown as string,
+        })
+        .where('id', '=', preAlertId)
+        .execute()
+
+      return NextResponse.json({
+        success: false,
+        reason: `Payment transaction failed: ${e instanceof Error ? e.message : String(e)}`,
+        pre_alert_id: preAlertId,
+        status: 'pending_reward',
+        score: body.score,
+      })
+    }
+
+    // Update status to paid
     await db
       .updateTable('pre_alert')
       .set({
-        status: 'scored',
+        status: 'paid',
         score: body.score,
+        tx_hash: txHash,
         scored_by: body.documenter_wallet.toLowerCase(),
         scored_at: new Date() as unknown as string,
         updated_at: new Date() as unknown as string,
@@ -127,9 +270,10 @@ export async function POST(
     return NextResponse.json({
       success: true,
       pre_alert_id: preAlertId,
-      status: 'scored',
+      status: 'paid',
       score: body.score,
       citizen_reward: `${body.score} USDT`,
+      tx_hash: txHash,
     })
   } catch (error) {
     console.error('POST /api/pre-alerts/[id]/score error:', error)
