@@ -5,26 +5,7 @@
 // No approve step needed — uses a single USDT transfer.
 
 import { parseUnits } from 'viem'
-import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
-import path from 'path'
-
-const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
-const network = (process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia') as 'celo' | 'celoSepolia'
-
-function getContractAddress(): `0x${string}` {
-  const dep = readDeployment(network, deploymentsDir, {
-    contract: 'SIVeL3PreAlertMarket',
-    version: 'V1',
-  })
-  if (!dep) throw new Error('PreAlertMarket not deployed')
-  return dep.address as `0x${string}`
-}
-
-function getUsdtAddress(): `0x${string}` {
-  const addr = process.env.NEXT_PUBLIC_USDT_ADDRESS
-  if (!addr) throw new Error('NEXT_PUBLIC_USDT_ADDRESS not set')
-  return addr as `0x${string}`
-}
+import { PREALERT_MARKET_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 
 const PRICE_USDT = 1 // Fixed $1 price (MVP)
 
@@ -72,8 +53,8 @@ export async function buyPreAlert(
 
   const ethereum = (window as any).ethereum
   const isMiniPay = ethereum.isMiniPay === true
-  const contractAddress = getContractAddress()
-  const usdtAddress = getUsdtAddress()
+  const contractAddress = PREALERT_MARKET_ADDRESS
+  const usdtAddress = USDT_ADDRESS
   const amount = parseUnits(String(PRICE_USDT), 6)
 
   // Encode: ERC-20 transfer(address,uint256) + regionId-style encoding of preAlertId
