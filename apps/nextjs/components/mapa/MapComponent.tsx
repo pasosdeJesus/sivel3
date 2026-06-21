@@ -210,6 +210,9 @@ export default function MapComponent({
     }
   }, [filtros, onCargarConteos, cargarDetalleCaso])
 
+  const cargarCasosRef = useRef(cargarCasos)
+  cargarCasosRef.current = cargarCasos
+
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
 
@@ -282,13 +285,13 @@ export default function MapComponent({
   useEffect(() => {
     if (!mapInstanceRef.current) return
     if (mapMode === 'casos') {
-      cargarCasos()
+      cargarCasosRef.current()
       preRef.current?.clearLayers()
     } else {
       markersRef.current?.clearLayers()
       setCargando(false)
     }
-  }, [mapMode, cargarCasos])
+  }, [mapMode])
 
   // Pre-alert markers (🤖 grey=pending, green=reserved)
   const defaultCoords: Record<string, [number, number]> = {
