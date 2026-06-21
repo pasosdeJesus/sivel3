@@ -4,16 +4,10 @@
   "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
   "version": "1.0.0",
   "agentType": "Scout",
-  "ownerAddress": "0x9f636e5653b649b44c9375e6e103600ae55af979",
+  "ownerAddress": "0x9F636E5653b649b44c9375E6E103600AE55aF979",
   "services": [
-    {
-      "name": "health",
-      "endpoint": "https://sivel.xyz/api/agent/health"
-    },
-    {
-      "name": "webhook",
-      "endpoint": "https://sivel.xyz/api/agent/webhook"
-    }
+    { "name": "health", "endpoint": "https://sivel.xyz/api/agent/health" },
+    { "name": "webhook", "endpoint": "https://sivel.xyz/api/agent/webhook" }
   ],
   "supportedTrust": ["reputation"],
   "createdAt": "2026-06-07T00:00:00Z"

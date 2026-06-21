@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict TwSjmGhTXtC6bOdtUtpF4AwgVLSpu9dioctiqDUe76P1u7Qxl5bvrG4IB10h70C
+\restrict
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.9
@@ -34,24 +34,10 @@ CREATE EXTENSION IF NOT EXISTS fuzzystrmatch WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION fuzzystrmatch; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION fuzzystrmatch IS 'determine similarities and distance between strings';
-
-
---
 -- Name: unaccent; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
-
-
---
--- Name: EXTENSION unaccent; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION unaccent IS 'text search dictionary that removes accents';
 
 
 --
@@ -3760,6 +3746,53 @@ CREATE MATERIALIZED VIEW public.persona_nomap AS
 
 
 --
+-- Name: pre_alert; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pre_alert (
+    id integer NOT NULL,
+    event_hash character varying(66) NOT NULL,
+    json_data jsonb NOT NULL,
+    status character varying(20) DEFAULT 'pending'::character varying NOT NULL,
+    publisher_wallet character varying(42) NOT NULL,
+    source_urls jsonb DEFAULT '[]'::jsonb,
+    source_summary text,
+    buyer_wallet character varying(42),
+    bought_at timestamp without time zone,
+    conversion_deadline timestamp without time zone,
+    converted_at timestamp without time zone,
+    tx_hash character varying(66),
+    contract_pre_alert_id integer,
+    score integer,
+    scored_by character varying(42),
+    scored_at timestamp without time zone,
+    rejection_reason text,
+    created_at timestamp without time zone DEFAULT '2026-06-19 09:42:52.750257'::timestamp without time zone,
+    updated_at timestamp without time zone DEFAULT '2026-06-19 09:42:52.750257'::timestamp without time zone
+);
+
+
+--
+-- Name: pre_alert_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pre_alert_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pre_alert_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.pre_alert_id_seq OWNED BY public.pre_alert.id;
+
+
+--
 -- Name: region; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5483,6 +5516,13 @@ ALTER TABLE ONLY public.msip_vereda ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: pre_alert id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pre_alert ALTER COLUMN id SET DEFAULT nextval('public.pre_alert_id_seq'::regclass);
+
+
+--
 -- Name: region id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -6191,6 +6231,22 @@ ALTER TABLE ONLY public.sivel2_gen_pconsolidado
 
 
 --
+-- Name: pre_alert pre_alert_event_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pre_alert
+    ADD CONSTRAINT pre_alert_event_hash_key UNIQUE (event_hash);
+
+
+--
+-- Name: pre_alert pre_alert_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pre_alert
+    ADD CONSTRAINT pre_alert_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: region region_name_es_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6791,6 +6847,20 @@ CREATE INDEX idx_credential_emission_token ON public.credential_emission USING b
 --
 
 CREATE INDEX idx_credential_emission_wallet ON public.credential_emission USING btree (wallet_address);
+
+
+--
+-- Name: idx_pre_alert_event_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pre_alert_event_hash ON public.pre_alert USING btree (event_hash);
+
+
+--
+-- Name: idx_pre_alert_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pre_alert_status ON public.pre_alert USING btree (status);
 
 
 --
@@ -8989,5 +9059,5 @@ ALTER TABLE ONLY public.sivel2_gen_victimacolectiva_vinculoestado
 -- PostgreSQL database dump complete
 --
 
-\unrestrict TwSjmGhTXtC6bOdtUtpF4AwgVLSpu9dioctiqDUe76P1u7Qxl5bvrG4IB10h70C
+\unrestrict
 
