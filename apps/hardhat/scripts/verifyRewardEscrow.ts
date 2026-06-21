@@ -39,10 +39,12 @@ async function main() {
   const deployerIsAdmin = await contract.hasRole(adminRole, deployer.address);
   console.log(`✅ Deployer is admin: ${deployerIsAdmin} (${deployer.address})`);
 
-  const backendCount = await contract.getRoleMemberCount(backendRole);
-  for (let i = 0n; i < backendCount; i++) {
-    const member = await contract.getRoleMember(backendRole, i);
-    console.log(`✅ BACKEND_ROLE member: ${member}`);
+  const backendWallet = deployment.backendWallet;
+  if (backendWallet) {
+    const backendHasRole = await contract.hasRole(backendRole, backendWallet);
+    console.log(`✅ Backend has BACKEND_ROLE: ${backendHasRole} (${backendWallet})`);
+  } else {
+    console.log('⚠️  No backendWallet in deployment file');
   }
 
   // 3. Test deposit + release (only with SMOKE_TEST_WRITE=true on testnet)
