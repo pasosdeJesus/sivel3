@@ -315,7 +315,7 @@ export default function MapComponent({
   }
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !isVerified) return
+    if (!mapInstanceRef.current || !isConnected) return
     if (!preRef.current) {
       preRef.current = L.layerGroup().addTo(mapInstanceRef.current)
     }
@@ -342,7 +342,7 @@ export default function MapComponent({
       marker.on('click', () => onPreAlertClick?.(pa.id))
       preRef.current.addLayer(marker)
     }
-  }, [preAlerts, isVerified, onPreAlertClick])
+  }, [preAlerts, isConnected, onPreAlertClick])
 
   useEffect(() => {
     const filtrosCambiaron = JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current);
@@ -389,7 +389,7 @@ export default function MapComponent({
         >
           Casos
         </button>
-        {isVerified && (
+        {isConnected && (
           <button
             onClick={() => setMapMode('preAlertas')}
             className={`px-3 py-1 text-sm rounded transition-colors ${
