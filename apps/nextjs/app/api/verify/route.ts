@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { privateKeyToAccount } from 'viem/accounts'
+import { keccak256, encodePacked } from 'viem'
 
 function getVerifyUrl(): string {
   return process.env.NEXT_PUBLIC_NETWORK === 'celo'
@@ -22,7 +23,12 @@ export async function GET(req: NextRequest) {
 
     const account = privateKeyToAccount(pk as `0x${string}`)
     const timestamp = Math.floor(Date.now() / 1000)
-    const message = `${wallet}${timestamp}`
+
+    // learn.tg uses hashMessage(keccak256(encodePacked(...))) → EIP-191
+    // signMessage applies the same EIP-191 wrapping internally
+    const message = keccak256(
+      encodePacked(['address', 'uint256'], [wallet as `0x${string}`, BigInt(timestamp)]),
+    )
     const signature = await account.signMessage({ message })
 
     const verifyUrl = `${getVerifyUrl()}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`

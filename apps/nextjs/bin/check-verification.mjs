@@ -9,6 +9,7 @@
  */
 
 import { privateKeyToAccount } from 'viem/accounts'
+import { keccak256, encodePacked } from 'viem'
 import { config } from 'dotenv'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -37,7 +38,12 @@ const account = privateKeyToAccount(pk)
 console.log(`signer:    ${account.address}`)
 console.log(`LEARNTG_ADDRESS (env): ${process.env.LEARNTG_ADDRESS || 'NOT SET'}`)
 const timestamp = Math.floor(Date.now() / 1000)
-const message = `${wallet}${timestamp}`
+
+// learn.tg uses hashMessage(keccak256(encodePacked(...))) → EIP-191
+// signMessage applies the same EIP-191 wrapping internally
+const message = keccak256(
+  encodePacked(['address', 'uint256'], [wallet, BigInt(timestamp)]),
+)
 const signature = await account.signMessage({ message })
 
 const url = `${base}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`
