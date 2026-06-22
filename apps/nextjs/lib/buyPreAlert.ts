@@ -6,6 +6,7 @@
 
 import { parseUnits } from 'viem'
 import { PREALERT_MARKET_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
+import { debugLog, logger } from '@/lib/debug'
 
 const PRICE_USDT = 1 // Fixed $1 price (MVP)
 
@@ -87,17 +88,62 @@ export async function buyPreAlert(
     })
   }
 
-  // Call backend to verify and record purchase
-  const res = await fetch(`/api/pre-alerts/${preAlertId}/buy`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ buyer_wallet: effectiveAddress, tx_hash: txHash }),
-  })
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.error || t('error'))
+  // Call backend to verify and record purchase (with retries)
+  // The backend verifies the on-chain transfer — may fail if tx not yet confirmed.
+  // 4xx errors continue retrying (tx may confirm in next seconds).
+  // 5xx and network errors retry.
+  let backendResponse: Response | null = null
+  let lastError: string = ''
+  let lastStatus: string = ''
+  let isClientError = false
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      logger.info(
+        `[buyPreAlert #${preAlertId}] Backend attempt ${attempt}/5 — txHash: ${txHash}`,
+        'buyPreAlert',
+      )
+      backendResponse = await fetch(`/api/pre-alerts/${preAlertId}/buy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buyer_wallet: effectiveAddress, tx_hash: txHash }),
+      })
+
+      if (backendResponse.ok) break
+
+      const errorBody = await backendResponse.json().catch(() => ({}))
+      lastError = errorBody.error || `HTTP ${backendResponse.status}`
+      lastStatus = `HTTP ${backendResponse.status}`
+      debugLog(`buyPreAlert #${preAlertId} attempt ${attempt}/5`, {
+        status: lastStatus,
+        error: lastError,
+      })
+
+      if (backendResponse.status >= 400 && backendResponse.status < 500) {
+        isClientError = true
+      }
+    } catch (err: any) {
+      lastError = err.message
+      debugLog(`buyPreAlert #${preAlertId} attempt ${attempt}/5 network error`, {
+        error: lastError,
+      })
+    }
+
+    if (attempt < 5) await new Promise((r) => setTimeout(r, 2000))
   }
 
+  if (!backendResponse || !backendResponse.ok) {
+    const msg = isClientError
+      ? `Could not verify purchase (${lastStatus}). ${lastError}. Contact the team if the problem persists.`
+      : `Purchase verification failed after 5 attempts. Funds are safe in the contract. Hash: ${txHash.slice(0, 16)}…`
+    debugLog(`buyPreAlert #${preAlertId} FAILED`, { status: lastStatus, error: lastError, txHash })
+    throw new Error(msg)
+  }
+
+  logger.info(
+    `[buyPreAlert #${preAlertId}] Purchase verified by backend. TX: ${txHash}`,
+    'buyPreAlert',
+  )
   return { txHash }
 }
 

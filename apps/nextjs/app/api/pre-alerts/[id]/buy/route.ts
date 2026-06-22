@@ -30,12 +30,22 @@ async function verifyPreAlertPurchase(
   try {
     const client = createPublicClient({ chain: viemChain, transport: http(RPC_URL) })
     const tx = await client.getTransaction({ hash: txHash as `0x${string}` })
+    if (!tx) {
+      console.warn(`[verifyPreAlert] Transaction not found on-chain: ${txHash}`)
+      return { valid: false, preAlertId: null }
+    }
     const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` })
-    if (!tx || !receipt) return { valid: false, preAlertId: null }
+    if (!receipt) {
+      console.warn(`[verifyPreAlert] Receipt not found (tx not confirmed): ${txHash}`)
+      return { valid: false, preAlertId: null }
+    }
 
     // Extract preAlertId from calldata (last 32 bytes)
     const input = tx.input
-    if (input.length < 136) return { valid: false, preAlertId: null }
+    if (input.length < 136) {
+      console.warn(`[verifyPreAlert] Calldata too short: ${input.length} bytes`)
+      return { valid: false, preAlertId: null }
+    }
     const preAlertIdHex = '0x' + input.slice(-64)
     const preAlertId = Number(BigInt(preAlertIdHex))
 
@@ -45,7 +55,10 @@ async function verifyPreAlertPurchase(
     const transferLog = receipt.logs.find(
       l => l.address.toLowerCase() === usdtAddress && l.topics[0] === transferTopic,
     )
-    if (!transferLog || transferLog.topics.length < 3) return { valid: false, preAlertId: null }
+    if (!transferLog || transferLog.topics.length < 3) {
+      console.warn(`[verifyPreAlert] USDT Transfer event not found in receipt logs`)
+      return { valid: false, preAlertId: null }
+    }
 
     const from = `0x${transferLog.topics[1]!.slice(26)}`.toLowerCase()
     const to = `0x${transferLog.topics[2]!.slice(26)}`.toLowerCase()
@@ -57,8 +70,15 @@ async function verifyPreAlertPurchase(
       to === contractAddr &&
       value === expectedAmount
 
+    if (!valid) {
+      console.warn(
+        `[verifyPreAlert] Transfer mismatch: from=${from} (expected=${expectedBuyer.toLowerCase()}), to=${to} (expected=${contractAddr}), value=${value} (expected=${expectedAmount})`,
+      )
+    }
+
     return { valid, preAlertId: valid ? preAlertId : null }
-  } catch {
+  } catch (err) {
+    console.error(`[verifyPreAlert] Exception:`, err)
     return { valid: false, preAlertId: null }
   }
 }
@@ -95,10 +115,14 @@ export async function POST(
       .executeTakeFirst()
 
     if (!preAlert) {
+      console.warn(`[buy API #${preAlertId}] Pre-alert not found in DB`)
       return NextResponse.json({ error: 'Pre-alert not found' }, { status: 404 })
     }
 
     if (preAlert.status !== 'pending') {
+      console.warn(
+        `[buy API #${preAlertId}] Not available — status: ${preAlert.status}`,
+      )
       return NextResponse.json(
         { error: `Pre-alert is not available for purchase (status: ${preAlert.status})` },
         { status: 409 },
@@ -107,6 +131,9 @@ export async function POST(
 
     // Verify on-chain USDT transfer
     if (body.tx_hash) {
+      console.log(
+        `[buy API #${preAlertId}] Verifying on-chain tx ${body.tx_hash} — buyer: ${body.buyer_wallet}`,
+      )
       const price = 1_000_000n // 1 USDT (6 decimals)
       const verification = await verifyPreAlertPurchase(
         body.tx_hash,
@@ -114,8 +141,11 @@ export async function POST(
         price,
       )
       if (!verification.valid || verification.preAlertId !== preAlertId) {
+        console.error(
+          `[buy API #${preAlertId}] On-chain verification FAILED. valid=${verification.valid}, preAlertId=${verification.preAlertId}, expectedId=${preAlertId}`,
+        )
         return NextResponse.json(
-          { error: 'On-chain verification failed — transfer does not match expected pre-alert purchase' },
+          { error: 'On-chain verification failed — transfer does not match expected pre-alert purchase. The transaction may not be confirmed yet.' },
           { status: 400 },
         )
       }

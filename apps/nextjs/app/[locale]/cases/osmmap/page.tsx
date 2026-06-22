@@ -8,6 +8,7 @@ import { Skeleton } from '@pasosdejesus/m/shadcn-components/ui/skeleton';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast';
 import { logger } from '@/lib/logger';
+import { debugLog } from '@/lib/debug';
 import { parseWalletError } from '@/lib/errors';
 import confetti from 'canvas-confetti';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -115,10 +116,13 @@ export default function OSMMapPage() {
 
   const handleBuy = async (id: number) => {
     if (!effectiveAddress) return
+    logger.info(`[handleBuy #${id}] Starting purchase — wallet: ${effectiveAddress.slice(0, 8)}…`, 'PreAlertBuy')
     try {
       await buyPreAlertOnChain(id, effectiveAddress, currentLocale)
+      logger.info(`[handleBuy #${id}] Purchase confirmed`, 'PreAlertBuy')
       toast({ title: '✅ Purchase confirmed', duration: 3000 })
     } catch (e: any) {
+      debugLog(`handleBuy #${id} FAILED`, { error: e.message || e })
       toast({ title: '❌ Purchase failed', description: e.message, variant: 'destructive', duration: 0 })
       return
     }
@@ -269,6 +273,7 @@ export default function OSMMapPage() {
           preAlert={selectedPreAlert}
           loading={preDetailLoading}
           isConnected={isConnected}
+          isVerified={isVerified}
           wallet={effectiveAddress}
           locale={currentLocale}
           onBuy={handleBuy}

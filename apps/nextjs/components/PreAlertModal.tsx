@@ -17,7 +17,7 @@ import type { PreAlertDetail } from '@/hooks/usePreAlerts'
 
 const tS = {
   en: {
-    title: '🤖 Pre-Alert',
+    title: '🔎 Pre-Alert',
     sources: 'Sources',
     price: 'Price',
     buy: 'Buy for $1 USDT',
@@ -33,9 +33,12 @@ const tS = {
     dashboardTitle: 'My Dashboard',
     pendingReward: 'Awaiting reward',
     paid: 'Paid',
+    verifyRequired: '🔐 Verify on learn.tg to purchase',
+    verifyExplanation: 'Buying pre-alerts requires identity verification to prevent spam. It takes less than 2 minutes.',
+    verifyLink: 'Verify on learn.tg →',
   },
   es: {
-    title: '🤖 Pre-Alerta',
+    title: '🔎 Pre-Alerta',
     sources: 'Fuentes',
     price: 'Precio',
     buy: 'Comprar por $1 USDT',
@@ -51,6 +54,9 @@ const tS = {
     dashboardTitle: 'Mi Tablero',
     pendingReward: 'Pendiente de recompensa',
     paid: 'Pagado',
+    verifyRequired: '🔐 Verifícate en learn.tg para comprar',
+    verifyExplanation: 'Comprar pre-alertas requiere verificación de identidad para prevenir spam. Toma menos de 2 minutos.',
+    verifyLink: 'Verifícate en learn.tg →',
   },
 }
 
@@ -58,6 +64,7 @@ interface PreAlertModalProps {
   preAlert: PreAlertDetail | null
   loading: boolean
   isConnected: boolean
+  isVerified: boolean
   wallet: string | null
   locale?: string
   onBuy: (id: number) => Promise<void>
@@ -69,6 +76,7 @@ export function PreAlertModal({
   preAlert,
   loading,
   isConnected,
+  isVerified,
   wallet,
   locale = 'en',
   onBuy,
@@ -152,29 +160,46 @@ export function PreAlertModal({
             {preAlert.can_purchase && (
               <>
                 <Separator />
-                <div className="bg-yellow-50 border border-yellow-200 rounded p-3 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-yellow-800">{t('noRefund')}</p>
+                {!isVerified ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 space-y-2">
+                    <p className="text-sm font-medium text-blue-800">{t('verifyRequired')}</p>
+                    <p className="text-xs text-blue-700">{t('verifyExplanation')}</p>
+                    <a
+                      href="https://learn.tg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-sm text-blue-600 underline hover:text-blue-800"
+                    >
+                      {t('verifyLink')}
+                    </a>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <DollarSign className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-yellow-800">{t('funded')}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{t('price')}: $1 USDT</span>
-                  <Button
-                    size="sm"
-                    disabled={!isConnected || actionLoading}
-                    onClick={async () => {
-                      setActionLoading(true)
-                      try { await onBuy(preAlert.id) } finally { setActionLoading(false) }
-                    }}
-                  >
-                    {actionLoading ? t('buying') : t('buy')}
-                  </Button>
-                </div>
+                ) : (
+                  <>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-3 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-yellow-800">{t('noRefund')}</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <DollarSign className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-yellow-800">{t('funded')}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{t('price')}: $1 USDT</span>
+                      <Button
+                        size="sm"
+                        disabled={!isConnected || actionLoading}
+                        onClick={async () => {
+                          setActionLoading(true)
+                          try { await onBuy(preAlert.id) } finally { setActionLoading(false) }
+                        }}
+                      >
+                        {actionLoading ? t('buying') : t('buy')}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </>
             )}
 

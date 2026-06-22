@@ -316,19 +316,23 @@ export default function MapComponent({
 
   useEffect(() => {
     if (!mapInstanceRef.current || !isConnected) return
+    if (mapModeRef.current !== 'preAlertas') {
+      preRef.current?.clearLayers()
+      return
+    }
     if (!preRef.current) {
       preRef.current = L.layerGroup().addTo(mapInstanceRef.current)
     }
     preRef.current.clearLayers()
 
     const greyIcon = L.divIcon({
-      html: '<div style="font-size:22px">🤖</div>',
+      html: '<div style="font-size:22px">🔎</div>',
       className: '',
       iconSize: [28, 28],
       iconAnchor: [14, 14],
     })
     const greenIcon = L.divIcon({
-      html: '<div style="font-size:22px;filter:hue-rotate(90deg)">🤖</div>',
+      html: '<div style="font-size:22px;filter:hue-rotate(90deg)">🔎</div>',
       className: '',
       iconSize: [28, 28],
       iconAnchor: [14, 14],
@@ -396,7 +400,7 @@ export default function MapComponent({
               mapMode === 'preAlertas' ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-700'
             }`}
           >
-            🤖 PreAlertas
+            🔎 PreAlertas
           </button>
         )}
       </div>
