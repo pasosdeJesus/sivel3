@@ -165,7 +165,7 @@ export function PreAlertModal({
                     <p className="text-sm font-medium text-blue-800">{t('verifyRequired')}</p>
                     <p className="text-xs text-blue-700">{t('verifyExplanation')}</p>
                     <a
-                      href="https://learn.tg"
+                      href={process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'https://learn.tg' : 'https://learn.tg:9001'}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block text-sm text-blue-600 underline hover:text-blue-800"
