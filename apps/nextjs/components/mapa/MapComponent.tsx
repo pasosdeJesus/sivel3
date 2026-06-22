@@ -220,16 +220,11 @@ export default function MapComponent({
       ),
     }
 
-    const capasSuperpuestas: Record<string, L.Layer> = {
+    const capasSuperpuestas = {
       'Transporte (OpenPtmap)': L.tileLayer(
         'http://www.openptmap.org/tiles/{z}/{x}/{y}.png',
       ),
     }
-
-    // Pre-alert layer — always in control, populated when isVerified
-    preRef.current = L.layerGroup()
-    capasSuperpuestas['Prealertas'] = preRef.current
-    preRef.current.addTo(map)
 
     capasBase['OpenStreetMap'].addTo(map)
     L.control.layers(capasBase, capasSuperpuestas, { position: 'topleft' }).addTo(map)
@@ -294,9 +289,9 @@ export default function MapComponent({
   }
 
   useEffect(() => {
-    if (!preRef.current || !isVerified) {
-      preRef.current?.clearLayers()
-      return
+    if (!mapInstanceRef.current || !isVerified) return
+    if (!preRef.current) {
+      preRef.current = L.layerGroup().addTo(mapInstanceRef.current)
     }
     preRef.current.clearLayers()
 
