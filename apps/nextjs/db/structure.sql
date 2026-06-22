@@ -3767,8 +3767,8 @@ CREATE TABLE public.pre_alert (
     scored_by character varying(42),
     scored_at timestamp without time zone,
     rejection_reason text,
-    created_at timestamp without time zone DEFAULT '2026-06-19 09:42:52.750257'::timestamp without time zone,
-    updated_at timestamp without time zone DEFAULT '2026-06-19 09:42:52.750257'::timestamp without time zone
+    created_at timestamp without time zone DEFAULT '2026-06-21 22:07:15.370705'::timestamp without time zone,
+    updated_at timestamp without time zone DEFAULT '2026-06-21 22:07:15.370705'::timestamp without time zone
 );
 
 
@@ -3800,8 +3800,8 @@ CREATE TABLE public.region (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     name_es character varying(255) NOT NULL,
-    created_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2026-02-24 12:44:56.399047'::timestamp without time zone NOT NULL
+    created_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2026-02-24 13:54:19.633953'::timestamp without time zone NOT NULL
 );
 
 
