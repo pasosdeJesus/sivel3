@@ -59,7 +59,6 @@ interface PreAlertModalProps {
   loading: boolean
   isConnected: boolean
   wallet: string | null
-  isVerified?: boolean
   locale?: string
   onBuy: (id: number) => Promise<void>
   onConvert: (id: number) => Promise<void>
@@ -71,7 +70,6 @@ export function PreAlertModal({
   loading,
   isConnected,
   wallet,
-  isVerified = false,
   locale = 'en',
   onBuy,
   onConvert,
@@ -166,20 +164,16 @@ export function PreAlertModal({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">{t('price')}: $1 USDT</span>
-                  {isConnected && isVerified ? (
-                    <Button
-                      size="sm"
-                      disabled={actionLoading}
-                      onClick={async () => {
-                        setActionLoading(true)
-                        try { await onBuy(preAlert.id) } finally { setActionLoading(false) }
-                      }}
-                    >
-                      {actionLoading ? t('buying') : t('buy')}
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-gray-400">{isConnected ? 'Verify on learn.tg to purchase' : 'Connect wallet to purchase'}</span>
-                  )}
+                  <Button
+                    size="sm"
+                    disabled={!isConnected || actionLoading}
+                    onClick={async () => {
+                      setActionLoading(true)
+                      try { await onBuy(preAlert.id) } finally { setActionLoading(false) }
+                    }}
+                  >
+                    {actionLoading ? t('buying') : t('buy')}
+                  </Button>
                 </div>
               </>
             )}
