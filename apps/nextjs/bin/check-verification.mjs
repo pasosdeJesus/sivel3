@@ -34,6 +34,8 @@ const base =
     : 'https://learn.tg:9001'
 
 const account = privateKeyToAccount(pk)
+console.log(`signer:    ${account.address}`)
+console.log(`LEARNTG_ADDRESS (env): ${process.env.LEARNTG_ADDRESS || 'NOT SET'}`)
 const timestamp = Math.floor(Date.now() / 1000)
 const message = `${wallet}${timestamp}`
 const signature = await account.signMessage({ message })
