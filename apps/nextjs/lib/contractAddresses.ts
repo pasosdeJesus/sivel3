@@ -27,7 +27,7 @@ export const PREALERT_MARKET_ADDRESS = PREALERT_MARKET[NETWORK]
 // ============================================================
 const REWARD_ESCROW: Record<'celo' | 'celoSepolia', `0x${string}`> = {
   celo: '' as `0x${string}`, // pending mainnet deployment
-  celoSepolia: (process.env.NEXT_PUBLIC_PREALERT_MARKET_ADDRESS || '0x902413432aD345bab37093404849C09193AB9A23') as `0x${string}`,
+  celoSepolia: (process.env.NEXT_PUBLIC_PREALERT_MARKET_ADDRESS || '0x53aD49cBF4001aD0c8fe588dA330ED277bBD45f9') as `0x${string}`,
 }
 export const REWARD_ESCROW_ADDRESS = REWARD_ESCROW[NETWORK]
 
