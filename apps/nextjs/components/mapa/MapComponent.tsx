@@ -346,7 +346,7 @@ export default function MapComponent({
       marker.on('click', () => onPreAlertClick?.(pa.id))
       preRef.current.addLayer(marker)
     }
-  }, [preAlerts, isConnected, onPreAlertClick])
+  }, [preAlerts, isConnected, onPreAlertClick, mapMode])
 
   useEffect(() => {
     const filtrosCambiaron = JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current);
