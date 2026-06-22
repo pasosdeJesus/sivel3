@@ -271,6 +271,7 @@ export default function OSMMapPage() {
           isConnected={isConnected}
           wallet={effectiveAddress}
           locale={currentLocale}
+          isVerified={isVerified}
           onBuy={handleBuy}
           onConvert={handleConvert}
           onClose={() => setShowPreModal(false)}

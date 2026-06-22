@@ -84,12 +84,14 @@ export default function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<any>(null)
-  const filtrosAnterioresRef = useRef<any>({})
   const preRef = useRef<L.LayerGroup | null>(null)
+  const filtrosAnterioresRef = useRef<any>({})
   const coordsCache = useRef<Map<number, [number, number]>>(new Map())
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
 
+  type MapMode = 'casos' | 'alertas' | 'preAlertas'
+  const [mapMode, setMapMode] = useState<MapMode>('casos')
   const [cargando, setCargando] = useState(true)
   const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(
     null,
@@ -155,6 +157,12 @@ export default function MapComponent({
   const cargarCasos = useCallback(async () => {
     if (!mapInstanceRef.current) return
 
+    if (mapMode !== 'casos') {
+      markersRef.current?.clearLayers()
+      setCargando(false)
+      return
+    }
+
     setCargando(true)
     try {
       let url = '/api/cases/datos-osm?'
@@ -197,7 +205,7 @@ export default function MapComponent({
     } finally {
       setCargando(false)
     }
-  }, [filtros, onCargarConteos, cargarDetalleCaso])
+  }, [filtros, onCargarConteos, cargarDetalleCaso, mapMode])
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
@@ -225,11 +233,6 @@ export default function MapComponent({
         'http://www.openptmap.org/tiles/{z}/{x}/{y}.png',
       ),
     }
-
-    // Pre-alert layer — always in control, populated when isVerified
-    preRef.current = L.layerGroup()
-    capasSuperpuestas['Prealertas'] = preRef.current
-    preRef.current.addTo(map)
 
     capasBase['OpenStreetMap'].addTo(map)
     L.control.layers(capasBase, capasSuperpuestas, { position: 'topleft' }).addTo(map)
@@ -272,6 +275,11 @@ export default function MapComponent({
     }
   }, []) // Dependencias vacías para que se ejecute solo una vez
 
+  // Reload cases when mapMode changes
+  useEffect(() => {
+    if (mapInstanceRef.current) cargarCasos()
+  }, [mapMode, cargarCasos])
+
   // Pre-alert markers (🤖 grey=pending, green=reserved)
   const defaultCoords: Record<string, [number, number]> = {
     putumayo: [1.15, -76.6], cauca: [2.45, -76.6], antioquia: [6.55, -75.8],
@@ -294,9 +302,12 @@ export default function MapComponent({
   }
 
   useEffect(() => {
-    if (!preRef.current || !isVerified) {
+    if (!mapInstanceRef.current || !isVerified || mapMode !== 'preAlertas') {
       preRef.current?.clearLayers()
       return
+    }
+    if (!preRef.current) {
+      preRef.current = L.layerGroup().addTo(mapInstanceRef.current)
     }
     preRef.current.clearLayers()
 
@@ -358,6 +369,27 @@ export default function MapComponent({
 
   return (
     <div className="relative h-full">
+      {/* Mode toggle */}
+      <div className="absolute top-2 left-12 z-30 flex gap-1 bg-white/90 backdrop-blur rounded-lg p-1 shadow">
+        {(['casos', 'alertas', 'preAlertas'] as MapMode[]).map(mode => {
+          if (mode === 'preAlertas' && !isVerified) return null
+          if (mode === 'alertas') return null // Disabled until Alerts data is available
+          const active = mapMode === mode
+          const labels: Record<MapMode, string> = { casos: 'Casos', alertas: 'Alertas', preAlertas: 'PreAlertas' }
+          return (
+            <button
+              key={mode}
+              onClick={() => setMapMode(mode)}
+              className={`px-3 py-1 text-sm rounded transition-colors ${
+                active ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-700'
+              }`}
+            >
+              {labels[mode]}
+            </button>
+          )
+        })}
+      </div>
+
       <div
         ref={mapRef}
         className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg border border-gray-300 relative z-10"
