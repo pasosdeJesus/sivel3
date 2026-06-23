@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPublicClient, createWalletClient, http } from 'viem'
+import { createPublicClient, createWalletClient, http, verifyMessage } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
 import path from 'path'
+
+const SIGNATURE_WINDOW = 300 // 5 minutes anti-replay
 
 const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
 const chainEnv = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
@@ -63,12 +65,60 @@ export async function POST(
       score?: number
       feedback?: string
       documenter_wallet?: string
+      timestamp?: number
+      signature?: string
     }
 
     if (body.score == null || !body.documenter_wallet) {
       return NextResponse.json(
         { error: 'score and documenter_wallet are required' },
         { status: 400 },
+      )
+    }
+
+    if (!body.feedback) {
+      return NextResponse.json(
+        { error: 'feedback is required' },
+        { status: 400 },
+      )
+    }
+
+    if (!body.timestamp || !body.signature) {
+      return NextResponse.json(
+        { error: 'timestamp and signature are required (EIP-191 of score:id:score:timestamp)' },
+        { status: 401 },
+      )
+    }
+
+    // Anti-replay: 5 minute window
+    const now = Math.floor(Date.now() / 1000)
+    if (Math.abs(now - body.timestamp) > SIGNATURE_WINDOW) {
+      return NextResponse.json(
+        { error: 'Signature expired' },
+        { status: 401 },
+      )
+    }
+
+    // Verify EIP-191 signature: documenter signed "score:{id}:{score}:{timestamp}"
+    const message = `score:${preAlertId}:${body.score}:${body.timestamp}`
+    let recovered: boolean
+    try {
+      recovered = await verifyMessage({
+        address: body.documenter_wallet as `0x${string}`,
+        message,
+        signature: body.signature as `0x${string}`,
+      })
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 },
+      )
+    }
+
+    if (!recovered) {
+      return NextResponse.json(
+        { error: 'Signature does not match documenter_wallet' },
+        { status: 401 },
       )
     }
 
@@ -106,20 +156,13 @@ export async function POST(
     }
 
     if (body.score === 0) {
-      // Rejection — no payment
-      if (!body.feedback) {
-        return NextResponse.json(
-          { error: 'feedback (rejection_reason) is required when score is 0' },
-          { status: 400 },
-        )
-      }
-
+      // Rejection — no payment, feedback already validated above
       await db
         .updateTable('pre_alert')
         .set({
           status: 'rejected',
           score: 0,
-          rejection_reason: body.feedback,
+          feedback: body.feedback,
           scored_by: body.documenter_wallet.toLowerCase(),
           scored_at: new Date() as unknown as string,
           updated_at: new Date() as unknown as string,
@@ -155,6 +198,7 @@ export async function POST(
         .set({
           status: 'pending_reward',
           score: body.score,
+          feedback: body.feedback,
           scored_by: body.documenter_wallet.toLowerCase(),
           scored_at: new Date() as unknown as string,
           updated_at: new Date() as unknown as string,
@@ -195,6 +239,7 @@ export async function POST(
         .set({
           status: 'pending_reward',
           score: body.score,
+          feedback: body.feedback,
           scored_by: body.documenter_wallet.toLowerCase(),
           scored_at: new Date() as unknown as string,
           updated_at: new Date() as unknown as string,
@@ -237,6 +282,7 @@ export async function POST(
         .set({
           status: 'pending_reward',
           score: body.score,
+          feedback: body.feedback,
           scored_by: body.documenter_wallet.toLowerCase(),
           scored_at: new Date() as unknown as string,
           updated_at: new Date() as unknown as string,
@@ -259,6 +305,7 @@ export async function POST(
       .set({
         status: 'paid',
         score: body.score,
+        feedback: body.feedback,
         tx_hash: txHash,
         scored_by: body.documenter_wallet.toLowerCase(),
         scored_at: new Date() as unknown as string,

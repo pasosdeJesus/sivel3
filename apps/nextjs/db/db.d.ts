@@ -781,6 +781,7 @@ export interface PreAlert {
   converted_at: Timestamp | null;
   created_at: Generated<Timestamp | null>;
   event_hash: string;
+  feedback: string | null;
   id: Generated<number>;
   json_data: Json;
   publisher_wallet: string;

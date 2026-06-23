@@ -338,11 +338,20 @@ export default function MapComponent({
       iconAnchor: [14, 14],
     })
 
+    // Group by coordinate to offset overlapping pre-alerts
+    const coordCount = new Map<string, number>()
     for (const pa of preAlerts) {
       const coords = coordsCache.current.get(pa.id)
       if (!coords) continue
+      const key = `${coords[0].toFixed(5)},${coords[1].toFixed(5)}`
+      const idx = coordCount.get(key) || 0
+      coordCount.set(key, idx + 1)
+      // Spiral offset: 0, 0.003, -0.003, 0.006, -0.006, ...
+      const offset = idx === 0 ? 0 : ((idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * 0.003)
+      const lat = coords[0] + offset
+      const lng = coords[1] + offset * 0.7
       const icon = pa.status === 'reserved' ? greenIcon : greyIcon
-      const marker = L.marker(coords, { icon })
+      const marker = L.marker([lat, lng], { icon })
       marker.on('click', () => onPreAlertClick?.(pa.id))
       preRef.current.addLayer(marker)
     }

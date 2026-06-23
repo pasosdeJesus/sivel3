@@ -74,10 +74,36 @@ export default function DocumenterPage() {
   const submitScore = async (preAlertId: number, score: number) => {
     setScoring(preAlertId)
     try {
+      // EIP-191: sign "score:{id}:{score}:{timestamp}" with personal_sign
+      const timestamp = Math.floor(Date.now() / 1000)
+      const message = `score:${preAlertId}:${score}:${timestamp}`
+
+      let signature: string
+      const ethereum = (window as any).ethereum
+      if (!ethereum) throw new Error('No wallet')
+      try {
+        signature = await ethereum.request({
+          method: 'personal_sign',
+          params: [message, effectiveAddress],
+        })
+      } catch {
+        // MiniPay fallback
+        signature = await ethereum.send({
+          method: 'personal_sign',
+          params: [message, effectiveAddress],
+        })
+      }
+
       const res = await fetch(`/api/pre-alerts/${preAlertId}/score`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score, documenter_wallet: effectiveAddress, feedback }),
+        body: JSON.stringify({
+          score,
+          documenter_wallet: effectiveAddress,
+          feedback,
+          timestamp,
+          signature,
+        }),
       })
       if (!res.ok) {
         const err = await res.json()

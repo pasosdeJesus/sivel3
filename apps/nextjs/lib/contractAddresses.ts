@@ -17,7 +17,7 @@ export const USDT_ADDRESS = USDT[NETWORK]
 // SIVeL3PreAlertMarket (#43)
 // ============================================================
 const PREALERT_MARKET: Record<'celo' | 'celoSepolia', `0x${string}`> = { 
-  celo: '0x9aefBD59455efE0F7732638eF791f35F110ddB0c' as `0x${string}`, // pending mainnet deployment
+  celo: '0x9aefBD59455efE0F7732638eF791f35F110ddB0c' as `0x${string}`,
   celoSepolia: (process.env.NEXT_PUBLIC_PREALERT_MARKET_ADDRESS || '0x902413432aD345bab37093404849C09193AB9A23') as `0x${string}`
 }
 export const PREALERT_MARKET_ADDRESS = PREALERT_MARKET[NETWORK]
@@ -26,8 +26,8 @@ export const PREALERT_MARKET_ADDRESS = PREALERT_MARKET[NETWORK]
 // SIVeL3RewardEscrow (#47)
 // ============================================================
 const REWARD_ESCROW: Record<'celo' | 'celoSepolia', `0x${string}`> = {
-  celo: '0xBFD94B391882612425455305dc0c9b1eC41E155A' as `0x${string}`, // pending mainnet deployment
-  celoSepolia: (process.env.NEXT_PUBLIC_PREALERT_MARKET_ADDRESS || '0x53aD49cBF4001aD0c8fe588dA330ED277bBD45f9') as `0x${string}`,
+  celo: '0xBFD94B391882612425455305dc0c9b1eC41E155A' as `0x${string}`,
+  celoSepolia: (process.env.NEXT_PUBLIC_REWARD_ESCROW_ADDRESS || '0x53aD49cBF4001aD0c8fe588dA330ED277bBD45f9') as `0x${string}`,
 }
 export const REWARD_ESCROW_ADDRESS = REWARD_ESCROW[NETWORK]
 
