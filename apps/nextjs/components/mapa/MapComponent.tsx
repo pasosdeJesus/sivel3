@@ -90,6 +90,11 @@ export default function MapComponent({
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
 
+  type MapMode = 'casos' | 'preAlertas'
+  const [mapMode, setMapMode] = useState<MapMode>('casos')
+  const mapModeRef = useRef(mapMode)
+  mapModeRef.current = mapMode
+
   const [cargando, setCargando] = useState(true)
   const [casoSeleccionado, setCasoSeleccionado] = useState<CasoDetalle | null>(
     null,
@@ -154,6 +159,12 @@ export default function MapComponent({
 
   const cargarCasos = useCallback(async () => {
     if (!mapInstanceRef.current) return
+
+    if (mapModeRef.current !== 'casos') {
+      markersRef.current?.clearLayers()
+      setCargando(false)
+      return
+    }
 
     setCargando(true)
     try {
@@ -267,6 +278,18 @@ export default function MapComponent({
     }
   }, []) // Dependencias vacías para que se ejecute solo una vez
 
+  // Toggle Casos/PreAlertas
+  useEffect(() => {
+    if (!mapInstanceRef.current) return
+    if (mapMode === 'casos') {
+      cargarCasos()
+      preRef.current?.clearLayers()
+    } else {
+      markersRef.current?.clearLayers()
+      setCargando(false)
+    }
+  }, [mapMode, cargarCasos])
+
   // Pre-alert markers (🤖 grey=pending, green=reserved)
   const defaultCoords: Record<string, [number, number]> = {
     putumayo: [1.15, -76.6], cauca: [2.45, -76.6], antioquia: [6.55, -75.8],
@@ -353,6 +376,28 @@ export default function MapComponent({
 
   return (
     <div className="relative h-full">
+      {/* Mode toggle */}
+      <div className="absolute top-2 left-12 z-30 flex gap-1 bg-white/90 backdrop-blur rounded-lg p-1 shadow">
+        <button
+          onClick={() => setMapMode('casos')}
+          className={`px-3 py-1 text-sm rounded transition-colors ${
+            mapMode === 'casos' ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-700'
+          }`}
+        >
+          Casos
+        </button>
+        {isVerified && (
+          <button
+            onClick={() => setMapMode('preAlertas')}
+            className={`px-3 py-1 text-sm rounded transition-colors ${
+              mapMode === 'preAlertas' ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
+            🤖 PreAlertas
+          </button>
+        )}
+      </div>
+
       <div
         ref={mapRef}
         className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg border border-gray-300 relative z-10"
