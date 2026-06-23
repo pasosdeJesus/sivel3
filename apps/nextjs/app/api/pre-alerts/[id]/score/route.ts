@@ -3,24 +3,25 @@ import { createPublicClient, createWalletClient, http, verifyMessage } from 'vie
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
-import path from 'path'
+import { REGIONAL_DONATION_ADDRESS, REWARD_ESCROW_ADDRESS } from '@/lib/contractAddresses'
 
 const SIGNATURE_WINDOW = 300 // 5 minutes anti-replay
 
-const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
-const chainEnv = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
-const viemChain = chainEnv === 'celo' ? celo : celoSepolia
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
-
-const REWARD_ESCROW_ABI = [
+const REGIONAL_DONATION_ABI = [
   {
-    inputs: [],
-    name: 'balance',
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
+    inputs: [
+      { name: '_regionId', type: 'uint256' },
+      { name: '_amount', type: 'uint256' },
+      { name: '_to', type: 'address' },
+    ],
+    name: 'withdraw',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
+] as const
+
+const REWARD_ESCROW_ABI = [
   {
     inputs: [
       { name: 'recipient', type: 'address' },
@@ -33,13 +34,23 @@ const REWARD_ESCROW_ABI = [
   },
 ] as const
 
-function getRewardEscrowAddress(): `0x${string}` | null {
-  const dep = readDeployment(chainEnv, deploymentsDir, {
-    contract: 'SIVeL3RewardEscrow',
-    version: 'V1',
-  })
-  return dep ? (dep.address as `0x${string}`) : null
+// Map departamento to regionId (Colombia=1, other=2)
+const COLOMBIA_DEPTOS = new Set([
+  'putumayo', 'cauca', 'antioquia', 'bogota', 'cundinamarca', 'nariño',
+  'valle', 'santander', 'norte de santander', 'arauca', 'meta', 'huila',
+  'tolima', 'caldas', 'risaralda', 'quindio', 'boyaca', 'bolivar',
+  'magdalena', 'cesar', 'cordoba', 'sucre', 'atlantico', 'guajira',
+  'choco', 'casanare', 'amazonas', 'guainia', 'guaviare', 'vaupes', 'vichada',
+  'san andres',
+])
+function getRegionId(departamento: string | undefined): number {
+  if (!departamento) return 2
+  return COLOMBIA_DEPTOS.has(departamento.toLowerCase().trim()) ? 1 : 2
 }
+
+const chainEnv = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
+const viemChain = chainEnv === 'celo' ? celo : celoSepolia
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
 
 // TODO(#9): Replace with SBT-based DOCUMENTER_ROLE verification
 async function isDocumenter(wallet: string): Promise<boolean> {
@@ -156,7 +167,7 @@ export async function POST(
     }
 
     if (body.score === 0) {
-      // Rejection — no payment, feedback already validated above
+      // Rejection — no payment
       await db
         .updateTable('pre_alert')
         .set({
@@ -179,7 +190,7 @@ export async function POST(
       })
     }
 
-    // Score 2-5 — release USDT payment via RewardEscrow
+    // Score 2-5 — auto-withdraw from RegionalDonation + release via RewardEscrow
     const citizenWallet = preAlert.buyer_wallet
     if (!citizenWallet) {
       return NextResponse.json(
@@ -189,10 +200,8 @@ export async function POST(
     }
 
     const rewardAmount = BigInt(body.score) * 1_000_000n // USDT 6 decimals
-    const escrowAddress = getRewardEscrowAddress()
 
-    if (!escrowAddress || !process.env.PRIVATE_KEY) {
-      // No contract or no key — record score, payment pending
+    if (!process.env.PRIVATE_KEY) {
       await db
         .updateTable('pre_alert')
         .set({
@@ -211,29 +220,40 @@ export async function POST(
         pre_alert_id: preAlertId,
         status: 'pending_reward',
         score: body.score,
-        citizen_reward: `${body.score} USDT (pending — reward escrow not configured)`,
+        citizen_reward: `${body.score} USDT (pending — PRIVATE_KEY not configured)`,
       })
     }
 
-    // Check escrow balance
-    let balance = 0n
+    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+    const walletClient = createWalletClient({
+      chain: viemChain,
+      transport: http(RPC_URL),
+      account,
+    })
+
+    // 1. Determine region from pre-alert's departamento
+    const depto = ((preAlert.json_data as any)?.departamento) as string | undefined
+    const regionId = BigInt(getRegionId(depto))
+
+    // 2. Withdraw from RegionalDonationV2 to RewardEscrow
+    const escrowAddress = REWARD_ESCROW_ADDRESS as `0x${string}`
     try {
-      const publicClient = createPublicClient({
-        chain: viemChain,
-        transport: http(RPC_URL),
+      console.log(
+        `[score] Withdrawing ${body.score} USDT from region ${regionId} to RewardEscrow…`,
+      )
+      const withdrawHash = await walletClient.writeContract({
+        address: REGIONAL_DONATION_ADDRESS as `0x${string}`,
+        abi: REGIONAL_DONATION_ABI,
+        functionName: 'withdraw',
+        args: [regionId, rewardAmount, escrowAddress],
       })
 
-      balance = await publicClient.readContract({
-        address: escrowAddress,
-        abi: REWARD_ESCROW_ABI,
-        functionName: 'balance',
-      })
-    } catch {
-      // RPC unavailable — record as pending
-      console.warn('[score] Could not read escrow balance — marking as pending_reward')
-    }
+      await createPublicClient({ chain: viemChain, transport: http(RPC_URL) })
+        .waitForTransactionReceipt({ hash: withdrawHash, timeout: 60_000 })
 
-    if (balance < rewardAmount) {
+      console.log(`[score] Withdrawn — tx: ${withdrawHash}`)
+    } catch (e) {
+      console.error('[score] Withdraw from RegionalDonation failed:', e)
       await db
         .updateTable('pre_alert')
         .set({
@@ -249,23 +269,17 @@ export async function POST(
 
       return NextResponse.json({
         success: false,
-        reason: 'Insufficient funds in reward escrow',
+        reason: `Withdraw from RegionalDonation failed: ${e instanceof Error ? e.message : String(e)}`,
         pre_alert_id: preAlertId,
         status: 'pending_reward',
         score: body.score,
       })
     }
 
-    // Release payment
-    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
-    const walletClient = createWalletClient({
-      chain: viemChain,
-      transport: http(RPC_URL),
-      account,
-    })
-
+    // 3. Release payment from RewardEscrow to citizen
     let txHash: `0x${string}`
     try {
+      console.log(`[score] Releasing ${body.score} USDT to citizen ${citizenWallet.slice(0, 10)}…`)
       txHash = await walletClient.writeContract({
         address: escrowAddress,
         abi: REWARD_ESCROW_ABI,
@@ -276,7 +290,7 @@ export async function POST(
       await createPublicClient({ chain: viemChain, transport: http(RPC_URL) })
         .waitForTransactionReceipt({ hash: txHash, timeout: 60_000 })
     } catch (e) {
-      console.error('[score] Payment transaction failed:', e)
+      console.error('[score] releasePayment failed:', e)
       await db
         .updateTable('pre_alert')
         .set({
@@ -292,7 +306,7 @@ export async function POST(
 
       return NextResponse.json({
         success: false,
-        reason: `Payment transaction failed: ${e instanceof Error ? e.message : String(e)}`,
+        reason: `releasePayment failed (funds are in RewardEscrow): ${e instanceof Error ? e.message : String(e)}`,
         pre_alert_id: preAlertId,
         status: 'pending_reward',
         score: body.score,
