@@ -13,6 +13,8 @@ import confetti from 'canvas-confetti';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRegionBalance } from './hooks/useRegionBalance';
 import { useOSMMapData } from './hooks/useOSMMapData';
+import { usePreAlerts } from '@/hooks/usePreAlerts';
+import { PreAlertModal } from '@/components/PreAlertModal';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 
@@ -81,6 +83,42 @@ export default function OSMMapPage() {
 
   // Balance regional
   const { regionBalance, balanceLoading, fetchBalance } = useRegionBalance(selectedRegion);
+
+  // Pre-alerts
+  const { preAlerts, loading: preLoading, fetchPreAlerts, fetchDetail, buyPreAlert, convertPreAlert } = usePreAlerts()
+  const [selectedPreAlert, setSelectedPreAlert] = useState<any>(null)
+  const [showPreModal, setShowPreModal] = useState(false)
+  const [preDetailLoading, setPreDetailLoading] = useState(false)
+
+  useEffect(() => {
+    fetchPreAlerts()
+  }, [fetchPreAlerts])
+
+  const handlePreAlertClick = async (id: number) => {
+    setShowPreModal(true)
+    setPreDetailLoading(true)
+    setSelectedPreAlert(null)
+    const detail = await fetchDetail(id, effectiveAddress)
+    setSelectedPreAlert(detail)
+    setPreDetailLoading(false)
+  }
+
+  const handleBuy = async (id: number) => {
+    if (!effectiveAddress) return
+    await buyPreAlert(id, effectiveAddress)
+    // Refresh after purchase
+    const detail = await fetchDetail(id, effectiveAddress)
+    setSelectedPreAlert(detail)
+    fetchPreAlerts()
+  }
+
+  const handleConvert = async (id: number) => {
+    if (!effectiveAddress) return
+    await convertPreAlert(id, effectiveAddress)
+    const detail = await fetchDetail(id, effectiveAddress)
+    setSelectedPreAlert(detail)
+    fetchPreAlerts()
+  }
   
   // Cargar balance inicial cuando hay región seleccionada
   useEffect(() => {
@@ -203,11 +241,25 @@ export default function OSMMapPage() {
     onRefreshBalance: () => selectedRegion && fetchBalance(selectedRegion),
     MapComponent,
     filtersObj: filters,
-    handleCountsLoad
+    handleCountsLoad,
+    preAlerts,
+    onPreAlertClick: handlePreAlertClick,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 relative">
+      {showPreModal && (
+        <PreAlertModal
+          preAlert={selectedPreAlert}
+          loading={preDetailLoading}
+          isConnected={isConnected}
+          wallet={effectiveAddress}
+          locale={currentLocale}
+          onBuy={handleBuy}
+          onConvert={handleConvert}
+          onClose={() => setShowPreModal(false)}
+        />
+      )}
       <main className="container mx-auto px-4 py-6">
         {/* Versión móvil */}
         <div className="lg:hidden">

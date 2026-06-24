@@ -37,6 +37,18 @@ interface MapComponentProps {
   onCargarConteos?: (conteos: any) => void
   isConnected?: boolean
   wallet?: string | null
+  isVerified?: boolean
+  preAlerts?: Array<{
+    id: number
+    titulo: string
+    fecha: string
+    departamento: string
+    municipio: string
+    status: string
+    source_urls: string[]
+    source_summary: string | null
+  }>
+  onPreAlertClick?: (id: number) => void
 }
 
 interface CasoDetalle {
@@ -65,11 +77,16 @@ export default function MapComponent({
   onCargarConteos,
   isConnected = false,
   wallet = null,
+  isVerified = false,
+  preAlerts = [],
+  onPreAlertClick,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<any>(null)
   const filtrosAnterioresRef = useRef<any>({})
+  const preRef = useRef<L.LayerGroup | null>(null)
+  const coordsCache = useRef<Map<number, [number, number]>>(new Map())
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
 
@@ -249,6 +266,57 @@ export default function MapComponent({
       }
     }
   }, []) // Dependencias vacías para que se ejecute solo una vez
+
+  // Pre-alert markers (🤖 grey=pending, green=reserved)
+  const defaultCoords: Record<string, [number, number]> = {
+    putumayo: [1.15, -76.6], cauca: [2.45, -76.6], antioquia: [6.55, -75.8],
+    bogota: [4.61, -74.08], cundinamarca: [5.0, -74.2], nariño: [1.2, -77.3],
+    valle: [3.4, -76.5], santander: [7.1, -73.1], 'norte de santander': [8.0, -72.5],
+    arauca: [6.9, -70.7], meta: [3.3, -73.0], huila: [2.5, -75.7], tolima: [4.1, -75.2],
+    caldas: [5.2, -75.5], risaralda: [4.8, -75.7], quindio: [4.5, -75.7],
+    boyaca: [5.6, -73.3], bolivar: [9.1, -74.4], magdalena: [10.5, -74.1],
+    cesar: [9.3, -73.5], cordoba: [8.1, -75.6], sucre: [9.1, -75.1],
+    atlantico: [10.8, -74.9], guajira: [11.5, -72.5], choco: [5.7, -76.7],
+    casanare: [5.3, -71.5],
+  }
+
+  // Assign coords for pre-alerts
+  for (const pa of preAlerts) {
+    if (coordsCache.current.has(pa.id)) continue
+    const dept = (pa.departamento || '').toLowerCase().trim()
+    const def = defaultCoords[dept]
+    if (def) coordsCache.current.set(pa.id, def)
+  }
+
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isVerified) return
+    if (!preRef.current) {
+      preRef.current = L.layerGroup().addTo(mapInstanceRef.current)
+    }
+    preRef.current.clearLayers()
+
+    const greyIcon = L.divIcon({
+      html: '<div style="font-size:22px">🤖</div>',
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    })
+    const greenIcon = L.divIcon({
+      html: '<div style="font-size:22px;filter:hue-rotate(90deg)">🤖</div>',
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    })
+
+    for (const pa of preAlerts) {
+      const coords = coordsCache.current.get(pa.id)
+      if (!coords) continue
+      const icon = pa.status === 'reserved' ? greenIcon : greyIcon
+      const marker = L.marker(coords, { icon })
+      marker.on('click', () => onPreAlertClick?.(pa.id))
+      preRef.current.addLayer(marker)
+    }
+  }, [preAlerts, isVerified, onPreAlertClick])
 
   useEffect(() => {
     const filtrosCambiaron = JSON.stringify(filtros) !== JSON.stringify(filtrosAnterioresRef.current);

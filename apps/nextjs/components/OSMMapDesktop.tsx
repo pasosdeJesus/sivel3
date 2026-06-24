@@ -29,6 +29,8 @@ interface OSMMapDesktopProps {
   MapComponent: React.ComponentType<any>;
   filtersObj: any;
   handleCountsLoad: (counts: any) => void;
+  preAlerts?: any[];
+  onPreAlertClick?: (id: number) => void;
 }
 
 export function OSMMapDesktop({
@@ -53,7 +55,9 @@ export function OSMMapDesktop({
   onRefreshBalance,
   MapComponent,
   filtersObj,
-  handleCountsLoad
+  handleCountsLoad,
+  preAlerts,
+  onPreAlertClick
 }: OSMMapDesktopProps) {
   const { t } = useTranslation({});
   return (
@@ -99,6 +103,8 @@ export function OSMMapDesktop({
               onCargarConteos={handleCountsLoad}
               isConnected={isConnected}
               wallet={wallet}
+              preAlerts={preAlerts}
+              onPreAlertClick={onPreAlertClick}
             />
           </CardContent>
         </Card>

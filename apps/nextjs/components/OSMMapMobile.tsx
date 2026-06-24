@@ -28,6 +28,8 @@ interface OSMMapMobileProps {
   MapComponent: React.ComponentType<any>;
   filtersObj: any;
   handleCountsLoad: (counts: any) => void;
+  preAlerts?: any[];
+  onPreAlertClick?: (id: number) => void;
 }
 
 export function OSMMapMobile({
@@ -52,7 +54,9 @@ export function OSMMapMobile({
   onRefreshBalance,
   MapComponent,
   filtersObj,
-  handleCountsLoad
+  handleCountsLoad,
+  preAlerts,
+  onPreAlertClick
 }: OSMMapMobileProps) {
   const { t } = useTranslation({});
   return (
@@ -119,6 +123,8 @@ export function OSMMapMobile({
           onCargarConteos={handleCountsLoad}
           isConnected={isConnected}
           wallet={wallet}
+          preAlerts={preAlerts}
+          onPreAlertClick={onPreAlertClick}
         />
       </div>
     </>
