@@ -20,6 +20,7 @@ import { buyPreAlert as buyPreAlertOnChain } from '@/lib/buyPreAlert';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
 import { SlearnInfo } from '@/components/SlearnInfo';
+import { SLEARN_ADDRESS } from '@/lib/contractAddresses';
 
 const localT = {
   en: {
@@ -27,7 +28,7 @@ const localT = {
     thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.',
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'You earned SLEARN cashback: {{0}}',
-    lpSuccessVerified: 'You earned SLEARN cashback: {{0}}. Add token 0x27fd41Bea85C39254f2B12789eB37a1543152CC1 to your wallet to see them.',
+    lpSuccessVerified: `You earned SLEARN cashback: {{0}}. Add token ${SLEARN_ADDRESS} to your wallet to see them.`,
     lpNotVerified: 'You earned SLEARN cashback: {{0}}. Verify on learn.tg to unlock them!',
     lpFallbackError: 'Unable to mint SLEARN cashback. Contact the team.',
     donationError: 'Donation error',
@@ -39,7 +40,7 @@ const localT = {
     thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.',
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'Has ganado SLEARN cashback: {{0}}',
-    lpSuccessVerified: 'Has ganado SLEARN cashback: {{0}}. Agrega el token 0x27fd41Bea85C39254f2B12789eB37a1543152CC1 a tu billetera para verlos.',
+    lpSuccessVerified: `Has ganado SLEARN cashback: {{0}}. Agrega el token ${SLEARN_ADDRESS} a tu billetera para verlos.`,
     lpNotVerified: 'Has ganado SLEARN cashback: {{0}}. ¡Verifícate en learn.tg para desbloquearlos!',
     lpFallbackError: 'No se pudo mintear SLEARN cashback. Contacta al equipo.',
     donationError: 'Error en donación',

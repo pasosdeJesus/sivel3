@@ -215,8 +215,8 @@ export async function POST(request: NextRequest) {
         slearnResult = { success: true, usdtToReserve: cashback.usdtToReserve, slearnMinted: cashback.slearnMinted, txHash: cashback.txHash }
         serverLog.success(`Split: ${cashback.usdtToReserve} USDT → SLEARN, ${(Number(assignAmount)/1_000_000).toFixed(2)} USDT → RegionalDonation`)
       } else {
-        serverLog.info('Not verified or no SLEARN — 100% to RegionalDonation')
-        slearnResult = { success: false, message: 'Not verified' }
+        serverLog.info('SLEARN cashback skipped (null result) — 100% to RegionalDonation')
+        slearnResult = { success: false, message: 'SLEARN minting skipped' }
       }
     } catch (slearnError) {
       serverLog.error(`SLEARN cashback error: ${slearnError}`)

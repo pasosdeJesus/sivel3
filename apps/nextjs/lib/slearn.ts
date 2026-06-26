@@ -1,12 +1,11 @@
 // lib/slearn.ts
-// Mints SLEARN cashback for verified donors via mintAndReserve().
+// Mints SLEARN cashback for all donors via mintAndReserve().
 // Replaces lib/learningPoints.ts (learn.tg API deactivated, returns 410).
 //
 // === Flow ===
-// 1. Verify donor on learn.tg via GET /api/verify (EIP-191, 5 min window)
-// 2. If verified: transfer 10% of donation USDT to SLEARN contract
-// 3. Call mintAndReserve(donor, usdtAmount) — mints SLEARN at 1:22 rate
-// 4. Retry on collision (shared USDT pool — see doc/slearn-integration.md §3.1)
+// 1. Transfer 10% of donation USDT from server wallet to SLEARN contract
+// 2. Call mintAndReserve(donor, usdtAmount) — mints SLEARN at 1:22 rate
+// 3. Retry on collision (shared USDT pool — see doc/slearn-integration.md §3.1)
 //
 // === SLEARN contract ===
 // Mainnet: 0x27fd41Bea85C39254f2B12789eB37a1543152CC1
@@ -15,6 +14,7 @@
 import { createWalletClient, createPublicClient, http, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
+import { SLEARN_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 
 const SLEARN_ABI = parseAbi([
   'function mintAndReserve(address to, uint256 usdtAmount) external returns (uint256)',
@@ -28,18 +28,6 @@ const USDT_ABI = parseAbi([
 
 function getChain() {
   return process.env.NEXT_PUBLIC_NETWORK === 'celo' ? celo : celoSepolia
-}
-
-function getSlearnAddress(): `0x${string}` {
-  const addr = process.env.NEXT_PUBLIC_SLEARN_ADDRESS
-  if (!addr) throw new Error('NEXT_PUBLIC_SLEARN_ADDRESS not set')
-  return addr as `0x${string}`
-}
-
-function getUsdtAddress(): `0x${string}` {
-  const addr = process.env.NEXT_PUBLIC_USDT_ADDRESS
-  if (!addr) throw new Error('NEXT_PUBLIC_USDT_ADDRESS not set')
-  return addr as `0x${string}`
 }
 
 const CASHBACK_PERCENT = 10 // 10% of donation goes to SLEARN reserve
@@ -64,8 +52,8 @@ async function transferAndMint(
   const account = privateKeyToAccount((process.env.PRIVATE_KEY || '') as `0x${string}`)
   const chain = getChain()
   const rpc = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || undefined
-  const slearn = getSlearnAddress()
-  const usdt = getUsdtAddress()
+  const slearn = SLEARN_ADDRESS
+  const usdt = USDT_ADDRESS
 
   const wc = createWalletClient({ chain, transport: http(rpc), account })
   const pc = createPublicClient({ chain, transport: http(rpc) })

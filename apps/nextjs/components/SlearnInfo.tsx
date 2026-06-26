@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@pasosdejesus/m/shadcn-components/ui/card'
 import { Info, GraduationCap, BadgeCheck, ArrowRightLeft } from 'lucide-react'
+import { SLEARN_ADDRESS } from '@/lib/contractAddresses'
 
 const tS = {
   en: {
