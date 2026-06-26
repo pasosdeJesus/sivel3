@@ -338,6 +338,13 @@ export default function MapComponent({
       iconAnchor: [14, 14],
     })
 
+    const bellIcon = L.divIcon({
+      html: '<div style="font-size:22px">🔔</div>',
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    })
+
     // Group by coordinate to offset overlapping pre-alerts
     const coordCount = new Map<string, number>()
     for (const pa of preAlerts) {
@@ -350,7 +357,14 @@ export default function MapComponent({
       const offset = idx === 0 ? 0 : ((idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * 0.003)
       const lat = coords[0] + offset
       const lng = coords[1] + offset * 0.7
-      const icon = pa.status === 'reserved' ? greenIcon : greyIcon
+      let icon
+      if (pa.status === 'converted' || pa.status === 'pending_reward' || pa.status === 'rejected' || pa.status === 'paid') {
+        icon = bellIcon
+      } else if (pa.status === 'reserved') {
+        icon = greenIcon
+      } else {
+        icon = greyIcon
+      }
       const marker = L.marker([lat, lng], { icon })
       marker.on('click', () => onPreAlertClick?.(pa.id))
       preRef.current.addLayer(marker)
