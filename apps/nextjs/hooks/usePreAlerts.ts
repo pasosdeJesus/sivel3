@@ -18,6 +18,9 @@ export interface PreAlertDetail extends PreAlertSummary {
   can_purchase?: boolean
   bought_at?: string
   conversion_deadline?: string
+  citizen_notes?: string | null
+  score?: number | null
+  feedback?: string | null
 }
 
 export function usePreAlerts() {

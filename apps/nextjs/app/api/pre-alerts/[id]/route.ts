@@ -54,6 +54,9 @@ export async function GET(
       status: preAlert.status,
       bought_at: preAlert.bought_at,
       conversion_deadline: preAlert.conversion_deadline,
+      citizen_notes: preAlert.citizen_notes,
+      score: preAlert.score,
+      feedback: preAlert.feedback,
     })
   } catch (error) {
     console.error('GET /api/pre-alerts/[id] error:', error)

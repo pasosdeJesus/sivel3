@@ -217,6 +217,11 @@ export function PreAlertModal({
                 <p className="text-xs text-gray-500 text-center">
                   {t('expires')}: {new Date(preAlert.conversion_deadline).toLocaleDateString()}
                 </p>
+                {preAlert.citizen_notes && (
+                  <div className="bg-gray-50 border rounded p-2 text-xs italic text-gray-600">
+                    {preAlert.citizen_notes}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-gray-600">
                     {t('improvements')}
