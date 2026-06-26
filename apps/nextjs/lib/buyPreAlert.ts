@@ -66,11 +66,16 @@ export async function buyPreAlert(
   const pid = BigInt(preAlertId).toString(16).padStart(64, '0')
   const data = (selector + to + amt + pid) as `0x${string}`
 
-  const txParams = {
+  const txParams: Record<string, any> = {
     to: usdtAddress,
     data,
     value: '0x0',
     from: effectiveAddress,
+  }
+
+  // MiniPay doesn't support eth_estimateGas — set explicit gas limit
+  if (isMiniPay) {
+    txParams.gas = '0x30d40' // 200,000 gas
   }
 
   let txHash: string
