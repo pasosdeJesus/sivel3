@@ -113,3 +113,5 @@ apps/nextjs/public/img/credential/generated/
 apps/nextjs/public/img/credential/generated
 IDEAS
 I*.md
+.agents
+skills-lock.json

@@ -182,7 +182,7 @@ export default function OSMMapPage() {
         toast({
           title: t('lpTitle'),
           description: msg.replace('{{0}}', slearn.slearnMinted || ''),
-          duration: isMiniPay ? 0 : 6000,
+          duration: 0,
         })
       }
 
