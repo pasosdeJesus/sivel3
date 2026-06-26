@@ -19,6 +19,7 @@ import { PreAlertModal } from '@/components/PreAlertModal';
 import { buyPreAlert as buyPreAlertOnChain } from '@/lib/buyPreAlert';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
+import { SlearnInfo } from '@/components/SlearnInfo';
 
 const localT = {
   en: {
@@ -26,8 +27,9 @@ const localT = {
     thanksMessage: '✨ Your generosity will help document cases of violence in {{region}}. {{amount}} USDT has been donated.',
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'You earned SLEARN cashback: {{0}}',
+    lpSuccessVerified: 'You earned SLEARN cashback: {{0}}. Add token 0x27fd41Bea85C39254f2B12789eB37a1543152CC1 to your wallet to see them.',
+    lpNotVerified: 'You earned SLEARN cashback: {{0}}. Verify on learn.tg to unlock them!',
     lpFallbackError: 'Unable to mint SLEARN cashback. Contact the team.',
-    lpNotVerified: 'Not verified on learn.tg — no SLEARN cashback. Full donation goes to the region.',
     donationError: 'Donation error',
     sbtTitle: '🎖️ SBT Obtained!',
     viewStats: '📊 View Site Statistics',
@@ -37,8 +39,9 @@ const localT = {
     thanksMessage: '✨ Tu generosidad ayudará a documentar casos de violencia en {{region}}. Se han donado {{amount}} USDT.',
     lpTitle: '🎓 SLEARN Cashback',
     lpSuccess: 'Has ganado SLEARN cashback: {{0}}',
+    lpSuccessVerified: 'Has ganado SLEARN cashback: {{0}}. Agrega el token 0x27fd41Bea85C39254f2B12789eB37a1543152CC1 a tu billetera para verlos.',
+    lpNotVerified: 'Has ganado SLEARN cashback: {{0}}. ¡Verifícate en learn.tg para desbloquearlos!',
     lpFallbackError: 'No se pudo mintear SLEARN cashback. Contacta al equipo.',
-    lpNotVerified: 'No verificado en learn.tg — sin SLEARN cashback. La donación completa va a la región.',
     donationError: 'Error en donación',
     sbtTitle: '🎖️ ¡SBT Obtenido!',
     viewStats: '📊 Ver Estadísticas del Sitio',
@@ -172,21 +175,23 @@ export default function OSMMapPage() {
 
       // Mostrar toast de SLEARN si se minteó exitosamente
       if (slearn?.success) {
+        const msg = isVerified
+          ? t('lpSuccessVerified')
+          : t('lpNotVerified')
         toast({
           title: t('lpTitle'),
-          description: t('lpSuccess').replace('{{0}}', slearn.slearnMinted || ''),
-          duration: isMiniPay ? 0 : 4000,
-        });
+          description: msg.replace('{{0}}', slearn.slearnMinted || ''),
+          duration: isMiniPay ? 0 : 6000,
+        })
       }
 
       // Mostrar toast informativo si SLEARN falló
       if (slearn && !slearn.success) {
-        const isNotVerified = slearn.message === 'Not verified'
         toast({
           title: t('lpTitle'),
-          description: isNotVerified ? t('lpNotVerified') : (slearn.userMessage || t('lpFallbackError')),
-          duration: isNotVerified ? 4000 : 0,
-        });
+          description: slearn.userMessage || t('lpFallbackError'),
+          duration: 0,
+        })
       }
 
       // Mostrar SBTs minteados
@@ -291,6 +296,12 @@ export default function OSMMapPage() {
         <div className="hidden lg:block">
           <OSMMapDesktop {...commonProps} />
         </div>
+
+        {isConnected && (
+          <div className="mt-6 max-w-lg">
+            <SlearnInfo locale={currentLocale} isVerified={isVerified} />
+          </div>
+        )}
 
         {/* Link to stats */}
         <div className="mt-6 text-center">

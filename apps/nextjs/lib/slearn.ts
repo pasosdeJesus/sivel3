@@ -53,38 +53,6 @@ export interface SlearnResult {
 }
 
 /**
- * Verify if a wallet is verified on learn.tg (Self.xyz passport).
- * Same protocol as mint-connector verification.
- */
-async function isVerifiedOnLearnTg(wallet: string): Promise<boolean> {
-  const timestamp = Math.floor(Date.now() / 1000)
-  const pk = process.env.PRIVATE_KEY || ''
-  console.log(`[slearn] PK length=${pk.length}, starts=${pk.slice(0,6)}...`)
-  const account = privateKeyToAccount(pk as `0x${string}`)
-  console.log(`[slearn] Signing verify request with: ${account.address}`)
-
-  // Sign: keccak256(encodePacked(['address', 'uint256'], [wallet, timestamp]))
-  const message = `${wallet}${timestamp}`
-  const signature = await account.signMessage({ message })
-
-function getVerifyUrl(): string {
-  return process.env.NEXT_PUBLIC_NETWORK === 'celo'
-    ? 'https://learn.tg'
-    : 'https://learn.tg:9001'
-}
-
-  const verifyUrl = `${getVerifyUrl()}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`
-  try {
-    const res = await fetch(verifyUrl)
-    if (!res.ok) return false
-    const data = await res.json()
-    return data.verified === true
-  } catch {
-    return false
-  }
-}
-
-/**
  * Transfer USDT to SLEARN contract, then call mintAndReserve().
  * Retries up to 3 times on collision (shared USDT pool).
  */
@@ -159,13 +127,6 @@ export async function mintSlearnCashback(
   donationAmountUsdt: number,
 ): Promise<{ usdtToReserve: string; slearnMinted: string; txHash: string } | null> {
   console.log(`OJO mintSlearnCashback wallet=${wallet}, donation=${donationAmountUsdt}`)
-
-  // Check verification
-  const verified = await isVerifiedOnLearnTg(wallet)
-  if (!verified) {
-    console.log(`[slearn] Wallet ${wallet.slice(0, 8)}... not verified, skipping cashback`)
-    return null
-  }
 
   // 10% of donation to SLEARN reserve
   const usdtToReserve = (donationAmountUsdt * CASHBACK_PERCENT) / 100
