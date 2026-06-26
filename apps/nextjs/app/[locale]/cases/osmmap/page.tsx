@@ -127,7 +127,9 @@ export default function OSMMapPage() {
       toast({ title: '✅ Purchase confirmed', duration: 3000 })
     } catch (e: any) {
       debugLog(`handleBuy #${id} FAILED`, { error: e.message || e })
-      toast({ title: '❌ Purchase failed', description: e.message, variant: 'destructive', duration: 0 })
+      const fullError = `Purchase #${id} failed: ${e.message || e}`
+      navigator.clipboard.writeText(fullError).catch(() => {})
+      toast({ title: '❌ Purchase failed', description: `${e.message || e} (copied to clipboard)`, variant: 'destructive', duration: 0 })
       return
     }
     const detail = await fetchDetail(id, effectiveAddress)
@@ -227,9 +229,10 @@ export default function OSMMapPage() {
     } catch (err: unknown) {
       console.error('Error en donación:', err);
       const errorMessage = parseWalletError(err, currentLocale);
+      navigator.clipboard.writeText(`Donation error: ${errorMessage}`).catch(() => {})
       toast({
         title: t('donationError'),
-        description: errorMessage,
+        description: `${errorMessage} (copied to clipboard)`,
         variant: 'destructive',
         duration: 0,
       });
