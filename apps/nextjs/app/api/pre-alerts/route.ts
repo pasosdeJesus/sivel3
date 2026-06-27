@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const departamento = url.searchParams.get('departamento')
     const municipio = url.searchParams.get('municipio')
     const wallet = url.searchParams.get('wallet')
+    const buyer = url.searchParams.get('buyer')
 
     const offset = (page - 1) * limit
 
@@ -18,8 +19,16 @@ export async function GET(req: NextRequest) {
     let baseQuery = db
       .selectFrom('pre_alert')
 
-    // When filtering by wallet, show all statuses (dashboard)
-    if (wallet) {
+    // buyer=wallet → map: show pending (market) + user's reserved
+    // wallet=addr → dashboard: show all user's pre-alerts
+    if (buyer) {
+      baseQuery = baseQuery.where((eb) =>
+        eb.or([
+          eb('status', '=', 'pending'),
+          eb('buyer_wallet', 'ilike', buyer),
+        ]),
+      )
+    } else if (wallet) {
       baseQuery = baseQuery.where('buyer_wallet', 'ilike', wallet)
     } else {
       baseQuery = baseQuery.where('status', '=', 'pending')

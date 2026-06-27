@@ -98,7 +98,7 @@ export default function OSMMapPage() {
   const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
-    fetchPreAlerts({ wallet: effectiveAddress || undefined })
+    fetchPreAlerts({ buyer: effectiveAddress || undefined })
   }, [fetchPreAlerts, effectiveAddress])
 
   useEffect(() => {
