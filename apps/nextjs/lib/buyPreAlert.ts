@@ -73,30 +73,44 @@ export async function buyPreAlert(
     from: effectiveAddress,
   }
 
-  // MiniPay doesn't support eth_estimateGas — set explicit gas limit
-  if (isMiniPay) {
-    txParams.gas = '0x30d40' // 200,000 gas
-  }
-
   let txHash: string
 
   if (isMiniPay) {
+    logger.info(
+      `[buyPreAlert #${preAlertId}] MiniPay tx — to: ${txParams.to}, data len: ${txParams.data.length}, gas: ${txParams.gas}`,
+      'buyPreAlert',
+    )
     const raw = await ethereum.send({
       method: 'eth_sendTransaction',
       params: [txParams],
     })
+    logger.info(
+      `[buyPreAlert #${preAlertId}] MiniPay raw response: ${JSON.stringify(raw).slice(0, 200)}`,
+      'buyPreAlert',
+    )
     txHash = extractMiniPayHash(raw)
   } else {
+    logger.info(
+      `[buyPreAlert #${preAlertId}] Standard tx — to: ${txParams.to}, data len: ${txParams.data.length}`,
+      'buyPreAlert',
+    )
     txHash = await ethereum.request({
       method: 'eth_sendTransaction',
       params: [txParams],
     })
   }
 
+  logger.info(`[buyPreAlert #${preAlertId}] txHash: ${txHash}`, 'buyPreAlert')
+
   // Call backend to verify and record purchase (with retries)
   // The backend verifies the on-chain transfer — may fail if tx not yet confirmed.
   // 4xx errors continue retrying (tx may confirm in next seconds).
   // 5xx and network errors retry.
+  debugLog(`buyPreAlert #${preAlertId} tx submitted`, {
+    txHash,
+    to: txParams.to,
+    dataLen: txParams.data.length,
+  })
   let backendResponse: Response | null = null
   let lastError: string = ''
   let lastStatus: string = ''
@@ -142,6 +156,11 @@ export async function buyPreAlert(
       ? `Could not verify purchase (${lastStatus}). ${lastError}. Contact the team if the problem persists.`
       : `Purchase verification failed after 5 attempts. Funds are safe in the contract. Hash: ${txHash.slice(0, 16)}…`
     debugLog(`buyPreAlert #${preAlertId} FAILED`, { status: lastStatus, error: lastError, txHash })
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(
+        `PreAlert #${preAlertId} purchase failed:\nStatus: ${lastStatus}\nError: ${lastError}\nTX: ${txHash}`
+      ).catch(() => {})
+    }
     throw new Error(msg)
   }
 

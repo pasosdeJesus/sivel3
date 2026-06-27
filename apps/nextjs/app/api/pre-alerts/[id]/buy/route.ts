@@ -49,11 +49,18 @@ async function verifyPreAlertPurchase(
     const preAlertIdHex = '0x' + input.slice(-64)
     const preAlertId = Number(BigInt(preAlertIdHex))
 
-    // Find Transfer event
+    // Find Transfer event TO the PreAlertMarket contract (MiniPay creates multiple Transfer events for fee abstraction)
     const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS?.toLowerCase()
+    const contractAddr = getPreAlertMarketAddress()?.toLowerCase()
     const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
     const transferLog = receipt.logs.find(
-      l => l.address.toLowerCase() === usdtAddress && l.topics[0] === transferTopic,
+      l => {
+        if (l.address.toLowerCase() !== usdtAddress) return false
+        if (l.topics[0] !== transferTopic) return false
+        if (l.topics.length < 3) return false
+        const to = `0x${l.topics[2]!.slice(26)}`.toLowerCase()
+        return to === contractAddr
+      },
     )
     if (!transferLog || transferLog.topics.length < 3) {
       console.warn(`[verifyPreAlert] USDT Transfer event not found in receipt logs`)
@@ -63,7 +70,6 @@ async function verifyPreAlertPurchase(
     const from = `0x${transferLog.topics[1]!.slice(26)}`.toLowerCase()
     const to = `0x${transferLog.topics[2]!.slice(26)}`.toLowerCase()
     const value = BigInt(transferLog.data)
-    const contractAddr = getPreAlertMarketAddress()?.toLowerCase()
 
     const valid =
       from === expectedBuyer.toLowerCase() &&
