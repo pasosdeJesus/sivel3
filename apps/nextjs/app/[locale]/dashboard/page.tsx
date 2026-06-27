@@ -20,6 +20,8 @@ const tS = {
     reserved: 'Reserved',
     expires: 'Expires',
     buyOnMap: 'Browse pre-alerts on the map',
+    viewOnMap: 'View on map to convert',
+    rejected: 'Rejected',
   },
   es: {
     title: 'Mis Pre-Alertas',
@@ -31,6 +33,8 @@ const tS = {
     reserved: 'Reservada',
     expires: 'Expira',
     buyOnMap: 'Explora pre-alertas en el mapa',
+    viewOnMap: 'Ver en mapa para convertir',
+    rejected: 'Rechazada',
   },
 }
 
@@ -46,7 +50,7 @@ export default function DashboardPage() {
     if (!effectiveAddress) { setLoading(false); return }
     fetch(`/api/pre-alerts?wallet=${effectiveAddress}&limit=100`)
       .then(r => r.json())
-      .then(d => setPurchases(d.pre_alerts?.filter((p: any) => p.buyer_wallet === effectiveAddress.toLowerCase()) || []))
+      .then(d => setPurchases(d.pre_alerts || []))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [effectiveAddress])
@@ -98,11 +102,13 @@ export default function DashboardPage() {
                   <Badge variant={
                     p.status === 'paid' ? 'default' :
                     p.status === 'pending_reward' ? 'secondary' :
-                    p.status === 'converted' ? 'outline' : 'secondary'
+                    p.status === 'converted' ? 'outline' :
+                    p.status === 'rejected' ? 'destructive' : 'secondary'
                   }>
                     {p.status === 'pending_reward' ? t('pendingReward') :
                      p.status === 'paid' ? t('paid') :
-                     p.status === 'converted' ? t('converted') : t('reserved')}
+                     p.status === 'converted' ? t('converted') :
+                     p.status === 'rejected' ? t('rejected') : t('reserved')}
                   </Badge>
                 </div>
               </CardHeader>
@@ -125,11 +131,22 @@ export default function DashboardPage() {
                     <span>{t('expires')}: {new Date(p.conversion_deadline).toLocaleDateString()}</span>
                   </div>
                 )}
-                {p.score && (
+                {p.score != null && (
                   <div className="flex items-center gap-2 text-green-600 font-medium">
                     <DollarSign className="h-4 w-4" />
-                    <span>{p.score} USDT</span>
+                    <span>{p.score}/5 — {p.status === 'paid' ? `$${p.score} USDT` : t('pendingReward')}</span>
                   </div>
+                )}
+                {p.feedback && (
+                  <div className="text-xs text-gray-500 italic">"{p.feedback}"</div>
+                )}
+                {p.status === 'reserved' && (
+                  <a
+                    href={`/${locale}/cases/osmmap`}
+                    className="inline-block mt-2 text-sm text-blue-600 underline hover:text-blue-800"
+                  >
+                    {t('viewOnMap')} →
+                  </a>
                 )}
               </CardContent>
             </Card>

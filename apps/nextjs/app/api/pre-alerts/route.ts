@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')))
     const departamento = url.searchParams.get('departamento')
     const municipio = url.searchParams.get('municipio')
+    const wallet = url.searchParams.get('wallet')
 
     const offset = (page - 1) * limit
 
@@ -16,7 +17,13 @@ export async function GET(req: NextRequest) {
 
     let baseQuery = db
       .selectFrom('pre_alert')
-      .where('status', '=', 'pending')
+
+    // When filtering by wallet, show all statuses (dashboard)
+    if (wallet) {
+      baseQuery = baseQuery.where('buyer_wallet', 'ilike', wallet)
+    } else {
+      baseQuery = baseQuery.where('status', '=', 'pending')
+    }
 
     if (departamento) {
       baseQuery = baseQuery.where(sql`json_data->>'departamento'`, '=', departamento)
@@ -34,6 +41,12 @@ export async function GET(req: NextRequest) {
       .select([
         'id',
         'status',
+        'buyer_wallet',
+        'bought_at',
+        'conversion_deadline',
+        'score',
+        'feedback',
+        'citizen_notes',
         'source_urls',
         'source_summary',
         sql<string>`json_data->>'titulo'`.as('titulo'),
