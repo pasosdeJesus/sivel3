@@ -98,8 +98,8 @@ export default function OSMMapPage() {
   const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
-    fetchPreAlerts()
-  }, [fetchPreAlerts])
+    fetchPreAlerts({ wallet: effectiveAddress || undefined })
+  }, [fetchPreAlerts, effectiveAddress])
 
   useEffect(() => {
     if (!effectiveAddress) return

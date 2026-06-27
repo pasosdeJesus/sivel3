@@ -24,12 +24,13 @@ export function usePreAlerts() {
   const [preAlerts, setPreAlerts] = useState<PreAlertSummary[]>([])
   const [loading, setLoading] = useState(false)
 
-  const fetchPreAlerts = useCallback(async (filters?: { departamento?: string; municipio?: string }) => {
+  const fetchPreAlerts = useCallback(async (filters?: { departamento?: string; municipio?: string; wallet?: string }) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
       if (filters?.departamento) params.set('departamento', filters.departamento)
       if (filters?.municipio) params.set('municipio', filters.municipio)
+      if (filters?.wallet) params.set('wallet', filters.wallet)
       params.set('limit', '100')
 
       const qs = params.toString()
