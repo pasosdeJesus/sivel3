@@ -69,11 +69,11 @@ export function usePreAlerts() {
     return await res.json()
   }, [])
 
-  const convertPreAlert = useCallback(async (preAlertId: number, buyerWallet: string) => {
+  const convertPreAlert = useCallback(async (preAlertId: number, buyerWallet: string, citizenNotes?: string) => {
     const res = await fetch('/api/pre-alerts/convert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pre_alert_id: preAlertId, buyer_wallet: buyerWallet }),
+      body: JSON.stringify({ pre_alert_id: preAlertId, buyer_wallet: buyerWallet, citizen_notes: citizenNotes }),
     })
     if (!res.ok) {
       const err = await res.json()

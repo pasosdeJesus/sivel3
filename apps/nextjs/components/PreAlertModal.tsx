@@ -36,6 +36,8 @@ const tS = {
     verifyRequired: '🔐 Verify on learn.tg to purchase',
     verifyExplanation: 'Buying pre-alerts requires identity verification to prevent spam. It takes less than 2 minutes.',
     verifyLink: 'Verify on learn.tg →',
+    improvements: 'Improvements to pre-alert',
+    improvementsPlaceholder: 'Add details, corrections, or new information you found… (optional)',
   },
   es: {
     title: '🔎 Pre-Alerta',
@@ -57,6 +59,8 @@ const tS = {
     verifyRequired: '🔐 Verifícate en learn.tg para comprar',
     verifyExplanation: 'Comprar pre-alertas requiere verificación de identidad para prevenir spam. Toma menos de 2 minutos.',
     verifyLink: 'Verifícate en learn.tg →',
+    improvements: 'Mejoras a la prealerta',
+    improvementsPlaceholder: 'Agrega detalles, correcciones o nueva información que hayas encontrado… (opcional)',
   },
 }
 
@@ -68,7 +72,7 @@ interface PreAlertModalProps {
   wallet: string | null
   locale?: string
   onBuy: (id: number) => Promise<void>
-  onConvert: (id: number) => Promise<void>
+  onConvert: (id: number, citizenNotes?: string) => Promise<void>
   onClose: () => void
 }
 
@@ -85,6 +89,7 @@ export function PreAlertModal({
 }: PreAlertModalProps) {
   const t = (key: keyof typeof tS.en) => (tS[locale as keyof typeof tS]?.[key] || tS.en[key]) as string
   const [actionLoading, setActionLoading] = useState(false)
+  const [citizenNotes, setCitizenNotes] = useState('')
 
   if (!preAlert && !loading) return null
 
@@ -212,13 +217,26 @@ export function PreAlertModal({
                 <p className="text-xs text-gray-500 text-center">
                   {t('expires')}: {new Date(preAlert.conversion_deadline).toLocaleDateString()}
                 </p>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600">
+                    {t('improvements')}
+                  </label>
+                  <textarea
+                    className="w-full border rounded px-2 py-1 text-sm resize-y"
+                    rows={3}
+                    maxLength={5000}
+                    placeholder={t('improvementsPlaceholder')}
+                    value={citizenNotes}
+                    onChange={e => setCitizenNotes(e.target.value)}
+                  />
+                </div>
                 <Button
                   size="sm"
                   className="w-full"
                   disabled={actionLoading}
                   onClick={async () => {
                     setActionLoading(true)
-                    try { await onConvert(preAlert.id) } finally { setActionLoading(false) }
+                    try { await onConvert(preAlert.id, citizenNotes) } finally { setActionLoading(false) }
                   }}
                 >
                   {actionLoading ? t('converting') : t('convert')}

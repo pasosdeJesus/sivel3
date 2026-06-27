@@ -135,9 +135,9 @@ export default function OSMMapPage() {
     fetchPreAlerts()
   }
 
-  const handleConvert = async (id: number) => {
+  const handleConvert = async (id: number, citizenNotes?: string) => {
     if (!effectiveAddress) return
-    await convertPreAlert(id, effectiveAddress)
+    await convertPreAlert(id, effectiveAddress, citizenNotes)
     const detail = await fetchDetail(id, effectiveAddress)
     setSelectedPreAlert(detail)
     fetchPreAlerts()

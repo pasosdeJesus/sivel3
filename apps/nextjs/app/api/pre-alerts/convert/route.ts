@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as {
       pre_alert_id?: number
       buyer_wallet?: string
+      citizen_notes?: string
     }
 
     if (!body.pre_alert_id || !body.buyer_wallet) {
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
       .updateTable('pre_alert')
       .set({
         status: 'converted',
+        citizen_notes: body.citizen_notes?.slice(0, 5000) || null,
         converted_at: new Date() as unknown as string,
         updated_at: new Date() as unknown as string,
       })

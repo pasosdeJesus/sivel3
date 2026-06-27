@@ -776,6 +776,7 @@ export interface Nobelicas {
 export interface PreAlert {
   bought_at: Timestamp | null;
   buyer_wallet: string | null;
+  citizen_notes: string | null;
   contract_pre_alert_id: number | null;
   conversion_deadline: Timestamp | null;
   converted_at: Timestamp | null;

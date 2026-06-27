@@ -17,6 +17,7 @@ const tS = {
     noWallet: 'Connect your wallet to access the documenter panel.',
     noAccess: 'You do not have DOCUMENTER_ROLE.',
     noAlerts: 'No converted pre-alerts awaiting review.',
+    citizenNotes: 'Citizen improvements',
     score: 'Score',
     scorePrompt: 'Rate the quality (2-5) or reject (0):',
     feedback: 'Feedback',
@@ -32,6 +33,7 @@ const tS = {
     noWallet: 'Conecta tu billetera para acceder al panel de documentación.',
     noAccess: 'No tienes DOCUMENTER_ROLE.',
     noAlerts: 'No hay pre-alertas convertidas esperando revisión.',
+    citizenNotes: 'Mejoras del ciudadano',
     score: 'Puntuar',
     scorePrompt: 'Califica la calidad (2-5) o rechaza (0):',
     feedback: 'Retroalimentación',
@@ -177,6 +179,13 @@ export default function DocumenterPage() {
                   <div className="flex items-start gap-2 text-xs">
                     <Globe className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <span>{item.source_urls.length} source(s)</span>
+                  </div>
+                )}
+
+                {item.citizen_notes && (
+                  <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs">
+                    <p className="font-medium text-blue-800 mb-1">{pt('citizenNotes')}:</p>
+                    <p className="text-blue-700 whitespace-pre-wrap">{item.citizen_notes}</p>
                   </div>
                 )}
 
