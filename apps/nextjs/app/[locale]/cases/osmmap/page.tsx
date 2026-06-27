@@ -134,7 +134,7 @@ export default function OSMMapPage() {
     }
     const detail = await fetchDetail(id, effectiveAddress)
     setSelectedPreAlert(detail)
-    fetchPreAlerts()
+    fetchPreAlerts({ buyer: effectiveAddress || undefined })
   }
 
   const handleConvert = async (id: number, citizenNotes?: string) => {
@@ -142,7 +142,7 @@ export default function OSMMapPage() {
     await convertPreAlert(id, effectiveAddress, citizenNotes)
     const detail = await fetchDetail(id, effectiveAddress)
     setSelectedPreAlert(detail)
-    fetchPreAlerts()
+    fetchPreAlerts({ buyer: effectiveAddress || undefined })
   }
   
   // Cargar balance inicial cuando hay región seleccionada

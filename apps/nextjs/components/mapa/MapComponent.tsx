@@ -306,9 +306,18 @@ export default function MapComponent({
     casanare: [5.3, -71.5],
   }
 
-  // Assign coords for pre-alerts
+  // Assign coords for pre-alerts — prefer real coordinates, fallback to defaults
   for (const pa of preAlerts) {
     if (coordsCache.current.has(pa.id)) continue
+    const jsonData = (pa as any).json_data
+    if (jsonData?.latitud && jsonData?.longitud) {
+      const lat = parseFloat(jsonData.latitud)
+      const lng = parseFloat(jsonData.longitud)
+      if (!isNaN(lat) && !isNaN(lng)) {
+        coordsCache.current.set(pa.id, [lat, lng])
+        continue
+      }
+    }
     const dept = (pa.departamento || '').toLowerCase().trim()
     const def = defaultCoords[dept]
     if (def) coordsCache.current.set(pa.id, def)
@@ -360,10 +369,12 @@ export default function MapComponent({
       const key = `${coords[0].toFixed(5)},${coords[1].toFixed(5)}`
       const idx = coordCount.get(key) || 0
       coordCount.set(key, idx + 1)
-      // Spiral offset: 0, 0.003, -0.003, 0.006, -0.006, ...
-      const offset = idx === 0 ? 0 : ((idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * 0.003)
-      const lat = coords[0] + offset
-      const lng = coords[1] + offset * 0.7
+      // Pseudo-random offset from preAlert ID for natural distribution
+      const seed = (pa.id * 2654435761) & 0xffffffff
+      const angle = ((seed % 360) * Math.PI) / 180
+      const dist = 0.002 + ((seed >> 16) % 100) * 0.00004 // 0.002° to 0.006°
+      const lat = coords[0] + Math.cos(angle) * dist
+      const lng = coords[1] + Math.sin(angle) * dist
       let icon
       if (pa.status === 'paid') {
         icon = pushpinIcon
