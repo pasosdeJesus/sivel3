@@ -345,6 +345,13 @@ export default function MapComponent({
       iconAnchor: [14, 14],
     })
 
+    const pushpinIcon = L.divIcon({
+      html: '<div style="font-size:22px;filter:hue-rotate(120deg)">📍</div>',
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    })
+
     // Group by coordinate to offset overlapping pre-alerts
     const coordCount = new Map<string, number>()
     for (const pa of preAlerts) {
@@ -358,7 +365,9 @@ export default function MapComponent({
       const lat = coords[0] + offset
       const lng = coords[1] + offset * 0.7
       let icon
-      if (pa.status === 'converted' || pa.status === 'pending_reward' || pa.status === 'rejected' || pa.status === 'paid') {
+      if (pa.status === 'paid') {
+        icon = pushpinIcon
+      } else if (pa.status === 'converted' || pa.status === 'pending_reward' || pa.status === 'rejected') {
         icon = bellIcon
       } else if (pa.status === 'reserved') {
         icon = greenIcon
