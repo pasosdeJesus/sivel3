@@ -1,0 +1,15 @@
+import { Kysely } from 'kysely'
+
+export async function up(db: Kysely<any>): Promise<void> {
+  await db.schema
+    .alterTable('pre_alert')
+    .addColumn('citizen_notes', 'text')
+    .execute()
+}
+
+export async function down(db: Kysely<any>): Promise<void> {
+  await db.schema
+    .alterTable('pre_alert')
+    .dropColumn('citizen_notes')
+    .execute()
+}

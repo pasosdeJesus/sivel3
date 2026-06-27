@@ -412,6 +412,15 @@ export default function MapComponent({
             🔎 PreAlertas
           </button>
         )}
+        {isConnected && (
+          <a
+            href={window.location.pathname.replace(/\/cases\/osmmap.*/, '/dashboard')}
+            className="px-3 py-1 text-sm rounded hover:bg-gray-100 text-gray-700 flex items-center gap-1"
+            title="Mis Pre-Alertas"
+          >
+            📋
+          </a>
+        )}
       </div>
 
       <div

@@ -19,7 +19,7 @@ importers:
         version: 0.8.9
       '@pasosdejesus/m':
         specifier: gitlab:pasosdeJesus/m
-        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=d6ec4f0db4fe1964f22c722ffc81e8fc5ff78006
+        version: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=1966b97950e860e484bb0f53ab47794a2be5f93b
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -967,9 +967,9 @@ packages:
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=d6ec4f0db4fe1964f22c722ffc81e8fc5ff78006':
-    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=d6ec4f0db4fe1964f22c722ffc81e8fc5ff78006}
-    version: 0.7.1
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=1966b97950e860e484bb0f53ab47794a2be5f93b':
+    resolution: {tarball: https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=1966b97950e860e484bb0f53ab47794a2be5f93b}
+    version: 0.8.0
     hasBin: true
 
   '@paulmillr/qr@0.2.1':
@@ -5746,7 +5746,7 @@ snapshots:
 
   '@panva/hkdf@1.2.1': {}
 
-  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=d6ec4f0db4fe1964f22c722ffc81e8fc5ff78006':
+  '@pasosdejesus/m@https://gitlab.com/api/v4/projects/pasosdeJesus%2Fm/repository/archive.tar.gz?sha=1966b97950e860e484bb0f53ab47794a2be5f93b':
     dependencies:
       dotenv: 17.4.2
       execa: 9.6.1

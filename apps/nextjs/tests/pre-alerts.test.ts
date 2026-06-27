@@ -46,7 +46,7 @@ vi.mock('kysely', () => ({
 // ============================================================
 // viem mock
 // ============================================================
-const mockVerifyMessage = vi.fn()
+const mockVerifyMessage = vi.fn().mockResolvedValue(true)
 const mockGetTransaction = vi.fn()
 const mockGetTransactionReceipt = vi.fn()
 
@@ -122,6 +122,7 @@ describe('Pre-Alerts API', () => {
     mockExecute.mockReset()
     mockExecuteTakeFirst.mockReset()
     mockVerifyMessage.mockReset()
+    mockVerifyMessage.mockResolvedValue(true)
     mockGetTransaction.mockReset()
     mockGetTransactionReceipt.mockReset()
   })
@@ -529,6 +530,8 @@ describe('Pre-Alerts API', () => {
   // POST /api/pre-alerts/[id]/score
   // ==========================================================
   describe('POST /api/pre-alerts/[id]/score', () => {
+    const sig = '0xabc123'
+
     it('returns 400 when score or documenter_wallet missing', async () => {
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
@@ -540,50 +543,55 @@ describe('Pre-Alerts API', () => {
     })
 
     it('returns 400 for invalid score (1)', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score: 1, documenter_wallet: DOCUMENTER_WALLET }),
+        body: JSON.stringify({ score: 1, documenter_wallet: DOCUMENTER_WALLET, timestamp: ts, signature: sig, feedback: 'test' }),
       })
       const res = await scorePOST(req, { params: { id: '1' } })
       expect(res.status).toBe(400)
     })
 
     it('returns 403 when not a documenter', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score: 3, documenter_wallet: '0xunknown' }),
+        body: JSON.stringify({ score: 3, documenter_wallet: '0xunknown', timestamp: ts, signature: sig, feedback: 'test' }),
       })
       const res = await scorePOST(req, { params: { id: '1' } })
       expect(res.status).toBe(403)
     })
 
     it('returns 404 when pre-alert not found', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       mockExecuteTakeFirst.mockResolvedValue(undefined)
       const req = new Request('http://localhost/api/pre-alerts/999/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score: 3, documenter_wallet: DOCUMENTER_WALLET }),
+        body: JSON.stringify({ score: 3, documenter_wallet: DOCUMENTER_WALLET, timestamp: ts, signature: sig, feedback: 'test' }),
       })
       const res = await scorePOST(req, { params: { id: '999' } })
       expect(res.status).toBe(404)
     })
 
     it('returns 409 when pre-alert is not converted', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       mockExecuteTakeFirst.mockResolvedValue({
         id: 1, status: 'pending', buyer_wallet: BUYER_WALLET,
       })
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score: 3, documenter_wallet: DOCUMENTER_WALLET }),
+        body: JSON.stringify({ score: 3, documenter_wallet: DOCUMENTER_WALLET, timestamp: ts, signature: sig, feedback: 'test' }),
       })
       const res = await scorePOST(req, { params: { id: '1' } })
       expect(res.status).toBe(409)
     })
 
     it('returns 200 on rejection (score 0)', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       mockExecuteTakeFirst.mockResolvedValue({
         id: 1, status: 'converted', buyer_wallet: BUYER_WALLET,
       })
@@ -594,6 +602,7 @@ describe('Pre-Alerts API', () => {
         body: JSON.stringify({
           score: 0, documenter_wallet: DOCUMENTER_WALLET,
           feedback: 'Unreliable sources',
+          timestamp: ts, signature: sig,
         }),
       })
       const res = await scorePOST(req, { params: { id: '1' } })
@@ -604,18 +613,20 @@ describe('Pre-Alerts API', () => {
       expect(body.citizen_reward).toBe('0 USDT')
     })
 
-    it('returns 200 on score 4 (falls back to pending_reward without RPC)', async () => {
+    it('returns 200 on score 4 (falls back to pending_reward without PRIVATE_KEY)', async () => {
+      const ts = Math.floor(Date.now() / 1000)
       mockExecuteTakeFirst.mockResolvedValue({
         id: 1, status: 'converted', buyer_wallet: BUYER_WALLET,
       })
       mockExecute.mockResolvedValue(undefined)
-      process.env.PRIVATE_KEY = undefined
+      delete process.env.PRIVATE_KEY
       const req = new Request('http://localhost/api/pre-alerts/1/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           score: 4, documenter_wallet: DOCUMENTER_WALLET,
           feedback: 'Good documentation',
+          timestamp: ts, signature: sig,
         }),
       })
       const res = await scorePOST(req, { params: { id: '1' } })
