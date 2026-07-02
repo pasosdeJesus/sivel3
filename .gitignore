@@ -117,3 +117,4 @@ I*.md
 skills-lock.json
 apps/nextjs/db/backups
 chrome.core
+*bak
