@@ -116,3 +116,4 @@ I*.md
 .agents
 skills-lock.json
 apps/nextjs/db/backups
+chrome.core

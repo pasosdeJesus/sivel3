@@ -22,6 +22,7 @@ We balance international collaboration with local context:
 Used for technical documentation and Web3-aligned components:
 *   Root documentation (`README.md`, `ARCHITECTURE.md`, `VISION.md`, `CONTRIBUTING.md`).
 *   All documentation and source code in `apps/nextjs/` and `apps/hardhat/`.
+*   Requirements in `REQ/` directory.
 *   Commit messages (preferred).
 
 ### Spanish

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+const { ethers } = (globalThis as any).hre
 
 describe('SIVeL3RewardEscrow', () => {
   let contract: any
