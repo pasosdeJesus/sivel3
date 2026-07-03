@@ -110,7 +110,8 @@
       "@tailwindcss/oxide": "npm:@tailwindcss/oxide-wasm32-wasi",
       "@ethereumjs/common": "^10.1.2",
       "@ethereumjs/util": "^10.1.2",
-      "@ethereumjs/tx": "^10.1.2"
+      "@ethereumjs/tx": "^10.1.2",
+      "@ethereumjs/rlp": "^10.1.2"
     },
     "onlyBuiltDependencies": [
       "@pasosdejesus/m",
