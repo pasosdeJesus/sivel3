@@ -37,8 +37,8 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
     howItWorks: isSpanish ? 'Cómo funciona' : 'How it works',
     step1Title: isSpanish ? '1. Agente IA 🤖' : '1. AI Agent 🤖',
     step1Desc: isSpanish
-      ? 'Monitorea noticias 24/7 y genera pre-alertas estructuradas siguiendo la metodología del CINEP.'
-      : 'Monitors news 24/7 and generates structured pre-alerts following the CINEP methodology.',
+      ? 'Monitorea noticias 24/7 y genera pre-alertas estructuradas siguiendo la metodología de Noche y Niebla.'
+      : 'Monitors news 24/7 and generates structured pre-alerts following the Noche y Niebla methodology.',
     step2Title: isSpanish ? '2. Investigación Ciudadana 🧑‍⚖️' : '2. Citizen Investigation 🧑‍⚖️',
     step2Desc: isSpanish
       ? 'Ciudadanos verificados compran pre-alertas por $1 USDT, las enriquecen con fuentes y detalles, y las convierten en alertas.'
