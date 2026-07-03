@@ -9,52 +9,45 @@ interface LandingPageProps {
 
 export function LandingPage({ locale: propLocale }: LandingPageProps) {
   const params = useParams();
-  // Si no se pasa locale por prop, usar el de la URL
   const locale = propLocale || (params?.locale as string) || 'en';
   const isSpanish = locale === 'es';
 
   const content = {
     title: 'SIVeL 3',
-    badge: isSpanish ? 'Beta' : 'Beta',
-    subtitle: isSpanish 
-      ? 'Protocolo Web3 para la documentación ética de la violencia sociopolítica'
+    badge: isSpanish ? 'Beta en Celo' : 'Beta on Celo',
+    subtitle: isSpanish
+      ? 'Protocolo Web3 para la Documentación Ética de la Violencia Sociopolítica'
       : 'Web3 Protocol for Ethical Documentation of Socio-Political Violence',
     description: isSpanish
-      ? 'SIVeL 3 empodera a ciudadanos, documentadores y validadores para crear un registro inmutable y transparente de casos de violencia, financiado mediante donaciones regionales en la red Celo.'
-      : 'SIVeL 3 empowers citizens, documenters, and validators to create an immutable, transparent record of violence cases, funded by regional donations on the Celo network.',
+      ? 'SIVeL 3 empodera a ciudadanos, documentadores y validadores para crear un registro inmutable y transparente de casos de violencia. Nuestro agente IA detecta eventos potenciales de fuentes públicas, y los ciudadanos pueden investigar, verificar y ganar recompensas por contribuir a la verdad.'
+      : 'SIVeL 3 empowers citizens, documenters, and validators to create an immutable, transparent record of violence cases. Our AI agent detects potential events from public sources, and citizens can investigate, verify, and earn rewards for contributing to the truth.',
     incentives: isSpanish
-      ? '✨ Donantes verificados reciben SLEARN cashback. ✨ Ciudadanos que reportan alertas verificadas reciben recompensas en USDT.'
-      : '✨ Verified donors earn SLEARN cashback. ✨ Citizens who submit verified alerts earn USDT rewards.',
+      ? '✨ Donantes verificados reciben SLEARN cashback. ✨ Ciudadanos ganan USDT por alertas verificadas.'
+      : '✨ Verified donors earn SLEARN cashback. ✨ Citizens earn USDT for verified alerts.',
     stats: {
-      cases: isSpanish ? 'Casos documentados' : 'Documented Cases',
-      regions: isSpanish ? 'Regiones activas' : 'Active Regions',
-      donations: isSpanish ? 'Donaciones (USDT)' : 'Donations (USDT)',
+      cases: isSpanish ? 'Casos Documentados' : 'Documented Cases',
+      regions: isSpanish ? 'Regiones Activas' : 'Active Regions',
     },
     buttonText: isSpanish ? 'Explorar el Mapa →' : 'Explore the Map →',
-    secondaryButton: isSpanish ? 'Saber más' : 'Learn more',
-    supportedRegions: isSpanish ? 'Regiones: Colombia, Israel/Palestina' : 'Regions: Colombia, Israel/Palestine',
-    donationInfo: isSpanish 
-      ? '🔗 Las donaciones apoyan directamente equipos locales de documentación'
-      : '🔗 Donations directly support local documentation teams',
+    secondaryButton: isSpanish ? 'Código Fuente' : 'Source Code',
+    liveOnCelo: isSpanish ? '🌐 Operando en Celo — pagos y certificaciones on-chain, compatible con MiniPay.' : '🌐 Live on Celo — on-chain payments and certifications, with MiniPay support.',
     footer: isSpanish
       ? 'SIVeL 3 es un proyecto de código abierto de Pasos de Jesús · Licencia ISC'
       : 'SIVeL 3 is an open-source project by Pasos de Jesús · ISC License',
     howItWorks: isSpanish ? 'Cómo funciona' : 'How it works',
-    step1Title: isSpanish ? '1. Explora el mapa' : '1. Explore the map',
-    step1Desc: isSpanish 
-      ? 'Visualiza casos documentados de violencia sociopolítica en regiones activas.'
-      : 'View documented cases of socio-political violence in active regions.',
-    step2Title: isSpanish ? '2. Conecta tu wallet' : '2. Connect your wallet',
+    step1Title: isSpanish ? '1. Agente IA 🤖' : '1. AI Agent 🤖',
+    step1Desc: isSpanish
+      ? 'Monitorea noticias 24/7 y genera pre-alertas estructuradas siguiendo la metodología del CINEP.'
+      : 'Monitors news 24/7 and generates structured pre-alerts following the CINEP methodology.',
+    step2Title: isSpanish ? '2. Investigación Ciudadana 🧑‍⚖️' : '2. Citizen Investigation 🧑‍⚖️',
     step2Desc: isSpanish
-      ? 'Usa MiniPay, MetaMask o OneKey para donar USDT y apoyar la documentación.'
-      : 'Use MiniPay, MetaMask, or OneKey to donate USDT and support documentation.',
-    step3Title: isSpanish ? '3. Dona por región' : '3. Donate by region',
+      ? 'Ciudadanos verificados compran pre-alertas por $1 USDT, las enriquecen con fuentes y detalles, y las convierten en alertas.'
+      : 'Verified citizens buy pre-alerts for $1 USDT, enrich them with sources and details, and convert them into alerts.',
+    step3Title: isSpanish ? '3. Revisión Documental 📋' : '3. Documenter Review 📋',
     step3Desc: isSpanish
-      ? 'Los fondos se distribuyen automáticamente a documentadores y validadores.'
-      : 'Funds are automatically distributed to documenters and validators.',
-    blockchain: isSpanish
-      ? 'Todo registro es certificado en la blockchain de Celo, garantizando inmutabilidad y transparencia.'
-      : 'Every record is certified on the Celo blockchain, ensuring immutability and transparency.',
+      ? 'Documentadores expertos revisan alertas, asignan puntuación (2–5), y el ciudadano recibe ese monto en USDT automáticamente.'
+      : 'Expert documenters review alerts, assign a quality score (2–5), and citizens earn that amount in USDT automatically.',
+    supportedRegions: isSpanish ? 'Regiones activas: Colombia, Israel/Palestina' : 'Active regions: Colombia, Israel/Palestine',
   };
 
   return (
@@ -75,12 +68,17 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
             {content.description}
           </p>
           
-          {/* Incentivos */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-10 max-w-2xl mx-auto">
+          {/* Incentives */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 max-w-2xl mx-auto">
             <p className="text-md text-gray-700 font-medium">
               {content.incentives}
             </p>
           </div>
+
+          {/* Live on Celo */}
+          <p className="text-sm text-gray-400 mb-10 max-w-2xl mx-auto">
+            {content.liveOnCelo}
+          </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link 
@@ -100,8 +98,8 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Stats - casos y regiones */}
-        <div className="max-w-4xl mx-auto mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+        {/* Stats */}
+        <div className="max-w-4xl mx-auto mt-12 grid grid-cols-2 gap-8 text-center">
           <div className="p-6 bg-white rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-blue-600">~500</div>
             <div className="text-gray-600 mt-2">{content.stats.cases}</div>
@@ -112,35 +110,32 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Cómo funciona */}
+        {/* How it works */}
         <div className="max-w-4xl mx-auto mt-20">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">{content.howItWorks}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🗺️</div>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🤖</div>
               <h3 className="font-semibold text-lg mb-2">{content.step1Title}</h3>
               <p className="text-gray-600 text-sm">{content.step1Desc}</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🔗</div>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🧑‍⚖️</div>
               <h3 className="font-semibold text-lg mb-2">{content.step2Title}</h3>
               <p className="text-gray-600 text-sm">{content.step2Desc}</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">❤️</div>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">📋</div>
               <h3 className="font-semibold text-lg mb-2">{content.step3Title}</h3>
               <p className="text-gray-600 text-sm">{content.step3Desc}</p>
             </div>
           </div>
-          <p className="text-center text-gray-500 text-sm mt-10 italic">
-            {content.blockchain}
-          </p>
         </div>
 
-        {/* Footer simplificado */}
+        {/* Footer */}
         <div className="max-w-4xl mx-auto mt-20 pt-8 border-t border-gray-200 text-center">
           <p className="text-xs text-gray-400">{content.footer}</p>
-          <p className="text-xs text-gray-400 mt-2">{content.supportedRegions} · {content.donationInfo}</p>
+          <p className="text-xs text-gray-400 mt-2">{content.supportedRegions}</p>
         </div>
       </main>
     </div>
