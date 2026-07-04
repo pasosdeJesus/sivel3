@@ -13,9 +13,9 @@ import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import {
   hasCredentialOnChain,
-  getCeloCredentialsAddress,
   mintCredentialWithRetry,
 } from '@pasosdejesus/m/blockchain'
+import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain/deployments'
 import path from 'path'
 import type { Kysely } from 'kysely'
 

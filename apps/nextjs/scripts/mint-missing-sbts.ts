@@ -11,7 +11,8 @@ import { createPublicClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts' 
 import { celo } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { mintCredentialWithRetry, hasCredentialOnChain, getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain'
+import { mintCredentialWithRetry, hasCredentialOnChain } from '@pasosdejesus/m/blockchain'
+import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain/deployments'
 
 const wallet = process.argv[2]
 if (!wallet || !wallet.startsWith('0x')) { console.error('Usage: npx tsx scripts/mint-missing-sbts.ts 0xWALLET'); process.exit(1) }

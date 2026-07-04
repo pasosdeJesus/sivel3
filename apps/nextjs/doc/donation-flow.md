@@ -2,7 +2,7 @@
 
 > *"Blessed are those who hunger and thirst for righteousness, for they shall be satisfied."* (Matthew 5:6)
 
-This document describes the complete donation flow: from the user clicking "Donate" to the Learning Points being credited. It covers the wallet interaction, on-chain transaction, backend verification, and cross-system integration with learn.tg.
+This document describes the complete donation flow: from the user clicking "Donate" to the SLEARN cashback being minted. It covers the wallet interaction, on-chain transaction, backend verification, and 90/10 split between RegionalDonation and SLEARN.
 
 ## Why this document exists
 
@@ -25,7 +25,7 @@ User clicks "Donate"
     ├── MetaMask/OneKey? → ethereum.request()
     │
     ▼
-Transaction sent to Celo (USDT transfer with regionId in data)
+Transaction sent to Celo (USDT transfer with regionId in data, to sivel.xyz backend wallet)
     │
     ▼
 ┌───────────────────────────────────────┐
@@ -35,8 +35,8 @@ Transaction sent to Celo (USDT transfer with regionId in data)
     │
     ├── 1. Verify tx on-chain (Viem)
     ├── 2. Extract regionId from tx.data
-    ├── 3. Call assignDonation() on contract
-    ├── 4. Call learn.tg API for Learning Points
+    ├── 3. 10% → SLEARN contract (mintAndReserve → 22:1 cashback)
+    ├── 4. 90% → RegionalDonationV2 (assignDonation)
     │
     ▼
 Response returned to user
@@ -54,18 +54,18 @@ Response returned to user
 
 ### 2.2 Transaction Data Encoding
 
-The ERC-20 `transfer(address to, uint256 amount)` function is called on the USDT contract, but with the region ID appended to the data:
+The ERC-20 `transfer(address to, uint256 amount)` function is called on the USDT contract, with the region ID and the **sivel.xyz backend wallet** (`NEXT_PUBLIC_ADDRESS`) encoded in the data:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ 0xa9059cbb  │  transfer selector (4 bytes)                   │
-│  0000...to  │  regionalDonationContractAddress (32 bytes)     │
+│  0000...to  │  sivel.xyz backend wallet (32 bytes)            │
 │  0000...amt │  amount in smallest unit (32 bytes, 6 decimals)│
 │  0000...reg │  regionId (32 bytes) ← appended for extraction  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-The region ID is appended at the end of the standard ERC-20 transfer data. The backend extracts it from `tx.input` during verification.
+The donation arrives at sivel.xyz's wallet. The backend splits it: 10% to SLEARN (mintAndReserve for cashback) and 90% to RegionalDonationV2 (assignDonation).
 
 > **Note:** This is not standard ERC-20. The standard `transfer(address,uint256)` expects exactly 68 bytes of calldata. Appending extra bytes (called *calldata stuffing*) works because the USDT contract ignores surplus data — Solidity only decodes what it needs. It is a pragmatic workaround: MiniPay does not support the standard approve+call pattern, so we encode the region ID in the transfer and verify it server-side instead.
 
@@ -140,19 +140,16 @@ Receive { regionId, donor, amount, txHash }
 2. Verify transaction on-chain via Viem:
    ├── getTransaction(txHash) → extract regionId from tx.input
    ├── getTransactionReceipt(txHash) → find USDT Transfer event
-   ├── Verify: from === donor, to === contract, value === amount
+   ├── Verify: from === donor, to === backend wallet, value === amount
    └── Verify: regionId is valid (1 or 2)
     │
     ▼
-3. Call assignDonation() on the RegionalDonation V2 contract
-   (uses PRIVATE_KEY to sign the contract call)
+3. Split 90/10:
+   ├── 10% → SLEARN contract (mintAndReserve → 22 SLEARN per USDT cashback)
+   └── 90% → RegionalDonationV2 (transfer + assignDonation)
     │
     ▼
-4. Call learn.tg API to increment Learning Points
-   (non-blocking: logs error but doesn't fail the donation)
-    │
-    ▼
-Return { success, txHash, learningPoints }
+Return { success, txHash, slearn }
 ```
 
 ### 3.2 Transaction Verification Details
@@ -165,33 +162,38 @@ The backend reads the full transaction data from Celo using `viem.getTransaction
    - Address: USDT contract address
 3. **Verifies the transfer**:
    - `from` (from topic[1]) matches the donor address
-   - `to` (from topic[2]) matches the RegionalDonation contract
+   - `to` (from topic[2]) matches the sivel.xyz backend wallet (`NEXT_PUBLIC_ADDRESS`)
    - `value` (from log data) matches the donation amount
 
-### 3.3 Security Considerations
+### 3.3 SLEARN Cashback
+
+The backend calls `mintSlearnCashback(donor, donationAmount)` from `lib/slearn.ts`:
+
+- Derives the backend wallet client from `PRIVATE_KEY`
+- Transfers 10% of the donation USDT to the SLEARN contract
+- Calls `mintAndReserve(donor, usdtAmount)` on SLEARN — mints at 22:1 rate
+- Retries on collision (shared USDT pool, up to 3 attempts)
+- **All donors receive SLEARN cashback** (verified or not — the donation is proof of good faith)
+- **Non-blocking**: if SLEARN minting fails, 100% goes to RegionalDonation
+
+### 3.4 Security Considerations
 
 - The backend uses the region ID **from the transaction data**, not from the request body. The frontend's `regionId` is only used as fallback.
 - The USDT Transfer event is verified against the actual on-chain data, not client-provided values.
-- The contract call is signed with the server's `PRIVATE_KEY`.
+- All contract calls are signed with the server's `PRIVATE_KEY`.
 
 ---
 
-## 4. Learning Points Integration
+## 4. Environment Variables
 
-After a successful donation assignment, the backend calls learn.tg to increment the donor's Learning Points:
-
-```
-incrementLearningPoints(db, donorWallet, txHash, amount=1)
-```
-
-This is documented in detail in `lib/learningPoints.ts` (module comment). Key points:
-
-- Uses a **nonce-based protocol** to prevent replay attacks (site_nonces table)
-- Signs the request with EIP-191 (`personal_sign`) using the server's PRIVATE_KEY
-- learn.tg verifies the signature recovers to `SIVEL_ADDRESS`
-- Retries on network errors (exponential backoff, up to 3 attempts)
-- Handles "Nonce out of order" by re-syncing and retrying
-- **Non-blocking**: if learn.tg is down, the donation still succeeds
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_ADDRESS` | sivel.xyz backend wallet — donations arrive here before 90/10 split |
+| `PRIVATE_KEY` | Server's private key for signing contract calls |
+| `NEXT_PUBLIC_RPC_URL` | Celo RPC endpoint |
+| `NEXT_PUBLIC_USDT_ADDRESS` | USDT token on Celo |
+| `NEXT_PUBLIC_REGIONALDONATION_ADDRESS` | RegionalDonationV2 contract |
+| `NEXT_PUBLIC_SLEARN_ADDRESS` | SLEARN token (via `contractAddresses.ts`) |
 
 ---
 
@@ -221,7 +223,8 @@ Enable with `?debug=1` URL parameter. Shows real-time logs from the donation flo
 |----------|-----------|
 | **Unified transfer vs approve+donate** | Fewer transactions, less gas, simpler UX |
 | **RegionId in tx.data** | Security: prevents frontend tampering |
+| **Transfer to backend wallet** | Enables 90/10 split: 10% SLEARN cashback, 90% RegionalDonation |
+| **SLEARN for all donors** | Donation itself is proof of good faith; verification encouraged via UI |
 | **MiniPay uses `ethereum.send`** | Discovered empirically — MiniPay does not support `request()` |
 | **4xx continues retrying** | Transaction may not be confirmed yet (false positive) |
-| **Learn Points are non-blocking** | Donation succeeds even if learn.tg is unavailable |
-| **Learning Points use nonces** | Prevents replay attacks across the sivel.xyz ↔ learn.tg boundary |
+| **SLEARN is non-blocking** | Donation succeeds even if SLEARN minting fails |

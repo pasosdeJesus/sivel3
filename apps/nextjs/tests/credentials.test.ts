@@ -38,6 +38,8 @@ vi.mock('viem/chains', async () => ({ ...await vi.importActual('viem/chains') as
 vi.mock('@pasosdejesus/m/blockchain', () => ({
   mintCredentialWithRetry: vi.fn().mockResolvedValue('0xhash'),
   hasCredentialOnChain: vi.fn().mockResolvedValue(false),
+}))
+vi.mock('@pasosdejesus/m/blockchain/deployments', () => ({
   getCeloCredentialsAddress: vi.fn(() => '0xCONTRACT'),
 }))
 
@@ -122,14 +124,15 @@ describe('mintSBT', () => {
 
   it('lanza si el contrato no está configurado', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain')
+    const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain/deployments')
     vi.mocked(getCeloCredentialsAddress).mockReturnValueOnce(null as any)
     await expect(mintSBT('0xW', 2, 'celo')).rejects.toThrow('Contract not configured')
   })
 
   it('lanza si el mint on-chain falla', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain, getCeloCredentialsAddress, mintCredentialWithRetry } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain, mintCredentialWithRetry } = await import('@pasosdejesus/m/blockchain')
+    const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain/deployments')
     vi.mocked(getCeloCredentialsAddress).mockReturnValueOnce('0xCONTRACT' as any)
     vi.mocked(hasCredentialOnChain).mockResolvedValueOnce(false)
     vi.mocked(mintCredentialWithRetry).mockRejectedValueOnce(new Error('gas too low'))
@@ -139,7 +142,8 @@ describe('mintSBT', () => {
   it('usa celoSepolia cuando NEXT_PUBLIC_NETWORK es celoSepolia', async () => {
     vi.stubEnv('NEXT_PUBLIC_NETWORK', 'celoSepolia')
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain, getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain } = await import('@pasosdejesus/m/blockchain')
+    const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain/deployments')
     vi.mocked(getCeloCredentialsAddress).mockReturnValueOnce('0xCONTRACT' as any)
     vi.mocked(hasCredentialOnChain).mockResolvedValueOnce(true)
     const r = await mintSBT('0xW', 2, 'celoSepolia')
