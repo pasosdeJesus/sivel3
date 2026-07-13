@@ -40,7 +40,9 @@ describe('SIVeL3PreAlertMarket', () => {
   // ==================== DEPLOYMENT ====================
   describe('Deployment', () => {
     it('sets the USDT token address', async () => {
-      expect(await contract.usdtToken()).to.equal(await mockUSDT.getAddress())
+      expect((await contract.usdtToken()).toLowerCase()).to.equal(
+        (await mockUSDT.getAddress()).toLowerCase(),
+      )
     })
 
     it('grants DEFAULT_ADMIN_ROLE to deployer', async () => {
@@ -73,7 +75,7 @@ describe('SIVeL3PreAlertMarket', () => {
         eventHash, locationHash, timestamp,
       )
       const receipt = await tx.wait()
-      expect(receipt.status).to.equal(1)
+      expect(Number(receipt.status)).to.equal(1)
 
       expect(await contract.preAlertCounter()).to.equal(1n)
 
@@ -132,7 +134,7 @@ describe('SIVeL3PreAlertMarket', () => {
 
       const tx = await contract.connect(citizen).buyPreAlert(preAlertId)
       const receipt = await tx.wait()
-      expect(receipt.status).to.equal(1)
+      expect(Number(receipt.status)).to.equal(1)
 
       const preAlert = await contract.preAlerts(preAlertId)
       expect(preAlert.buyer).to.equal(citizen.address)
@@ -194,7 +196,7 @@ describe('SIVeL3PreAlertMarket', () => {
     it('allows buyer to convert to alert', async () => {
       const tx = await contract.connect(citizen).convertToAlert(convertableId)
       const receipt = await tx.wait()
-      expect(receipt.status).to.equal(1)
+      expect(Number(receipt.status)).to.equal(1)
 
       const preAlert = await contract.preAlerts(convertableId)
       expect(preAlert.converted).to.be.true
@@ -249,7 +251,7 @@ describe('SIVeL3PreAlertMarket', () => {
     it('allows admin to withdraw USDT', async () => {
       // The contract should have some USDT from previous buys
       const contractBalance = await mockUSDT.balanceOf(await contract.getAddress())
-      expect(contractBalance).to.be.gt(0n)
+      expect(contractBalance > 0n).to.be.true
 
       const balanceBefore = await mockUSDT.balanceOf(owner.address)
       await contract.connect(owner).withdrawUSDT(contractBalance)

@@ -33,7 +33,9 @@ describe('SIVeL3RewardEscrow', () => {
   // ==================== DEPLOYMENT ====================
   describe('Deployment', () => {
     it('sets the USDT token address', async () => {
-      expect(await contract.usdtToken()).to.equal(await mockUSDT.getAddress())
+      expect((await contract.usdtToken()).toLowerCase()).to.equal(
+        (await mockUSDT.getAddress()).toLowerCase(),
+      )
     })
 
     it('grants DEFAULT_ADMIN_ROLE to deployer', async () => {
@@ -59,7 +61,7 @@ describe('SIVeL3RewardEscrow', () => {
 
       const tx = await contract.connect(owner).deposit(amount)
       const receipt = await tx.wait()
-      expect(receipt.status).to.equal(1)
+      expect(Number(receipt.status)).to.equal(1)
 
       const balanceAfter = await mockUSDT.balanceOf(await contract.getAddress())
       expect(balanceAfter - balanceBefore).to.equal(amount)
@@ -95,7 +97,7 @@ describe('SIVeL3RewardEscrow', () => {
 
       const tx = await contract.connect(backend).releasePayment(citizen.address, reward)
       const receipt = await tx.wait()
-      expect(receipt.status).to.equal(1)
+      expect(Number(receipt.status)).to.equal(1)
 
       const balanceAfter = await mockUSDT.balanceOf(citizen.address)
       expect(balanceAfter - balanceBefore).to.equal(reward)
@@ -139,7 +141,7 @@ describe('SIVeL3RewardEscrow', () => {
   describe('emergencyWithdraw', () => {
     it('allows admin to emergency withdraw', async () => {
       const contractBalance = await contract.balance()
-      expect(contractBalance).to.be.gt(0n)
+      expect(contractBalance > 0n).to.be.true
 
       const balanceBefore = await mockUSDT.balanceOf(owner.address)
       await contract.connect(owner).emergencyWithdraw(contractBalance)

@@ -9,6 +9,10 @@ contract MockUSDT is ERC20, Ownable {
         _mint(initialOwner, 1_000_000 * 10**6); // Mint 1,000,000 tokens with 6 decimals
     }
 
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }

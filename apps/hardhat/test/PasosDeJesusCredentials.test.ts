@@ -30,7 +30,7 @@ describe('PasosDeJesusCredentials', () => {
   describe('registerCredentialType', () => {
     it('registers a course completion type', async () => {
       const tx = await contract.registerCredentialType(
-        LEARN_TG, COURSE_COMPLETION, 'Basic Course', true, 1, false
+        LEARN_TG, COURSE_COMPLETION, 'Basic Course', true, 1, false, '', 0
       )
       const receipt = await tx.wait()
       expect(receipt.status).to.equal(1)
@@ -53,7 +53,7 @@ describe('PasosDeJesusCredentials', () => {
 
     it('registers a premium course', async () => {
       await contract.registerCredentialType(
-        LEARN_TG, COURSE_COMPLETION, 'Premium Course', true, 2, true
+        LEARN_TG, COURSE_COMPLETION, 'Premium Course', true, 2, true, '', 0
       )
       const premium = await contract.isPremiumCourse(2)
       expect(premium).to.equal(true)
@@ -61,7 +61,7 @@ describe('PasosDeJesusCredentials', () => {
 
     it('registers a role type (soulbound)', async () => {
       await contract.registerCredentialType(
-        SIVEL_XYZ, ROLE, 'Founder User', true, 0, false
+        SIVEL_XYZ, ROLE, 'Founder User', true, 0, false, '', 0
       )
       const soulbound = await contract.isSoulbound(3)
       expect(soulbound).to.equal(true)
@@ -69,7 +69,7 @@ describe('PasosDeJesusCredentials', () => {
 
     it('registers an NFT type (transferable)', async () => {
       await contract.registerCredentialType(
-        SIVEL_XYZ, NFT, 'Bible Verse', false, 0, false
+        SIVEL_XYZ, NFT, 'Bible Verse', false, 0, false, '', 0
       )
       const soulbound = await contract.isSoulbound(4)
       expect(soulbound).to.equal(false)
@@ -77,20 +77,20 @@ describe('PasosDeJesusCredentials', () => {
 
     it('reverts registering an achievement as transferable', async () => {
       await expect(
-        contract.registerCredentialType(SIVEL_XYZ, ACHIEVEMENT, 'Badge', false, 0, false)
+        contract.registerCredentialType(SIVEL_XYZ, ACHIEVEMENT, 'Badge', false, 0, false, '', 0)
       ).to.be.revertedWith('Roles and achievements must be soulbound')
     })
 
     it('reverts registering an NFT as soulbound', async () => {
       await expect(
-        contract.registerCredentialType(SIVEL_XYZ, NFT, 'Locked', true, 0, false)
+        contract.registerCredentialType(SIVEL_XYZ, NFT, 'Locked', true, 0, false, '', 0)
       ).to.be.revertedWith('NFTs must be transferable')
     })
 
     it('reverts non-admin registering a type', async () => {
       await expect(
         contract.connect(user).registerCredentialType(
-          LEARN_TG, COURSE_COMPLETION, 'Unauthorized', true, 99, false
+          LEARN_TG, COURSE_COMPLETION, 'Unauthorized', true, 99, false, '', 0
         )
       ).to.be.reverted
     })
@@ -100,7 +100,7 @@ describe('PasosDeJesusCredentials', () => {
   describe('minting', () => {
     it('mints a course completion SBT', async () => {
       const tx = await contract.connect(minter).mintCourseCompletion(
-        user.address, 1, 'Basic Course', false
+        user.address, 1
       )
       const receipt = await tx.wait()
       expect(receipt.status).to.equal(1)
@@ -131,27 +131,15 @@ describe('PasosDeJesusCredentials', () => {
       expect(balance).to.equal(1n)
     })
 
-    it('reverts mintCourseCompletion with wrong course name', async () => {
+    it('reverts mintCourseCompletion for unregistered course', async () => {
       await expect(
-        contract.connect(minter).mintCourseCompletion(
-          user.address, 1, 'Wrong Name', false
-        )
-      ).to.be.revertedWith('Course name mismatch')
-    })
-
-    it('reverts mintCourseCompletion with wrong premium flag', async () => {
-      await expect(
-        contract.connect(minter).mintCourseCompletion(
-          user.address, 2, 'Premium Course', false
-        )
-      ).to.be.revertedWith('Premium status mismatch')
+        contract.connect(minter).mintCourseCompletion(user.address, 999)
+      ).to.be.revertedWith('Course not registered')
     })
 
     it('reverts mintCourseCompletion on non-soulbound token', async () => {
       await expect(
-        contract.connect(minter).mintCourseCompletion(
-          user.address, 4, 'Bible Verse', false
-        )
+        contract.connect(minter).mintCourseCompletion(user.address, 4)
       ).to.be.revertedWith('Course credential must be soulbound')
     })
 
@@ -166,9 +154,7 @@ describe('PasosDeJesusCredentials', () => {
   describe('duplicate prevention', () => {
     it('reverts minting same credential twice for same user', async () => {
       await expect(
-        contract.connect(minter).mintCourseCompletion(
-          user.address, 1, 'Basic Course', false
-        )
+        contract.connect(minter).mintCourseCompletion(user.address, 1)
       ).to.be.revertedWith('Account already has this credential')
     })
 
@@ -341,7 +327,7 @@ describe('PasosDeJesusCredentials', () => {
     it('increments after each registration', async () => {
       const before = await contract.nextTokenId()
       await contract.registerCredentialType(
-        SIVEL_XYZ, ROLE, 'Test Role', true, 0, false
+        SIVEL_XYZ, ROLE, 'Test Role', true, 0, false, '', 0
       )
       const after = await contract.nextTokenId()
       expect(after).to.equal(before + 1n)
@@ -355,7 +341,7 @@ describe('PasosDeJesusCredentials', () => {
 
       // Mint a token for stable-sl to verify URI
       await contract.registerCredentialType(
-        'stable-sl.pdJ.app', ROLE, 'Stable Role', true, 0, false
+        'stable-sl.pdJ.app', ROLE, 'Stable Role', true, 0, false, '', 0
       )
       const nextId = Number(await contract.nextTokenId()) - 1
       const uri = await contract.uri(nextId)

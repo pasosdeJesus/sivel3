@@ -19,8 +19,6 @@
   "license": "ISC",
   "dependencies": {
     "@ethereumjs/common": "^10.1.2",
-    "@ethereumjs/evm": "^10.1.2",
-    "@ethereumjs/statemanager": "^10.1.2",
     "@ethereumjs/tx": "^10.1.2",
     "@ethereumjs/util": "^10.1.2",
     "@ethereumjs/vm": "^10.1.2",
@@ -76,6 +74,11 @@
     "wagmi": "^2.19.5"
   },
   "devDependencies": {
+    "@ethereumjs/block": "^10.1.2",
+    "@ethereumjs/blockchain": "^10.1.2",
+    "@ethereumjs/evm": "^10.1.2",
+    "@ethereumjs/mpt": "^10.1.2",
+    "@ethereumjs/statemanager": "^10.1.2",
     "@tailwindcss/oxide-wasm32-wasi": "^4.3.0",
     "@tailwindcss/postcss": "latest",
     "@testing-library/jest-dom": "^6.9.1",
