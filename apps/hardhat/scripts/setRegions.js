@@ -10,8 +10,8 @@ async function main() {
     process.exit(1);
   }
 
-  const regionalDonation = await ethers.getContract("RegionalDonation");
-  console.log(`Contrato RegionalDonation obtenido en: ${regionalDonation.address}`);
+  const regionalDonation = await ethers.getContract("SIVeL3RegionalDonationV2");
+  console.log(`Contrato SIVeL3RegionalDonationV2 obtenido en: ${regionalDonation.address}`);
 
   console.log(`Añadiendo/actualizando región ${regionId}: ${regionName}...`);
   const tx = await regionalDonation.setRegion(regionId, regionName);

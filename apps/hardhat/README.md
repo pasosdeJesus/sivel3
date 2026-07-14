@@ -20,7 +20,7 @@ Currently, this directory contains:
 
 - `MockUSDT.sol` — Fake USDT for local and testnet development. See **[MOCK_USDT_README.md](./MOCK_USDT_README.md)**.
 - `PasosdeJesusCredentials.sol` — Unified SBT + NFT contract (ERC1155 + AccessControl), deployable on Celo and Base.
-- `RegionalDonation.sol` / `SIVeL3RegionalDonationV2.sol` — Regional donation management on Celo.
+- `SIVeL3RegionalDonationV2.sol` — Regional donation management on Celo.
 
 ## Prerequisites
 
