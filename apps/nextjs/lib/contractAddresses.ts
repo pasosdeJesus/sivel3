@@ -1,17 +1,20 @@
 // lib/contractAddresses.ts
-// Hardcoded contract addresses for client-side use.
-// Read from deployments/ on the server (readDeployment), use these on the client.
+// Shared addresses from @pasosdejesus/m/blockchain (USDT, SLEARN, network resolver).
+// Project-specific addresses (PreAlertMarket, RewardEscrow, RegionalDonation,
+// Credentials) remain here.
+//
+// See REQ/8.md and REQ/57.md
 
-export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia') as 'celo' | 'celoSepolia'
+import {
+  USDT_ADDRESSES,
+  SLEARN_ADDRESSES,
+  resolveNetwork,
+} from '@pasosdejesus/m/blockchain/ecosystem-addresses'
 
-// ============================================================
-// USDT
-// ============================================================
-const USDT: Record<'celo' | 'celoSepolia', `0x${string}`> = {
-  celo: '0x48065fbbe25f71c9282ddf5e1cd6d6a887483d5e',
-  celoSepolia: process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`,
-}
-export const USDT_ADDRESS = USDT[NETWORK]
+export const NETWORK = resolveNetwork()
+
+export const USDT_ADDRESS = USDT_ADDRESSES[NETWORK]
+export const SLEARN_ADDRESS = SLEARN_ADDRESSES[NETWORK]
 
 // ============================================================
 // SIVeL3PreAlertMarket (#43)
@@ -39,15 +42,6 @@ const REGIONAL_DONATION: Record<'celo' | 'celoSepolia', `0x${string}`> = {
   celoSepolia: process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`,
 }
 export const REGIONAL_DONATION_ADDRESS = REGIONAL_DONATION[NETWORK]
-
-// ============================================================
-// SLEARN
-// ============================================================
-const SLEARN: Record<'celo' | 'celoSepolia', `0x${string}`> = {
-  celo: '0x27fd41Bea85C39254f2B12789eB37a1543152CC1',
-  celoSepolia: process.env.NEXT_PUBLIC_SLEARN_ADDRESS as `0x${string}`,
-}
-export const SLEARN_ADDRESS = SLEARN[NETWORK]
 
 // ============================================================
 // PasosDeJesusCredentials
