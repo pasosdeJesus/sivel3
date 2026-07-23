@@ -108,12 +108,12 @@ yarn verify-mock-usdt
 
 ## 4. Testing
 
-The project uses Hardhat's built-in testing framework with Chai matchers.
+```bash
+# From apps/hardhat/ — runs contract:test via @pasosdejesus/m
+pnpm test
 
-To run the entire test suite, execute:
-
-```sh
-yarn test
+# Or directly
+../nextjs/bin/m contract:test
 ```
 
 ## ABI Synchronization
