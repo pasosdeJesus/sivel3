@@ -48,7 +48,7 @@ On OpenBSD/adJ, Hardhat's native dependencies (solidity-analyzer) don't have
 prebuilt binaries. Run the preparation script once:
 
 ```sh
-sh bin/prepadJ.sh
+make prepadJ
 ```
 
 This patches and compiles the native addon. On non-OpenBSD platforms, this
@@ -56,16 +56,21 @@ step is not needed.
 
 ## 3. Development Workflow
 
-### Install Dependencies
+All commands can be run via `make` or `pnpm` directly:
+
+| Task | make | pnpm |
+|------|------|------|
+| Build | `make` or `make build` | `pnpm build` |
+| Install deps | `make install` | `pnpm install` |
+| Type check | `make type` | `pnpm tsc` |
+| Run tests | `make test` | `pnpm test` |
+| Clean | `make clean` | `pnpm clean` |
+| OpenBSD setup | `make prepadJ` | `sh bin/prepadJ.sh` |
+
+### Build
 
 ```sh
-pnpm install
-```
-
-### Compile Contracts
-
-```sh
-pnpm build
+make
 ```
 
 Compiles Solidity contracts, generates TypeScript types, and syncs ABIs
@@ -74,15 +79,11 @@ to `apps/nextjs/abis/`.
 ### Run Tests
 
 ```sh
-pnpm test
+make test
 ```
 
 Runs all contract tests via `@pasosdejesus/m`'s `contract:test` runner
-(OpenBSD-compatible, no EDR needed). Also available directly:
-
-```sh
-../nextjs/bin/m contract:test
-```
+(OpenBSD-compatible, no EDR needed).
 
 ### Deploy a Contract
 

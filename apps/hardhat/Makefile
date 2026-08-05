@@ -13,5 +13,8 @@ type:
 test:
 	pnpm test
 
+prepadJ:
+	sh bin/prepadJ.sh
+
 clean:
 	pnpm clean
