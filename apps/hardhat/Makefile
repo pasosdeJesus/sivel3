@@ -1,11 +1,11 @@
 
+.PHONY: build all type test clean prepadJ
+
 build:
+	pnpm install
 	pnpm build
 
 all: build
-
-install:
-	pnpm install
 
 type:
 	pnpm tsc
@@ -13,8 +13,8 @@ type:
 test:
 	pnpm test
 
-prepadJ:
-	sh bin/prepadJ.sh
-
 clean:
 	pnpm clean
+
+prepadJ:
+	sh bin/prepadJ.sh

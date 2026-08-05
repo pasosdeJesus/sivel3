@@ -45,14 +45,22 @@ development. Always generate and use a separate, dedicated wallet for testing.
 ## 2. Platform-Specific Setup (adJ / OpenBSD)
 
 On OpenBSD/adJ, Hardhat's native dependencies (solidity-analyzer) don't have
-prebuilt binaries. Run the preparation script once:
+prebuilt binaries. On a fresh adJ/OpenBSD installation:
 
 ```sh
+# 1. Update npm (the bundled version is too old for our deps)
+npm install -g npm
+
+# 2. Enable corepack for pnpm and yarn version management
+doas corepack enable
+
+# 3. Patch and compile the native solidity-analyzer addon
 make prepadJ
 ```
 
-This patches and compiles the native addon. On non-OpenBSD platforms, this
-step is not needed.
+Steps 1-2 are one-time per machine. `prepadJ.sh` handles `pnpm install`
+internally. On non-OpenBSD platforms, only `make install && make build`
+is needed.
 
 ## 3. Development Workflow
 
@@ -60,8 +68,7 @@ All commands can be run via `make` or `pnpm` directly:
 
 | Task | make | pnpm |
 |------|------|------|
-| Build | `make` or `make build` | `pnpm build` |
-| Install deps | `make install` | `pnpm install` |
+| Build | `make` or `make build` | `pnpm install && pnpm build` |
 | Type check | `make type` | `pnpm tsc` |
 | Run tests | `make test` | `pnpm test` |
 | Clean | `make clean` | `pnpm clean` |
