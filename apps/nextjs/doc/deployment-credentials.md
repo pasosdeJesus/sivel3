@@ -41,7 +41,7 @@ cd apps/hardhat
 bin/prepadJ.sh
 
 # Compile + sync ABIs
-yarn build
+pnpm build
 
 # Deploy to testnets
 bin/deployPdJCredentials celoSepolia

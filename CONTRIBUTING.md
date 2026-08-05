@@ -9,7 +9,7 @@ This repository contains different components of the SIVeL 3 ecosystem. Each com
 | Component | Directory | Package Manager | Purpose |
 |-----------|-----------|-----------------|---------|
 | **Legacy Engine** | `sivel2/` | `yarn` | Ruby on Rails case documentation engine. |
-| **Smart Contracts** | `apps/hardhat/` | `yarn` | Solidity contracts for Celo. |
+| **Smart Contracts** | `apps/hardhat/` | `pnpm` | Solidity contracts for Celo. |
 | **Modern Frontend & API**| `apps/nextjs/` | `pnpm` | Web3 portal and orchestration API. |
 
 ---
@@ -39,7 +39,7 @@ Maintain consistency by using the established tools in each directory:
 
 *   **`sivel2/` (Ruby):** Follows `rubocop-shopify`. Run `bundle exec rubocop` to check.
 *   **`apps/nextjs/` (TS/React):** Uses ESLint and Prettier. Run `pnpm lint` and `pnpm format`.
-*   **`apps/hardhat/` (Solidity/TS):** Uses Prettier for contracts and scripts. Run `yarn prettier`.
+*   **`apps/hardhat/` (Solidity/TS):** Uses Prettier for contracts and scripts. Run `pnpm prettier`.
 
 ---
 

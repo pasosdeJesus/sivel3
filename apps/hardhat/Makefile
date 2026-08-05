@@ -1,9 +1,17 @@
+
 build:
-	yarn build
+	pnpm build
+
+all: build
+
+install:
+	pnpm install
 
 type:
-	yarn build
+	pnpm tsc
 
 test:
-	yarn test
+	pnpm test
 
+clean:
+	pnpm clean
