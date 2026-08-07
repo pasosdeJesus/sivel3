@@ -1,5 +1,5 @@
 // lib/contractAddresses.ts
-// Shared addresses from @pasosdejesus/m/blockchain (USDT, SLEARN, network resolver).
+// Shared addresses from @pasosdejesus/mpdj/blockchain (USDT, SLEARN, network resolver).
 // Project-specific addresses (PreAlertMarket, RewardEscrow, RegionalDonation,
 // Credentials) remain here.
 //
@@ -9,7 +9,7 @@ import {
   USDT_ADDRESSES,
   SLEARN_ADDRESSES,
   resolveNetwork,
-} from '@pasosdejesus/m/blockchain/ecosystem-addresses'
+} from '@pasosdejesus/mpdj/blockchain/ecosystem-addresses'
 
 export const NETWORK = resolveNetwork()
 

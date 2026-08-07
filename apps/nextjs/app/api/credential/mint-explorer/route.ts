@@ -3,7 +3,7 @@ import { keccak256, encodePacked } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintSBT, getChainId } from '@/lib/credentials'
-import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
+import { getCredentialMetadata } from '@pasosdejesus/mpdj/blockchain'
 
 const MIN_CASES = 3
 

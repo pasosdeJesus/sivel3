@@ -3,15 +3,6 @@
   "license": "MIT",
   "version": "1.0.0",
   "devDependencies": {
-    "@ethereumjs/block": "^10.1.2",
-    "@ethereumjs/blockchain": "^10.1.2",
-    "@ethereumjs/common": "^10.1.2",
-    "@ethereumjs/evm": "^10.1.2",
-    "@ethereumjs/mpt": "^10.1.2",
-    "@ethereumjs/statemanager": "^10.1.2",
-    "@ethereumjs/tx": "^10.1.2",
-    "@ethereumjs/util": "^10.1.2",
-    "@ethereumjs/vm": "^10.1.2",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
@@ -19,10 +10,10 @@
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "@nomicfoundation/hardhat-verify": "^2.0.11",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@pasosdejesus/contract-test": "link:../../../m/packages/contract-test",
+    "@pasosdejesus/edr": "link:../../../m/packages/edr",
     "@typechain/ethers-v6": "^0.5.0",
     "@typechain/hardhat": "^9.1.0",
-    "@types/chai": "^5.2.3",
-    "@types/mocha": "^10.0.7",
     "chai": "^4.2.0",
     "ethers": "^6.15.0",
     "hardhat": ">=2.27.0 <3.0.0",
@@ -55,11 +46,6 @@
   },
   "author": "pasosdeJesus",
   "pnpm": {
-    "overrides": {
-      "@ethereumjs/common": "^10.1.2",
-      "@ethereumjs/util": "^10.1.2",
-      "@ethereumjs/tx": "^10.1.2"
-    },
     "onlyBuiltDependencies": [
       "esbuild",
       "keccak",

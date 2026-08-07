@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-import(join(__dirname, '..', 'node_modules', '@pasosdejesus', 'm', 'dist', 'm.js'));
+(async () => {
+  try { await import('@pasosdejesus/mpdj') } catch {}
+  await import('@pasosdejesus/m/m')
+})()

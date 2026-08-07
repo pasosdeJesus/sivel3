@@ -2,17 +2,10 @@
 /// <reference types="vitest" />
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Kysely } from 'kysely'
+import { createMockDb } from '@pasosdejesus/m/test-utils'
+import { mockCredentialsModule, mockDeploymentsModule } from '@pasosdejesus/mpdj/test-utils'
 
-const mockDb = vi.hoisted(() => ({
-  selectFrom: vi.fn().mockReturnThis(),
-  select: vi.fn().mockReturnThis(),
-  where: vi.fn().mockReturnThis(),
-  executeTakeFirst: vi.fn().mockResolvedValue(null),
-  insertInto: vi.fn().mockReturnThis(),
-  values: vi.fn().mockReturnThis(),
-  onConflict: vi.fn().mockReturnThis(),
-  execute: vi.fn().mockResolvedValue(undefined),
-}))
+let mockDb: ReturnType<typeof createMockDb>
 
 vi.mock('@/.config/kysely.config', () => ({ newKyselyPostgresql: vi.fn(() => mockDb) }))
 vi.mock('path', async () => ({ ...await vi.importActual('path') as any, join: vi.fn(() => '/mock') }))
@@ -35,15 +28,13 @@ vi.mock('viem/accounts', async () => ({
 
 vi.mock('viem/chains', async () => ({ ...await vi.importActual('viem/chains') as any }))
 
-vi.mock('@pasosdejesus/m/blockchain', () => ({
+vi.mock('@pasosdejesus/mpdj/blockchain', () => mockCredentialsModule({
   mintCredentialWithRetry: vi.fn().mockResolvedValue('0xhash'),
-  hasCredentialOnChain: vi.fn().mockResolvedValue(false),
 }))
-vi.mock('@pasosdejesus/m/blockchain/deployments', () => ({
-  getCeloCredentialsAddress: vi.fn(() => '0xCONTRACT'),
-}))
+vi.mock('@pasosdejesus/m/blockchain/deployments', () => mockDeploymentsModule())
 
 beforeEach(() => {
+  mockDb = createMockDb()
   vi.stubEnv('PRIVATE_KEY', '0xMOCK')
   vi.stubEnv('NEXT_PUBLIC_RPC_URL', 'https://rpc')
   vi.stubEnv('NEXT_PUBLIC_NETWORK', 'celo')
@@ -79,7 +70,6 @@ describe('getDonorThresholds', () => {
     let call = 0
     mockDb.executeTakeFirst.mockImplementation(() => {
       call++
-      // Solo Donor (call=1) y Bronze Donor (call=2) existen; el resto null
       if (call === 1) return Promise.resolve({ token_id: 2 })
       if (call === 2) return Promise.resolve({ token_id: 3 })
       return Promise.resolve(null)
@@ -108,14 +98,14 @@ describe('mintSBT', () => {
 
   it('null si ya on-chain', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain } = await import('@pasosdejesus/mpdj/blockchain')
     vi.mocked(hasCredentialOnChain).mockResolvedValueOnce(true)
     expect(await mintSBT('0xW', 2, 'celo')).toBeNull()
   })
 
   it('mintea y registra', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain } = await import('@pasosdejesus/mpdj/blockchain')
     vi.mocked(hasCredentialOnChain).mockResolvedValue(false)
     const r = await mintSBT('0xW', 2, 'celo')
     expect(r).toEqual({ txHash: '0xhash' })
@@ -131,7 +121,7 @@ describe('mintSBT', () => {
 
   it('lanza si el mint on-chain falla', async () => {
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain, mintCredentialWithRetry } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain, mintCredentialWithRetry } = await import('@pasosdejesus/mpdj/blockchain')
     const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain/deployments')
     vi.mocked(getCeloCredentialsAddress).mockReturnValueOnce('0xCONTRACT' as any)
     vi.mocked(hasCredentialOnChain).mockResolvedValueOnce(false)
@@ -142,7 +132,7 @@ describe('mintSBT', () => {
   it('usa celoSepolia cuando NEXT_PUBLIC_NETWORK es celoSepolia', async () => {
     vi.stubEnv('NEXT_PUBLIC_NETWORK', 'celoSepolia')
     mockDb.executeTakeFirst.mockResolvedValue(null)
-    const { hasCredentialOnChain } = await import('@pasosdejesus/m/blockchain')
+    const { hasCredentialOnChain } = await import('@pasosdejesus/mpdj/blockchain')
     const { getCeloCredentialsAddress } = await import('@pasosdejesus/m/blockchain/deployments')
     vi.mocked(getCeloCredentialsAddress).mockReturnValueOnce('0xCONTRACT' as any)
     vi.mocked(hasCredentialOnChain).mockResolvedValueOnce(true)

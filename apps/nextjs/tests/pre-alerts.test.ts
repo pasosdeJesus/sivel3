@@ -70,6 +70,10 @@ vi.mock('viem/chains', () => ({
   celoSepolia: { id: 11142220, name: 'Celo Sepolia' },
 }))
 
+vi.mock('@pasosdejesus/m/blockchain/deployments', () => ({
+  readDeployment: vi.fn(() => ({ address: '0x892373D6930dd38Cb54A28Ea8573e6d838570426' })),
+}))
+
 // ============================================================
 // Constants
 // ============================================================

@@ -11,7 +11,7 @@ import { createPublicClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts' 
 import { celo } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { mintCredentialWithRetry, hasCredentialOnChain } from '@pasosdejesus/m/blockchain'
+import { mintCredentialWithRetry, hasCredentialOnChain } from '@pasosdejesus/mpdj/blockchain'
 import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain/deployments'
 
 const wallet = process.argv[2]

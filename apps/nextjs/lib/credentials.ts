@@ -1,6 +1,6 @@
 // lib/credentials.ts
 // Project-specific SBT minting wrapper — delegates on-chain mint to
-// @pasosdejesus/m/blockchain (which handles Celo L2 nonce retry logic).
+// @pasosdejesus/mpdj/blockchain (which handles Celo L2 nonce retry logic).
 // Adds credential_emission tracking and donor threshold queries.
 
 import { 
@@ -14,7 +14,7 @@ import { newKyselyPostgresql } from '@/.config/kysely.config'
 import {
   hasCredentialOnChain,
   mintCredentialWithRetry,
-} from '@pasosdejesus/m/blockchain'
+} from '@pasosdejesus/mpdj/blockchain'
 import { getCeloCredentialsAddress } from '@pasosdejesus/m/blockchain/deployments'
 import path from 'path'
 import type { Kysely } from 'kysely'

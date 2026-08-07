@@ -19,7 +19,7 @@ import { PreAlertModal } from '@/components/PreAlertModal';
 import { buyPreAlert as buyPreAlertOnChain } from '@/lib/buyPreAlert';
 import { OSMMapDesktop } from '@/components/OSMMapDesktop';
 import { OSMMapMobile } from '@/components/OSMMapMobile';
-import { SlearnInfo, AddSlearnButton, SLEARN_ADDRESSES } from '@pasosdejesus/m/blockchain';
+import { SlearnInfo, AddSlearnButton, SLEARN_ADDRESSES } from '@pasosdejesus/mpdj/blockchain';
 import { NETWORK } from '@/lib/contractAddresses';
 
 const localT = {

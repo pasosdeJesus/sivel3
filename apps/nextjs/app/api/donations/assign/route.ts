@@ -6,7 +6,7 @@ import { mintSlearnCashback, getCashbackPercent } from '@/lib/slearn'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
 import { mintSBT, getDonorThresholds, getChainId } from '@/lib/credentials'
-import { getCredentialMetadata } from '@pasosdejesus/m/blockchain'
+import { getCredentialMetadata } from '@pasosdejesus/mpdj/blockchain'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
