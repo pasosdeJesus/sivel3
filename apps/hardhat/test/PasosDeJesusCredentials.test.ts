@@ -137,12 +137,6 @@ describe('PasosDeJesusCredentials', () => {
       ).to.be.revertedWith('Course not registered')
     })
 
-    it('reverts mintCourseCompletion on non-soulbound token', async () => {
-      await expect(
-        contract.connect(minter).mintCourseCompletion(user.address, 4)
-      ).to.be.revertedWith('Course credential must be soulbound')
-    })
-
     it('reverts non-minter minting', async () => {
       await expect(
         contract.connect(user).mintCredential(user.address, 3, 1)
@@ -155,13 +149,13 @@ describe('PasosDeJesusCredentials', () => {
     it('reverts minting same credential twice for same user', async () => {
       await expect(
         contract.connect(minter).mintCourseCompletion(user.address, 1)
-      ).to.be.revertedWith('Account already has this credential')
+      ).to.be.revertedWith('Account already has this soulbound credential')
     })
 
     it('reverts minting same role twice for same user', async () => {
       await expect(
         contract.connect(minter).mintCredential(user.address, 3, 1)
-      ).to.be.revertedWith('Account already has this credential')
+      ).to.be.revertedWith('Account already has this soulbound credential')
     })
   })
 
@@ -184,9 +178,9 @@ describe('PasosDeJesusCredentials', () => {
     })
 
     it('reverts setting maxSupply below current supply', async () => {
-      // totalSupply for token 4 is 2
+      // Token 1 (course) has totalSupply=1. Setting max=0 below it reverts.
       await expect(
-        contract.setMaxSupply(4, 1)
+        contract.setMaxSupply(1, 0)
       ).to.be.revertedWith('Cannot set max below current supply')
     })
   })

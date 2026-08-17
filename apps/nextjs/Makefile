@@ -19,6 +19,6 @@ dev:
 	./bin/dev
 
 prod:
-	pnpm build
+	sh -c 'ulimit -d 7340032 && pnpm build'
 	./bin/start > prod.log 2>&1 &
 

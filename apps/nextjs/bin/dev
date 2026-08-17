@@ -3,6 +3,6 @@
 rm -rf .next
 pnpm install
 . ../.env
-cmd="node_modules/next/dist/bin/next dev -p${PORT} ${OPDEV}"
+cmd="node_modules/next/dist/bin/next dev --webpack -p${PORT} ${OPDEV}"
 echo $cmd
 eval $cmd

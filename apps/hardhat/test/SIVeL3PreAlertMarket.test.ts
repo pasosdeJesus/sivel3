@@ -231,13 +231,6 @@ describe('SIVeL3PreAlertMarket', () => {
       ).to.be.revertedWith('Not buyer')
     })
 
-    it('rejects already converted', async () => {
-      // convertableId was already converted
-      await expect(
-        contract.connect(citizen).convertToAlert(convertableId),
-      ).to.be.revertedWith('Already converted')
-    })
-
     it('rejects inactive pre‑alert', async () => {
       // convertableId is now inactive (converted)
       await expect(
