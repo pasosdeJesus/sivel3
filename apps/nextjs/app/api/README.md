@@ -2,7 +2,7 @@
 
 > *"Let your 'yes' be 'yes' and your 'no' be 'no'"* (Matthew 5:37, CSB)
 
-These endpoints are consumed by the frontend and in turn query the sivel2 Rails backend or the blockchain.
+These endpoints are consumed by the frontend and in turn query the shared PostgreSQL database with Kysely or the blockchain.
 
 ## Endpoints
 
@@ -10,8 +10,8 @@ These endpoints are consumed by the frontend and in turn query the sivel2 Rails 
 |-------|--------|---------|-------------|
 | `/api/cases/counts` | GET | Count cases, victims, and acts with filters | Kysely → PostgreSQL |
 | `/api/cases/geojson` | GET | GeoJSON of cases for the map | Hardcoded (placeholder) |
-| `/api/cases/datos-osm` | GET | OSM data for interactive map | Proxy → Rails API |
-| `/api/cases/[id]` | GET | Case detail by ID | Proxy → Rails API |
+| `/api/cases/datos-osm` | GET | OSM data for interactive map | Kysely → PostgreSQL |
+| `/api/cases/[id]` | GET | Case detail by ID (case, victims, alleged perpetrators) | Kysely → PostgreSQL |
 | `/api/categories` | GET | Enabled violence categories | Kysely → PostgreSQL |
 | `/api/departments` | GET | Enabled Colombian departments | Kysely → PostgreSQL |
 | `/api/regions` | GET | Donation regions (supports `?locale=es`) | Kysely → PostgreSQL |
@@ -35,8 +35,12 @@ Full flow documented in `doc/donation-flow.md`. Receives `{ regionId, donor, amo
 
 ### `GET /api/cases/datos-osm`
 
-Proxies to the Rails API (`NEXT_PUBLIC_API1/casos/datos-osm.json`). Passes through the same filter parameters it receives.
+Reads the markers directly from the shared database (`sivel2_gen_caso` JOIN `msip_ubicacion`, plus the geo names), replicating the `Sivel2Gen::Conscaso` filter scopes (`filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[presponsable_id]`, `filtro[categoria_id]`). No longer goes through Rails.
+
+### `GET /api/cases/[id]`
+
+Reads a case, its victims and its alleged perpetrators from the shared database with Kysely. No longer goes through Rails.
 
 ### `GET /api/regions/[id]/balance`
 
-Reads the balance directly from the `RegionalDonation` contract on Celo using Viem. Does not go through Rails.
+Reads the balance directly from the `RegionalDonation` contract on Celo using Viem.

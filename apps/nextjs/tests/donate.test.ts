@@ -62,7 +62,7 @@ describe('lib/donate', () => {
       }, 'en')).rejects.toThrow(/0\.02/)
     })
 
-    it('rechaza NaN (parseUnits lanza error)', async () => {
+    it('rechaza monto inválido (motor usdt: safeParseFloat → 0 → mínimo)', async () => {
       const { donate } = await import('@/lib/donate')
       await expect(donate({
         regionId: 1,
@@ -70,7 +70,7 @@ describe('lib/donate', () => {
         effectiveAddress: USER_ADDRESS,
         usdtContractAddress: USDT_ADDRESS,
         regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/not a valid decimal/)
+      }, 'en')).rejects.toThrow(/minimum donation amount/)
     })
   })
 

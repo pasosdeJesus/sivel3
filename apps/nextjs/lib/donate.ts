@@ -1,10 +1,13 @@
 // lib/donate.ts
 // Lógica de donación unificada (transferencia USDT + backend)
+//
+// Helpers de parseo desde el motor usdt (https://gitlab.com/pasosdeJesus/m/-/work_items/35 §15.7):
+// @pasosdejesus/usdt/lib/donate-utils.
 
-import { parseUnits } from 'viem'
 import { logger } from './logger'
 import { safeStringify, debugLog } from './debug'
 import { parseWalletError } from './errors'
+import { parseUserAmount, safeParseFloat } from '@pasosdejesus/usdt/lib/donate-utils'
 
 export interface DonateParams {
   regionId: number
@@ -59,14 +62,14 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
   logMsg(`Iniciando - Región: ${regionId}, Monto: ${amount}`)
   logMsg(`✅ Contract addresses: USDT=${usdtContractAddress}, Donation=${regionalDonationContractAddress}`)
 
-  const amountNum = parseFloat(amount)
+  const amountNum = safeParseFloat(amount)
   if (amountNum < 0.02) {
     const errorMsg = t.minAmount.replace('{{0}}', String(amountNum))
     logMsg(`❌ ${errorMsg}`)
     throw new Error(errorMsg)
   }
 
-  const amountInSmallestUnit = parseUnits(amount, 6)
+  const amountInSmallestUnit = parseUserAmount(amount, 6)
   logMsg(`Monto en unidades pequeñas: ${amountInSmallestUnit.toString()}`)
 
   // Codificar el data con el regionId (32 bytes)

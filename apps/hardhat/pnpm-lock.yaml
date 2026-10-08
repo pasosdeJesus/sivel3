@@ -51,6 +51,9 @@ importers:
       '@pasosdejesus/edr':
         specifier: ^0.1.1
         version: 0.1.1
+      '@pasosdejesus/usdt':
+        specifier: ^0.1.1
+        version: 0.1.1(@pasosdejesus/m@0.16.1(ethers@6.17.0)(viem@2.55.16(typescript@5.9.3)))(react@19.2.8)(viem@2.55.16(typescript@5.9.3))
       '@typechain/ethers-v6':
         specifier: ^0.5.1
         version: 0.5.1(ethers@6.17.0)(typechain@8.3.2(typescript@5.9.3))(typescript@5.9.3)
@@ -621,6 +624,13 @@ packages:
   '@pasosdejesus/m@0.16.1':
     resolution: {integrity: sha512-lX2FTP/zpiB/BLkRQZKfpF/FMBQXd3ejmLMw2nygKv2e3yrD0pO2oakvImZA0x+yGIikzf7eD2M+h2PAE+witQ==}
     hasBin: true
+
+  '@pasosdejesus/usdt@0.1.1':
+    resolution: {integrity: sha512-uz0K6K+cuYsmU2rla1ueuG5Ab92VyAdqKcCoUPSuRrimWctQqnRlTV7EdAs8rV2JHLG60y87KVHOD3JLa2XWmg==}
+    peerDependencies:
+      '@pasosdejesus/m': '>=0.16.0'
+      react: '>=18.0.0'
+      viem: '>=2.0.0'
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1958,8 +1968,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  pretty-ms@9.3.0:
-    resolution: {integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==}
+  pretty-ms@9.3.1:
+    resolution: {integrity: sha512-HzMy3Geq23nVALD/M2LliU+F+M+gVNsvkQWWqeBZ8HDiCgzo6YPJ/Omrmtq24EFrIsk0a3EkQGEd7bDOo+IhGA==}
     engines: {node: '>=18'}
 
   process-nextick-args@2.0.1:
@@ -1982,6 +1992,10 @@ packages:
   raw-body@2.5.3:
     resolution: {integrity: sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==}
     engines: {node: '>= 0.8'}
+
+  react@19.2.8:
+    resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
+    engines: {node: '>=0.10.0'}
 
   readable-stream@2.3.8:
     resolution: {integrity: sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA==}
@@ -3131,6 +3145,12 @@ snapshots:
       - supports-color
       - viem
 
+  '@pasosdejesus/usdt@0.1.1(@pasosdejesus/m@0.16.1(ethers@6.17.0)(viem@2.55.16(typescript@5.9.3)))(react@19.2.8)(viem@2.55.16(typescript@5.9.3))':
+    dependencies:
+      '@pasosdejesus/m': 0.16.1(ethers@6.17.0)(viem@2.55.16(typescript@5.9.3))
+      react: 19.2.8
+      viem: 2.55.16(typescript@5.9.3)
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -3863,7 +3883,7 @@ snapshots:
       is-plain-obj: 4.1.0
       is-stream: 4.0.1
       npm-run-path: 6.0.0
-      pretty-ms: 9.3.0
+      pretty-ms: 9.3.1
       signal-exit: 4.1.0
       strip-final-newline: 4.0.0
       yoctocolors: 2.2.0
@@ -4634,7 +4654,7 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  pretty-ms@9.3.0:
+  pretty-ms@9.3.1:
     dependencies:
       parse-ms: 4.0.0
 
@@ -4659,6 +4679,8 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       unpipe: 1.0.0
+
+  react@19.2.8: {}
 
   readable-stream@2.3.8:
     dependencies:
