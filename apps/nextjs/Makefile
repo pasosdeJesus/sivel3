@@ -1,7 +1,7 @@
 
 all:
 	pnpm i
-	pnpm build
+	sh -c 'ulimit -d 7340032 && pnpm build'
 
 type:
 	pnpm typecheck

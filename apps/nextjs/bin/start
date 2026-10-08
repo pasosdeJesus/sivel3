@@ -1,4 +1,8 @@
 #!/bin/sh
 
+# adJ/OpenBSD: the default data segment limit (~1.5 GB) crashes V8's GC.
+# Raise it (7 GB) before starting the server, as `make prod` does for the build.
+ulimit -d 7340032
+
 . ../.env
 node_modules/next/dist/bin/next start -p${PORT}
