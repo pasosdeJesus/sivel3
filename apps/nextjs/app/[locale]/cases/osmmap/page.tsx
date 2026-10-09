@@ -67,7 +67,7 @@ export default function OSMMapPage() {
   const currentLocale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en';
   const { t } = useTranslation(localT);
 
-  const { isConnected, donate, isTransacting, isProcessing, effectiveAddress, isMiniPay } = useWallet();
+  const { isConnected, donate, isTransacting, isProcessing, effectiveAddress, provider } = useWallet();
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState('');
 
@@ -119,10 +119,10 @@ export default function OSMMapPage() {
   }
 
   const handleBuy = async (id: number) => {
-    if (!effectiveAddress) return
+    if (!effectiveAddress || !provider) return
     logger.info(`[handleBuy #${id}] Starting purchase — wallet: ${effectiveAddress.slice(0, 8)}…`, 'PreAlertBuy')
     try {
-      await buyPreAlertOnChain(id, effectiveAddress, currentLocale)
+      await buyPreAlertOnChain(id, effectiveAddress, provider, currentLocale)
       logger.info(`[handleBuy #${id}] Purchase confirmed`, 'PreAlertBuy')
       toast({ title: '✅ Purchase confirmed', duration: 3000 })
     } catch (e: any) {
@@ -173,7 +173,7 @@ export default function OSMMapPage() {
         description: t('thanksMessage')
           .replace('{{region}}', regionName)
           .replace('{{amount}}', donationAmount),
-        duration: isMiniPay ? 0 : 4000,
+        duration: 4000,
       });
 
       // Mostrar toast de SLEARN si se minteó exitosamente
@@ -203,7 +203,7 @@ export default function OSMMapPage() {
           toast({
             title: t('sbtTitle'),
             description: sbt.name,
-            duration: isMiniPay ? 0 : 4000,
+            duration: 4000,
           })
         }
       }

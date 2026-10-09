@@ -5,14 +5,17 @@
 // @pasosdejesus/usdt/lib/donate-utils.
 
 import { logger } from './logger'
-import { safeStringify, debugLog } from './debug'
+import { debugLog } from './debug'
 import { parseWalletError } from './errors'
 import { parseUserAmount, safeParseFloat } from '@pasosdejesus/usdt/lib/donate-utils'
+import type { Eip1193Provider } from '@pasosdejesus/m/wallet'
 
 export interface DonateParams {
   regionId: number
   amount: string
   effectiveAddress: `0x${string}`
+  /** Effective EIP-1193 provider (in-app or external). */
+  provider: Eip1193Provider
   usdtContractAddress: `0x${string}`
   regionalDonationContractAddress: `0x${string}`
 }
@@ -51,7 +54,7 @@ const donateTranslations = {
 }
 
 export async function donate(params: DonateParams, locale: string = 'en'): Promise<DonateResult> {
-  const { regionId, amount, effectiveAddress, usdtContractAddress, regionalDonationContractAddress } = params
+  const { regionId, amount, effectiveAddress, provider, usdtContractAddress, regionalDonationContractAddress } = params
   const t = locale === 'es' ? donateTranslations.es : donateTranslations.en
 
   const logMsg = (msg: string) => {
@@ -86,12 +89,11 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
 
   logMsg(`Transfer data (primeros 100 chars): ${transferData.substring(0, 100)}...`)
 
-  if (typeof window === 'undefined' || !window.ethereum) {
+  if (!provider) {
     logMsg(`❌ No hay wallet disponible`)
     throw new Error(t.noWallet)
   }
 
-  const ethereum = window.ethereum as any
   const txParams = {
     from: effectiveAddress,
     to: usdtContractAddress,
@@ -99,78 +101,14 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
     value: '0x0',
   }
 
-  /**
-   * NOTA: Métodos de transacción según wallet (Abril 2026)
-   *
-   * Durante la integración de MiniPay, se descubrió que:
-   * - MiniPay NO soporta ethereum.request (error: Cannot read properties of undefined (reading '_request'))
-   * - MiniPay SÍ soporta ethereum.send
-   *
-   * Por otro lado:
-   * - MetaMask NO soporta ethereum.send sin callback (error: does not support synchronous methods)
-   * - MetaMask SÍ soporta ethereum.request
-   *
-   * Por tanto, debemos detectar la wallet y usar el método apropiado.
-   *
-   * Referencia: https://github.com/pasosdeJesus/sivel3/issues/24
-   * Fecha de las pruebas: 21-24 de abril de 2026
-   */
-  const isMiniPay = ethereum.isMiniPay === true
-
   try {
-    let txHash: string
-
-    let rawHash: any
-    if (isMiniPay && typeof ethereum.send === 'function') {
-      logMsg(`📱 Usando ethereum.send (MiniPay)...`)
-      rawHash = await ethereum.send({
-        method: 'eth_sendTransaction',
-        params: [txParams],
-      })
-
-      // Depuración: serializar la respuesta usando debugLog
-      debugLog('MiniPay Response', rawHash)
-      logMsg(`📦 Respuesta MiniPay (tipo: ${typeof rawHash}): ${safeStringify(rawHash)}`)
-
-      // Intentar extraer el hash de diferentes propiedades
-      if (typeof rawHash === 'string') {
-        txHash = rawHash
-      } else if (typeof rawHash === 'object' && rawHash !== null) {
-        // Buscar propiedades comunes donde puede estar el hash
-        if (rawHash.result) {
-          txHash = rawHash.result
-        } else if (rawHash.hash) {
-          txHash = rawHash.hash
-        } else if (rawHash.transactionHash) {
-          txHash = rawHash.transactionHash
-        } else if (rawHash.txHash) {
-          txHash = rawHash.txHash
-        } else {
-          // Si no encontramos el hash, mostrar la estructura completa usando safeStringify
-          const serialized = safeStringify(rawHash)
-          debugLog('MiniPay Unknown Response', rawHash)
-          logMsg(`❌ No se pudo extraer hash. Respuesta completa: ${serialized}`)
-          throw new Error(`Formato inesperado de MiniPay. Respuesta: ${serialized.substring(0, 200)}`)
-        }
-      } else {
-        debugLog('MiniPay Invalid Type', { type: typeof rawHash, value: rawHash })
-        throw new Error(`Tipo de respuesta inesperado: ${typeof rawHash}`)
-      }
-
-      debugLog('MiniPay Extracted Hash', { hash: txHash })
-      logMsg(`📱 Hash extraído: ${txHash}`)
-    } else if (typeof ethereum.request === 'function') {
-      logMsg(`🔄 Usando ethereum.request (MetaMask/OneKey)...`)
-      txHash = await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [txParams],
-      })
-      logMsg(`✅ Hash: ${txHash}`)
-    } else {
-      logMsg(`⚠️ No se encontró método compatible`)
-      throw new Error(t.walletIncompatible)
-    }
-
+    // The effective EIP-1193 provider is the in-app wallet or the external one;
+    // both support `eth_sendTransaction` via `request` (no MiniPay `send` path).
+    logMsg(`🔄 Enviando transacción con la billetera (provider EIP-1193)...`)
+    const txHash = (await provider.request({
+      method: 'eth_sendTransaction',
+      params: [txParams],
+    })) as string
     logMsg(`✅ Transacción enviada. Hash: ${txHash}`)
 
     // Llamar al backend para asignar la donación (con reintentos)

@@ -1,5 +1,18 @@
 #!/bin/sh
 
+# adJ/OpenBSD: `next dev` (WASM SWC) needs a large data segment; the default
+# (~1.5G) crashes V8 ("Check failed: (result.ptr) != nullptr"). Raise it, and
+# abort with instructions if the shell cannot (mirrors learn.tg's bin/dev).
+ulimit -d 7340032 2>/dev/null || true
+limit=$(ulimit -d 2>/dev/null)
+if [ -n "$limit" ] && [ "$limit" != "unlimited" ] && [ "$limit" -lt 7340032 ]; then
+  echo "ERROR: ulimit -d is ${limit} KB; need >= 7340032 KB (7G)."
+  echo "  Try: ulimit -d unlimited   (or set the chroot data-limit)"
+  echo "  If your shell rejects ulimit -d, start it through ksh:"
+  echo "    /bin/ksh -c 'ulimit -d 7340032; exec bin/dev'"
+  exit 1
+fi
+
 rm -rf .next
 pnpm install
 . ../.env

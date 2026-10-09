@@ -1,12 +1,13 @@
 // lib/buyPreAlert.ts
 // Client-side purchase of pre-alerts — sends USDT directly to PreAlertMarket
 // contract with preAlertId encoded in the transfer data.
-// Follows the same MiniPay-compatible pattern as lib/donate.ts.
+// Uses the effective EIP-1193 provider (in-app or external).
 // No approve step needed — uses a single USDT transfer.
 
 import { parseUnits } from 'viem'
 import { PREALERT_MARKET_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 import { debugLog, logger } from '@/lib/debug'
+import type { Eip1193Provider } from '@pasosdejesus/m/wallet'
 
 const PRICE_USDT = 1 // Fixed $1 price (MVP)
 
@@ -39,21 +40,20 @@ export interface BuyPreAlertResult {
  * Purchase a pre-alert by sending USDT directly to the PreAlertMarket contract
  * with the preAlertId encoded in the transfer data.
  *
- * Works with MiniPay (legacy eth_sendTransaction) and MetaMask.
+ * Uses the effective EIP-1193 provider (in-app or external).
  */
 export async function buyPreAlert(
   preAlertId: number,
   effectiveAddress: `0x${string}`,
+  provider: Eip1193Provider,
   locale: string = 'en',
 ): Promise<BuyPreAlertResult> {
   const t = (k: keyof typeof tS.en) => (tS[locale as keyof typeof tS]?.[k] || tS.en[k]) as string
 
-  if (typeof window === 'undefined' || !(window as any).ethereum) {
+  if (!provider) {
     throw new Error(t('noWallet'))
   }
 
-  const ethereum = (window as any).ethereum
-  const isMiniPay = ethereum.isMiniPay === true
   const contractAddress = PREALERT_MARKET_ADDRESS
   const usdtAddress = USDT_ADDRESS
   const amount = parseUnits(String(PRICE_USDT), 6)
@@ -73,32 +73,14 @@ export async function buyPreAlert(
     from: effectiveAddress,
   }
 
-  let txHash: string
-
-  if (isMiniPay) {
-    logger.info(
-      `[buyPreAlert #${preAlertId}] MiniPay tx — to: ${txParams.to}, data len: ${txParams.data.length}, gas: ${txParams.gas}`,
-      'buyPreAlert',
-    )
-    const raw = await ethereum.send({
-      method: 'eth_sendTransaction',
-      params: [txParams],
-    })
-    logger.info(
-      `[buyPreAlert #${preAlertId}] MiniPay raw response: ${JSON.stringify(raw).slice(0, 200)}`,
-      'buyPreAlert',
-    )
-    txHash = extractMiniPayHash(raw)
-  } else {
-    logger.info(
-      `[buyPreAlert #${preAlertId}] Standard tx — to: ${txParams.to}, data len: ${txParams.data.length}`,
-      'buyPreAlert',
-    )
-    txHash = await ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [txParams],
-    })
-  }
+  logger.info(
+    `[buyPreAlert #${preAlertId}] Sending tx — to: ${txParams.to}, data len: ${txParams.data.length}`,
+    'buyPreAlert',
+  )
+  const txHash = (await provider.request({
+    method: 'eth_sendTransaction',
+    params: [txParams],
+  })) as string
 
   logger.info(`[buyPreAlert #${preAlertId}] txHash: ${txHash}`, 'buyPreAlert')
 
@@ -169,13 +151,4 @@ export async function buyPreAlert(
     'buyPreAlert',
   )
   return { txHash }
-}
-
-function extractMiniPayHash(response: any): string {
-  if (typeof response === 'string') return response
-  if (response?.result?.hash) return response.result.hash
-  if (response?.result) return response.result
-  if (response?.hash) return response.hash
-  if (response?.transactionHash) return response.transactionHash
-  throw new Error('Unexpected MiniPay response: ' + JSON.stringify(response))
 }

@@ -1,29 +1,24 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
 
-// Mock window with all properties needed by logger and donate
+// The effective EIP-1193 provider (in-app or external) is injected by the caller.
 const mockRequest = vi.fn()
-const mockSend = vi.fn()
 
 vi.stubGlobal('window', {
   location: { search: '', href: 'http://localhost' },
-  ethereum: {
-    isMiniPay: false,
-    request: mockRequest,
-    send: mockSend,
-  },
 })
 
-// Mock fetch global
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
-// Mock setTimeout to avoid real delays in retry tests
-vi.stubGlobal('setTimeout', vi.fn((fn) => fn()))
+// Avoid real delays in retry tests
+vi.stubGlobal('setTimeout', vi.fn((fn: any) => fn()))
 
 const VALID_HASH = '0x04fb9e12a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8'
-const USER_ADDRESS = '0x383b1cc3ddb5d02c8c3b0dc8ea7e5f3a2b1c0d9e'
-const USDT_ADDRESS = '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f'
-const REGIONAL_DONATION_ADDRESS = '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b'
+const USER_ADDRESS = '0x383b1cc3ddb5d02c8c3b0dc8ea7e5f3a2b1c0d9e' as `0x${string}`
+const USDT_ADDRESS = '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f' as `0x${string}`
+const REGIONAL_DONATION_ADDRESS = '0x563a7b5e6f4806b6ab179050326070ccbd3c1f5b' as `0x${string}`
+
+const makeProvider = () => ({ request: mockRequest }) as any
 
 describe('lib/donate', () => {
   beforeAll(async () => {
@@ -34,68 +29,50 @@ describe('lib/donate', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     mockRequest.mockReset()
-    mockSend.mockReset()
     mockFetch.mockReset()
+  })
+
+  const baseParams = () => ({
+    regionId: 1,
+    amount: '1',
+    effectiveAddress: USER_ADDRESS,
+    provider: makeProvider(),
+    usdtContractAddress: USDT_ADDRESS,
+    regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
   })
 
   // ---- Minimum amount validation ----
   describe('amount validation', () => {
     it('rechaza montos menores a 0.02 USDT', async () => {
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '0.01',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/0\.02/)
+      await expect(donate({ ...baseParams(), amount: '0.01' }, 'en')).rejects.toThrow(/0\.02/)
     })
 
     it('rechaza montos negativos', async () => {
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '-5',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/0\.02/)
+      await expect(donate({ ...baseParams(), amount: '-5' }, 'en')).rejects.toThrow(/0\.02/)
     })
 
     it('rechaza monto inválido (motor usdt: safeParseFloat → 0 → mínimo)', async () => {
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: 'abc',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/minimum donation amount/)
+      await expect(donate({ ...baseParams(), amount: 'abc' }, 'en')).rejects.toThrow(
+        /minimum donation amount/,
+      )
     })
   })
 
-  // ---- MetaMask flow ----
-  describe('MetaMask flow (ethereum.request)', () => {
+  // ---- EIP-1193 provider flow ----
+  describe('provider flow (eth_sendTransaction)', () => {
     it('envia transaccion y asigna donacion exitosamente', async () => {
-      // Configurar mock para MetaMask
-      vi.stubGlobal('window', {
-        location: { search: '', href: 'http://localhost' },
-        ethereum: { isMiniPay: false, request: mockRequest, send: mockSend },
-      })
       mockRequest.mockResolvedValue(VALID_HASH)
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ txHash: VALID_HASH, slearn: { success: true, slearnMinted: '220.00' } }),
+        json: () =>
+          Promise.resolve({ txHash: VALID_HASH, slearn: { success: true, slearnMinted: '220.00' } }),
       })
 
       const { donate } = await import('@/lib/donate')
-      const result = await donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')
+      const result = await donate(baseParams(), 'en')
 
       expect(mockRequest).toHaveBeenCalledWith({
         method: 'eth_sendTransaction',
@@ -107,91 +84,9 @@ describe('lib/donate', () => {
     })
   })
 
-  // ---- MiniPay flow ----
-  describe('MiniPay flow (ethereum.send)', () => {
-    beforeEach(() => {
-      vi.stubGlobal('window', {
-        location: { search: '', href: 'http://localhost' },
-        ethereum: { isMiniPay: true, request: mockRequest, send: mockSend },
-      })
-    })
-
-    it('usa ethereum.send para MiniPay', async () => {
-      mockSend.mockResolvedValue(VALID_HASH)
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ txHash: VALID_HASH }),
-      })
-
-      const { donate } = await import('@/lib/donate')
-      const result = await donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')
-
-      expect(mockSend).toHaveBeenCalledWith({
-        method: 'eth_sendTransaction',
-        params: [expect.objectContaining({ from: USER_ADDRESS, to: USDT_ADDRESS })],
-      })
-      expect(result.txHash).toBe(VALID_HASH)
-    })
-
-    it('extrae el hash de respuesta object (result)', async () => {
-      mockSend.mockResolvedValue({ result: VALID_HASH })
-      mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ txHash: VALID_HASH }) })
-
-      const { donate } = await import('@/lib/donate')
-      const result = await donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')
-
-      expect(result.txHash).toBe(VALID_HASH)
-    })
-
-    it('extrae el hash de respuesta object (hash)', async () => {
-      mockSend.mockResolvedValue({ hash: VALID_HASH })
-      mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ txHash: VALID_HASH }) })
-
-      const { donate } = await import('@/lib/donate')
-      const result = await donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')
-
-      expect(result.txHash).toBe(VALID_HASH)
-    })
-
-    it('lanza error si MiniPay devuelve formato inesperado', async () => {
-      mockSend.mockResolvedValue({ unexpected: 'formato' })
-
-      const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/inesperado/i)
-    })
-  })
-
   // ---- Backend errors ----
   describe('backend errors', () => {
     beforeEach(() => {
-      vi.stubGlobal('window', {
-        location: { search: '', href: 'http://localhost' },
-        ethereum: { isMiniPay: false, request: mockRequest, send: mockSend },
-      })
       mockRequest.mockResolvedValue(VALID_HASH)
     })
 
@@ -203,14 +98,8 @@ describe('lib/donate', () => {
       })
 
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/received your donation/i)
-      // 1 analytics call + 5 retries = 6 total
+      await expect(donate(baseParams(), 'en')).rejects.toThrow(/received your donation/i)
+      // 5 retries + 1 analytics call
       expect(mockFetch).toHaveBeenCalledTimes(6)
     })
 
@@ -222,15 +111,8 @@ describe('lib/donate', () => {
       })
 
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/HTTP 400/i)
-
-      // 1 analytics call + 5 retries = 6 total
+      await expect(donate(baseParams(), 'en')).rejects.toThrow(/HTTP 400/i)
+      // 5 retries + 1 analytics call
       expect(mockFetch).toHaveBeenCalledTimes(6)
     })
 
@@ -238,48 +120,19 @@ describe('lib/donate', () => {
       mockFetch.mockResolvedValue(new Response(null, { status: 503 }))
 
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/received your donation/i)
-
-      // 1 analytics call + 5 retries = 6 total
+      await expect(donate(baseParams(), 'en')).rejects.toThrow(/received your donation/i)
+      // 5 retries + 1 analytics call
       expect(mockFetch).toHaveBeenCalledTimes(6)
     })
   })
 
   // ---- Wallet detection errors ----
   describe('wallet errors', () => {
-    it('lanza error cuando window no existe', async () => {
-      vi.stubGlobal('window', undefined)
-
+    it('lanza error cuando no hay provider', async () => {
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/wallet/i)
-    })
-
-    it('lanza error cuando ethereum no tiene request ni send', async () => {
-      vi.stubGlobal('window', {
-        location: { search: '', href: 'http://localhost' },
-        ethereum: { isMiniPay: false },
-      })
-
-      const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '1',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'en')).rejects.toThrow(/compatible/i)
+      await expect(
+        donate({ ...baseParams(), provider: undefined as any }, 'en'),
+      ).rejects.toThrow(/wallet/i)
     })
   })
 
@@ -287,13 +140,9 @@ describe('lib/donate', () => {
   describe('locale support', () => {
     it('usa español en mensaje de error cuando locale es es', async () => {
       const { donate } = await import('@/lib/donate')
-      await expect(donate({
-        regionId: 1,
-        amount: '0.01',
-        effectiveAddress: USER_ADDRESS,
-        usdtContractAddress: USDT_ADDRESS,
-        regionalDonationContractAddress: REGIONAL_DONATION_ADDRESS,
-      }, 'es')).rejects.toThrow(/monto m.nimo/)
+      await expect(donate({ ...baseParams(), amount: '0.01' }, 'es')).rejects.toThrow(
+        /monto m.nimo/,
+      )
     })
   })
 })

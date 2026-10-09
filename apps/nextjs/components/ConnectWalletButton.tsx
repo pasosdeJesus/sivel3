@@ -2,180 +2,166 @@
 
 import { useState } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import {
+  useInAppWallet,
+  InAppWalletSetup,
+  InAppWalletUnlock,
+} from '@pasosdejesus/m/wallet/next'
+import { getExternalProvider } from '@pasosdejesus/m/wallet'
+import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
 import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@pasosdejesus/m/shadcn-components/ui/popover'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@pasosdejesus/m/shadcn-components/ui/tooltip'
-import { Avatar, AvatarFallback, AvatarImage } from '@pasosdejesus/m/shadcn-components/ui/avatar'
 import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@pasosdejesus/m/shadcn-components/ui/dialog'
+
+const localT = {
+  en: {
+    connect: 'Connect Wallet',
+    title: 'Wallet',
+    inAppBtn: 'Use in-app wallet',
+    inAppHint: 'Create a wallet inside the app — no installation needed.',
+    external: 'Connect external wallet',
+    externalHint: 'Or connect a wallet you already have (Rabby, MetaMask…).',
+    disconnect: 'Disconnect',
+    connected: 'Connected wallet',
+    inAppBadge: 'In-app',
+    noExternal: 'No external wallet detected.',
+    externalFailed: 'Could not connect the external wallet.',
+    loading: 'Loading…',
+  },
+  es: {
+    connect: 'Conectar Billetera',
+    title: 'Billetera',
+    inAppBtn: 'Usar billetera de la aplicación',
+    inAppHint: 'Crea una billetera dentro de la aplicación, sin instalar nada.',
+    external: 'Conectar billetera externa',
+    externalHint: 'O conecta una billetera que ya tengas (Rabby, MetaMask…).',
+    disconnect: 'Desconectar',
+    connected: 'Billetera conectada',
+    inAppBadge: 'En la app',
+    noExternal: 'No se detectó billetera externa.',
+    externalFailed: 'No se pudo conectar la billetera externa.',
+    loading: 'Cargando…',
+  },
+}
+
+function shorten(addr: string) {
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`
+}
 
 export default function ConnectWalletButton() {
-  const { isConnected, phoneNumber, isMiniPay } = useWallet()
-  const [openPopover, setOpenPopover] = useState(false)
+  const { isConnected, effectiveAddress, isInApp, externalAvailable, disconnect } = useWallet()
+  const inApp = useInAppWallet()
+  const { t, locale } = useTranslation(localT)
+  const [open, setOpen] = useState(false)
+  const [showSetup, setShowSetup] = useState(false)
+  const [error, setError] = useState('')
+
+  const lang = locale === 'es' ? 'es' : 'en'
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (!next) {
+      setShowSetup(false)
+      setError('')
+    }
+  }
+
+  const handleExternal = async () => {
+    setError('')
+    const provider = getExternalProvider()
+    if (!provider) {
+      setError(t('noExternal'))
+      return
+    }
+    try {
+      await provider.request({ method: 'eth_requestAccounts' })
+      setOpen(false)
+    } catch {
+      setError(t('externalFailed'))
+    }
+  }
+
+  const renderContent = () => {
+    if (showSetup) {
+      return <InAppWalletSetup lang={lang} onDone={() => {}} />
+    }
+    if (isConnected && effectiveAddress) {
+      return (
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs text-muted-foreground">{t('connected')}</p>
+            <p className="text-sm font-mono break-all mt-1">{effectiveAddress}</p>
+            {isInApp && (
+              <Badge variant="secondary" className="mt-2 text-[10px]">
+                {t('inAppBadge')}
+              </Badge>
+            )}
+          </div>
+          <Separator />
+          <Button variant="outline" size="sm" className="w-full" onClick={() => disconnect()}>
+            {t('disconnect')}
+          </Button>
+        </div>
+      )
+    }
+    if (inApp.status === 'locked') {
+      return <InAppWalletUnlock lang={lang} onUnlocked={() => setOpen(false)} />
+    }
+    if (inApp.status === 'no-wallet') {
+      return (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t('inAppHint')}</p>
+          <Button className="w-full" onClick={() => setShowSetup(true)}>
+            {t('inAppBtn')}
+          </Button>
+          {externalAvailable && (
+            <>
+              <Separator />
+              <p className="text-xs text-muted-foreground">{t('externalHint')}</p>
+              <Button variant="outline" size="sm" className="w-full" onClick={handleExternal}>
+                {t('external')}
+              </Button>
+            </>
+          )}
+        </div>
+      )
+    }
+    return <p className="text-sm text-muted-foreground">{t('loading')}</p>
+  }
 
   return (
-    <TooltipProvider>
-      <ConnectButton.Custom>
-        {({
-          account,
-          chain,
-          openAccountModal,
-          openChainModal,
-          openConnectModal,
-          authenticationStatus,
-          mounted,
-        }) => {
-          const ready = mounted && authenticationStatus !== 'loading'
-          const connected = ready && account && chain && isConnected
-
-          return (
-            <div
-              {...(!ready && {
-                'aria-hidden': true,
-                className: 'opacity-0 pointer-events-none select-none',
-              })}
-            >
-              {!connected ? (
-                isMiniPay ? null : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={openConnectModal}
-                        variant="default"
-                        size="sm"
-                        className="gap-2"
-                      >
-                        <span className="text-lg">🔗</span>
-                        Conectar Wallet
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Conectar wallet Web3 (opcional)</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )
-              ) : (
-                <div className="flex items-center gap-2">
-                  {/* Botón de red con Badge */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={openChainModal}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1.5 px-2"
-                      >
-                        {chain.hasIcon && chain.iconUrl && (
-                          <Avatar className="h-4 w-4">
-                            <AvatarImage src={chain.iconUrl} alt={chain.name} />
-                            <AvatarFallback className="text-[10px]">
-                              {chain.name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <span className="text-xs font-medium truncate max-w-[60px]">
-                          {chain.name}
-                        </span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Cambiar red</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  {/* Botón de cuenta con Badge de estado */}
-                  <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="h-8 gap-2 px-3 bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        <Badge
-                          variant="outline"
-                          className="h-2 w-2 p-0 bg-green-500 border-green-500"
-                        />
-                        <span className="text-xs font-medium truncate max-w-[100px]">
-                          {isMiniPay && phoneNumber ? phoneNumber : account.displayName}
-                        </span>
-                        {isMiniPay && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] font-normal bg-blue-500/20 text-blue-800"
-                          >
-                            📱 MiniPay
-                          </Badge>
-                        )}
-                        {account.displayBalance && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] font-normal bg-emerald-500/20 text-emerald-800"
-                          >
-                            {account.displayBalance}
-                          </Badge>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64 p-0" align="end">
-                      <div className="p-4">
-                        <div className="space-y-3">
-                          <div>
-                            <h4 className="text-sm font-semibold">
-                              Wallet conectada
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {account.displayName}
-                            </p>
-                          </div>
-
-                          <Separator />
-
-                          <div className="space-y-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={openAccountModal}
-                            >
-                              👤 Ver detalles de cuenta
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={openChainModal}
-                            >
-                              🌐 Cambiar red
-                            </Button>
-                          </div>
-
-                          <Separator />
-
-                          <div className="pt-1">
-                            <p className="text-xs text-muted-foreground">
-                              Conexión Web3 para futuras funciones
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-            </div>
-          )
-        }}
-      </ConnectButton.Custom>
-    </TooltipProvider>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {isConnected && effectiveAddress ? (
+          <Button
+            variant="default"
+            size="sm"
+            className="h-8 gap-2 px-3 bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Badge variant="outline" className="h-2 w-2 p-0 bg-green-500 border-green-500" />
+            <span className="text-xs font-medium">{shorten(effectiveAddress)}</span>
+          </Button>
+        ) : (
+          <Button variant="default" size="sm" className="gap-2">
+            <span className="text-lg">🔗</span>
+            {t('connect')}
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('title')}</DialogTitle>
+        </DialogHeader>
+        {renderContent()}
+        {error && <p className="text-xs text-destructive">{error}</p>}
+      </DialogContent>
+    </Dialog>
   )
 }

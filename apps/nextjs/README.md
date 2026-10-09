@@ -33,9 +33,6 @@ Political Violence Information System (SIVeL)
     
     # -- Web3 Configuration --
 
-    # WalletConnect Project ID (get yours from https://cloud.walletconnect.com/)
-    NEXT_PUBLIC_WC_PROJECT_ID=0123
-
     # Application Name (displayed in wallet providers)
     NEXT_PUBLIC_APPNAME="SIVeL 3"
 

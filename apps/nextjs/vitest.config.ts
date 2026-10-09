@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
-    setupFiles: ['tests/setup-env.ts'],
+    setupFiles: ['tests/setup-env.ts', 'tests/setup.ts'],
     coverage: {
       enabled: true,
       all: true,

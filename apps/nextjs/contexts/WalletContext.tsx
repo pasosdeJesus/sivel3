@@ -1,8 +1,12 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
-import { useAccount, useDisconnect, useChainId, useConnect } from 'wagmi'
-import { useMiniPay } from '@/hooks/useMiniPay'
+import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo, useSyncExternalStore } from 'react'
+import { useInAppWallet } from '@pasosdejesus/m/wallet/next'
+import {
+  subscribeExternalProvider,
+  getExternalProviderSnapshot,
+  type Eip1193Provider,
+} from '@pasosdejesus/m/wallet'
 import { donate as donateFn } from '@/lib/donate'
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -29,14 +33,19 @@ interface WalletContextType {
   address: `0x${string}` | null
   effectiveAddress: `0x${string}` | null
   chainId: number | null
+  /** Effective EIP-1193 provider (in-app when unlocked, else external). */
+  provider: Eip1193Provider | null
+  isInApp: boolean
+  /** An external wallet is announced (EIP-6963) or present via `window.ethereum`. */
+  externalAvailable: boolean
   disconnect: () => void
-  donate: (regionId: number, amount: string, locale?: string) => Promise<{ txHash: string; slearn?: { success: boolean; slearnMinted?: string; message?: string; userMessage?: string }; mintedSbts?: { name: string; imageUrl: string }[] }>
+  donate: (regionId: number, amount: string, locale?: string) => Promise<{
+    txHash: string
+    slearn?: { success: boolean; slearnMinted?: string; message?: string; userMessage?: string }
+    mintedSbts?: { name: string; imageUrl: string }[]
+  }>
   isTransacting: boolean
   isProcessing: boolean
-  // Nuevas propiedades para MiniPay
-  isMiniPay: boolean
-  phoneNumber: string | null
-  connectMiniPay: () => Promise<void>
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined)
@@ -49,80 +58,70 @@ export const useWallet = () => {
   return context
 }
 
+const CHAIN_ID = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 42220 : 11142220
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { connect, connectors } = useConnect()
-  const chainId = useChainId()
-  const { isMiniPay, phoneNumber, isConnected: isMiniPayConnected, address: miniPayAddress } = useMiniPay()
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
+  const inApp = useInAppWallet()
+  const externalState = useSyncExternalStore(
+    subscribeExternalProvider,
+    getExternalProviderSnapshot,
+    getExternalProviderSnapshot,
+  )
+  const external = externalState.provider
 
-  // Sincronizar el estado de MiniPay con el estado de wagmi
-  const effectiveIsConnected = isConnected || (isMiniPay && isMiniPayConnected)
-  const effectiveAddress = address || miniPayAddress
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || undefined
+  const inAppProvider = useMemo(
+    () => (inApp.status === 'unlocked' ? inApp.getProvider(rpcUrl) : null),
+    [inApp.status, rpcUrl],
+  )
+  const provider = inAppProvider ?? external
+  const isInApp = !!inAppProvider
+  const externalAvailable = !!external
 
-  const [state, setState] = useState({
-    isConnected: false,
-    address: null as `0x${string}` | null,
-    chainId: null as number | null,
-  })
-
-  const connectMiniPay = useCallback(async () => {
-    // Detectar si MiniPay está disponible
-    if (typeof window === 'undefined' || !window.ethereum) {
-      throw new Error('No se detectó ninguna wallet. Asegúrate de tener MiniPay instalado.')
-    }
-
-    try {
-      // Solicitar conexión a MiniPay
-      await window.ethereum.request({ method: 'eth_requestAccounts' })
-
-      // Si hay un connector específico para MiniPay, usarlo
-      const miniPayConnector = connectors?.find((c: { id: string }) => c.id === 'minipay')
-      if (miniPayConnector) {
-        await connect({ connector: miniPayConnector })
-      }
-    } catch (err) {
-      console.error('Error conectando a MiniPay:', err)
-      throw new Error('No se pudo conectar a MiniPay. Verifica que esté instalado y desbloqueado.')
-    }
-  }, [connect, connectors])
+  const [address, setAddress] = useState<`0x${string}` | null>(null)
 
   useEffect(() => {
-    setState({
-      isConnected,
-      address: address || null,
-      chainId: chainId || 0,
-    })
-  }, [isConnected, address, chainId])
-
-  // Auto-conectar si es MiniPay y no está conectado
-  useEffect(() => {
-    const autoConnectMiniPay = async () => {
-      if (isMiniPay && !isConnected && typeof window !== 'undefined' && window.ethereum) {
-        try {
-          console.log('MiniPay detectado, conectando automáticamente...')
-          await window.ethereum.request({ method: 'eth_requestAccounts' })
-        } catch (err) {
-          console.warn('No se pudo conectar automáticamente a MiniPay:', err)
-        }
+    if (!provider) {
+      setAddress(null)
+      return
+    }
+    let cancelled = false
+    const read = async () => {
+      try {
+        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[]
+        if (!cancelled) setAddress((accounts?.[0] as `0x${string}`) ?? null)
+      } catch {
+        if (!cancelled) setAddress(null)
       }
     }
-    autoConnectMiniPay()
-  }, [isMiniPay, isConnected])
+    void read()
+    const onChange = (accounts: unknown) => {
+      const list = accounts as string[] | undefined
+      setAddress((list?.[0] as `0x${string}`) ?? null)
+    }
+    const p = provider as unknown as {
+      on?: (e: string, cb: (a: unknown) => void) => void
+      removeListener?: (e: string, cb: (a: unknown) => void) => void
+    }
+    p.on?.('accountsChanged', onChange)
+    return () => {
+      cancelled = true
+      p.removeListener?.('accountsChanged', onChange)
+    }
+  }, [provider])
 
-  // Estado local para donación en curso
+  const isConnected = !!provider && !!address
+  const effectiveAddress = address
+
   const [isDonating, setIsDonating] = useState(false)
 
-  // Track wallet connection changes for analytics
-  const prevConnected = useRef(effectiveIsConnected)
-
+  const prevConnected = useRef(isConnected)
   useEffect(() => {
-    if (prevConnected.current !== effectiveIsConnected) {
-      if (effectiveIsConnected && effectiveAddress) {
+    if (prevConnected.current !== isConnected) {
+      if (isConnected && effectiveAddress) {
         recordWalletEvent('connect_wallet', effectiveAddress.toLowerCase())
-        // Mint Connector SBT
         fetch('/api/credential/mint-connector', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -131,34 +130,34 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }).then(async r => {
           if (!r.ok) return
           const data = await r.json()
-          if (data.minted) {
-            console.log('Connector SBT minted')
-            if (data.mintedSbts) {
-              for (const sbt of data.mintedSbts) {
-                toast({ title: t('sbtTitle'), description: sbt.name, duration: 4000 })
-              }
+          if (data.minted && data.mintedSbts) {
+            for (const sbt of data.mintedSbts) {
+              toast({ title: t('sbtTitle'), description: sbt.name, duration: 4000 })
             }
-          } else if (data.reason === 'not_verified') {
-            console.info('Self-verification on learn.tg required for SBTs')
           }
         }).catch(() => {})
-      } else if (!effectiveIsConnected) {
+      } else if (!isConnected) {
         recordWalletEvent('disconnect_wallet')
       }
-      prevConnected.current = effectiveIsConnected
+      prevConnected.current = isConnected
     }
-  }, [effectiveIsConnected, effectiveAddress])
+  }, [isConnected, effectiveAddress, t, toast])
 
-  // FUNCIÓN DE DONACIÓN UNIFICADA (usa lib/donate.ts)
-  const donate = useCallback(async (regionId: number, amount: string, locale?: string): Promise<{ txHash: string; slearn?: any; mintedSbts?: { name: string; imageUrl: string }[] }> => {
+  const disconnect = useCallback(() => {
+    if (isInApp) {
+      void inApp.lock()
+    }
+    setAddress(null)
+  }, [isInApp, inApp])
+
+  const donate = useCallback(async (regionId: number, amount: string, locale?: string) => {
     const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
     const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
 
     if (!regionalDonationContractAddress || !usdtContractAddress) {
       throw new Error('Contract addresses not configured')
     }
-
-    if (!effectiveAddress) {
+    if (!effectiveAddress || !provider) {
       throw new Error('Wallet not connected')
     }
 
@@ -168,34 +167,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         regionId,
         amount,
         effectiveAddress,
+        provider,
         usdtContractAddress,
         regionalDonationContractAddress,
       }, locale)
     } finally {
       setIsDonating(false)
     }
-  }, [effectiveAddress])
-
-  // isTransacting e isProcessing reflejan solo el estado local de donación
-  // (el flujo unificado no usa wagmi writeContract)
-  const isTransacting = isDonating
-  const isProcessing = isDonating
+  }, [effectiveAddress, provider])
 
   const value: WalletContextType = {
-    isConnected: effectiveIsConnected,
-    address: effectiveAddress || state.address,
-    effectiveAddress: effectiveAddress || state.address,
-    chainId: state.chainId,
+    isConnected,
+    address: effectiveAddress,
+    effectiveAddress,
+    chainId: CHAIN_ID,
+    provider,
+    isInApp,
+    externalAvailable,
     disconnect,
     donate,
-    isTransacting,
-    isProcessing,
-    isMiniPay,
-    phoneNumber,
-    connectMiniPay,
+    isTransacting: isDonating,
+    isProcessing: isDonating,
   }
 
-  return (
-    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
-  )
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
 }

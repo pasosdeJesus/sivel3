@@ -17,8 +17,8 @@ vi.mock('@/hooks/useTranslation', () => ({
   useTranslation: () => ({ t: (key: string) => key, locale: 'en' }),
 }))
 
-// ConnectWalletButton needs the wagmi/RainbowKit providers; it is not the
-// subject of these tests.
+// ConnectWalletButton consumes the WalletContext; it is not the subject of
+// these tests.
 vi.mock('@/components/ConnectWalletButton', () => ({
   default: () => null,
 }))
