@@ -13,20 +13,6 @@ vi.mock('@/.config/kysely.config', async () => {
   return { newKyselyPostgresql: () => new apiDbMocks.MockKysely() }
 })
 
-// `m`'s `mockEb` hands the bare expression builder to the `eb('col','in',cb)`
-// callback, which lacks `selectFrom` (real Kysely's `eb` has it). sivel3's
-// `datos-osm` route builds subqueries there, so extend the shared `eb` with a
-// chainable subquery builder (reported to `m`; remove once it is covered).
-function wireEbSubqueries() {
-  const eb = apiDbMocks.mockEb as any
-  eb.mockImplementation((lhs: any, op: any, rhs: any) => {
-    const target = Object.assign(eb, { selectFrom: () => new apiDbMocks.MockKysely() })
-    if (typeof op === 'function') op(target)
-    else if (typeof rhs === 'function') rhs(target)
-    return { __expr: true, lhs, op, rhs }
-  })
-}
-
 let datosOsmGET: (request: Request) => Promise<Response>
 let casoGET: (
   request: Request,
@@ -41,7 +27,6 @@ describe('GET /api/cases/datos-osm', () => {
 
   beforeEach(() => {
     apiDbMocks.resetMocks()
-    wireEbSubqueries()
   })
 
   it('returns the { respuesta } envelope with mapped markers', async () => {
