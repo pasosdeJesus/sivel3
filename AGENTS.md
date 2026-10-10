@@ -2,6 +2,20 @@
 
 As an AI Agent, you must follow these instructions to align with your operational purpose within this project.
 
+> ## ⛔ Critical rule — Git is read-only for the agent
+>
+> **Never write to git or to the remote.** Do not run `git add`, `git commit`,
+> `git push`, `git tag`, `git reset`, `git restore`/`git checkout`, `git rm`,
+> `git mv`, `git rebase`, `git merge`, `git cherry-pick`, `git stash`,
+> `git branch -d/-m`, `git remote set-url`, nor write commands that mutate issues
+> or PRs (`gh pr create`, `gh pr merge`, `gh issue create/close`, `gh api` with a
+> write method).
+>
+> **Commits, tags, pushes and deployments are the human operator's job.** The
+> agent may only *read* git: `git status`, `git diff`, `git log`, `git show`,
+> `git blame`, `git remote -v`. If changes should be committed, stop and tell the
+> operator instead of committing.
+
 
 ### 1. Assimilate Your Foundational Knowledge
 
