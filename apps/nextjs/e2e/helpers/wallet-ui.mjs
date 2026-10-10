@@ -30,13 +30,30 @@ export function loadPrivateKey() {
   return null
 }
 
-/** Waits for the header connect button and clicks it (opens the wallet dialog). */
+/**
+ * Waits for the header connect button and clicks it to open the wallet dialog.
+ * Retries the click: on a remote (slow to hydrate) site the first click can land
+ * before React attaches the handler, so a single click is not reliable.
+ */
 export async function openWalletDialog(page, { timeout = 90000 } = {}) {
   await page.waitForFunction(() => !!document.querySelector('[data-testid="connect-wallet"]'), {
     timeout,
   })
-  const btn = await page.$('[data-testid="connect-wallet"]')
-  await btn.click()
+  const dialogOpen = () =>
+    page.evaluate(
+      () =>
+        !!document.querySelector('[data-testid="use-in-app-wallet"]') ||
+        !!document.querySelector('[data-testid="in-app-wallet-unlock"]') ||
+        !!document.querySelector('[data-testid="disconnect-wallet"]'),
+    )
+  const deadline = Date.now() + timeout
+  while (Date.now() < deadline) {
+    if (await dialogOpen()) return
+    const btn = await page.$('[data-testid="connect-wallet"]')
+    if (btn) await btn.click().catch(() => {})
+    await new Promise((resolve) => setTimeout(resolve, 800))
+  }
+  throw new Error('wallet dialog did not open (connect button not interactive?)')
 }
 
 /** In the dialog menu (no in-app wallet yet) picks the in-app path. */
