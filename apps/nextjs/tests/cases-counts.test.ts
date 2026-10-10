@@ -1,59 +1,17 @@
-import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest'
+import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
 
-// ============================================================
-// Full Kysely chain mock — function-based builder
-// ============================================================
-const mockExecute = vi.fn()
-const mockExecuteTakeFirst = vi.fn()
-const mockSqlExecute = vi.fn()
-
-// sql template tag that supports .as() and .execute()
-const mockSql = Object.assign(
-  (..._args: any[]) => ({
-    as: vi.fn().mockReturnValue({}),
-    execute: mockSqlExecute,
-  }),
-  {
-    val: vi.fn((v: any) => v),
-  }
-)
-
-function makeBuilder(): Record<string, any> {
-  return {
-    selectFrom: () => makeBuilder(),
-    select: () => makeBuilder(),
-    selectAll: () => makeBuilder(),
-    innerJoin: () => makeBuilder(),
-    leftJoin: () => makeBuilder(),
-    where: () => makeBuilder(),
-    orderBy: () => makeBuilder(),
-    limit: () => makeBuilder(),
-    groupBy: () => makeBuilder(),
-    insertInto: () => makeBuilder(),
-    values: () => makeBuilder(),
-    updateTable: () => makeBuilder(),
-    set: () => makeBuilder(),
-    deleteFrom: () => makeBuilder(),
-    returningAll: () => makeBuilder(),
-    execute: () => mockExecute(),
-    executeTakeFirst: () => mockExecuteTakeFirst(),
-    executeTakeFirstOrThrow: () => mockExecuteTakeFirst(),
-  }
-}
-
-// Mock the config module
-vi.mock('@/.config/kysely.config', () => ({
-  newKyselyPostgresql: vi.fn(() => makeBuilder()),
-}))
-
-// Mock kysely module for sql template tag
-vi.mock('kysely', () => ({
-  Kysely: vi.fn(() => makeBuilder()),
-  sql: mockSql,
-}))
+// A5: the Kysely mock comes from `@pasosdejesus/m/test-utils` (the global
+// `tests/setup.ts` already mocks `kysely` with this same singleton). The factory
+// is async because `vi.mock` is hoisted and cannot reference the import binding
+// (see the m test-utils README §8).
+vi.mock('@/.config/kysely.config', async () => {
+  const { apiDbMocks } = await import('@pasosdejesus/m/test-utils/kysely-mocks')
+  return { newKyselyPostgresql: () => new apiDbMocks.MockKysely() }
+})
 
 let GET: (request: Request) => Promise<Response>
 
@@ -64,15 +22,12 @@ describe('GET /api/cases/counts', () => {
   })
 
   beforeEach(() => {
-    vi.restoreAllMocks()
-    mockExecute.mockReset()
-    mockExecuteTakeFirst.mockReset()
-    mockSqlExecute.mockReset()
+    apiDbMocks.resetMocks()
   })
 
   it('returns counts with default values when DB is empty', async () => {
-    mockExecuteTakeFirst.mockResolvedValue(null)
-    mockSqlExecute.mockResolvedValue({ rows: [{ count: '0' }] })
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue(null)
+    apiDbMocks.mockSqlExecute.mockResolvedValue({ rows: [{ count: '0' }] })
 
     const req = new Request('http://localhost/api/cases/counts')
     const res = await GET(req)
@@ -86,8 +41,8 @@ describe('GET /api/cases/counts', () => {
   })
 
   it('returns counts from DB', async () => {
-    mockExecuteTakeFirst.mockResolvedValue({ count: '250' })
-    mockSqlExecute.mockResolvedValue({ rows: [{ count: '300' }] })
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({ count: '250' })
+    apiDbMocks.mockSqlExecute.mockResolvedValue({ rows: [{ count: '300' }] })
 
     const req = new Request('http://localhost/api/cases/counts')
     const res = await GET(req)
@@ -101,7 +56,7 @@ describe('GET /api/cases/counts', () => {
   })
 
   it('returns 500 on DB error', async () => {
-    mockExecuteTakeFirst.mockImplementation(() => {
+    apiDbMocks.mockExecuteTakeFirst.mockImplementation(() => {
       throw new Error('Connection refused')
     })
 
@@ -114,8 +69,8 @@ describe('GET /api/cases/counts', () => {
   })
 
   it('returns integer counts when DB returns bigint', async () => {
-    mockExecuteTakeFirst.mockResolvedValue({ count: BigInt(999) })
-    mockSqlExecute.mockResolvedValue({ rows: [{ count: '555' }] })
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({ count: BigInt(999) })
+    apiDbMocks.mockSqlExecute.mockResolvedValue({ rows: [{ count: '555' }] })
 
     const req = new Request('http://localhost/api/cases/counts')
     const res = await GET(req)

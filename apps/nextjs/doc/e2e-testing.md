@@ -8,8 +8,8 @@ End-to-end testing for sivel3 uses `@pasosdejesus/m`'s test runner
 
 `bin/m test:e2e` is only registered **when `e2e/` exists** (this is why it does
 not appear in `bin/m --help` in a checkout without the directory). See
-`REQ/66` for the plan (Block A = smoke, doable now; Block B = browser + signature
-specs).
+`REQ/66` for the plan; **Blocks A (smoke) and B (browser + signature specs) are
+implemented**.
 
 ## Quick reference
 
@@ -30,12 +30,33 @@ variables yourself.
 
 Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 
+## Browser and signature specs (`e2e/specs/`)
+
+| Spec | Needs | What it checks |
+|---|---|---|
+| `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
+| `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through the UI (`setupInAppWallet`), sees the recovery phrase; reloads (locks it) and unlocks (`unlockInAppWallet`). |
+| `signatures.spec.mjs` | server | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401). |
+| `prealert-buy.spec.mjs` | server | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404). |
+
+The wallet specs run on `/en`: the connect button lives in the shared Header, which
+is the same on every route. The OSM map route (`/en/cases/osmmap`,
+`/es/cases/osmmap`) is covered by the HTTP smoke layer (`public-site.spec.mjs`); the
+map page itself now renders in the browser too (the counts widget no longer
+white-screens when `/api/cases/counts` fails).
+
+The in-app form is driven by `@pasosdejesus/m/e2e`'s `setupInAppWallet`/
+`unlockInAppWallet` (testids of `@pasosdejesus/m/wallet/next`); `helpers/wallet-ui.mjs`
+only covers sivel3's shell (testids of `ConnectWalletButton`). Optional positive
+paths are gated by env (below) and otherwise print `[SKIP]`.
+
 ## Running against a local server
 
 ```sh
 cd apps/nextjs
 make dev                                   # http://localhost:4000
 SITE_URL=http://localhost:4000 make test-smoke
+SITE_URL=http://localhost:4000 make test-e2e
 ```
 
 `SITE_URL` is honoured by `@pasosdejesus/m`'s `initTestEnv` (P2, `m@0.23.0`), so
@@ -52,6 +73,9 @@ the specs navigate to the HTTP local server — no per-spec patching.
 | `CHROME_PATH` | auto-detect | Chrome/Chromium binary |
 | `E2E_SPEC_DELAY_MS` | `1500` | pause between specs (rate-limit relief) |
 | `WALLET_INDEX` | `0` | wallet rotation across specs |
+| `PREALERT_ID` | (unset) | a **converted** pre-alert → runs `signatures`' positive path |
+| `PENDING_PREALERT_ID` | (unset) | a **pending** pre-alert → runs `prealert-buy`' positive path |
+| `DOCUMENTER_WALLETS` | (server) | must list the test wallet for the `signatures` positive path |
 
 ## OpenBSD / adJ notes
 

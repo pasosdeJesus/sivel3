@@ -105,7 +105,13 @@ export default function ConnectWalletButton() {
             )}
           </div>
           <Separator />
-          <Button variant="outline" size="sm" className="w-full" onClick={() => disconnect()}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            data-testid="disconnect-wallet"
+            onClick={() => disconnect()}
+          >
             {t('disconnect')}
           </Button>
         </div>
@@ -118,14 +124,24 @@ export default function ConnectWalletButton() {
       return (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">{t('inAppHint')}</p>
-          <Button className="w-full" onClick={() => setShowSetup(true)}>
+          <Button
+            className="w-full"
+            data-testid="use-in-app-wallet"
+            onClick={() => setShowSetup(true)}
+          >
             {t('inAppBtn')}
           </Button>
           {externalAvailable && (
             <>
               <Separator />
               <p className="text-xs text-muted-foreground">{t('externalHint')}</p>
-              <Button variant="outline" size="sm" className="w-full" onClick={handleExternal}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                data-testid="use-external-wallet"
+                onClick={handleExternal}
+              >
                 {t('external')}
               </Button>
             </>
@@ -144,12 +160,13 @@ export default function ConnectWalletButton() {
             variant="default"
             size="sm"
             className="h-8 gap-2 px-3 bg-emerald-600 hover:bg-emerald-700"
+            data-testid="connected-wallet"
           >
             <Badge variant="outline" className="h-2 w-2 p-0 bg-green-500 border-green-500" />
             <span className="text-xs font-medium">{shorten(effectiveAddress)}</span>
           </Button>
         ) : (
-          <Button variant="default" size="sm" className="gap-2">
+          <Button variant="default" size="sm" className="gap-2" data-testid="connect-wallet">
             <span className="text-lg">🔗</span>
             {t('connect')}
           </Button>

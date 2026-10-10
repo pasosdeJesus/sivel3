@@ -3768,7 +3768,9 @@ CREATE TABLE public.pre_alert (
     scored_at timestamp without time zone,
     rejection_reason text,
     created_at timestamp without time zone DEFAULT '2026-06-21 22:07:15.370705'::timestamp without time zone,
-    updated_at timestamp without time zone DEFAULT '2026-06-21 22:07:15.370705'::timestamp without time zone
+    updated_at timestamp without time zone DEFAULT '2026-06-21 22:07:15.370705'::timestamp without time zone,
+    feedback text,
+    citizen_notes text
 );
 
 

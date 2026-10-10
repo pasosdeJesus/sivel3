@@ -1,38 +1,31 @@
-import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest'
+import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
 
-// ============================================================
-// Full Kysely chain mock — function-based builder
-// ============================================================
-const mockExecute = vi.fn()
-const mockExecuteTakeFirst = vi.fn()
+// A5: the Kysely mock comes from `@pasosdejesus/m/test-utils` (the global
+// `tests/setup.ts` already mocks `kysely` with this same singleton). The factory
+// is async because `vi.mock` is hoisted and cannot reference the import binding
+// (see the m test-utils README §8).
+vi.mock('@/.config/kysely.config', async () => {
+  const { apiDbMocks } = await import('@pasosdejesus/m/test-utils/kysely-mocks')
+  return { newKyselyPostgresql: () => new apiDbMocks.MockKysely() }
+})
 
-function makeBuilder(): Record<string, any> {
-  return {
-    selectFrom: () => makeBuilder(),
-    select: () => makeBuilder(),
-    selectAll: () => makeBuilder(),
-    innerJoin: () => makeBuilder(),
-    leftJoin: () => makeBuilder(),
-    where: () => makeBuilder(),
-    orderBy: () => makeBuilder(),
-    limit: () => makeBuilder(),
-    groupBy: () => makeBuilder(),
-    execute: () => mockExecute(),
-    executeTakeFirst: () => mockExecuteTakeFirst(),
-  }
+// `m`'s `mockEb` hands the bare expression builder to the `eb('col','in',cb)`
+// callback, which lacks `selectFrom` (real Kysely's `eb` has it). sivel3's
+// `datos-osm` route builds subqueries there, so extend the shared `eb` with a
+// chainable subquery builder (reported to `m`; remove once it is covered).
+function wireEbSubqueries() {
+  const eb = apiDbMocks.mockEb as any
+  eb.mockImplementation((lhs: any, op: any, rhs: any) => {
+    const target = Object.assign(eb, { selectFrom: () => new apiDbMocks.MockKysely() })
+    if (typeof op === 'function') op(target)
+    else if (typeof rhs === 'function') rhs(target)
+    return { __expr: true, lhs, op, rhs }
+  })
 }
-
-vi.mock('@/.config/kysely.config', () => ({
-  newKyselyPostgresql: vi.fn(() => makeBuilder()),
-}))
-
-vi.mock('kysely', () => ({
-  Kysely: vi.fn(() => makeBuilder()),
-  sql: vi.fn(() => ({})),
-}))
 
 let datosOsmGET: (request: Request) => Promise<Response>
 let casoGET: (
@@ -47,13 +40,12 @@ describe('GET /api/cases/datos-osm', () => {
   })
 
   beforeEach(() => {
-    vi.restoreAllMocks()
-    mockExecute.mockReset()
-    mockExecuteTakeFirst.mockReset()
+    apiDbMocks.resetMocks()
+    wireEbSubqueries()
   })
 
   it('returns the { respuesta } envelope with mapped markers', async () => {
-    mockExecute.mockResolvedValue([
+    apiDbMocks.mockExecute.mockResolvedValue([
       {
         caso_id: 1,
         latitud: 2.4419,
@@ -96,7 +88,7 @@ describe('GET /api/cases/datos-osm', () => {
   })
 
   it('returns an empty respuesta when there are no markers', async () => {
-    mockExecute.mockResolvedValue([])
+    apiDbMocks.mockExecute.mockResolvedValue([])
 
     const req = new Request('http://localhost/api/cases/datos-osm')
     const res = await datosOsmGET(req)
@@ -107,7 +99,7 @@ describe('GET /api/cases/datos-osm', () => {
   })
 
   it('accepts every filter without error', async () => {
-    mockExecute.mockResolvedValue([])
+    apiDbMocks.mockExecute.mockResolvedValue([])
 
     const params = new URLSearchParams({
       'filtro[fechaini]': '2024-01-01',
@@ -125,7 +117,7 @@ describe('GET /api/cases/datos-osm', () => {
   })
 
   it('returns 500 on DB error', async () => {
-    mockExecute.mockImplementation(() => {
+    apiDbMocks.mockExecute.mockImplementation(() => {
       throw new Error('Connection refused')
     })
 
@@ -148,9 +140,7 @@ describe('GET /api/cases/[id]', () => {
   })
 
   beforeEach(() => {
-    vi.restoreAllMocks()
-    mockExecute.mockReset()
-    mockExecuteTakeFirst.mockReset()
+    apiDbMocks.resetMocks()
   })
 
   function ctx(id: string) {
@@ -158,7 +148,7 @@ describe('GET /api/cases/[id]', () => {
   }
 
   it('returns the { caso } envelope with victims and perpetrators', async () => {
-    mockExecuteTakeFirst.mockResolvedValue({
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({
       id: 42,
       titulo: 'Masacre de X',
       hechos: 'Descripción de los hechos',
@@ -170,7 +160,7 @@ describe('GET /api/cases/[id]', () => {
       municipio: 'Popayán',
       centro_poblado: 'El Tambo',
     })
-    mockExecute
+    apiDbMocks.mockExecute
       .mockResolvedValueOnce([
         { nombres: 'Ana', apellidos: 'Pérez' },
         { nombres: 'Luis', apellidos: 'Gómez' },
@@ -197,7 +187,7 @@ describe('GET /api/cases/[id]', () => {
   })
 
   it('exposes lugar only for "otro sitio" (tsitio_id == 3)', async () => {
-    mockExecuteTakeFirst.mockResolvedValue({
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({
       id: 7,
       titulo: 'Caso',
       hechos: 'Hechos',
@@ -209,7 +199,7 @@ describe('GET /api/cases/[id]', () => {
       municipio: null,
       centro_poblado: null,
     })
-    mockExecute.mockResolvedValueOnce([]).mockResolvedValueOnce([])
+    apiDbMocks.mockExecute.mockResolvedValueOnce([]).mockResolvedValueOnce([])
 
     const req = new Request('http://localhost/api/cases/7')
     const res = await casoGET(req, ctx('7'))
@@ -222,7 +212,7 @@ describe('GET /api/cases/[id]', () => {
   })
 
   it('returns 404 when the case does not exist', async () => {
-    mockExecuteTakeFirst.mockResolvedValue(undefined)
+    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue(undefined)
 
     const req = new Request('http://localhost/api/cases/999')
     const res = await casoGET(req, ctx('999'))
@@ -237,11 +227,11 @@ describe('GET /api/cases/[id]', () => {
     const res = await casoGET(req, ctx('abc'))
 
     expect(res.status).toBe(404)
-    expect(mockExecuteTakeFirst).not.toHaveBeenCalled()
+    expect(apiDbMocks.mockExecuteTakeFirst).not.toHaveBeenCalled()
   })
 
   it('returns 500 on DB error', async () => {
-    mockExecuteTakeFirst.mockImplementation(() => {
+    apiDbMocks.mockExecuteTakeFirst.mockImplementation(() => {
       throw new Error('Connection refused')
     })
 

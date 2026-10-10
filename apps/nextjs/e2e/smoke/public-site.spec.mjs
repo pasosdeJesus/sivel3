@@ -26,6 +26,8 @@ async function main() {
   console.log(`Smoke: public site — ${SITE}\n`)
   await check('/en', 'en')
   await check('/es', 'es')
+  await check('/en/cases/osmmap', 'en (map)')
+  await check('/es/cases/osmmap', 'es (map)')
   process.exit(summary(t0) > 0 ? 1 : 0)
 }
 

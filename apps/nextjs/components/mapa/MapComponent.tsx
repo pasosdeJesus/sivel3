@@ -181,8 +181,14 @@ export default function MapComponent({
       if (onCargarConteos) {
         const conteosUrl = `/api/cases/counts?${new URLSearchParams(filtros).toString()}`
         const conteosRes = await fetch(conteosUrl)
-        const conteosData = await conteosRes.json()
-        onCargarConteos(conteosData)
+        // A failed counts request returns an error body (no `casos`/`actos`…);
+        // passing it on crashed the counts widget. Only propagate a valid payload.
+        if (conteosRes.ok) {
+          const conteosData = await conteosRes.json()
+          onCargarConteos(conteosData)
+        } else {
+          console.error('Error cargando conteos:', conteosRes.status)
+        }
       }
 
       markersRef.current?.clearLayers()

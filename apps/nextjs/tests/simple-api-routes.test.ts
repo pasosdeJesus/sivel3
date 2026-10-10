@@ -1,52 +1,17 @@
-import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest'
+import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
 
-// ============================================================
-// Kysely chain mock — vi.mock must be top-level for hoisting
-// ============================================================
-const mockExecute = vi.fn()
-const mockExecuteTakeFirst = vi.fn()
-
-const mockSql = vi.fn(() => ({
-  as: vi.fn().mockReturnValue({}),
-  execute: vi.fn(),
-  val: vi.fn((v: any) => v),
-}))
-
-function makeBuilder(): Record<string, any> {
-  return {
-    selectFrom: () => makeBuilder(),
-    select: () => makeBuilder(),
-    selectAll: () => makeBuilder(),
-    innerJoin: () => makeBuilder(),
-    leftJoin: () => makeBuilder(),
-    where: () => makeBuilder(),
-    orderBy: () => makeBuilder(),
-    limit: () => makeBuilder(),
-    groupBy: () => makeBuilder(),
-    insertInto: () => makeBuilder(),
-    values: () => makeBuilder(),
-    updateTable: () => makeBuilder(),
-    set: () => makeBuilder(),
-    deleteFrom: () => makeBuilder(),
-    returningAll: () => makeBuilder(),
-    execute: () => mockExecute(),
-    executeTakeFirst: () => mockExecuteTakeFirst(),
-    executeTakeFirstOrThrow: () => mockExecuteTakeFirst(),
-  }
-}
-
-vi.mock('@/.config/kysely.config', () => ({
-  newKyselyPostgresql: vi.fn(() => makeBuilder()),
-}))
-
-vi.mock('kysely', () => ({
-  Kysely: vi.fn(() => makeBuilder()),
-  PostgresDialect: vi.fn(),
-  sql: mockSql,
-}))
+// A5: the Kysely mock comes from `@pasosdejesus/m/test-utils` (the global
+// `tests/setup.ts` already mocks `kysely` with this same singleton). The factory
+// is async because `vi.mock` is hoisted and cannot reference the import binding
+// (see the m test-utils README §8).
+vi.mock('@/.config/kysely.config', async () => {
+  const { apiDbMocks } = await import('@pasosdejesus/m/test-utils/kysely-mocks')
+  return { newKyselyPostgresql: () => new apiDbMocks.MockKysely() }
+})
 
 let regionsGET: (request: Request) => Promise<Response>
 let categoriesGET: (request: Request) => Promise<Response>
@@ -69,16 +34,14 @@ describe('API reference data endpoints', () => {
   })
 
   beforeEach(() => {
-    vi.restoreAllMocks()
-    mockExecute.mockReset()
-    mockExecuteTakeFirst.mockReset()
+    apiDbMocks.resetMocks()
   })
 
   // ---- Regions ----
 
   describe('GET /api/regions', () => {
     it('returns donation regions in English by default', async () => {
-      mockExecute.mockResolvedValue([
+      apiDbMocks.mockExecute.mockResolvedValue([
         { id: 1, name: 'Colombia' },
         { id: 2, name: 'Israel/Palestine' },
       ])
@@ -95,7 +58,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns donation regions in Spanish when locale=es', async () => {
-      mockExecute.mockResolvedValue([
+      apiDbMocks.mockExecute.mockResolvedValue([
         { id: 1, name: 'Colombia' },
         { id: 2, name: 'Israel/Palestina' },
       ])
@@ -111,7 +74,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns 500 on DB error', async () => {
-      mockExecute.mockRejectedValue(new Error('Connection lost'))
+      apiDbMocks.mockExecute.mockRejectedValue(new Error('Connection lost'))
 
       const req = new Request('http://localhost/api/regions') as any
       req.nextUrl = new URL('http://localhost/api/regions')
@@ -128,7 +91,7 @@ describe('API reference data endpoints', () => {
 
   describe('GET /api/categories', () => {
     it('returns enabled categories ordered by code', async () => {
-      mockExecute.mockResolvedValue([
+      apiDbMocks.mockExecute.mockResolvedValue([
         { id: 1, nombre: 'A 1 - Homicidio' },
         { id: 2, nombre: 'B 2 - Desplazamiento' },
       ])
@@ -143,7 +106,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns 500 on DB error', async () => {
-      mockExecute.mockRejectedValue(new Error('Connection lost'))
+      apiDbMocks.mockExecute.mockRejectedValue(new Error('Connection lost'))
 
       const req = new Request('http://localhost/api/categories')
       const res = await categoriesGET(req)
@@ -152,7 +115,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns empty array when no categories enabled', async () => {
-      mockExecute.mockResolvedValue([])
+      apiDbMocks.mockExecute.mockResolvedValue([])
 
       const req = new Request('http://localhost/api/categories')
       const res = await categoriesGET(req)
@@ -167,7 +130,7 @@ describe('API reference data endpoints', () => {
 
   describe('GET /api/departments', () => {
     it('returns Colombian departments ordered by name', async () => {
-      mockExecute.mockResolvedValue([
+      apiDbMocks.mockExecute.mockResolvedValue([
         { id: 1, nombre: 'ANTIOQUIA' },
         { id: 2, nombre: 'BOGOTÁ D.C.' },
         { id: 3, nombre: 'CUNDINAMARCA' },
@@ -183,7 +146,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns 500 on DB error', async () => {
-      mockExecute.mockRejectedValue(new Error('Connection lost'))
+      apiDbMocks.mockExecute.mockRejectedValue(new Error('Connection lost'))
 
       const req = new Request('http://localhost/api/departments')
       const res = await departmentsGET(req)
@@ -196,7 +159,7 @@ describe('API reference data endpoints', () => {
 
   describe('GET /api/alleged-perpetrators', () => {
     it('returns enabled perpetrators ordered by name', async () => {
-      mockExecute.mockResolvedValue([
+      apiDbMocks.mockExecute.mockResolvedValue([
         { id: 1, nombre: 'Paramilitares' },
         { id: 2, nombre: 'Guerrilla' },
       ])
@@ -211,7 +174,7 @@ describe('API reference data endpoints', () => {
     })
 
     it('returns 500 on DB error', async () => {
-      mockExecute.mockRejectedValue(new Error('Connection lost'))
+      apiDbMocks.mockExecute.mockRejectedValue(new Error('Connection lost'))
 
       const req = new Request('http://localhost/api/alleged-perpetrators')
       const res = await allegedPerpetratorsGET(req)

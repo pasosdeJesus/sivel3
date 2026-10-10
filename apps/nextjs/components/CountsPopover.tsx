@@ -20,6 +20,14 @@ interface CountsPopoverProps {
 export function CountsPopover({ counts, labelCases, labelVictims, labelVictimizations, labelActs, title, totalsByFilters, variant = 'mobile' }: CountsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
 
+  // The counts endpoint can fail; never assume the four keys are present.
+  const c = {
+    casos: Number(counts?.casos) || 0,
+    victimas: Number(counts?.victimas) || 0,
+    victimizaciones: Number(counts?.victimizaciones) || 0,
+    actos: Number(counts?.actos) || 0,
+  }
+
   // Versión desktop: card completa siempre visible
   if (variant === 'desktop') {
     return (
@@ -29,13 +37,13 @@ export function CountsPopover({ counts, labelCases, labelVictims, labelVictimiza
           {totalsByFilters && <CardDescription>{totalsByFilters}</CardDescription>}
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between"><span>{labelCases}</span><Badge>{counts.casos.toLocaleString()}</Badge></div>
+          <div className="flex justify-between"><span>{labelCases}</span><Badge>{c.casos.toLocaleString()}</Badge></div>
           <Separator />
-          <div className="flex justify-between"><span>{labelVictims}</span><Badge>{counts.victimas.toLocaleString()}</Badge></div>
+          <div className="flex justify-between"><span>{labelVictims}</span><Badge>{c.victimas.toLocaleString()}</Badge></div>
           <Separator />
-          <div className="flex justify-between"><span>{labelVictimizations}</span><Badge>{counts.victimizaciones.toLocaleString()}</Badge></div>
+          <div className="flex justify-between"><span>{labelVictimizations}</span><Badge>{c.victimizaciones.toLocaleString()}</Badge></div>
           <Separator />
-          <div className="flex justify-between"><span>{labelActs}</span><Badge>{counts.actos.toLocaleString()}</Badge></div>
+          <div className="flex justify-between"><span>{labelActs}</span><Badge>{c.actos.toLocaleString()}</Badge></div>
         </CardContent>
       </Card>
     )
@@ -59,10 +67,10 @@ export function CountsPopover({ counts, labelCases, labelVictims, labelVictimiza
             <button onClick={() => setIsOpen(false)} className="text-gray-500">✕</button>
           </div>
           <div className="p-3 space-y-2">
-            <div className="flex justify-between"><span className="text-sm">{labelCases}</span><Badge>{counts.casos.toLocaleString()}</Badge></div>
-            <div className="flex justify-between"><span className="text-sm">{labelVictims}</span><Badge>{counts.victimas.toLocaleString()}</Badge></div>
-            <div className="flex justify-between"><span className="text-sm">{labelVictimizations}</span><Badge>{counts.victimizaciones.toLocaleString()}</Badge></div>
-            <div className="flex justify-between"><span className="text-sm">{labelActs}</span><Badge>{counts.actos.toLocaleString()}</Badge></div>
+            <div className="flex justify-between"><span className="text-sm">{labelCases}</span><Badge>{c.casos.toLocaleString()}</Badge></div>
+            <div className="flex justify-between"><span className="text-sm">{labelVictims}</span><Badge>{c.victimas.toLocaleString()}</Badge></div>
+            <div className="flex justify-between"><span className="text-sm">{labelVictimizations}</span><Badge>{c.victimizaciones.toLocaleString()}</Badge></div>
+            <div className="flex justify-between"><span className="text-sm">{labelActs}</span><Badge>{c.actos.toLocaleString()}</Badge></div>
           </div>
         </div>
       )}
