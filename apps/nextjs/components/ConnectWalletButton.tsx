@@ -1,24 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
+import { useTranslation } from '@/hooks/useTranslation'
 import {
+  WalletConnect,
   useInAppWallet,
   InAppWalletSetup,
   InAppWalletUnlock,
-} from '@pasosdejesus/m/wallet/next'
-import { getExternalProvider } from '@pasosdejesus/m/wallet'
-import { useTranslation } from '@/hooks/useTranslation'
+} from 'generated-wallet/next'
 import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
 import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
 import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@pasosdejesus/m/shadcn-components/ui/dialog'
 
 const localT = {
   en: {
@@ -34,6 +27,8 @@ const localT = {
     noExternal: 'No external wallet detected.',
     externalFailed: 'Could not connect the external wallet.',
     loading: 'Loading…',
+    signIn: 'Sign in with in-app wallet',
+    signInHint: 'The wallet is unlocked: sign in to use your account.',
   },
   es: {
     connect: 'Conectar Billetera',
@@ -48,47 +43,37 @@ const localT = {
     noExternal: 'No se detectó billetera externa.',
     externalFailed: 'No se pudo conectar la billetera externa.',
     loading: 'Cargando…',
+    signIn: 'Ingresar con la billetera de la aplicación',
+    signInHint: 'La billetera está desbloqueada: ingresa para usar tu cuenta.',
   },
 }
 
-function shorten(addr: string) {
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`
+/** Clears sivel3's local UI state when the wallet dialog unmounts (closes). */
+function ResetOnClose({ onClose }: { onClose: () => void }) {
+  useEffect(() => onClose, [onClose])
+  return null
 }
 
+/**
+ * Header wallet entry point. Delegates the dialog, the trigger and the
+ * external-wallet detection to the `wallet` engine's generic `WalletConnect`
+ * view (REQ/68 Fase 4), injecting sivel3's `WalletContext` state and
+ * Spanish/English texts.
+ *
+ * `renderBody` is used (the granular override REQ/68 allows) because the engine
+ * default closes the dialog on setup completion, hiding the recovery phrase;
+ * sivel3 must keep it visible so the user can back up the new wallet.
+ * `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.
+ */
 export default function ConnectWalletButton() {
   const { isConnected, effectiveAddress, isInApp, externalAvailable, disconnect } = useWallet()
   const inApp = useInAppWallet()
   const { t, locale } = useTranslation(localT)
-  const [open, setOpen] = useState(false)
   const [showSetup, setShowSetup] = useState(false)
-  const [error, setError] = useState('')
-
   const lang = locale === 'es' ? 'es' : 'en'
+  const resetSetup = useCallback(() => setShowSetup(false), [])
 
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next)
-    if (!next) {
-      setShowSetup(false)
-      setError('')
-    }
-  }
-
-  const handleExternal = async () => {
-    setError('')
-    const provider = getExternalProvider()
-    if (!provider) {
-      setError(t('noExternal'))
-      return
-    }
-    try {
-      await provider.request({ method: 'eth_requestAccounts' })
-      setOpen(false)
-    } catch {
-      setError(t('externalFailed'))
-    }
-  }
-
-  const renderContent = () => {
+  const renderContent = (close: () => void, connectExternal: () => Promise<void>) => {
     if (showSetup) {
       return <InAppWalletSetup lang={lang} onDone={() => {}} />
     }
@@ -118,7 +103,7 @@ export default function ConnectWalletButton() {
       )
     }
     if (inApp.status === 'locked') {
-      return <InAppWalletUnlock lang={lang} onUnlocked={() => setOpen(false)} />
+      return <InAppWalletUnlock lang={lang} onUnlocked={close} />
     }
     if (inApp.status === 'no-wallet') {
       return (
@@ -140,7 +125,7 @@ export default function ConnectWalletButton() {
                 size="sm"
                 className="w-full"
                 data-testid="use-external-wallet"
-                onClick={handleExternal}
+                onClick={connectExternal}
               >
                 {t('external')}
               </Button>
@@ -153,32 +138,35 @@ export default function ConnectWalletButton() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {isConnected && effectiveAddress ? (
-          <Button
-            variant="default"
-            size="sm"
-            className="h-8 gap-2 px-3 bg-emerald-600 hover:bg-emerald-700"
-            data-testid="connected-wallet"
-          >
-            <Badge variant="outline" className="h-2 w-2 p-0 bg-green-500 border-green-500" />
-            <span className="text-xs font-medium">{shorten(effectiveAddress)}</span>
-          </Button>
-        ) : (
-          <Button variant="default" size="sm" className="gap-2" data-testid="connect-wallet">
-            <span className="text-lg">🔗</span>
-            {t('connect')}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-        </DialogHeader>
-        {renderContent()}
-        {error && <p className="text-xs text-destructive">{error}</p>}
-      </DialogContent>
-    </Dialog>
+    <WalletConnect
+      lang={lang}
+      messages={{
+        connect: t('connect'),
+        title: t('title'),
+        inAppBtn: t('inAppBtn'),
+        inAppHint: t('inAppHint'),
+        external: t('external'),
+        externalHint: t('externalHint'),
+        disconnect: t('disconnect'),
+        connected: t('connected'),
+        inAppBadge: t('inAppBadge'),
+        noExternal: t('noExternal'),
+        externalFailed: t('externalFailed'),
+        loading: t('loading'),
+        signIn: t('signIn'),
+        signInHint: t('signInHint'),
+      }}
+      isConnected={isConnected}
+      effectiveAddress={effectiveAddress}
+      isInApp={isInApp}
+      externalAvailable={externalAvailable}
+      onDisconnect={disconnect}
+      renderBody={({ close, connectExternal }) => (
+        <>
+          <ResetOnClose onClose={resetSetup} />
+          {renderContent(close, connectExternal)}
+        </>
+      )}
+    />
   )
 }

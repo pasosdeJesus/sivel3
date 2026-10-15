@@ -128,6 +128,9 @@ importers:
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
+      generated-wallet:
+        specifier: workspace:*
+        version: link:packages/generated/wallet
       kysely:
         specifier: ^0.28.17
         version: 0.28.17
@@ -1564,8 +1567,8 @@ packages:
       react-redux:
         optional: true
 
-  '@rollup/wasm-node@4.64.6':
-    resolution: {integrity: sha512-ufelhiGxNl8RuflC/Tie5ZVcI3MJUtd27nJ0jC2I4LroyZb7n4iwmajEmXXeTLxJtDiiWUwU8v2UjkACBHqQvw==}
+  '@rollup/wasm-node@4.64.7':
+    resolution: {integrity: sha512-Gra9DXbfD1a9R9l3abxr/9fgqB2sc681w0RaYGrkFL9jMi8yr2kPPSlpFlxXN6YO0FC3hQSTW9rlKX7ZxdiicA==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -5075,7 +5078,7 @@ snapshots:
       react: 19.2.8
       react-redux: 9.3.0(@types/react@19.2.18)(react@19.2.8)(redux@5.0.1)
 
-  '@rollup/wasm-node@4.64.6':
+  '@rollup/wasm-node@4.64.7':
     dependencies:
       '@types/estree': 1.0.9
     optionalDependencies:
@@ -7214,7 +7217,7 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.5)
       picomatch: 4.0.5
       postcss: 8.5.26
-      rollup: '@rollup/wasm-node@4.64.6'
+      rollup: '@rollup/wasm-node@4.64.7'
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 24.13.3

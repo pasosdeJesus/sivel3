@@ -52,6 +52,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
+    "generated-wallet": "workspace:*",
     "kysely": "^0.28.17",
     "kysely-postgres-js": "^2.0.0",
     "leaflet": "^1.9.4",

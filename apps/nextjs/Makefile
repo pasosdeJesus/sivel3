@@ -1,6 +1,7 @@
 
 all:
 	pnpm i
+	$(MAKE) eng-build
 	sh -c 'ulimit -d 7340032 && pnpm build'
 
 type:
@@ -35,6 +36,12 @@ eng-sync:
 	# Re-vendoring recreates packages/generated/* (dropping their node_modules),
 	# so re-link the workspace siblings before building.
 	pnpm install
+	$(MAKE) eng-build
+
+# Compiles the vendored engines to their `dist/` (what `generated-<motor>/…`
+# imports resolve to). `dist/` is ignored by the root `.gitignore`, so it must be
+# built after `pnpm install` on a fresh checkout — hence it is part of `all` and `dev`.
+eng-build:
 	@for e in $(ENGINES); do pnpm exec tsc -b packages/generated/$$e; done
 
 # Conformance guard (R-#68). `eng:check` ends with the live-DB-vs-baseline check,
