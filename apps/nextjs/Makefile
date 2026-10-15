@@ -58,7 +58,7 @@ db-check:
 E2E_ENV = IPDES=sivel.xyz PUERTOPRU=9001 CHAIN_ID=11142220
 
 test-smoke:
-	./bin/m test:e2e --smoke
+	$(E2E_ENV) ./bin/m test:e2e --smoke
 
 test-e2e:
 	$(E2E_ENV) ./bin/m test:e2e

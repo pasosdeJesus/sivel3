@@ -23,10 +23,13 @@ if (BASE_URL === 'https://sivel.xyz') {
 }
 const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || 'https://forno.celo-sepolia.celo-testnet.org'
 const RPC_DONATION = 'https://forno.celo-sepolia.celo-testnet.org' // forno for custom-data txs
-const USDT = process.env.NEXT_PUBLIC_USDT_ADDRESS
-const DONATION = BASE_URL === 'https://sivel.xyz:9001'
-  ? '0xc50123fb87e4167fe9275cab90ae35551fe1248e' // Sepolia deployment
-  : process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
+// USDT is a shared ecosystem address: it comes from @pasosdejesus/mpdj (same
+// single source as lib/contractAddresses.ts), not from env read here — in testnet
+// mpdj itself injects it from the env. (Celo Sepolia script.)
+const { USDT_ADDRESSES } = await import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses')
+const USDT = USDT_ADDRESSES.celoSepolia
+// Project-specific address: same source the app uses (lib/contractAddresses.ts).
+const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 if (!PRIVATE_KEY) { console.error('PRIVATE_KEY not set'); process.exit(1) }

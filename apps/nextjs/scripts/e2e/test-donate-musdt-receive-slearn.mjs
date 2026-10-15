@@ -27,9 +27,15 @@ if (BASE_URL === 'https://sivel.xyz') {
   process.exit(1)
 }
 const RPC_URL = (process.env.NEXT_PUBLIC_RPC_URL || '').replace(/"/g, '') || 'https://forno.celo-sepolia.celo-testnet.org'
-const USDT = process.env.NEXT_PUBLIC_USDT_ADDRESS
+// SLEARN/USDT are shared ecosystem addresses: they come from @pasosdejesus/mpdj
+// (same single source as lib/contractAddresses.ts), not from env read here — in
+// testnet mpdj itself injects them from the env. (Celo Sepolia script.)
+const { USDT_ADDRESSES, SLEARN_ADDRESSES } = await import(
+  '@pasosdejesus/mpdj/blockchain/ecosystem-addresses'
+)
+const USDT = USDT_ADDRESSES.celoSepolia
+const SLEARN = SLEARN_ADDRESSES.celoSepolia
 const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
-const SLEARN = process.env.NEXT_PUBLIC_SLEARN_ADDRESS
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 if (!PRIVATE_KEY) { console.error('PRIVATE_KEY not set'); process.exit(1) }
@@ -115,7 +121,7 @@ async function donate() {
 }
 
 // ─── Verify SLEARN ───
-async function verifySlearn(assignResult: any) {
+async function verifySlearn(assignResult) {
   console.log('\n── SLEARN cashback ──')
   const slearnField = assignResult?.slearn
 
