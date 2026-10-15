@@ -74,12 +74,12 @@ graph TD
 - **Key features:**
   - Interactive map with case visualization (Leaflet)
   - Pre-alert marketplace (🔎 markers, mode toggle Casos/PreAlertas)
-  - Donation flow (USDT via MiniPay/MetaMask, 90/10 split)
+  - Donation flow (USDT via the in-app or an external wallet, 90/10 split)
   - SLEARN cashback (10% of donation)
   - Documenter panel (queue + EIP-191 scoring)
   - Citizen dashboard (purchased pre-alerts)
   - SBT minting (Connector, Explorer, Donor tiers)
-- **Authentication:** Wallet connection (RainbowKit/Wagmi) + learn.tg KYC for sensitive actions
+- **Authentication:** Wallet connection (in-app wallet first, external EIP-6963 as an option) + learn.tg KYC for sensitive actions
 
 ### 3. **Smart Contracts: Hardhat (apps/hardhat/)**
 - **Language:** Solidity ^0.8.20 (OpenZeppelin 5.x)
@@ -181,7 +181,7 @@ POST /api/pre-alerts/:id/score
 | Map | Leaflet + markerCluster | Geo-referenced visualization |
 | AI Agent | Node.js + Qwen2.5-7B | Pre-alert generation from news |
 | KYC | learn.tg (Self protocol) | Citizen verification |
-| Wallet | Wagmi + RainbowKit | Multi-wallet (MetaMask, MiniPay, OneKey) |
+| Wallet | In-app (`@pasosdejesus/m/wallet`) + external EIP-6963 | Self-custodied in-app first; external wallet optional (no vendor kit) |
 
 ---
 
@@ -195,7 +195,7 @@ POST /api/pre-alerts/:id/score
 | Off-chain state machine | Cheaper (no gas), flexible. Blockchain certifies only purchase + payment |
 | Separate RewardEscrow contract | Clean separation: RegionalDonation = incoming, RewardEscrow = outgoing |
 | SLEARN from contractAddresses.ts | Single source of truth, no env var dependency |
-| Calldata-stuffing for buy | MiniPay doesn't support approve(). On-chain buyPreAlert() deferred to REQ/51 |
+| Calldata-stuffing for buy | `approve()` is not universally supported; on-chain buyPreAlert() deferred to REQ/51 |
 
 ---
 

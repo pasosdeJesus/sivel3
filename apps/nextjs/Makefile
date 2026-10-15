@@ -22,6 +22,29 @@ prod:
 	sh -c 'ulimit -d 7340032 && pnpm build'
 	./bin/start > prod.log 2>&1 &
 
+# ── Engines (R-#68) ────────────────────────────────────────────────────
+# Vendored engines (packages/generated/<motor>) are derived copies — like
+# node_modules: regenerate with `eng-sync`, never edit by hand. `M_FROM` is the
+# `m` checkout that holds the motor sources; `packages/generated/*` are workspace
+# packages (pnpm-workspace.yaml) so `generated-<motor>` imports resolve.
+M_FROM ?= /var/www/adJ-ia/m
+ENGINES = msip wallet
+
+eng-sync:
+	@for e in $(ENGINES); do ./bin/m eng:sync $(M_FROM)/packages/$$e --vendor; done
+	# Re-vendoring recreates packages/generated/* (dropping their node_modules),
+	# so re-link the workspace siblings before building.
+	pnpm install
+	@for e in $(ENGINES); do pnpm exec tsc -b packages/generated/$$e; done
+
+# Conformance guard (R-#68). `eng:check` ends with the live-DB-vs-baseline check,
+# which fails here **by design**: sivel3's schema is the shared Rails one and its
+# drift from the `msip` baseline is NOT reconciled. So this target is informational
+# (the leading `-` keeps `make` from failing); the vendor drift and self-containment
+# checks do pass. Pending an `m` flag to skip the DB conformance (reported).
+db-check:
+	-./bin/m eng:check --from $(M_FROM)
+
 # ── E2E (REQ/66) ───────────────────────────────────────────────────────
 # Targets export IPDES/PUERTOPRU/CHAIN_ID so a bare `bin/m test:e2e` (which
 # defaults to production: learn.tg/443/42220) never hits the wrong site with.

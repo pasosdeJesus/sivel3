@@ -1,0 +1,9 @@
+# Vendored engines (packages/generated/*) are siblings of the app, not
+# npm-installable copy: they are regenerated with `bin/m eng:sync <motor> --vendor`.
+# Declaring them as workspace packages lets `generated-<motor>` imports resolve
+# and their own dependencies (e.g. qrcode.react) install.
+packages:
+  - 'packages/generated/*'
+
+# Link `generated-<motor>` siblings declared as `*` by the vendored copies.
+linkWorkspacePackages: true

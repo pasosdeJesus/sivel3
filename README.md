@@ -66,7 +66,7 @@ To understand the heart and direction of SIVeL 3, consult these foundational doc
 SIVeL 3 is a monorepo containing:
 ```
 sivel3/
-├── sivel2/ # Legacy data engine (Ruby on Rails)
+├── sivel2/ # Legacy Rails backoffice (admin/migrations) — NOT a runtime dependency
 ├── apps/
 │ ├── nextjs/ # Modern frontend and Web3 integration
 │ └── hardhat/ # Solidity smart contracts (Celo)

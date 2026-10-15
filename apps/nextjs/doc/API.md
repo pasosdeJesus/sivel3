@@ -54,7 +54,7 @@ Alleged perpetrators (state actors, armed groups, corporations).
 
 ### `GET /api/cases/datos-osm`
 
-Geo-referenced case data for the interactive map. Proxies to SIVeL 2 Rails backend.
+Geo-referenced case data for the interactive map. Read from PostgreSQL with Kysely (no Rails).
 
 **Query:** Filter params: `filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[categoria_id]`, `filtro[presponsable_id]`
 

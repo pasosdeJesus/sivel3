@@ -16,24 +16,25 @@ The application uses the Next.js **App Router** with a `[locale]` dynamic segmen
 
 ## 2. State Management and Providers
 
-The application uses a hierarchy of providers (`AppProvider.tsx`) to manage global state:
+The application uses a hierarchy of providers (`providers/AppProvider.tsx`) to manage global state:
 
-1.  **Wagmi & RainbowKit:** Configure the connection to the Celo blockchain (Mainnet or Sepolia).
-2.  **WalletContext (`contexts/WalletContext.tsx`):** A custom abstraction layer over Wagmi that:
-    *   Manages unified wallet connection — merges Wagmi's `useAccount` with MiniPay's native detection via `useMiniPay`.
-    *   Implements specific logic for **MiniPay** (auto-connection on detection, legacy transaction handling).
-    *   Provides the `donate` function that orchestrates the on-chain USDT transfer and subsequent backend notification via `lib/donate.ts`.
-    *   Exposes wallet state to the entire app: `isConnected`, `effectiveAddress`, `isTransacting`, `isProcessing`, `isMiniPay`, `phoneNumber`, and `connectMiniPay`.
+1.  **React Query (`@tanstack/react-query`):** `QueryClientProvider` for server-state.
+2.  **WalletContext (`contexts/WalletContext.tsx`):** a thin layer over the shared `@pasosdejesus/m/wallet`:
+    *   **In-app wallet first:** `useInAppWallet()` (`@pasosdejesus/m/wallet/next`) when the in-app wallet is unlocked.
+    *   **External wallet:** the EIP-6963 connector (`getExternalProvider` / `subscribeExternalProvider`); **no** wagmi, RainbowKit, WalletConnect or MiniPay.
+    *   The **effective provider** is in-app ?? external; the address is read with `eth_accounts` and refreshed on `accountsChanged`.
+    *   Exposes `{ isConnected, effectiveAddress, chainId, provider, isInApp, externalAvailable, disconnect, donate, isTransacting, isProcessing }`.
+    *   `donate` orchestrates the on-chain USDT transfer and the backend notification via `lib/donate.ts`.
+
+The in-app storage namespaces are fixed in `configureInAppWallet({ dbName, destinationsPrefix, rpName })` — changing them makes existing wallets unreadable.
 
 ---
 
-## 3. Web3 Integration and MiniPay Strategy
+## 3. Web3 Integration
 
-SIVeL 3 is optimized for mobile use via **MiniPay** (Opera Mini), which requires special considerations:
-
-*   **Legacy Transactions:** MiniPay does not support EIP-1559. The `AppProvider` intercepts `eth_sendTransaction` to remove fields like `maxFeePerGas`.
-*   **Wallet Detection:** The `useMiniPay` hook is used to identify if the application is running inside MiniPay and adjust UI behavior and transaction submission methods (`eth_sendTransaction` via `ethereum.send`).
-*   **Unified Donations (`lib/donate.ts`):** A centralized library that handles the differences between `ethereum.request` (MetaMask) and `ethereum.send` (MiniPay), ensuring a consistent experience.
+*   **Signing:** EIP-191 (`personal_sign`) through the effective EIP-1193 provider (in-app or external). SIVeL 3 does **not** use SIWE.
+*   **Sends:** `lib/donate.ts` and `lib/buyPreAlert.ts` receive the effective provider and call `provider.request({ method: 'eth_sendTransaction', params })`.
+*   **UI:** `components/ConnectWalletButton.tsx` renders its own dialog with `InAppWalletSetup`/`InAppWalletUnlock` (from `@pasosdejesus/m/wallet/next`) plus an optional external-wallet path.
 
 ---
 ## 3b. Learning Points Integration (learn.tg)
@@ -81,7 +82,7 @@ The Next.js application acts as a bridge between the PostgreSQL database and the
 *   **API Routes (`app/api/`):**
     *   `donations/assign`: Critical endpoint that verifies a USDT transaction on-chain (using `viem`) and then calls the `RegionalDonation` contract to assign the donation to a specific region from the server (using a secure private key).
     *   `cases/*`: Endpoints for querying geo-referenced socio-political violence data.
-*   **Database Access:** API routes use Kysely directly via `newKyselyPostgresql()` (configured in `.config/kysely.config.ts`) to query PostgreSQL tables shared with the Rails backend (`sivel2`). Database types in `db/db.d.ts` are auto-generated with `kysely-codegen`.
+*   **Database Access:** API routes use Kysely directly via `newKyselyPostgresql()` (configured in `.config/kysely.config.ts`), which shares one process-wide `pg.Pool`. They query the same PostgreSQL database the Rails backoffice uses, but **Rails is not required at runtime** (dev and production do not run it; `sivel2/` is an optional backoffice and the owner of the Rails-side migrations). Database types in `db/db.d.ts` are auto-generated with `kysely-codegen`.
 
 ---
 

@@ -1,0 +1,13 @@
+{
+  "engines": {
+    "msip": {
+      "tables": [
+        "msip_centropoblado",
+        "msip_departamento",
+        "msip_municipio",
+        "msip_persona",
+        "msip_ubicacion"
+      ]
+    }
+  }
+}
