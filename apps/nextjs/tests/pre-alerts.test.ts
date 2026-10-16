@@ -70,8 +70,14 @@ vi.mock('viem/chains', () => ({
   celoSepolia: { id: 11142220, name: 'Celo Sepolia' },
 }))
 
-vi.mock('@pasosdejesus/m/blockchain/deployments', () => ({
-  readDeployment: vi.fn(() => ({ address: '0x892373D6930dd38Cb54A28Ea8573e6d838570426' })),
+// Single source of truth for the project's contract addresses (lib/contractAddresses.ts).
+vi.mock('@/lib/contractAddresses', () => ({
+  NETWORK: 'celoSepolia',
+  USDT_ADDRESS: '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f',
+  SLEARN_ADDRESS: '0x9fBa3A2Ca0275c4D7A3eA341923f8c531e913BFA',
+  PREALERT_MARKET_ADDRESS: '0x892373D6930dd38Cb54A28Ea8573e6d838570426',
+  REWARD_ESCROW_ADDRESS: '0x53aD49cBF4001aD0c8fe588dA330ED277bBD45f9',
+  REGIONAL_DONATION_ADDRESS: '0xc50123fb87e4167fe9275cab90ae35551fe1248e',
 }))
 
 // ============================================================
@@ -380,7 +386,7 @@ describe('Pre-Alerts API', () => {
       mockGetTransaction.mockResolvedValue({
         input: '0xa9059cbb' + '00'.repeat(64) + '00'.repeat(64) + preAlertIdHex,
       })
-      process.env.NEXT_PUBLIC_USDT_ADDRESS = '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f'
+      // The USDT address comes from the mocked @/lib/contractAddresses (top of file).
       mockGetTransactionReceipt.mockResolvedValue({
         logs: [{
           address: '0x4806b6ab179050326070ccbd3c1f5b0c7a1b5e6f',

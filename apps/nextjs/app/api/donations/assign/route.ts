@@ -7,6 +7,7 @@ import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
 import { mintSBT, getDonorThresholds, getChainId } from '@/lib/credentials'
 import { getCredentialMetadata } from '@pasosdejesus/mpdj/blockchain'
+import { REGIONAL_DONATION_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 
 // Logger simple para el servidor (no usar el logger del cliente)
 const serverLog = {
@@ -93,7 +94,7 @@ async function verifyTransferAndGetRegion(
     const transferEventTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
     const transferLog = receipt.logs.find(log => 
       log.topics[0] === transferEventTopic &&
-      log.address.toLowerCase() === process.env.NEXT_PUBLIC_USDT_ADDRESS?.toLowerCase()
+      log.address.toLowerCase() === USDT_ADDRESS.toLowerCase()
     )
 
     if (!transferLog) {
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
     // ============================================================
     const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
     const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
-    const regionalDonationAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS!
+    const regionalDonationAddress = REGIONAL_DONATION_ADDRESS
 
     const account = privateKeyToAccount(PRIVATE_KEY)
     serverLog.info(`[route] Backend address: ${account.address}`)
@@ -223,7 +224,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transfer USDT from backend to RegionalDonation (90% or 100%)
-    const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS!
+    const usdtAddress = USDT_ADDRESS
     const usdtAbi = parseAbi(['function transfer(address to, uint256 amount) returns (bool)'])
     const txRegional = await walletClient.writeContract({
       address: usdtAddress as `0x${string}`, abi: usdtAbi,

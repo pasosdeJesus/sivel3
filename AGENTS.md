@@ -230,8 +230,9 @@ and no `-B`/`-A`, so use `grep -E` for alternation.
 **Critical conventions:**
 - **Wallet addresses**: lowercase once at API boundary, never EIP-55 mixed-case
 - **TokenIds**: always resolve from `credential_metadata` by (name, chainId), never hardcode
+- **Contract addresses**: resolve from `lib/contractAddresses.ts` (canonical dev default per network + `NEXT_PUBLIC_*` override); never read `process.env.NEXT_PUBLIC_*_ADDRESS` directly. Shared USDT/SLEARN come from `@pasosdejesus/mpdj`; Credentials are the exception (resolved from the Hardhat deployment files).
 - **SBT minting**: use `mintSBT()` from `lib/credentials.ts` (handles cache + on-chain check + Celo L2 retry via `mintCredentialWithRetry`)
-- **RPC URL**: always pass explicit `NEXT_PUBLIC_RPC_URL` to `http()` — default Forno rejects writes
+- **RPC URL**: pass an explicit `NEXT_PUBLIC_RPC_URL` to `http()` (don't rely on the chain default). `forno.celo.org` (Celo **mainnet**) has been observed to reject writes; the **Sepolia** Forno (`forno.celo-sepolia.celo-testnet.org`) does accept them (verified 2026-10-15 — mined a tx).
 - **@pasosdejesus/m** uses `export *` barrel — if imports break at runtime, check `serverExternalPackages` in `next.config.ts`
 
 **Testing:** See `CONTRIBUTING.md` and `@pasosdejesus/m/src/test-utils/README.md`. Use `createMockKysely()` from `@pasosdejesus/m/test-utils` for DB mocks, not raw `vi.mock()`.

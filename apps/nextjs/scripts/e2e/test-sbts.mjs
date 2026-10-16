@@ -28,8 +28,9 @@ const RPC_DONATION = 'https://forno.celo-sepolia.celo-testnet.org' // forno for 
 // mpdj itself injects it from the env. (Celo Sepolia script.)
 const { USDT_ADDRESSES } = await import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses')
 const USDT = USDT_ADDRESSES.celoSepolia
-// Project-specific address: same source the app uses (lib/contractAddresses.ts).
-const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
+// Project-specific address with the same default as lib/contractAddresses.ts
+// (canonical dev deployment); the env var overrides it with another test one.
+const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS || '0xc50123fb87e4167fe9275cab90ae35551fe1248e'
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 if (!PRIVATE_KEY) { console.error('PRIVATE_KEY not set'); process.exit(1) }

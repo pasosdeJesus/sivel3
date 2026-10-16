@@ -4,8 +4,9 @@ import { celoSepolia, celo } from 'viem/chains';
 
 import regionalDonationAbi from '@/abis/RegionalDonation.json'
 import { recordEvent } from '@/lib/web-analytics'
+import { REGIONAL_DONATION_ADDRESS } from '@/lib/contractAddresses'
 
-const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`;
+const regionalDonationContractAddress = REGIONAL_DONATION_ADDRESS
 
 const publicClient = createPublicClient({
   chain: process.env.NEXT_PUBLIC_NETWORK == 'celoSepolia' ? celoSepolia : celo,

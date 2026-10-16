@@ -36,8 +36,10 @@ Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 |---|---|---|
 | `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
 | `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through the UI (`setupInAppWallet`), sees the recovery phrase; reloads (locks it) and unlocks (`unlockInAppWallet`). |
-| `signatures.spec.mjs` | server | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401). |
-| `prealert-buy.spec.mjs` | server | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404). |
+| `signatures.spec.mjs` | server (+ `PREALERT_ID`, `DOCUMENTER_WALLETS` for the positive path) | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401); the positive path records a score 0 (**rejected**). |
+| `prealert-buy.spec.mjs` | server (+ `PENDING_PREALERT_ID` for the positive path) | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404); the positive path **reserves** a pending one. |
+| `prealert-lifecycle.spec.mjs` | server (+ `DOCUMENTER_WALLETS`; `PENDING_PREALERT_ID` optional) | The **DB-only** lifecycle `pending → reserved → converted → rejected` over the API: reserves (buy without `tx_hash`), converts, and scores 0. It picks a pending pre-alert itself. |
+| `prealert-purchase.spec.mjs` | server + **on-chain** (USDT + gas in the wallet) | Buys a pending pre-alert with a real USDT transfer to the PreAlertMarket (1 USDT + `preAlertId` appended, like `lib/buyPreAlert.ts`); the backend verifies it (`tx_hash`) and it converts it. `PREALERT_PAY=1` also scores 2 → payout (needs the region funded + the escrow's `BACKEND_ROLE`). |
 
 The wallet specs run on `/en`: the connect button lives in the shared Header, which
 is the same on every route. The OSM map route (`/en/cases/osmmap`,
@@ -62,6 +64,23 @@ SITE_URL=http://localhost:4000 make test-e2e
 `SITE_URL` is honoured by `@pasosdejesus/m`'s `initTestEnv` (P2, `m@0.23.0`), so
 the specs navigate to the HTTP local server — no per-spec patching.
 
+## Fixtures (positive paths)
+
+The optional positive paths **consume** a row (`pending → reserved`, `converted →
+rejected`). Against a **local** DB you can (re)create the two fixtures with a stable
+id:
+
+```sh
+cd apps/nextjs && node scripts/e2e/seed-pre-alerts.mjs
+# → PENDING_PREALERT_ID=<id>  PREALERT_ID=<id>
+```
+
+It upserts two `pre_alert` rows (keyed by a fixed `event_hash`) and resets
+status/buyer/scores, so a run is repeatable. It writes to `PGDATABASE` from
+`apps/.env`: **never** run it against production. On a remote site the rows must
+already exist there (the agent's pre-alerts); `prealert-lifecycle` picks a pending
+one by itself, and `signatures`/`prealert-buy` take the id via env.
+
 ## Environment variables
 
 | Variable | Default | Notes |
@@ -74,8 +93,11 @@ the specs navigate to the HTTP local server — no per-spec patching.
 | `E2E_SPEC_DELAY_MS` | `1500` | pause between specs (rate-limit relief) |
 | `WALLET_INDEX` | `0` | wallet rotation across specs |
 | `PREALERT_ID` | (unset) | a **converted** pre-alert → runs `signatures`' positive path |
-| `PENDING_PREALERT_ID` | (unset) | a **pending** pre-alert → runs `prealert-buy`' positive path |
-| `DOCUMENTER_WALLETS` | (server) | must list the test wallet for the `signatures` positive path |
+| `PENDING_PREALERT_ID` | (unset) | a **pending** pre-alert → runs `prealert-buy`' positive path (and pins `prealert-lifecycle`) |
+| `DOCUMENTER_WALLETS` | (server) | must list the test wallet for the `signatures`/`prealert-lifecycle` score step |
+| `E2E_RPC_URL` | `NEXT_PUBLIC_RPC_URL` | RPC for the client-side on-chain steps (`prealert-purchase`); set it when the app's RPC is IP-whitelisted (e.g. `https://forno.celo-sepolia.celo-testnet.org`) |
+| `E2E_MARKET_ADDRESS` / `E2E_USDT_ADDRESS` | app env | override the PreAlertMarket / USDT address used by `prealert-purchase` (the runner reloads `apps/.env`, so a plain command-line var is not enough for a different site) |
+| `PREALERT_PAY` | (unset) | `1` → `prealert-purchase` also runs the payout (score 2) |
 
 ## OpenBSD / adJ notes
 

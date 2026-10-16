@@ -35,7 +35,9 @@ const { USDT_ADDRESSES, SLEARN_ADDRESSES } = await import(
 )
 const USDT = USDT_ADDRESSES.celoSepolia
 const SLEARN = SLEARN_ADDRESSES.celoSepolia
-const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS
+// Project-specific address with the same default as lib/contractAddresses.ts
+// (canonical dev deployment); the env var overrides it with another test one.
+const DONATION = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS || '0xc50123fb87e4167fe9275cab90ae35551fe1248e'
 const DONATION_REGION = '1'
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 if (!PRIVATE_KEY) { console.error('PRIVATE_KEY not set'); process.exit(1) }

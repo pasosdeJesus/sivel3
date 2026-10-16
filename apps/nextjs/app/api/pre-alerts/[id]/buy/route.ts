@@ -2,21 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, parseAbi } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
-import path from 'path'
+import { PREALERT_MARKET_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 
-const deploymentsDir = path.join(process.cwd(), '..', 'hardhat', 'deployments')
 const network = (process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia') as 'celo' | 'celoSepolia'
 const viemChain = network === 'celo' ? celo : celoSepolia
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
-
-function getPreAlertMarketAddress(): `0x${string}` | null {
-  const dep = readDeployment(network, deploymentsDir, {
-    contract: 'SIVeL3PreAlertMarket',
-    version: 'V1',
-  })
-  return dep ? (dep.address as `0x${string}`) : null
-}
 
 const ERC20_ABI = parseAbi([
   'event Transfer(address indexed from, address indexed to, uint256 value)',
@@ -50,8 +40,8 @@ async function verifyPreAlertPurchase(
     const preAlertId = Number(BigInt(preAlertIdHex))
 
     // Find Transfer event TO the PreAlertMarket contract (MiniPay creates multiple Transfer events for fee abstraction)
-    const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS?.toLowerCase()
-    const contractAddr = getPreAlertMarketAddress()?.toLowerCase()
+    const usdtAddress = USDT_ADDRESS.toLowerCase()
+    const contractAddr = PREALERT_MARKET_ADDRESS.toLowerCase()
     const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
     const transferLog = receipt.logs.find(
       l => {

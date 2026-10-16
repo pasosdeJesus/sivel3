@@ -8,6 +8,7 @@ import {
   type Eip1193Provider,
 } from '@pasosdejesus/m/wallet'
 import { donate as donateFn } from '@/lib/donate'
+import { REGIONAL_DONATION_ADDRESS, USDT_ADDRESS } from '@/lib/contractAddresses'
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
 import { useTranslation } from '@/hooks/useTranslation'
 
@@ -151,8 +152,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [isInApp, inApp])
 
   const donate = useCallback(async (regionId: number, amount: string, locale?: string) => {
-    const regionalDonationContractAddress = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
-    const usdtContractAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS as `0x${string}`
+    const regionalDonationContractAddress = REGIONAL_DONATION_ADDRESS
+    const usdtContractAddress = USDT_ADDRESS
 
     if (!regionalDonationContractAddress || !usdtContractAddress) {
       throw new Error('Contract addresses not configured')
