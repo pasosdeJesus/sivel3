@@ -2,7 +2,7 @@
   "name": "sivel3",
   "version": "0.0.0",
   "description": "Political Violence Information System (SIVeL)",
-  "packageManager": "pnpm@10.34.5",
+  "packageManager": "pnpm@11.28.6",
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
@@ -101,47 +101,5 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
-  },
-  "pnpm": {
-    "trustedDependencies": [
-      "@pasosdejesus/m"
-    ],
-    "overrides": {
-      "@pasosdejesus/m": "0.31.2",
-      "@parcel/watcher": "npm:@parcel/watcher-wasm",
-      "rollup": "npm:@rollup/wasm-node",
-      "lightningcss": "npm:lightningcss-wasm@1.32.0",
-      "@tailwindcss/oxide": "npm:@tailwindcss/oxide-wasm32-wasi",
-      "esbuild@<=0.24.2": ">=0.25.0",
-      "diff@>=6.0.0 <8.0.3": ">=8.0.3",
-      "serialize-javascript@<=7.0.2": ">=7.0.3",
-      "vite@<=6.4.1": "6.4.3",
-      "ws@>=8.0.0 <8.20.1": ">=8.20.1",
-      "serialize-javascript@>=5.0.0 <7.0.5": ">=7.0.5",
-      "uuid@<11.1.1": ">=11.1.1",
-      "vite@<=6.4.2": "6.4.3",
-      "ws@>=8.0.0 <8.21.0": ">=8.21.0",
-      "axios@>=1.0.0 <1.18.0": ">=1.18.0",
-      "axios@>=1.7.0 <1.18.0": ">=1.18.0",
-      "axios@>=1.15.0 <1.18.0": ">=1.18.0",
-      "axios@>=1.15.2 <1.18.0": ">=1.18.0",
-      "axios@>=1.15.1 <1.18.0": ">=1.18.0",
-      "axios@>=1.13.0 <1.18.0": ">=1.18.0"
-    },
-    "onlyBuiltDependencies": [
-      "@pasosdejesus/m",
-      "@swc/core",
-      "blake-hash",
-      "bufferutil",
-      "esbuild",
-      "keccak",
-      "sharp",
-      "unrs-resolver",
-      "utf-8-validate"
-    ],
-    "resolutions": {
-      "@parcel/watcher": "2.5.2",
-      "lightningcss": "npm:lightningcss-wasm@1.32.0"
-    }
   }
 }
