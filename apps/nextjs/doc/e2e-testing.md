@@ -41,6 +41,7 @@ Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 | `credential-metadata.spec.mjs` | ERC-1155 metadata for the deployment's own chain (`celo` / `celoSepolia`), a wallet profile, and a regional on-chain balance. |
 | `api-validation.spec.mjs` | Malformed requests get the documented 4xx codes (donations, pre-alerts buy/convert/queue/sync, verify, geocode, case detail, credential); pagination is clamped; a real case id returns its payload. |
 | `pages-and-i18n.spec.mjs` | Stats, dashboard, documenter, and wallet pages return 200 in EN/ES; unprefixed paths redirect through the locale middleware; unknown pages stay 404. |
+| `pool-lifecycle.spec.mjs` | The analytics summary does not end the shared pg pool: after it runs, pre-alerts, counts, credentials, and regions still return 200 (regression for "Cannot use a pool after calling end on the pool"). |
 
 ## Browser and signature specs (`e2e/specs/`)
 
