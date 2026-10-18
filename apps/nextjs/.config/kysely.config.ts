@@ -34,6 +34,10 @@ export default defineConfig({
   },
 })
 
+// A Kysely client over the process-wide pool. Do NOT call `destroy()` on it:
+// Kysely would end the shared pool and every later query would fail with
+// "Cannot use a pool after calling end on the pool". The pool lives for the
+// whole server process.
 export function newKyselyPostgresql() {
   return new Kysely<DB>({
     dialect: new PostgresDialect({

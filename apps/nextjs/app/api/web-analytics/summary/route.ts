@@ -57,7 +57,5 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('[wba/summary] Project extension error:', error)
     return NextResponse.json(data)
-  } finally {
-    await db.destroy()
   }
 }

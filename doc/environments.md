@@ -134,6 +134,7 @@ positive-path environment variables.
 | `GET /api/health/credentials` returns 503               | The endpoint is reachable but one or both chains are not configured or unreachable      | Expected on a dev deployment without credentials addresses                                                                         |
 | `prealert-purchase` says "On-chain verification failed" | The server verifies a different `PreAlertMarket` than the one `apps/.env` sent funds to | Set `E2E_MARKET_ADDRESS` to the server's market (measured 2026-10-18: site used the `0x9024…` default, `apps/.env` used `0x8923…`) |
 | `GET /api/credential/<id>` returns 404                  | The metadata route filtered `chain_id = 'celo'` on a `celoSepolia` deployment           | Use `getChainId()`; redeploy the fix                                                                                               |
+| Every DB API returns 500 after the stats page loads     | A route called `db.destroy()` on the shared Kysely pool                                 | Never destroy clients from `newKyselyPostgresql()`; restart the server after removing the call                                     |
 | A spec fails on a slow remote site                      | Timing, RPC latency, on-demand compilation                                              | Rerun the spec alone; use `make test-e2e-retry` for the full suite                                                                 |
 
 The transfer in `prealert-purchase` is a real on-chain transaction and cannot
