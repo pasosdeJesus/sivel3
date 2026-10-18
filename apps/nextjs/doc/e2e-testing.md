@@ -132,4 +132,7 @@ failed`, send the USDT to the address the **server** expects with
   `packages/m/src/tasks/e2e.ts`.
 - sivel3 `REQ/66` (this suite), `REQ/65` (no-Rails guard), `REQ/67` (wallet
   rework — Block B tests against in-app + EIP-6963, not RainbowKit).
+- sivel3 [environments.md](../../../doc/environments.md): environments, chains, wallets, and
+  the deploy constraint (a fix in the tree is not visible on `:9001` until the
+  operator deploys).
 - learn.tg `doc/e2e-testing.md` (the reference implementation).

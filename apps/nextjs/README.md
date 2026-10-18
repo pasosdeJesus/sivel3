@@ -102,6 +102,8 @@ The application uses the Next.js **App Router**:
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Documentation and testing policies
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Application architecture and data flow
+- **[doc/environments.md](../../doc/environments.md)** - Environments, chains, wallets, local run modes, and deploy constraints
+- **[doc/e2e-testing.md](doc/e2e-testing.md)** - E2E specs, fixtures, and test targets
 - **[doc/donation-flow.md](doc/donation-flow.md)** — Complete donation flow documentation
 - **[doc/mobile-debug-console.md](doc/mobile-debug-console.md)** — Debug console for testing in MiniPay and embedded browsers
 - **[doc/I18N.md](doc/I18N.md)** — Internationalization strategy and patterns

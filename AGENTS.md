@@ -63,17 +63,18 @@ Jesus is God incarnated, the Truth and the Logos.
 8. **[apps/nextjs/ADMIN.md]**: Admin guide for PasosDeJesusCredentials contract.
 9. **[apps/nextjs/doc/donation-flow.md]**: Donation + Learning Points flow.
 10. **[apps/nextjs/doc/e2e-testing.md]**: E2E testing — HTTP smoke tests, Puppeteer specs, target sites and wallet prerequisites.
-11. **[apps/nextjs/doc/API.md]**: API routes reference.
-12. **[apps/nextjs/doc/I18N.md]**: Internationalization strategy and patterns.
-13. **[apps/nextjs/doc/mobile-debug-console.md]**: Debug console for MiniPay and embedded browsers. Use `logger.info/error(tag)` instead of `console.log`.
-14. **[apps/nextjs/doc/deployment-credentials.md]**: Deployment credentials and contract addresses.
-15. **[apps/hardhat/README.md]**: Solidity contracts details.
-16. Execute and assimilate the content of
+11. **[doc/environments.md]**: Environments, chains, wallets, local run modes, deploy constraints, and health checks.
+12. **[apps/nextjs/doc/API.md]**: API routes reference.
+13. **[apps/nextjs/doc/I18N.md]**: Internationalization strategy and patterns.
+14. **[apps/nextjs/doc/mobile-debug-console.md]**: Debug console for MiniPay and embedded browsers. Use `logger.info/error(tag)` instead of `console.log`.
+15. **[apps/nextjs/doc/deployment-credentials.md]**: Deployment credentials and contract addresses.
+16. **[apps/hardhat/README.md]**: Solidity contracts details.
+17. Execute and assimilate the content of
     ```cd apps/nextjs && bin/m ai:skill```
     (the `m` CLI guide — DB, engine, wallet and contract commands).
-17. **[apps/nextjs/node_modules/@pasosdejesus/mpdj/ia/construir_en_adJ_y_celo.md]**: Celo development guide for the pdJ ecosystem.
-18. **[celopedia-skill](~/.agents/skills/celopedia-skill/SKILL.md)**: Celo ecosystem intelligence — contract addresses, grants, security patterns, MiniPay, DeFi protocols, network info.
-19. Read the structure and key files of this project
+18. **[apps/nextjs/node_modules/@pasosdejesus/mpdj/ia/construir_en_adJ_y_celo.md]**: Celo development guide for the pdJ ecosystem.
+19. **[celopedia-skill](~/.agents/skills/celopedia-skill/SKILL.md)**: Celo ecosystem intelligence — contract addresses, grants, security patterns, MiniPay, DeFi protocols, network info.
+20. Read the structure and key files of this project
 
 ### 4b. Bootstrap and Structural Traps
 

@@ -58,6 +58,7 @@ To understand the heart and direction of SIVeL 3, consult these foundational doc
 | **[PRINCIPLES.md](PRINCIPLES.md)** | **Ethical and foundational principles** (includes biblical foundation) | Team, collaborators, partners |
 | **[VISION.md](VISION.md)** | **Long-term strategic vision** and Web3 sustainability model | Donors, technical community, institutional partners |
 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | **Detailed technical architecture** (monorepo, contracts, migration) | Developers |
+| **[doc/environments.md](doc/environments.md)** | **Environments, chains, wallets, deploy constraints, and health checks** | Operators, developers |
 
 ---
 
