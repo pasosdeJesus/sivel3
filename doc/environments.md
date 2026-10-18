@@ -105,6 +105,24 @@ When the vendored engines change (`packages/generated/*`), regenerate them with
 `make eng-sync M_FROM=/path/to/m` and rebuild with `make eng-build`. They are
 derived copies, like `node_modules`: never edit them by hand.
 
+### Updating `@pasosdejesus/m`
+
+`apps/nextjs/package.json` pins the version twice: the direct dependency and the
+`pnpm.overrides` entry. The vendored `generated-wallet` declares `"*"`, so the
+override is what guarantees a single copy. Without it the lockfile can keep an
+older `m` for the engine, and the in-app wallet setup and `WalletContext` end up
+using different stores: the wallet is created and the recovery phrase is shown,
+but the header never reaches "Connected".
+
+When updating `m`, change both the dependency and the override, then:
+
+```sh
+cd apps/nextjs
+pnpm install
+pnpm why @pasosdejesus/m   # must report one version
+make eng-build             # or make all / make prod
+```
+
 ## 5. E2E targets
 
 Use the Makefile targets. A bare `bin/m test:e2e` falls back to the runner
@@ -128,14 +146,15 @@ positive-path environment variables.
 
 ## 6. Health checks and troubleshooting
 
-| Symptom                                                 | Likely cause                                                                            | What to check                                                                                                                      |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Pages return 200 but every DB-backed API returns 500    | The dev server's PostgreSQL is down or restarting                                       | `GET /api/cases/counts`; if it is 500, the specs cannot be trusted until the site recovers                                         |
-| `GET /api/health/credentials` returns 503               | The endpoint is reachable but one or both chains are not configured or unreachable      | Expected on a dev deployment without credentials addresses                                                                         |
-| `prealert-purchase` says "On-chain verification failed" | The server verifies a different `PreAlertMarket` than the one `apps/.env` sent funds to | Set `E2E_MARKET_ADDRESS` to the server's market (measured 2026-10-18: site used the `0x9024…` default, `apps/.env` used `0x8923…`) |
-| `GET /api/credential/<id>` returns 404                  | The metadata route filtered `chain_id = 'celo'` on a `celoSepolia` deployment           | Use `getChainId()`; redeploy the fix                                                                                               |
-| Every DB API returns 500 after the stats page loads     | A route called `db.destroy()` on the shared Kysely pool                                 | Never destroy clients from `newKyselyPostgresql()`; restart the server after removing the call                                     |
-| A spec fails on a slow remote site                      | Timing, RPC latency, on-demand compilation                                              | Rerun the spec alone; use `make test-e2e-retry` for the full suite                                                                 |
+| Symptom                                                    | Likely cause                                                                            | What to check                                                                                                                      |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Pages return 200 but every DB-backed API returns 500       | The dev server's PostgreSQL is down or restarting                                       | `GET /api/cases/counts`; if it is 500, the specs cannot be trusted until the site recovers                                         |
+| `GET /api/health/credentials` returns 503                  | The endpoint is reachable but one or both chains are not configured or unreachable      | Expected on a dev deployment without credentials addresses                                                                         |
+| `prealert-purchase` says "On-chain verification failed"    | The server verifies a different `PreAlertMarket` than the one `apps/.env` sent funds to | Set `E2E_MARKET_ADDRESS` to the server's market (measured 2026-10-18: site used the `0x9024…` default, `apps/.env` used `0x8923…`) |
+| `GET /api/credential/<id>` returns 404                     | The metadata route filtered `chain_id = 'celo'` on a `celoSepolia` deployment           | Use `getChainId()`; redeploy the fix                                                                                               |
+| Every DB API returns 500 after the stats page loads        | A route called `db.destroy()` on the shared Kysely pool                                 | Never destroy clients from `newKyselyPostgresql()`; restart the server after removing the call                                     |
+| In-app wallet shows the recovery phrase but never connects | `generated-wallet` resolves an older `@pasosdejesus/m` than the app (two wallet stores) | `pnpm why @pasosdejesus/m`; pin the version in `pnpm.overrides`; `pnpm install`; `make eng-build`; redeploy                        |
+| A spec fails on a slow remote site                         | Timing, RPC latency, on-demand compilation                                              | Rerun the spec alone; use `make test-e2e-retry` for the full suite                                                                 |
 
 The transfer in `prealert-purchase` is a real on-chain transaction and cannot
 be undone. Run it only against testnet with test funds.

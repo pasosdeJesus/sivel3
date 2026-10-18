@@ -107,6 +107,7 @@
       "@pasosdejesus/m"
     ],
     "overrides": {
+      "@pasosdejesus/m": "0.31.2",
       "@parcel/watcher": "npm:@parcel/watcher-wasm",
       "rollup": "npm:@rollup/wasm-node",
       "lightningcss": "npm:lightningcss-wasm@1.32.0",
