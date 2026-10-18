@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
+import { getChainId } from '@/lib/credentials'
 
 /**
  * GET /api/credential/[tokenId].json
@@ -24,7 +25,7 @@ export async function GET(
     .selectFrom('credential_metadata')
     .selectAll()
     .where('token_id', '=', tokenId)
-    .where('chain_id', '=', 'celo')
+    .where('chain_id', '=', getChainId())
     .executeTakeFirst()
 
   if (!row) {

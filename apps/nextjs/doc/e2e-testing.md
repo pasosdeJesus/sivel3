@@ -30,12 +30,25 @@ variables yourself.
 
 Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 
+## Smoke specs (`e2e/smoke/`)
+
+| Spec | What it checks |
+|---|---|
+| `public-site.spec.mjs` | `/en`, `/es`, and both OSM map routes return 200 without error markers. |
+| `public-api.spec.mjs` | Public reference endpoints (counts, categories, departments, regions, alleged perpetrators, OSM data) return their expected JSON shape. |
+| `no-rails.spec.mjs` | The public data routes are served by Kysely (R-#65) and the HTML does not reference the Rails host. |
+| `credentials.spec.mjs` | Credential health (200 or 503), breakdown, and leaderboard answer. |
+| `credential-metadata.spec.mjs` | ERC-1155 metadata for the deployment's own chain (`celo` / `celoSepolia`), a wallet profile, and a regional on-chain balance. |
+| `api-validation.spec.mjs` | Malformed requests get the documented 4xx codes (donations, pre-alerts buy/convert/queue/sync, verify, geocode, case detail, credential); pagination is clamped; a real case id returns its payload. |
+| `pages-and-i18n.spec.mjs` | Stats, dashboard, documenter, and wallet pages return 200 in EN/ES; unprefixed paths redirect through the locale middleware; unknown pages stay 404. |
+
 ## Browser and signature specs (`e2e/specs/`)
 
 | Spec | Needs | What it checks |
 |---|---|---|
 | `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
 | `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through the UI (`setupInAppWallet`), sees the recovery phrase; reloads (locks it) and unlocks (`unlockInAppWallet`). |
+| `public-pages.spec.mjs` | Chrome + server | Client pages hydrate against the live APIs: the OSM map renders its Leaflet container, EN/ES stats render, and the wallet profile leaves the loading state. |
 | `signatures.spec.mjs` | server (+ `PREALERT_ID`, `DOCUMENTER_WALLETS` for the positive path) | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401); the positive path records a score 0 (**rejected**). |
 | `prealert-buy.spec.mjs` | server (+ `PENDING_PREALERT_ID` for the positive path) | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404); the positive path **reserves** a pending one. |
 | `prealert-lifecycle.spec.mjs` | server (+ `DOCUMENTER_WALLETS`; `PENDING_PREALERT_ID` optional) | The **DB-only** lifecycle `pending → reserved → converted → rejected` over the API: reserves (buy without `tx_hash`), converts, and scores 0. It picks a pending pre-alert itself. |
@@ -98,6 +111,12 @@ one by itself, and `signatures`/`prealert-buy` take the id via env.
 | `E2E_RPC_URL` | `NEXT_PUBLIC_RPC_URL` | RPC for the client-side on-chain steps (`prealert-purchase`); set it when the app's RPC is IP-whitelisted (e.g. `https://forno.celo-sepolia.celo-testnet.org`) |
 | `E2E_MARKET_ADDRESS` / `E2E_USDT_ADDRESS` | app env | override the PreAlertMarket / USDT address used by `prealert-purchase` (the runner reloads `apps/.env`, so a plain command-line var is not enough for a different site) |
 | `PREALERT_PAY` | (unset) | `1` → `prealert-purchase` also runs the payout (score 2) |
+
+The remote dev site has its own environment, so its contracts may not match this
+checkout's `apps/.env`. If `prealert-purchase` reports `On-chain verification
+failed`, send the USDT to the address the **server** expects with
+`E2E_MARKET_ADDRESS` (measured 2026-10-18: the site verified against the
+`celoSepolia` default `0x9024…`, while `apps/.env` pointed at `0x8923…`).
 
 ## OpenBSD / adJ notes
 

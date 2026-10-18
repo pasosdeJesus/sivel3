@@ -97,6 +97,10 @@ async function main() {
     ok(`using PENDING_PREALERT_ID=${id}`)
   } else {
     const list = await getJson(`${base}/api/pre-alerts?limit=1`)
+    if (list.status !== 200) {
+      fail(`GET /api/pre-alerts → ${list.status} (cannot pick a pending pre-alert)`)
+      process.exit(summary(t0) > 0 ? 1 : 0)
+    }
     id = list.json?.pre_alerts?.[0]?.id ?? null
     if (id) ok(`picked pending pre-alert #${id}`)
   }

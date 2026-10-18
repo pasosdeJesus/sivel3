@@ -32,6 +32,41 @@ export async function get(url, timeoutMs = 20000) {
   }
 }
 
+/** GET without following redirects; returns { status, location }. */
+export async function getRedirect(url, timeoutMs = 20000) {
+  try {
+    const res = await fetch(url, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    return { status: res.status, location: res.headers.get('location') }
+  } catch (err) {
+    return { status: 0, location: null, error: err?.message || String(err) }
+  }
+}
+
+/** POST JSON that never throws; returns { status, text, json }. */
+export async function postJson(url, body, timeoutMs = 20000) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    const text = await res.text()
+    let json = null
+    try {
+      json = JSON.parse(text)
+    } catch {
+      /* not JSON */
+    }
+    return { status: res.status, text, json, ok: res.ok }
+  } catch (err) {
+    return { status: 0, text: '', json: null, ok: false, error: err?.message || String(err) }
+  }
+}
+
 // Minimal assertion helpers (same contract as @pasosdejesus/m/e2e, without importing it).
 let passed = 0
 let failed = 0
