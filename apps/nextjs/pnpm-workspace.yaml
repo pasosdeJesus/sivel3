@@ -7,3 +7,43 @@ packages:
 
 # Link `generated-<motor>` siblings declared as `*` by the vendored copies.
 linkWorkspacePackages: true
+
+# pnpm 11 falla con ERR_PNPM_IGNORED_BUILDS si un paquete con script no está aquí
+# (reemplaza `pnpm.onlyBuiltDependencies` y `pnpm.trustedDependencies`).
+allowBuilds:
+  '@pasosdejesus/m': true
+  '@swc/core': true
+  blake-hash: true
+  bufferutil: true
+  esbuild: true
+  keccak: true
+  secp256k1: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true
+
+# Migrado del campo `pnpm.overrides` de package.json: pnpm 11 ya no lo lee.
+overrides:
+  '@pasosdejesus/m': 0.31.2
+  '@parcel/watcher': npm:@parcel/watcher-wasm
+  rollup: npm:@rollup/wasm-node
+  lightningcss: npm:lightningcss-wasm@1.32.0
+  '@tailwindcss/oxide': npm:@tailwindcss/oxide-wasm32-wasi
+  'esbuild@<=0.24.2': '>=0.25.0'
+  'diff@>=6.0.0 <8.0.3': '>=8.0.3'
+  'serialize-javascript@<=7.0.2': '>=7.0.3'
+  'vite@<=6.4.1': 6.4.3
+  'ws@>=8.0.0 <8.20.1': '>=8.20.1'
+  'serialize-javascript@>=5.0.0 <7.0.5': '>=7.0.5'
+  'uuid@<11.1.1': '>=11.1.1'
+  'vite@<=6.4.2': 6.4.3
+  'ws@>=8.0.0 <8.21.0': '>=8.21.0'
+  'axios@>=1.0.0 <1.18.0': '>=1.18.0'
+  'axios@>=1.7.0 <1.18.0': '>=1.18.0'
+  'axios@>=1.15.0 <1.18.0': '>=1.18.0'
+  'axios@>=1.15.2 <1.18.0': '>=1.18.0'
+  'axios@>=1.15.1 <1.18.0': '>=1.18.0'
+  'axios@>=1.13.0 <1.18.0': '>=1.18.0'
+
+minimumReleaseAgeExclude:
+  - '@pasosdejesus/*'

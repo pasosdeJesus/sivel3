@@ -1,0 +1,18 @@
+# Configuración de pnpm para `apps/hardhat`.
+#
+# No declara `packages:`: el app se instala solo. Este archivo existe porque
+# pnpm 11 ya no lee el campo `pnpm` de package.json (`onlyBuiltDependencies`)
+# y falla con ERR_PNPM_IGNORED_BUILDS si falta alguno.
+
+# pnpm 11 falla con ERR_PNPM_IGNORED_BUILDS si un paquete con script de
+# instalación no está aquí (reemplaza `pnpm.onlyBuiltDependencies`).
+allowBuilds:
+  '@pasosdejesus/m': true
+  bufferutil: true
+  esbuild: true
+  keccak: true
+  secp256k1: true
+  utf-8-validate: true
+
+minimumReleaseAgeExclude:
+  - '@pasosdejesus/*'
