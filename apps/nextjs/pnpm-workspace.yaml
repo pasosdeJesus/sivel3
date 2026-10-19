@@ -24,7 +24,7 @@ allowBuilds:
 
 # Migrado del campo `pnpm.overrides` de package.json: pnpm 11 ya no lo lee.
 overrides:
-  '@pasosdejesus/m': 0.31.2
+  '@pasosdejesus/m': 0.32.0
   '@parcel/watcher': npm:@parcel/watcher-wasm
   rollup: npm:@rollup/wasm-node
   lightningcss: npm:lightningcss-wasm@1.32.0
