@@ -4,7 +4,7 @@
 // converts it, and (opt-in) scores 2 → payout.
 //
 // Needs USDT + gas in the test wallet. Addresses come from the app's env
-// (`NEXT_PUBLIC_PREALERT_MARKET_ADDRESS`, `NEXT_PUBLIC_USDT_ADDRESS`), overridable
+// (`NEXT_PUBLIC_PREALERT_MARKET_ADDRESS`, `NEXT_PUBLIC_USDT_TESTNET`), overridable
 // with `E2E_MARKET_ADDRESS` / `E2E_USDT_ADDRESS` (the runner reloads `apps/.env`, so
 // a plain env var on the command line is not enough for the target site). The RPC
 // comes from `E2E_RPC_URL` or `NEXT_PUBLIC_RPC_URL` (pass `E2E_RPC_URL=…` if the
@@ -67,12 +67,12 @@ async function main() {
   const buyer = account.address
   const chain = env.chainId === 42220 ? celo : celoSepolia
   const rpc = process.env.E2E_RPC_URL || process.env.NEXT_PUBLIC_RPC_URL
-  const usdt = process.env.E2E_USDT_ADDRESS || process.env.NEXT_PUBLIC_USDT_ADDRESS
+  const usdt = process.env.E2E_USDT_ADDRESS || process.env.NEXT_PUBLIC_USDT_TESTNET
   const market = process.env.E2E_MARKET_ADDRESS || process.env.NEXT_PUBLIC_PREALERT_MARKET_ADDRESS
   console.log(`Pre-alert on-chain purchase — ${base}\n wallet: ${buyer}\n rpc: ${rpc}\n`)
 
   if (!usdt || !market) {
-    fail('NEXT_PUBLIC_USDT_ADDRESS / NEXT_PUBLIC_PREALERT_MARKET_ADDRESS not set')
+    fail('NEXT_PUBLIC_USDT_TESTNET / NEXT_PUBLIC_PREALERT_MARKET_ADDRESS not set')
     process.exit(summary(t0) > 0 ? 1 : 0)
   }
 

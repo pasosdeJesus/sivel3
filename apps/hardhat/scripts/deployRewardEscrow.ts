@@ -11,13 +11,13 @@ async function main() {
     `Deploying SIVeL3RewardEscrow with the account: ${deployer.address}`
   );
 
-  const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS;
+  const usdtAddress = process.env.NEXT_PUBLIC_USDT_TESTNET;
   const backendWallet =
     process.env.AGENT_WALLET_ADDRESS || deployer.address;
   // BACKEND_ROLE: sivel.xyz backend wallet. Use sivel3agent wallet for Sepolia.
 
   if (!usdtAddress) {
-    throw new Error("NEXT_PUBLIC_USDT_ADDRESS not set");
+    throw new Error("NEXT_PUBLIC_USDT_TESTNET not set");
   }
 
   console.log("  USDT address:", usdtAddress);

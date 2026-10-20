@@ -13,9 +13,9 @@ async function main() {
   const regionalDonationFactory = await ethers.getContractFactory(
     "SIVeL3RegionalDonationV2"
   );
-  console.log("usdt_address=", process.env.NEXT_PUBLIC_USDT_ADDRESS)
+  console.log("usdt_address=", process.env.NEXT_PUBLIC_USDT_TESTNET)
   const regionalDonation = await regionalDonationFactory.deploy(
-    process.env.NEXT_PUBLIC_USDT_ADDRESS,
+    process.env.NEXT_PUBLIC_USDT_TESTNET,
     deployer.address
   );
   await regionalDonation.waitForDeployment();

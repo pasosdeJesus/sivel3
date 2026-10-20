@@ -82,7 +82,7 @@ describe('POST /api/donations/assign', () => {
     // Set env vars
     process.env.NEXT_PUBLIC_RPC_URL = 'https://sepolia.celo.org'
     process.env.NEXT_PUBLIC_NETWORK = 'celoSepolia'
-    process.env.NEXT_PUBLIC_USDT_ADDRESS = USDT_ADDRESS
+    process.env.NEXT_PUBLIC_USDT_TESTNET = USDT_ADDRESS
     process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = CONTRACT_ADDRESS
     process.env.PRIVATE_KEY = '0x7ca1a247f5ea85228506abcb86cefda2c7090b5e46d0518c80c65a7f949da67e'
     process.env.LEARNTG_ADDRESS = '0x9f636e5653b649b44c9375e6e103600ae55af979'

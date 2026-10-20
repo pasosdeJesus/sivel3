@@ -22,7 +22,7 @@ const makeProvider = () => ({ request: mockRequest }) as any
 
 describe('lib/donate', () => {
   beforeAll(async () => {
-    process.env.NEXT_PUBLIC_USDT_ADDRESS = USDT_ADDRESS
+    process.env.NEXT_PUBLIC_USDT_TESTNET = USDT_ADDRESS
     process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS = REGIONAL_DONATION_ADDRESS
   })
 

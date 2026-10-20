@@ -30,7 +30,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     const PRIVATE_KEY = process.env.PRIVATE_KEY! as `0x${string}`
     const OLD_CONTRACT = process.env.NEXT_PUBLIC_REGIONALDONATION_V1_ADDRESS! as `0x${string}`
     const NEW_CONTRACT = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS! as `0x${string}`
-    const USDT_ADDRESS = process.env.NEXT_PUBLIC_USDT_ADDRESS! as `0x${string}`
+    const USDT_ADDRESS = (process.env.NEXT_PUBLIC_USDT_TESTNET ?? process.env.NEXT_PUBLIC_USDT_ADDRESS)! as `0x${string}`
     const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
 
     console.log(`   Old contract (V1): ${OLD_CONTRACT}`)

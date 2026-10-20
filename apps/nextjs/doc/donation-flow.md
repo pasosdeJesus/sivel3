@@ -191,9 +191,9 @@ The backend calls `mintSlearnCashback(donor, donationAmount)` from `lib/slearn.t
 | `NEXT_PUBLIC_ADDRESS` | sivel.xyz backend wallet — donations arrive here before 90/10 split |
 | `PRIVATE_KEY` | Server's private key for signing contract calls |
 | `NEXT_PUBLIC_RPC_URL` | Celo RPC endpoint |
-| `NEXT_PUBLIC_USDT_ADDRESS` | USDT token on Celo |
+| `NEXT_PUBLIC_USDT_TESTNET` | USDT token on Celo |
 | `NEXT_PUBLIC_REGIONALDONATION_ADDRESS` | RegionalDonationV2 contract |
-| `NEXT_PUBLIC_SLEARN_ADDRESS` | SLEARN token (via `contractAddresses.ts`) |
+| `NEXT_PUBLIC_SLEARN_TESTNET` | SLEARN token (via `contractAddresses.ts`) |
 
 ---
 

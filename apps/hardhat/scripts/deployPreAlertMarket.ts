@@ -11,11 +11,11 @@ async function main() {
     `Deploying SIVeL3PreAlertMarket with the account: ${deployer.address}`
   );
 
-  const usdtAddress = process.env.NEXT_PUBLIC_USDT_ADDRESS;
+  const usdtAddress = process.env.NEXT_PUBLIC_USDT_TESTNET;
   const agentWallet = process.env.AGENT_WALLET_ADDRESS;
 
   if (!usdtAddress) {
-    throw new Error("NEXT_PUBLIC_USDT_ADDRESS not set");
+    throw new Error("NEXT_PUBLIC_USDT_TESTNET not set");
   }
   if (!agentWallet) {
     throw new Error("AGENT_WALLET_ADDRESS not set");

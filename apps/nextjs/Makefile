@@ -1,5 +1,6 @@
 
 all:
+	./bin/m env:check
 	pnpm i
 	$(MAKE) eng-build
 	sh -c 'ulimit -d 7340032 && pnpm build'

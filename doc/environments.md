@@ -41,13 +41,18 @@ the app and the contracts resolve addresses per network.
 | `SIVeL3RegionalDonationV2` | `0x563AbB7492bb496B9DD74d54D6daDd41374924E5` | `0xc50123fb87e4167fe9275cab90ae35551fe1248e` |
 | `SIVeL3PreAlertMarket`     | `0x9aefBD59455efE0F7732638eF791f35F110ddB0c` | `0x902413432aD345bab37093404849C09193AB9A23` |
 | `SIVeL3RewardEscrow`       | `0xBFD94B391882612425455305dc0c9b1eC41E155A` | `0x53aD49cBF4001aD0c8fe588dA330ED277bBD45f9` |
-| `USDT` / `SLEARN`          | app env / `@pasosdejesus/mpdj`               | `@pasosdejesus/mpdj` ecosystem defaults      |
+| `USDT` / `SLEARN`          | `NEXT_PUBLIC_USDT_TESTNET` / `NEXT_PUBLIC_SLEARN_TESTNET` in `apps/.env` | `@pasosdejesus/mpdj` ecosystem defaults |
 | `PasosDeJesusCredentials`  | from Hardhat deployments                     | from Hardhat deployments                     |
 
 Resolution order for the sivel3-specific contracts (`lib/contractAddresses.ts`):
 
 1. `NEXT_PUBLIC_<CONTRACT>_ADDRESS` from `apps/.env`.
 2. The canonical Celo Sepolia default above.
+
+The shared tokens (USDT, SLEARN) resolve in `@pasosdejesus/mpdj` from
+`NEXT_PUBLIC_USDT_TESTNET` / `NEXT_PUBLIC_SLEARN_TESTNET`; the legacy
+`..._ADDRESS` names are **ignored** since `mpdj@0.3.0`. `bin/m env:check`
+(first step of `make all`) reports any leftover old name and exits 0.
 
 This checkout's `apps/.env` overrides several Sepolia addresses (for example
 `NEXT_PUBLIC_PREALERT_MARKET_ADDRESS=0x8923…`). The **remote dev server has its
@@ -161,11 +166,13 @@ be undone. Run it only against testnet with test funds.
 
 ## 7. Deployment checklist
 
-The deploy must rebuild the engines and the app. `make all` runs the three
-steps below; `make prod` builds and starts the production server.
+The deploy must rebuild the engines and the app. `make all` runs the four
+steps below (the first one is the informative `env:check`); `make prod` builds
+and starts the production server.
 
 ```sh
 cd apps/nextjs
+./bin/m env:check
 pnpm install
 make eng-build
 pnpm build
