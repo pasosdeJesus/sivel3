@@ -8,8 +8,7 @@
 // 3. Retry on collision (shared USDT pool — see doc/slearn-integration.md §3.1)
 //
 // === SLEARN contract ===
-// Mainnet: 0x27fd41Bea85C39254f2B12789eB37a1543152CC1
-// Sepolia: 0x9fBa3A2Ca0275c4D7A3eA341923f8c531e913BFA
+// Addresses resolve from `lib/contractAddresses.ts` (`@pasosdejesus/mpdj`).
 
 import { createWalletClient, createPublicClient, http, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'

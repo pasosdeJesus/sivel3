@@ -49,6 +49,7 @@ Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 |---|---|---|
 | `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
 | `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through the UI (`setupInAppWallet`), sees the recovery phrase; reloads (locks it) and unlocks (`unlockInAppWallet`). |
+| `in-app-wallet-import.spec.mjs` | Chrome + server + `PRIVATE_KEY` | Imports the **known test wallet** (no new keys) and unlocks it after a reload; safe to run against production because it creates nothing and the SBT mint is skipped when the wallet already holds it. |
 | `public-pages.spec.mjs` | Chrome + server | Client pages hydrate against the live APIs: the OSM map renders its Leaflet container, EN/ES stats render, and the wallet profile leaves the loading state. |
 | `signatures.spec.mjs` | server (+ `PREALERT_ID`, `DOCUMENTER_WALLETS` for the positive path) | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401); the positive path records a score 0 (**rejected**). |
 | `prealert-buy.spec.mjs` | server (+ `PENDING_PREALERT_ID` for the positive path) | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404); the positive path **reserves** a pending one. |

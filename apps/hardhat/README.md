@@ -131,6 +131,26 @@ balance of each region, checking that the regional balances add up to the
 contract's USDT. It uses `tsx` + `viem` and the compiled artifact instead of
 `hardhat run`, so it works on OpenBSD without `bin/prepadJ.sh`.
 
+### Check deployment addresses
+
+```sh
+cd ..                                       # repository root
+apps/nextjs/bin/m contract:checkdeploy      # readable report
+apps/nextjs/bin/m contract:checkdeploy --json
+```
+
+Read-only: validates every `deployments/<Contract>/V1/<network>.json` (address,
+network, expected fields) and that sources read addresses with
+`@pasosdejesus/m/blockchain/deployments` instead of literals. Intentional
+literals (canonical Celo Sepolia defaults, applied migrations, one-off scripts)
+are declared in `contract-check.json` at the repository root.
+
+Run it from the **repository root**: from `apps/nextjs` the tool does not see
+`apps/hardhat`. The two `DEPLOYMENTS_DIR_MISSING` findings are expected in a
+fresh checkout: `deployments/PasosDeJesusCredentials/` is gitignored and only
+exists on machines where the credentials contract was deployed; there the report
+is clean.
+
 ### Deploy and Verify PasosDeJesusCredentials
 
 ```sh
