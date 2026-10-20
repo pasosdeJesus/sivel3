@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import { resolve } from 'path'
+import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
 import type { Kysely } from 'kysely'
 import { createPublicClient, http, parseAbiItem } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
@@ -8,11 +10,17 @@ import { celo, celoSepolia } from 'viem/chains'
  * events from the SIVeL3RegionalDonationV2 contract on-chain.
  */
 export async function up(db: Kysely<any>): Promise<void> {
-  const CONTRACT = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS as `0x${string}`
+  // Address from the deployment file (written by apps/hardhat); env is only a fallback.
+  const deployment = readDeployment(
+    process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia',
+    resolve(__dirname, '../../../hardhat/deployments'),
+    { contract: 'SIVeL3RegionalDonationV2', version: 'V1' },
+  )
+  const CONTRACT = (process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS ?? deployment?.address) as `0x${string}`
   const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
 
   if (!CONTRACT) {
-    console.log('Skipping backfill — REGIONALDONATION_ADDRESS not set')
+    console.log('Skipping backfill — RegionalDonationV2 deployment not found')
     return
   }
 

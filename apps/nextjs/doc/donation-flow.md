@@ -192,8 +192,12 @@ The backend calls `mintSlearnCashback(donor, donationAmount)` from `lib/slearn.t
 | `PRIVATE_KEY` | Server's private key for signing contract calls |
 | `NEXT_PUBLIC_RPC_URL` | Celo RPC endpoint |
 | `NEXT_PUBLIC_USDT_TESTNET` | USDT token on Celo |
-| `NEXT_PUBLIC_REGIONALDONATION_ADDRESS` | RegionalDonationV2 contract |
 | `NEXT_PUBLIC_SLEARN_TESTNET` | SLEARN token (via `contractAddresses.ts`) |
+
+`RegionalDonationV2` is not an env var: it resolves from
+`apps/hardhat/deployments/SIVeL3RegionalDonationV2/V1/<network>.json` at build
+time, with the canonical Celo Sepolia address in `lib/contractAddresses.ts` as
+fallback.
 
 ---
 

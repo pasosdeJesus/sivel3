@@ -46,18 +46,23 @@ the app and the contracts resolve addresses per network.
 
 Resolution order for the sivel3-specific contracts (`lib/contractAddresses.ts`):
 
-1. `NEXT_PUBLIC_<CONTRACT>_ADDRESS` from `apps/.env`.
+1. `apps/hardhat/deployments/<Contract>/V1/<network>.json`, written by the deploy
+   scripts and read by `next.config.ts` at build time (a deployment file wins over
+   any env var). The directory is gitignored.
 2. The canonical Celo Sepolia default above.
+
+`NEXT_PUBLIC_<CONTRACT>_ADDRESS` is only a last-resort override (unit tests and
+per-VM experiments). On a fresh checkout without `deployments/` the canonical
+default applies, so the app never depends on a missing file at build time.
 
 The shared tokens (USDT, SLEARN) resolve in `@pasosdejesus/mpdj` from
 `NEXT_PUBLIC_USDT_TESTNET` / `NEXT_PUBLIC_SLEARN_TESTNET`; the legacy
 `..._ADDRESS` names are **ignored** since `mpdj@0.3.0`. `bin/m env:check`
 (first step of `make all`) reports any leftover old name and exits 0.
 
-This checkout's `apps/.env` overrides several Sepolia addresses (for example
-`NEXT_PUBLIC_PREALERT_MARKET_ADDRESS=0x8923…`). The **remote dev server has its
-own environment** and may use another set. Do not assume the deployed server
-shares this checkout's contracts.
+The **remote dev and production servers have their own `deployments/` and
+`apps/.env`**; do not assume they share this checkout's addresses. To compare,
+look at the deployment JSON of the server's network.
 
 `credential_metadata.chain_id` is stored as `celo` or `celoSepolia`, never as
 the numeric chain id. Routes that read credentials must resolve it with

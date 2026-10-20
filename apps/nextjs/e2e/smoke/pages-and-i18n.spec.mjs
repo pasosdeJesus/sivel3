@@ -1,5 +1,5 @@
 // Smoke: authenticated-less pages render in both locales and the locale
-// middleware redirects unprefixed paths. 404s stay 404.
+// proxy redirects unprefixed paths. 404s stay 404.
 // Run with: make test-smoke
 import { siteBase, get, getRedirect, ok, fail, summary } from '../helpers/site.mjs'
 

@@ -1,6 +1,8 @@
 
 import { ethers } from "hardhat";
 import dotenv from "dotenv"
+import fs from "fs";
+import path from "path";
 dotenv.config({ path: '../.env' })
 
 async function main() {
@@ -23,6 +25,38 @@ async function main() {
   console.log(
     `SIVeL3RegionalDonationV2 contract deployed to: ${regionalDonationAddress}`
   );
+
+  // Save deployment address (hierarchical V1); Next.js reads it at build time.
+  const chainId = Number((await ethers.provider.getNetwork()).chainId);
+  const networkName =
+    chainId === 42220
+      ? "celo"
+      : chainId === 11142220
+        ? "celoSepolia"
+        : `chain-${chainId}`;
+  const deploymentsDir = path.join(
+    __dirname,
+    "../deployments/SIVeL3RegionalDonationV2/V1",
+  );
+  fs.mkdirSync(deploymentsDir, { recursive: true });
+  const deploymentFile = path.join(deploymentsDir, `${networkName}.json`);
+  fs.writeFileSync(
+    deploymentFile,
+    JSON.stringify(
+      {
+        contract: "SIVeL3RegionalDonationV2",
+        address: regionalDonationAddress,
+        chainId,
+        network: networkName,
+        transactionHash: regionalDonation.deploymentTransaction()?.hash,
+        deployedAt: new Date().toISOString(),
+        usdtAddress: process.env.NEXT_PUBLIC_USDT_TESTNET,
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(`   Deployment saved to ${deploymentFile}`);
 
   // Set the regions
   console.log("Setting region 1: Colombia...");

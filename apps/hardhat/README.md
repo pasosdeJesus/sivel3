@@ -98,8 +98,38 @@ Runs all contract tests via `@pasosdejesus/m`'s `contract:test` runner
 pnpm deploy-mock-usdt
 ```
 
-The script will output the contract address. **Copy this address** and
-update the corresponding `NEXT_PUBLIC_*` variable in `apps/.env`.
+The deploy scripts write the address to
+`deployments/<Contract>/V1/<network>.json` (gitignored). The Next.js app reads
+those files at build time (`next.config.ts`), so **no manual copy to
+`apps/.env` is needed**. The same convention covers
+`SIVeL3RegionalDonationV2`, `SIVeL3PreAlertMarket` and `SIVeL3RewardEscrow`;
+`PasosDeJesusCredentials` keeps its own
+`deployments/PasosDeJesusCredentials/<network>.json`.
+
+```sh
+bin/deployRegionalDonation celoSepolia
+bin/deployPreAlertMarket celoSepolia
+bin/deployRewardEscrow celoSepolia
+```
+
+If a deployment file is missing (fresh checkout), the app falls back to the
+canonical Celo Sepolia address in `apps/nextjs/lib/contractAddresses.ts`; a
+`NEXT_PUBLIC_*_ADDRESS` env var is only a last-resort override.
+
+### Verify SIVeL3RegionalDonationV2
+
+```sh
+bin/verifyRegionalDonationV2            # network from NEXT_PUBLIC_NETWORK
+bin/verifyRegionalDonationV2 celo
+REGION_MAX=20 bin/verifyRegionalDonationV2 celo
+```
+
+Read-only: loads the address from
+`deployments/SIVeL3RegionalDonationV2/V1/<network>.json`, then prints the owner,
+`backendAddress`, the donation token (symbol/decimals/balance) and the name and
+balance of each region, checking that the regional balances add up to the
+contract's USDT. It uses `tsx` + `viem` and the compiled artifact instead of
+`hardhat run`, so it works on OpenBSD without `bin/prepadJ.sh`.
 
 ### Deploy and Verify PasosDeJesusCredentials
 

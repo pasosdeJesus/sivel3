@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. ../.env
+
+network=${1:-$NEXT_PUBLIC_NETWORK}
+if (test "$network" = "") then {
+  echo "Missing network (celo/celoSepolia). Set NEXT_PUBLIC_NETWORK or pass it as the first argument."
+  exit 1;
+} fi;
+
+# Uses tsx + viem (not `hardhat run`): the Solidity analyzer has no OpenBSD binary.
+node_modules/.bin/tsx scripts/verifyRegionalDonationV2.ts "$network"

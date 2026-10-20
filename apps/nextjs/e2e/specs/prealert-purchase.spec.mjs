@@ -3,8 +3,8 @@
 // mirroring `lib/buyPreAlert.ts`), asks the backend to verify it (`tx_hash`),
 // converts it, and (opt-in) scores 2 → payout.
 //
-// Needs USDT + gas in the test wallet. Addresses come from the app's env
-// (`NEXT_PUBLIC_PREALERT_MARKET_ADDRESS`, `NEXT_PUBLIC_USDT_TESTNET`), overridable
+// Needs USDT + gas in the test wallet. Addresses come from the deployment files
+// the target server was built with (`apps/hardhat/deployments/...`), overridable
 // with `E2E_MARKET_ADDRESS` / `E2E_USDT_ADDRESS` (the runner reloads `apps/.env`, so
 // a plain env var on the command line is not enough for the target site). The RPC
 // comes from `E2E_RPC_URL` or `NEXT_PUBLIC_RPC_URL` (pass `E2E_RPC_URL=…` if the

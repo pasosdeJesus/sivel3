@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { resolve } from 'path'
+import { readDeployment } from '@pasosdejesus/m/blockchain/deployments'
 import { Kysely } from 'kysely'
 import { createPublicClient, createWalletClient, getContract, http, formatUnits } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -29,7 +30,13 @@ export async function up(db: Kysely<any>): Promise<void> {
     const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
     const PRIVATE_KEY = process.env.PRIVATE_KEY! as `0x${string}`
     const OLD_CONTRACT = process.env.NEXT_PUBLIC_REGIONALDONATION_V1_ADDRESS! as `0x${string}`
-    const NEW_CONTRACT = process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS! as `0x${string}`
+    // Address from the deployment file (written by apps/hardhat); env is only a fallback.
+    const deployment = readDeployment(
+        process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia',
+        resolve(__dirname, '../../../hardhat/deployments'),
+        { contract: 'SIVeL3RegionalDonationV2', version: 'V1' },
+    )
+    const NEW_CONTRACT = (process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS ?? deployment?.address) as `0x${string}`
     const USDT_ADDRESS = (process.env.NEXT_PUBLIC_USDT_TESTNET ?? process.env.NEXT_PUBLIC_USDT_ADDRESS)! as `0x${string}`
     const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
 

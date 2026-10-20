@@ -25,7 +25,7 @@ function getLocale(request: NextRequest): string {
   return locale;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip redirect for API / assets / agents
@@ -50,7 +50,7 @@ export function middleware(request: NextRequest) {
   try {
     locale = getLocale(request)
   } catch (err) {
-    console.error('Middleware locale detection failed:', err)
+    console.error('Proxy locale detection failed:', err)
     locale = defaultLocale
   }
 

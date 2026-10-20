@@ -9,7 +9,7 @@ This document describes the internal technical architecture of the Next.js appli
 The application uses the Next.js **App Router** with a `[locale]` dynamic segment to handle multi-language support (Spanish and English).
 
 *   **`[locale]` Segment:** All public routes reside under `app/[locale]/`. This allows Next.js to generate static or dynamic versions per language.
-*   **Middleware (`middleware.ts`):** Detects the user's preferred language via the `accept-language` header and redirects them to the corresponding route (e.g., from `/` to `/es/`). It excludes API routes (`/api/*`) and static assets.
+*   **Proxy (`proxy.ts`):** Detects the user's preferred language via the `accept-language` header and redirects them to the corresponding route (e.g., from `/` to `/es/`). It excludes API routes (`/api/*`) and static assets.
 *   **ClientLayout:** A component that wraps pages to provide language context and state providers to the client.
 
 ---
