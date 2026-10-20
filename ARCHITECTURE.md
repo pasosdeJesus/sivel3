@@ -68,7 +68,7 @@ graph TD
 - **Based on:** MSIP and cor1440_gen frameworks.
 - **Status:** Read-only from Next.js perspective. Gradual migration to `@pasosdejesus/m`.
 
-### 2. **Frontend & API: Next.js (apps/nextjs/)**
+### 2. **Frontend & API: Next.js (apps/web/)**
 - **Framework:** Next.js App Router + React + TypeScript
 - **Database:** PostgreSQL via Kysely (shared with sivel2)
 - **Key features:**
@@ -81,7 +81,7 @@ graph TD
   - SBT minting (Connector, Explorer, Donor tiers)
 - **Authentication:** Wallet connection (in-app wallet first, external EIP-6963 as an option) + learn.tg KYC for sensitive actions
 
-### 3. **Smart Contracts: Hardhat (apps/hardhat/)**
+### 3. **Smart Contracts: Hardhat (apps/contracts/)**
 - **Language:** Solidity ^0.8.20 (OpenZeppelin 5.x)
 - **Network:** Celo Mainnet (42220) + Sepolia testnet (11142220)
 

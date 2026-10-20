@@ -69,8 +69,8 @@ SIVeL 3 is a monorepo containing:
 sivel3/
 ├── sivel2/ # Legacy Rails backoffice (admin/migrations) — NOT a runtime dependency
 ├── apps/
-│ ├── nextjs/ # Modern frontend and Web3 integration
-│ └── hardhat/ # Solidity smart contracts (Celo)
+│ ├── web/ # Modern frontend and Web3 integration
+│ └── contracts/ # Solidity smart contracts (Celo)
 ├── PRINCIPLES.md # Ethical principles
 ├── VISION.md # Strategic vision
 ├── ARCHITECTURE.md # Technical documentation

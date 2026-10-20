@@ -1,19 +1,19 @@
 {
   "allowAddresses": {
-    "apps/nextjs/app/api/donations/assign/route.ts": [
+    "apps/web/app/api/donations/assign/route.ts": [
       "0xddf252ad1be2c89b69c2b068fc378daa952ba7f1"
     ],
-    "apps/nextjs/app/api/pre-alerts/[id]/buy/route.ts": [
+    "apps/web/app/api/pre-alerts/[id]/buy/route.ts": [
       "0xddf252ad1be2c89b69c2b068fc378daa952ba7f1"
     ],
-    "apps/nextjs/bin/check-escrow.mjs": [
+    "apps/web/bin/check-escrow.mjs": [
       "0x9aefbd59455efe0f7732638ef791f35f110ddb0c",
       "0xbfd94b391882612425455305dc0c9b1ec41e155a"
     ],
-    "apps/nextjs/bin/check-verification.mjs": [
+    "apps/web/bin/check-verification.mjs": [
       "0x2e2c4ac19c93d0984840cdd8e7f77500e2ef978e"
     ],
-    "apps/nextjs/db/migrations/20260510142000_BackfillLearningPoints.ts": [
+    "apps/web/db/migrations/20260510142000_BackfillLearningPoints.ts": [
       "0x1a28222b9963956d5806862cc99ff7c540d10027",
       "0x2e2c4ac19c93d0984840cdd8e7f77500e2ef978e",
       "0x43295a53aadbf1afc1672ba29453a09899a27f3e",
@@ -24,7 +24,7 @@
       "0xdc37393ea5c44428be9d06964588d91cfbcedd17",
       "0xde15e7e6584ad7b8ff3201eb321b227deeda365d"
     ],
-    "apps/nextjs/db/migrations/20260520_sync_credential_metadata.ts": [
+    "apps/web/db/migrations/20260520_sync_credential_metadata.ts": [
       "0x2eb33b8b6fa0a4cfa9282cd213f79e291a0a4734",
       "0x616d78ebe5052eab0de25afa2c90b2cd8e550c70",
       "0x65a58990984f61f252fd6868ac0e9acb3befaf5d",
@@ -33,35 +33,35 @@
       "0xa0a8be0a778a94eac2488e69eb5cf6921d2c0227",
       "0xc881844ff5e225c937d57807a73752d627e79811"
     ],
-    "apps/nextjs/e2e/smoke/api-validation.spec.mjs": [
+    "apps/web/e2e/smoke/api-validation.spec.mjs": [
       "0x0000000000000000000000000000000000000001"
     ],
-    "apps/nextjs/e2e/smoke/pages-and-i18n.spec.mjs": [
+    "apps/web/e2e/smoke/pages-and-i18n.spec.mjs": [
       "0x0000000000000000000000000000000000000001"
     ],
-    "apps/nextjs/lib/contractAddresses.ts": [
+    "apps/web/lib/contractAddresses.ts": [
       "0x53ad49cbf4001ad0c8fe588da330ed277bbd45f9",
       "0x902413432ad345bab37093404849c09193ab9a23",
       "0x9aefbd59455efe0f7732638ef791f35f110ddb0c",
       "0xbfd94b391882612425455305dc0c9b1ec41e155a",
       "0xc50123fb87e4167fe9275cab90ae35551fe1248e"
     ],
-    "apps/nextjs/scripts/diagnose-contract.mjs": [
+    "apps/web/scripts/diagnose-contract.mjs": [
       "0x358643badcc77cccb28a319abd439438a57339a7",
       "0x6b3bc1b55b28380193733a2fd27f2639d92f14be",
       "0x9522f056fa74edbfe72988c002be37048d5d6604"
     ],
-    "apps/nextjs/scripts/e2e/test-donate-musdt-receive-slearn.mjs": [
+    "apps/web/scripts/e2e/test-donate-musdt-receive-slearn.mjs": [
       "0xc50123fb87e4167fe9275cab90ae35551fe1248e"
     ],
-    "apps/nextjs/scripts/e2e/test-sbts.mjs": [
+    "apps/web/scripts/e2e/test-sbts.mjs": [
       "0xc50123fb87e4167fe9275cab90ae35551fe1248e"
     ],
-    "apps/nextjs/scripts/mint-donor-direct.mjs": [
+    "apps/web/scripts/mint-donor-direct.mjs": [
       "0x8fd27bdc1d1d53ebf7ab31225e7663b49d3573f7",
       "0x9522f056fa74edbfe72988c002be37048d5d6604"
     ],
-    "apps/nextjs/scripts/recover-donations.ts": [
+    "apps/web/scripts/recover-donations.ts": [
       "0xe7e8e4fb2d52c35392abf4436569c93aa752c050"
     ]
   }

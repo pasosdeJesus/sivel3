@@ -46,7 +46,7 @@ the app and the contracts resolve addresses per network.
 
 Resolution order for the sivel3-specific contracts (`lib/contractAddresses.ts`):
 
-1. `apps/hardhat/deployments/<Contract>/V1/<network>.json`, written by the deploy
+1. `apps/contracts/deployments/<Contract>/V1/<network>.json`, written by the deploy
    scripts and read by `next.config.ts` at build time (a deployment file wins over
    any env var). The directory is gitignored.
 2. The canonical Celo Sepolia default above.
@@ -117,7 +117,7 @@ derived copies, like `node_modules`: never edit them by hand.
 
 ### Updating `@pasosdejesus/m`
 
-`apps/nextjs/package.json` pins the version twice: the direct dependency and the
+`apps/web/package.json` pins the version twice: the direct dependency and the
 `pnpm.overrides` entry. The vendored `generated-wallet` declares `"*"`, so the
 override is what guarantees a single copy. Without it the lockfile can keep an
 older `m` for the engine, and the in-app wallet setup and `WalletContext` end up
@@ -127,7 +127,7 @@ but the header never reaches "Connected".
 When updating `m`, change both the dependency and the override, then:
 
 ```sh
-cd apps/nextjs
+cd apps/web
 pnpm install
 pnpm why @pasosdejesus/m   # must report one version
 make eng-build             # or make all / make prod
@@ -151,7 +151,7 @@ IP-whitelisted, pass `E2E_RPC_URL=https://forno.celo-sepolia.celo-testnet.org`.
 For contract addresses that differ from this checkout's `apps/.env`, pass
 `E2E_MARKET_ADDRESS` / `E2E_USDT_ADDRESS`.
 
-See [apps/nextjs/doc/e2e-testing.md](../apps/nextjs/doc/e2e-testing.md) for the spec catalog, fixtures, and the
+See [apps/web/doc/e2e-testing.md](../apps/web/doc/e2e-testing.md) for the spec catalog, fixtures, and the
 positive-path environment variables.
 
 ## 6. Health checks and troubleshooting
@@ -176,7 +176,7 @@ steps below (the first one is the informative `env:check`); `make prod` builds
 and starts the production server.
 
 ```sh
-cd apps/nextjs
+cd apps/web
 ./bin/m env:check
 pnpm install
 make eng-build
@@ -186,7 +186,7 @@ pnpm build
 After the operator deploys:
 
 ```sh
-cd apps/nextjs
+cd apps/web
 make test-smoke
 make test-e2e
 ```
@@ -197,9 +197,9 @@ spec asserts behavior introduced by an undeployed fix, the spec stays red on
 
 ## 8. References
 
-- [apps/nextjs/doc/e2e-testing.md](../apps/nextjs/doc/e2e-testing.md) - spec catalog, fixtures, test environment.
-- [apps/nextjs/doc/deployment-credentials.md](../apps/nextjs/doc/deployment-credentials.md) - credentials contract.
-- [apps/nextjs/doc/donation-flow.md](../apps/nextjs/doc/donation-flow.md) - donation and SLEARN flow.
+- [apps/web/doc/e2e-testing.md](../apps/web/doc/e2e-testing.md) - spec catalog, fixtures, test environment.
+- [apps/web/doc/deployment-credentials.md](../apps/web/doc/deployment-credentials.md) - credentials contract.
+- [apps/web/doc/donation-flow.md](../apps/web/doc/donation-flow.md) - donation and SLEARN flow.
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - system architecture and contract overview.
-- [apps/nextjs/ARCHITECTURE.md](../apps/nextjs/ARCHITECTURE.md) - Next.js data flow.
+- [apps/web/ARCHITECTURE.md](../apps/web/ARCHITECTURE.md) - Next.js data flow.
 - learn.tg `doc/environments.md` - the reference implementation of this guide.

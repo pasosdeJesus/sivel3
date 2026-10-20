@@ -1,0 +1,12 @@
+{
+  "name": "sivel3",
+  "private": true,
+  "description": "Sistema de Información de Violencia Política en Línea (SIVeL 3)",
+  "packageManager": "pnpm@11.28.6",
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
