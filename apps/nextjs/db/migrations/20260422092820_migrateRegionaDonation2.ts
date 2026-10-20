@@ -37,8 +37,10 @@ export async function up(db: Kysely<any>): Promise<void> {
         { contract: 'SIVeL3RegionalDonationV2', version: 'V1' },
     )
     const NEW_CONTRACT = (process.env.NEXT_PUBLIC_REGIONALDONATION_ADDRESS ?? deployment?.address) as `0x${string}`
-    const USDT_ADDRESS = (process.env.NEXT_PUBLIC_USDT_TESTNET ?? process.env.NEXT_PUBLIC_USDT_ADDRESS)! as `0x${string}`
     const NETWORK = process.env.NEXT_PUBLIC_NETWORK!
+    // USDT address from @pasosdejesus/mpdj (honours NEXT_PUBLIC_USDT_TESTNET, else the canonical default).
+    const { USDT_ADDRESSES } = await import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses')
+    const USDT_ADDRESS = USDT_ADDRESSES[NETWORK === 'celo' ? 'celo' : 'celoSepolia']
 
     console.log(`   Old contract (V1): ${OLD_CONTRACT}`)
     console.log(`   New contract (V2): ${NEW_CONTRACT}`)

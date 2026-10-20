@@ -104,7 +104,6 @@ one by itself, and `signatures`/`prealert-buy` take the id via env.
 | `PUERTOPRU` | `443` | port |
 | `CHAIN_ID` | `42220` | Celo chain (`11142220` = celoSepolia) |
 | `CHROME_PATH` | auto-detect | Chrome/Chromium binary |
-| `E2E_SPEC_DELAY_MS` | `1500` | pause between specs (rate-limit relief) |
 | `WALLET_INDEX` | `0` | wallet rotation across specs |
 | `PREALERT_ID` | (unset) | a **converted** pre-alert → runs `signatures`' positive path |
 | `PENDING_PREALERT_ID` | (unset) | a **pending** pre-alert → runs `prealert-buy`' positive path (and pins `prealert-lifecycle`) |

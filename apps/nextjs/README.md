@@ -42,10 +42,7 @@ Political Violence Information System (SIVeL)
     # Use 'celoSepolia' for the development or testing environment.
     NEXT_PUBLIC_NETWORK=celoSepolia
 
-    # -- Learning Points (learn.tg Integration) --
-    # URL of the learn.tg endpoint that increments Learning Points after donation
-    LEARNTG_INCREMENT_API_URL=https://learn.tg/api/learning-points/increment
-
+    # -- learn.tg Integration --
     # Ethereum address that identifies sivel.xyz (must match learn.tg's SIVEL_ADDRESS)
     LEARNTG_ADDRESS=0x9F636E5653b649b44c9375E6E103600AE55aF979
     ```

@@ -21,14 +21,14 @@ This document defines the documentation and testing policies for the Next.js app
 |------|----------|---------|---------|
 | Directory index | `lib/README.md`, `db/README.md`, `app/api/README.md` | Brief map of what's in the directory, references to `doc/` for complex topics | |
 | Feature/protocol | `doc/<feature>.md` | Self-contained document that can be understood without reading the codebase. Potentially reusable in other projects. | `doc/donation-flow.md` |
-| Module comments | Top of `.ts` files with complex logic | Protocol details, design rationale, external references. | `lib/learningPoints.ts` |
+| Module comments | Top of `.ts` files with complex logic | Protocol details, design rationale, external references. | `lib/slearn.ts` |
 
 ### Decision Criterion: `doc/` vs. Inline Comment
 
 | Criterion | Where | Example |
 |-----------|-------|---------|
 | Cross-system protocol or cross-project reusable design | `doc/<feature>.md` | Donation flow (sivel.xyz ↔ Celo ↔ learn.tg), i18n strategy |
-| Internal module decision — *why* this implementation, not another | Comment at top of `.ts` file | Nonce sync protocol in `learningPoints.ts`, MiniPay `ethereum.send` rationale in `donate.ts` |
+| Internal module decision — *why* this implementation, not another | Comment at top of `.ts` file | SLEARN retry/collision handling in `slearn.ts`, MiniPay `ethereum.send` rationale in `donate.ts` |
 | What the code does, how it behaves | **Test** | `useTranslation.test.ts` documents every fallback rule |
 
 ### What We Don't Document

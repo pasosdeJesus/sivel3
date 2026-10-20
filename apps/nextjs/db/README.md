@@ -13,7 +13,7 @@ Tables prefixed with `sivel2_*`, `msip_*`, `heb412_*`, `mr519_*` belong to the R
 | Table | Purpose |
 |-------|---------|
 | `region` | Geographic regions for donations (Colombia, Israel/Palestine). Created in initial migration. |
-| `site_nonces` | Nonces for the Learning Points protocol with learn.tg. Controls replay attacks and site balance. |
+| `site_nonces` | Legacy: nonces for the retired Learning Points protocol with learn.tg. No current code writes to it. |
 
 ## Migrations
 

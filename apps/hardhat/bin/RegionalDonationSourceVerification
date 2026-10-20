@@ -2,6 +2,16 @@
 
 . ../.env
 
-cmd="node_modules/.bin/hardhat verify --network $NEXT_PUBLIC_NETWORK $NEXT_PUBLIC_REGIONALDONATION_ADDRESS $NEXT_PUBLIC_USDT_ADDRESS $NEXT_PUBLIC_ADDRESS"
+NETWORK=$NEXT_PUBLIC_NETWORK
+if [ "$NETWORK" = "celo" ]; then
+  NETFILE="celo"
+else
+  NETFILE="celoSepolia"
+fi
+
+USDT=$(cd ../nextjs && NEXT_PUBLIC_NETWORK="$NETWORK" NEXT_PUBLIC_USDT_TESTNET="$NEXT_PUBLIC_USDT_TESTNET" node -e "import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses').then(m=>console.log(m.USDT_ADDRESSES[process.env.NEXT_PUBLIC_NETWORK==='celo'?'celo':'celoSepolia']))")
+ADDR=$(node -e "console.log(require('./deployments/SIVeL3RegionalDonationV2/V1/${NETFILE}.json').address)")
+
+cmd="node_modules/.bin/hardhat verify --network $NETWORK $ADDR $USDT $NEXT_PUBLIC_ADDRESS"
 echo $cmd
 eval $cmd

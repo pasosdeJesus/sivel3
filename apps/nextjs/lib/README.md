@@ -7,7 +7,7 @@ Directory of logic modules shared between components and API routes.
 | File | Purpose |
 |------|---------|
 | `donate.ts` | Orchestrates the unified donation: builds the ERC-20 transaction, sends it via MiniPay or MetaMask, and calls the backend for assignment. See `doc/donation-flow.md`. |
-| `learningPoints.ts` | HTTP client for the learn.tg API. Implements the nonce protocol and EIP-191 signing to increment Learning Points. |
+| `slearn.ts` | SLEARN cashback for donors: transfers 10% of the USDT and calls `mintAndReserve` on the SLEARN contract (replaces the retired learn.tg Learning Points API). |
 | `errors.ts` | Translates wallet/blockchain errors to user-friendly messages (`parseWalletError`). |
 | `logger.ts` | Unified logging system with floating debug console for MiniPay. See `doc/mobile-debug-console.md`. |
 | `debug.ts` | Debug utilities: `safeStringify` for circular objects, `debugLog`. |
