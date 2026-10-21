@@ -11,8 +11,10 @@ env-check:
 	@./apps/web/bin/m env:check || true
 
 # Next 16 con Webpack: V8 crashea (Trace/BPT trap) con el límite de data por
-# defecto en adJ/OpenBSD, así que el build sube a 7G.
+# defecto en adJ/OpenBSD, así que el build sube a 7G. Los motores vendorizados
+# (`dist/` está gitignored) se compilan antes en un checkout fresco.
 build:
+	@(cd apps/web && $(MAKE) eng-build)
 	@(cd apps/web && sh -c 'ulimit -d 7340032 && pnpm build')
 
 test:
