@@ -7,6 +7,12 @@ import path from 'path';
 // Load the centralized .env file from the parent directory.
 dotEnvConfig({ path: path.resolve(__dirname, '../.env') });
 
+// Sin PRIVATE_KEY válida la red queda sin cuentas: así `compile` y `test`
+// funcionan sin secretos. Desplegar exige una PRIVATE_KEY de 32 bytes.
+const accounts = /^0x[0-9a-fA-F]{64}$/.test(process.env.PRIVATE_KEY ?? '')
+  ? [process.env.PRIVATE_KEY as string]
+  : [];
+
 task("check-transfer", "Check token transfer from tx hash")
 .addParam("tx", "Transaction hash")
 .addParam("token", "Token contract address")
@@ -47,21 +53,21 @@ task("check-transfer", "Check token transfer from tx hash")
 const config: HardhatUserConfig = {
   networks: {
     celo: {
-      accounts: [process.env.PRIVATE_KEY ?? '0x0'],
+      accounts,
       url: 'https://forno.celo.org',
     },
     celoSepolia: {
-      accounts: [process.env.PRIVATE_KEY ?? '0x0'],
+      accounts,
       url: 'https://forno.celo-sepolia.celo-testnet.org/',
     },
 
     baseSepolia: {
-      accounts: [process.env.PRIVATE_KEY ?? '0x0'],
+      accounts,
       url: 'https://sepolia.base.org',
     },
 
     base: {
-      accounts: [process.env.PRIVATE_KEY ?? '0x0'],
+      accounts,
       url: 'https://mainnet.base.org',
     },
   },

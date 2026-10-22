@@ -82,11 +82,12 @@ echo "Copied $NODE_FILE to $SOLA_SRC"
 rm -rf "$TMPDIR"
 
 echo "=== prepadJ: Verifying with pnpm build ==="
-# `hardhat compile` loads the config, which rejects a short account key. When the
-# project has no `.env` yet, use a throwaway 32-byte key so the check does not
-# depend on the operator's secrets.
-if [ -z "${PRIVATE_KEY:-}" ] && [ ! -f "$ROOT/apps/.env" ] && [ ! -f "$APP/.env" ]; then
-  echo "No .env yet: verifying with a throwaway PRIVATE_KEY"
+# Verify with a throwaway 32-byte key whenever no valid key is in the
+# environment, so the check never depends on the operator's secrets (a `.env`
+# file may exist with a placeholder, and `dotenv` does not overwrite an
+# exported value).
+if [ ${#PRIVATE_KEY} -ne 66 ]; then
+  echo "No 32-byte PRIVATE_KEY: verifying with a throwaway key"
   PRIVATE_KEY="0x1111111111111111111111111111111111111111111111111111111111111111"
   export PRIVATE_KEY
 fi
