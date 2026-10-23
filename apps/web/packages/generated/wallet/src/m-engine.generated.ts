@@ -1,7 +1,7 @@
 // m-engine.generated.ts — generado por `eng:sync`; no editar a mano.
 export const engine = {
-  "name": "@pasosdejesus/wallet",
-  "version": "0.1.0",
+  "name": "generated-wallet",
+  "version": "0.1.1",
   "model": {
     "tables": [
       "billetera_invitada",

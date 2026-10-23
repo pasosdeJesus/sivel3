@@ -216,7 +216,16 @@ and no `-B`/`-A`, so use `grep -E` for alternation.
 - Tests: `make test`
 - Type check sources: `make type`
 - Type check tests: `make type-check-tests`
-- Update shared deps: `pnpm update @pasosdejesus/m @pasosdejesus/mpdj`
+- Update shared deps: `pnpm update @pasosdejesus/m @pasosdejesus/mpdj` (bump the
+  `catalog:` ranges in `pnpm-workspace.yaml` and the `@pasosdejesus/m` override in
+  the same edit, then `pnpm install`)
+- Vendored engines (`apps/web/packages/generated/*`, derived copies): re-vendor with
+  `make -C apps/web eng-sync` (`eng:sync --vendor --prepare`), guard with
+  `make -C apps/web eng-check` (`eng:check --runtime --no-db`) and
+  `make -C apps/web eng-verify` (per engine; without a target it also flags the
+  app's `@/*` tsconfig aliases). `dist/` is gitignored: `make -C apps/web eng-build`
+  on a fresh checkout. `typescript` sits in the **root** `package.json` so
+  `eng:sync --prepare` can run `tsc -b` inside the copies.
 - Lint: `next lint` was removed in Next 16, so the `pnpm lint` script currently
   fails (`Invalid project directory … /lint`). ESLint is configured
   (`eslint.config.mjs`); run `pnpm exec eslint .` if you need it. The required gate

@@ -1,6 +1,6 @@
 // m-engine.generated.ts — generado por `eng:sync`; no editar a mano.
 export const engine = {
-  "name": "@pasosdejesus/msip",
+  "name": "generated-msip",
   "version": "1.1.0",
   "model": {
     "tables": [

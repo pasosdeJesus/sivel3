@@ -51,6 +51,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "catalog:",
+    "generated-msip": "workspace:*",
     "generated-wallet": "workspace:*",
     "kysely": "^0.28.17",
     "kysely-postgres-js": "^2.0.0",

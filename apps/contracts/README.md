@@ -145,11 +145,12 @@ network, expected fields) and that sources read addresses with
 literals (canonical Celo Sepolia defaults, applied migrations, one-off scripts)
 are declared in `contract-check.json` at the repository root.
 
-Run it from the **repository root**: from `apps/web` the tool does not see
-`apps/contracts`. The two `DEPLOYMENTS_DIR_MISSING` findings are expected in a
-fresh checkout: `deployments/PasosDeJesusCredentials/` is gitignored and only
-exists on machines where the credentials contract was deployed; there the report
-is clean.
+Since `contract-test@0.2.2` the command searches upward for the project root, so
+running it from `apps/web` also finds `apps/contracts`; the report header prints
+the roots it used (`web`, `contratos`). The two `DEPLOYMENTS_DIR_MISSING`
+findings are expected in a fresh checkout:
+`deployments/PasosDeJesusCredentials/` is gitignored and only exists on machines
+where the credentials contract was deployed; there the report is clean.
 
 ### Deploy and Verify PasosDeJesusCredentials
 

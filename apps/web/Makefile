@@ -33,11 +33,7 @@ M_FROM ?= /var/www/adJ-ia/m
 ENGINES = msip wallet
 
 eng-sync:
-	@for e in $(ENGINES); do ./bin/m eng:sync $(M_FROM)/packages/$$e --vendor; done
-	# Re-vendoring recreates packages/generated/* (dropping their node_modules),
-	# so re-link the workspace siblings before building.
-	pnpm install
-	$(MAKE) eng-build
+	@for e in $(ENGINES); do ./bin/m eng:sync $(M_FROM)/packages/$$e --vendor --prepare; done
 
 # Compiles the vendored engines to their `dist/` (what `generated-<motor>/…`
 # imports resolve to). `dist/` is ignored by the root `.gitignore`, so it must be
@@ -45,11 +41,19 @@ eng-sync:
 eng-build:
 	@for e in $(ENGINES); do pnpm exec tsc -b packages/generated/$$e; done
 
-# Conformance guard (R-#68). `eng:check` ends with the live-DB-vs-baseline check,
-# which fails here **by design**: sivel3's schema is the shared Rails one and its
-# drift from the `msip` baseline is NOT reconciled. So this target is informational
-# (the leading `-` keeps `make` from failing); the vendor drift and self-containment
-# checks do pass. Pending an `m` flag to skip the DB conformance (reported).
+# Guard de las copias (R-#68). Se verifica **motor por motor**: sin argumento
+# `eng:verify` también analiza `apps/web` como motor y reporta sus alias `@/*`
+# (`UNDECLARED_IMPORT`), que son rutas del tsconfig de la app, no paquetes.
+eng-verify:
+	@for e in $(ENGINES); do ./bin/m eng:verify $$e; done
+
+# Guard de conformidad (R-#68): drift de las copias, autocontención de tablas y
+# carga real (`--runtime`), sin la conformidad de la BD (`--no-db`) porque el
+# esquema de sivel3 es el Rails compartido y su drift con la base `msip` no se
+# reconcilia a propósito. Ese drift se consulta aparte con `db-check`.
+eng-check:
+	./bin/m eng:check --runtime --no-db --from $(M_FROM)
+
 db-check:
 	-./bin/m eng:check --from $(M_FROM)
 

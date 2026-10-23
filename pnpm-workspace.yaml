@@ -10,9 +10,9 @@ packages:
 # Versión única por dependencia: las apps escriben `"catalog:"`.
 catalog:
   # ecosistema
-  '@pasosdejesus/m': ^0.35.0
-  '@pasosdejesus/mpdj': ^0.3.0
-  '@pasosdejesus/contract-test': ^0.1.7
+  '@pasosdejesus/m': ^0.37.2
+  '@pasosdejesus/mpdj': ^0.3.2
+  '@pasosdejesus/contract-test': ^0.2.3
   '@pasosdejesus/edr': ^0.1.1
   '@pasosdejesus/usdt': ^0.1.1
   # compartidas por apps/web y apps/contracts
@@ -43,7 +43,6 @@ linkWorkspacePackages: true
 
 # Migrado del campo `pnpm.overrides` de apps/web/package.json.
 overrides:
-  '@pasosdejesus/m': 0.35.0
   '@parcel/watcher': npm:@parcel/watcher-wasm
   rollup: npm:@rollup/wasm-node
   lightningcss: npm:lightningcss-wasm@1.32.0
