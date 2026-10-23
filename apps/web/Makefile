@@ -26,14 +26,29 @@ prod:
 
 # ── Engines (R-#68) ────────────────────────────────────────────────────
 # Vendored engines (packages/generated/<motor>) are derived copies — like
-# node_modules: regenerate with `eng-sync`, never edit by hand. `M_FROM` is the
-# `m` checkout that holds the motor sources; `packages/generated/*` are workspace
+# node_modules: regenerate with `eng-sync`, never edit by hand. The copies are taken
+# from a **git ref** of `m` (PROVENANCE records kind/origin/ref/path, so the tree is
+# reproducible without a local checkout); `packages/generated/*` are workspace
 # packages (pnpm-workspace.yaml) so `generated-<motor>` imports resolve.
-M_FROM ?= /var/www/adJ-ia/m
+M_GIT ?= https://gitlab.com/pasosdeJesus/m.git
+MSIP_TAG ?= v0.37.2
+WALLET_TAG ?= wallet-v0.1.1
 ENGINES = msip wallet
+# Opcional: checkout local de `m` para medir drift contra las fuentes.
+M_FROM ?=
+FROM_ARG = $(if $(M_FROM),--from $(M_FROM),)
 
 eng-sync:
-	@for e in $(ENGINES); do ./bin/m eng:sync $(M_FROM)/packages/$$e --vendor --prepare; done
+	@for e in $(ENGINES); do \
+	  case $$e in \
+	    msip) ref=$(MSIP_TAG) ;; \
+	    wallet) ref=$(WALLET_TAG) ;; \
+	    *) ref=$(MSIP_TAG) ;; \
+	  esac; \
+	  ./bin/m eng:sync --vendor --prepare \
+	    --from-git $(M_GIT)#$$ref --path packages/$$e \
+	    --out packages/generated/$$e || exit 1; \
+	done
 
 # Compiles the vendored engines to their `dist/` (what `generated-<motor>/…`
 # imports resolve to). `dist/` is ignored by the root `.gitignore`, so it must be
@@ -52,10 +67,10 @@ eng-verify:
 # esquema de sivel3 es el Rails compartido y su drift con la base `msip` no se
 # reconcilia a propósito. Ese drift se consulta aparte con `db-check`.
 eng-check:
-	./bin/m eng:check --runtime --no-db --from $(M_FROM)
+	./bin/m eng:check --runtime --no-db $(FROM_ARG)
 
 db-check:
-	-./bin/m eng:check --from $(M_FROM)
+	-./bin/m eng:check $(FROM_ARG)
 
 # ── E2E (REQ/66) ───────────────────────────────────────────────────────
 # Targets export IPDES/PUERTOPRU/CHAIN_ID so a bare `bin/m test:e2e` (which

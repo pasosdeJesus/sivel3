@@ -220,12 +220,16 @@ and no `-B`/`-A`, so use `grep -E` for alternation.
   `catalog:` ranges in `pnpm-workspace.yaml` and the `@pasosdejesus/m` override in
   the same edit, then `pnpm install`)
 - Vendored engines (`apps/web/packages/generated/*`, derived copies): re-vendor with
-  `make -C apps/web eng-sync` (`eng:sync --vendor --prepare`), guard with
-  `make -C apps/web eng-check` (`eng:check --runtime --no-db`) and
+  `make -C apps/web eng-sync` (`eng:sync --vendor --prepare`); it takes each motor from a
+  **git ref** of `m` (`M_GIT`, `MSIP_TAG=v0.37.2`, `WALLET_TAG=wallet-v0.1.1`), so
+  `PROVENANCE.json` records `kind/origin/ref/path` and no local checkout is needed.
+  Guard with `make -C apps/web eng-check` (`eng:check --runtime --no-db`) and
   `make -C apps/web eng-verify` (per engine; without a target it also flags the
   app's `@/*` tsconfig aliases). `dist/` is gitignored: `make -C apps/web eng-build`
   on a fresh checkout. `typescript` sits in the **root** `package.json` so
-  `eng:sync --prepare` can run `tsc -b` inside the copies.
+  `eng:sync --prepare` can run `tsc -b` inside the copies. Never edit those copies by
+  hand; `eng:check` drift is measured against `M_FROM` only when you pass a checkout
+  (`make -C apps/web eng-check M_FROM=/path/to/m`).
 - Lint: `next lint` was removed in Next 16, so the `pnpm lint` script currently
   fails (`Invalid project directory … /lint`). ESLint is configured
   (`eslint.config.mjs`); run `pnpm exec eslint .` if you need it. The required gate
