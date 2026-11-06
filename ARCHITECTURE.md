@@ -17,7 +17,7 @@ graph TD
     end
 
     subgraph "sivel3agent (AI)"
-        AG[AI Agent<br/>Qwen2.5-7B]
+        AG[AI Agent]
         AG -->|publishPreAlert| PM
     end
 
@@ -94,7 +94,7 @@ graph TD
 | `SLEARN` | `0x27fd41Bea85C39254f2B12789eB37a1543152CC1` | Cashback token (22 SLEARN = 1 USDT) |
 
 ### 4. **AI Agent: sivel3agent**
-- **Framework:** Node.js + Qwen2.5-7B-Instruct
+- **Framework:** Node.js + LLM (internal, see sivel3agent)
 - **Registration:** ERC-8004 (token ID 9330)
 - **Purpose:** Autonomous monitoring of news sources → pre-alert generation → on-chain publishing
 - **Status:** Base pipeline operational (scraper, LLM extraction, cron). Remaining: deduplication, classification, GPU infra (tracked in REQ/53)
@@ -179,7 +179,7 @@ POST /api/pre-alerts/:id/score
 | Frontend & API | Next.js + React + TypeScript | UI, map, donations, pre-alert marketplace |
 | Blockchain | Celo | Immutable record + payments |
 | Map | Leaflet + markerCluster | Geo-referenced visualization |
-| AI Agent | Node.js + Qwen2.5-7B | Pre-alert generation from news |
+| AI Agent | Node.js + LLM (internal) | Pre-alert generation from news |
 | KYC | learn.tg (Self protocol) | Citizen verification |
 | Wallet | In-app (`@pasosdejesus/m/wallet`) + external EIP-6963 | Self-custodied in-app first; external wallet optional (no vendor kit) |
 
