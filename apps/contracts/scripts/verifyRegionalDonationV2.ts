@@ -1,6 +1,6 @@
 // Read-only verification of SIVeL3RegionalDonationV2.
 //
-// Runs on OpenBSD without `hardhat` (the analyzer native addon is not needed):
+// Runs on OpenBSD without Hardhat (no native analyzer needed):
 // the ABI comes from the compiled artifact and the RPC from the environment.
 //
 //   bin/verifyRegionalDonationV2            # uses NEXT_PUBLIC_NETWORK

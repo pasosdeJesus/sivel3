@@ -1,4 +1,6 @@
 #!/bin/sh
-
+set -a
 . ../.env
-npx hardhat run scripts/approveDepositOwner.ts --network $NETWORK
+set +a
+
+exec node scripts/approve-deposit-owner.mjs

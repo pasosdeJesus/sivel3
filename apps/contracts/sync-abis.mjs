@@ -75,8 +75,8 @@ try {
 
 } catch (error) {
   if (error.code === 'ENOENT' && error.path === HARDHAT_ARTIFACTS_PATH) {
-    console.error("❌ Error: Hardhat artifacts directory not found.");
-    console.error("   Please run `npx hardhat compile` in the 'apps/contracts' directory first.");
+    console.error("❌ Error: contract artifacts directory not found.");
+    console.error("   Please run `../web/bin/m contract:compile` in the 'apps/contracts' directory first.");
   } else {
     console.error("\n❌ An unexpected error occurred during ABI sync:", error);
   }

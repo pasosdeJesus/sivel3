@@ -16,7 +16,6 @@ As an AI Agent, you must follow these instructions to align with your operationa
 > `git blame`, `git remote -v`. If changes should be committed, stop and tell the
 > operator instead of committing.
 
-
 ### 1. Assimilate Your Foundational Knowledge
 
 Execute the following orders and asimilate their content:
@@ -121,7 +120,7 @@ framework and principles.
 
 ---
 
-## 6. Financial Constraint
+### 6. Financial Constraint
 
 Any token with real value in wallets whose private key is known by the agent
 cannot be spent by the agent except in something directly and recently ordered
@@ -244,12 +243,27 @@ and no `-B`/`-A`, so use `grep -E` for alternation.
 **Critical conventions:**
 - **Wallet addresses**: lowercase once at API boundary, never EIP-55 mixed-case
 - **TokenIds**: always resolve from `credential_metadata` by (name, chainId), never hardcode
-- **Contract addresses**: resolve from `lib/contractAddresses.ts` (canonical dev default per network + `NEXT_PUBLIC_*` override); never read `process.env.NEXT_PUBLIC_*_ADDRESS` directly. Shared USDT/SLEARN come from `@pasosdejesus/mpdj`; Credentials are the exception (resolved from the Hardhat deployment files).
+- **Contract addresses**: resolve from `lib/contractAddresses.ts` (canonical dev default per network + `NEXT_PUBLIC_*` override); never read `process.env.NEXT_PUBLIC_*_ADDRESS` directly. Shared USDT/SLEARN come from `@pasosdejesus/mpdj`; Credentials are the exception (resolved from the `deployments/` files written by `contract:deploy`; gitignored).
 - **SBT minting**: use `mintSBT()` from `lib/credentials.ts` (handles cache + on-chain check + Celo L2 retry via `mintCredentialWithRetry`)
 - **RPC URL**: pass an explicit `NEXT_PUBLIC_RPC_URL` to `http()` (don't rely on the chain default). `forno.celo.org` (Celo **mainnet**) has been observed to reject writes; the **Sepolia** Forno (`forno.celo-sepolia.celo-testnet.org`) does accept them (verified 2026-10-15 — mined a tx).
 - **@pasosdejesus/m** uses `export *` barrel — if imports break at runtime, check `serverExternalPackages` in `next.config.ts`
 
 **Testing:** See `CONTRIBUTING.md` and `@pasosdejesus/m/src/test-utils/README.md`. Use `createMockKysely()` from `@pasosdejesus/m/test-utils` for DB mocks, not raw `vi.mock()`.
+
+### 13. Model Guard — Only Flash, Never Pro
+
+Pro-class models are far too expensive for this project. Before doing any work in a
+session, call `crush_info` and read the `[model]` section (`large` / `small`).
+
+- If the active model identifier contains `flash`, proceed normally.
+- If it is anything else (`deepseek-reasoner`, "DeepSeek Thinking", any Pro/reasoning
+  model), **stop immediately**: do not call any other tool and reply only:
+  *"Estás en un modelo Pro (caro). Cambia a un modelo `flash` en
+  `~/.config/crush/crush.json` y vuelve a lanzar la tarea."*
+- If the model cannot be determined, stop and ask the operator to confirm it is Flash.
+
+The hard guarantee is the model catalogue in `~/.config/crush/crush.json` (only
+`deepseek-v4-flash` should be listed); this rule is the safety net for other machines.
 
 ---
 

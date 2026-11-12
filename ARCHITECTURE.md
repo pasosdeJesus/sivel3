@@ -81,7 +81,7 @@ graph TD
   - SBT minting (Connector, Explorer, Donor tiers)
 - **Authentication:** Wallet connection (in-app wallet first, external EIP-6963 as an option) + learn.tg KYC for sensitive actions
 
-### 3. **Smart Contracts: Hardhat (apps/contracts/)**
+### 3. **Smart Contracts: `m contract:*` (apps/contracts/)**
 - **Language:** Solidity ^0.8.20 (OpenZeppelin 5.x)
 - **Network:** Celo Mainnet (42220) + Sepolia testnet (11142220)
 
@@ -175,7 +175,7 @@ POST /api/pre-alerts/:id/score
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | Main Backend | Rails + PostgreSQL | Centralized case data management |
-| Smart Contracts | Solidity + Hardhat (OZ 5.x) | Marketplace, donations, rewards, SBTs |
+| Smart Contracts | Solidity + `m contract:*` (OZ 5.x) | Marketplace, donations, rewards, SBTs |
 | Frontend & API | Next.js + React + TypeScript | UI, map, donations, pre-alert marketplace |
 | Blockchain | Celo | Immutable record + payments |
 | Map | Leaflet + markerCluster | Geo-referenced visualization |

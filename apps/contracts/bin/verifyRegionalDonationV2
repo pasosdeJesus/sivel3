@@ -8,5 +8,5 @@ if (test "$network" = "") then {
   exit 1;
 } fi;
 
-# Uses tsx + viem (not `hardhat run`): the Solidity analyzer has no OpenBSD binary.
+# Uses tsx + viem (no Hardhat).
 node_modules/.bin/tsx scripts/verifyRegionalDonationV2.ts "$network"

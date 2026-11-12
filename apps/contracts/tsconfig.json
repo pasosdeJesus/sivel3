@@ -19,7 +19,7 @@
     "./test", 
     "./deploy", 
     "./types",
-    "hardhat.config.ts"
+    "m-contracts.config.ts"
   ],
   "exclude": [
     "./node_modules/*"

@@ -1,4 +1,7 @@
 #!/bin/sh
-
+set -a
 . ../.env
-npx hardhat verify --network celoSepolia $MOCK_USDT_ADDRESS
+set +a
+
+network=${1:-${NEXT_PUBLIC_NETWORK:-celoSepolia}}
+exec ../web/bin/m contract:verify --contract MockUSDT --network "$network"

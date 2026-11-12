@@ -1,4 +1,8 @@
 #!/bin/sh
-
+set -a
 . ../.env
-node_modules/.bin/hardhat run scripts/deployMockUSDT.ts --network $NEXT_PUBLIC_NETWORK
+set +a
+
+network=${NEXT_PUBLIC_NETWORK:-celoSepolia}
+../web/bin/m contract:deploy --contract MockUSDT --network "$network" || exit 1
+NEXT_PUBLIC_NETWORK="$network" node scripts/mint-mock-usdt.mjs

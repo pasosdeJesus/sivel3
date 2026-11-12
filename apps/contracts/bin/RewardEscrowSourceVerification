@@ -1,20 +1,10 @@
 #!/bin/sh
-
+set -a
 . ../.env
+set +a
 
-NETWORK=$NEXT_PUBLIC_NETWORK
-if [ "$NETWORK" = "celo" ]; then
-  NETFILE="celo"
-else
-  NETFILE="celoSepolia"
-fi
-
-USDT=$(cd ../nextjs && NEXT_PUBLIC_NETWORK="$NETWORK" NEXT_PUBLIC_USDT_TESTNET="$NEXT_PUBLIC_USDT_TESTNET" node -e "import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses').then(m=>console.log(m.USDT_ADDRESSES[process.env.NEXT_PUBLIC_NETWORK==='celo'?'celo':'celoSepolia']))")
-ADDR=$(node -e "console.log(require('./deployments/SIVeL3RewardEscrow/V1/${NETFILE}.json').address)")
-
-# Backend wallet: use AGENT_WALLET_ADDRESS for Sepolia, BACKEND_WALLET_MAINNET for mainnet
+NETWORK=${NEXT_PUBLIC_NETWORK:-celoSepolia}
+USDT=$(cd ../web && NEXT_PUBLIC_NETWORK="$NETWORK" node --input-type=module -e "import('@pasosdejesus/mpdj/blockchain/ecosystem-addresses').then(m=>console.log(m.USDT_ADDRESSES[m.resolveNetwork()]))")
 BACKEND_WALLET=${BACKEND_WALLET_MAINNET:-$AGENT_WALLET_ADDRESS}
-
-cmd="node_modules/.bin/hardhat verify --network $NETWORK $ADDR $USDT $BACKEND_WALLET"
-echo $cmd
-eval $cmd
+exec ../web/bin/m contract:verify --contract SIVeL3RewardEscrow --network "$NETWORK" \
+  --args "[\"$USDT\",\"$BACKEND_WALLET\"]"

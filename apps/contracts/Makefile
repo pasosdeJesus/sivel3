@@ -1,5 +1,5 @@
 
-.PHONY: build all type test clean prepadJ
+.PHONY: build all type test clean typechain
 
 build:
 	pnpm install
@@ -16,5 +16,5 @@ test:
 clean:
 	pnpm clean
 
-prepadJ:
-	sh bin/prepadJ.sh
+typechain:
+	pnpm typechain
