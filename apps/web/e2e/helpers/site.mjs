@@ -15,7 +15,7 @@ export function siteBase() {
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/** GET that never throws; returns { status, text, json } (json = null if not JSON). */
+/** GET that never throws; returns { status, text, json, contentType } (json = null if not JSON). */
 export async function get(url, timeoutMs = 20000) {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
@@ -26,9 +26,9 @@ export async function get(url, timeoutMs = 20000) {
     } catch {
       /* not JSON */
     }
-    return { status: res.status, text, json, ok: res.ok }
+    return { status: res.status, text, json, ok: res.ok, contentType: res.headers.get('content-type') }
   } catch (err) {
-    return { status: 0, text: '', json: null, ok: false, error: err?.message || String(err) }
+    return { status: 0, text: '', json: null, ok: false, contentType: null, error: err?.message || String(err) }
   }
 }
 

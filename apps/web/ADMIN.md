@@ -237,6 +237,8 @@ The badge is composed programmatically from the user's icon (512×512 SVG) plus:
 
 **Icon requirements:** SVG, viewBox `0 0 512 512`, no scripts, no remote resources.
 Output: `public/img/credential/generated/{tokenId}.svg` + `public/img/credential/{tokenId}.png` (via `rsvg-convert`).
+The PNG is served by the app and is versioned: commit it when a type is registered or its
+icon changes, or a fresh deploy will show broken badges.
 
 ### Metadata
 

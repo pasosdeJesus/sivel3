@@ -108,7 +108,6 @@ sivel2/config/credentials.yml.enc
 sivel2/config/master.key
 sivel2/app/assets/builds/
 sivel2/public/sivelxyz-admin/
-apps/web/public/img/credential/*.png
 apps/web/public/img/credential/generated/
 apps/web/public/img/credential/generated
 IDEAS

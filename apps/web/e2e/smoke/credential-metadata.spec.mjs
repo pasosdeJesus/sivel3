@@ -19,6 +19,19 @@ async function main() {
     console.log('  [SKIP] breakdown is empty — no registered credential types')
   } else {
     ok(`GET /api/credential/breakdown → ${breakdown.json.length} token(s)`)
+
+    // Composed badge PNGs are derived artifacts: they must be committed under
+    // public/img/credential/ or every deploy serves 404 icons.
+    for (const entry of breakdown.json) {
+      const imageUrl = entry.imageUrl.startsWith('http') ? entry.imageUrl : `${SITE}/${entry.imageUrl}`
+      const image = await get(imageUrl)
+      if (image.status !== 200) {
+        fail(`GET ${imageUrl} → ${image.status} (${entry.name} icon missing; compose it with bin/m eng:credentials:recompose-image and commit the PNG)`)
+      } else {
+        ok(`GET ${imageUrl} → ${image.contentType}`)
+      }
+    }
+
     const tokenId = breakdown.json[0].tokenId
     const meta = await get(`${SITE}/api/credential/${tokenId}`)
     if (meta.status !== 200 || !meta.json) {
@@ -31,6 +44,12 @@ async function main() {
       fail(`GET /api/credential/${tokenId} → malformed ERC-1155 metadata`)
     } else {
       ok(`GET /api/credential/${tokenId} → ${meta.json.name} (ERC-1155 metadata)`)
+      const metaImage = await get(meta.json.image)
+      if (metaImage.status !== 200) {
+        fail(`GET ${meta.json.image} → ${metaImage.status} (ERC-1155 image)`)
+      } else {
+        ok(`GET ${meta.json.image} → ${metaImage.contentType}`)
+      }
     }
   }
 

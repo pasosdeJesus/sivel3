@@ -210,11 +210,19 @@ curl -s https://sivel.xyz:9001/en/api/credential/2.json | json_pp
 
 ```bash
 # Recompose a single token's image
-bin/m credentials:recompose-image \
+bin/m eng:credentials:recompose-image \
   --network celoSepolia --token-id 1 --icon public/img/credential/source/connector.svg
 
 # Verify files exist
 ls -la public/img/credential/{1.png,generated/1.svg}
+```
+
+The composed PNG is **versioned**: commit `public/img/credential/<tokenId>.png` together
+with the registration change. A fresh deploy that lacks the file serves a broken badge on
+`/stats`, wallet profiles, and the ERC-1155 metadata. After deploying, check it:
+
+```bash
+curl -sI https://sivel.xyz:9001/img/credential/1.png | head -1   # HTTP/2 200
 ```
 
 ## 11. Run Tests

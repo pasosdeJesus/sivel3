@@ -10,7 +10,7 @@ packages:
 # Versión única por dependencia: las apps escriben `"catalog:"`.
 catalog:
   # ecosistema
-  '@pasosdejesus/m': ^0.37.19
+  '@pasosdejesus/m': ^0.38.0
   '@pasosdejesus/mpdj': ^0.3.7
   '@pasosdejesus/contract-test': ^0.3.8
   '@pasosdejesus/edr': ^0.2.1

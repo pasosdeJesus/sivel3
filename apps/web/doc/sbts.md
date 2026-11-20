@@ -113,18 +113,24 @@ mints "Connector" and "Global Founder" (same logic as wallet connect).
 
 ## Credential Icons
 
-Icons live in `apps/web/public/img/credential/source/icons/` (512×512 SVG, viewBox `0 0 512 512`).
-Composed into final badge images (green border `#10b981`) via `bin/m credentials:recompose-image`.
+Icons live in `apps/web/public/img/credential/source/` (512×512 SVG, viewBox `0 0 512 512`).
+Composed into the badge PNGs served by the app (`public/img/credential/<tokenId>.png`) with
+`bin/m eng:credentials:recompose-image`. **The composed PNGs are versioned**: after
+registering a type or changing an icon, regenerate its PNG and commit it. A fresh deploy
+without them shows broken images on `/stats`, on public wallet profiles, and in the
+ERC-1155 metadata (which points at the same URL); `make test-smoke`
+(`credential-metadata.spec.mjs`) fails when a badge is missing. The intermediate
+`public/img/credential/generated/*.svg` is derived and stays untracked.
 
 | SBT | Filename | Concept |
 |-----|----------|---------|
 | Connector | `connector.svg` | Link/chain |
 | Explorer | `explorer.svg` | Magnifying glass / map |
 | Donor | `donor.svg` | Heart |
-| Bronze Donor | `donor-bronze.svg` | Bronze medal |
-| Silver Donor | `donor-silver.svg` | Silver medal |
-| Gold Donor | `donor-gold.svg` | Gold medal |
-| Diamond Donor | `donor-diamond.svg` | Diamond gem |
+| Bronze Donor | `bronze-donor.svg` | Bronze medal |
+| Silver Donor | `silver-donor.svg` | Silver medal |
+| Gold Donor | `gold-donor.svg` | Gold medal |
+| Diamond Donor | `diamond-donor.svg` | Diamond gem |
 | Global Founder | `global-founder.svg` | Crown + globe |
 
 ## Database Tables
