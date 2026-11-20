@@ -8,8 +8,8 @@ End-to-end testing for sivel3 uses `@pasosdejesus/m`'s test runner
 
 `bin/m test:e2e` is only registered **when `e2e/` exists** (this is why it does
 not appear in `bin/m --help` in a checkout without the directory). See
-`REQ/66` for the plan; **Blocks A (smoke) and B (browser + signature specs) are
-implemented**.
+https://gitlab.com/pasosdeJesus/sivel3/-/issues/66 for the plan; **Blocks A (smoke)
+and B (browser + signature specs) are implemented**.
 
 ## Quick reference
 
@@ -131,8 +131,10 @@ failed`, send the USDT to the address the **server** expects with
 
 - `@pasosdejesus/m`: `doc/e2e.md`, `packages/m/src/e2e/README.md`,
   `packages/m/src/tasks/e2e.ts`.
-- sivel3 `REQ/66` (this suite), `REQ/65` (no-Rails guard), `REQ/67` (wallet
-  rework — Block B tests against in-app + EIP-6963, not RainbowKit).
+- sivel3 https://gitlab.com/pasosdeJesus/sivel3/-/issues/66 (this suite),
+  https://gitlab.com/pasosdeJesus/sivel3/-/issues/65 (no-Rails guard),
+  https://gitlab.com/pasosdeJesus/sivel3/-/issues/67 (wallet rework — Block B
+  tests against in-app + EIP-6963, not RainbowKit).
 - sivel3 [environments.md](../../../doc/environments.md): environments, chains, wallets, and
   the deploy constraint (a fix in the tree is not visible on `:9001` until the
   operator deploys).

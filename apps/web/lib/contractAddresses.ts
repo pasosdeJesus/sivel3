@@ -7,7 +7,9 @@
 // deployment, so an incomplete .env falls back to it instead of `undefined`; the
 // `NEXT_PUBLIC_*` env var overrides it with another, even more test, deployment.
 //
-// See REQ/8.md and REQ/57.md (the ecosystem-shared half is `m/REQ/51`).
+// See https://gitlab.com/pasosdeJesus/sivel3/-/issues/8 and
+// https://gitlab.com/pasosdeJesus/sivel3/-/issues/57 (the ecosystem-shared half
+// is https://gitlab.com/pasosdeJesus/m/-/work_items/51).
 
 import {
   USDT_ADDRESSES,

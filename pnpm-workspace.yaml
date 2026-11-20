@@ -10,11 +10,11 @@ packages:
 # Versión única por dependencia: las apps escriben `"catalog:"`.
 catalog:
   # ecosistema
-  '@pasosdejesus/m': ^0.38.0
-  '@pasosdejesus/mpdj': ^0.3.7
-  '@pasosdejesus/contract-test': ^0.3.8
+  '@pasosdejesus/m': ^0.39.0
+  '@pasosdejesus/mpdj': ^0.3.9
+  '@pasosdejesus/contract-test': ^0.3.10
   '@pasosdejesus/edr': ^0.2.1
-  '@pasosdejesus/usdt': ^0.1.1
+  '@pasosdejesus/usdt': ^0.1.5
   # compartidas por apps/web y apps/contracts
   typescript: ^5.9.3
   viem: ^2.55.16

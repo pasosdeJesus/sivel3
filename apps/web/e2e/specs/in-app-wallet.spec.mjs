@@ -1,4 +1,5 @@
-// Browser spec: the in-app wallet (sivel3's default after REQ/67) is created and,
+// Browser spec: the in-app wallet (sivel3's default after
+// https://gitlab.com/pasosdeJesus/sivel3/-/issues/67) is created and,
 // after a reload (which locks it), unlocked through the UI. The form itself is
 // driven by the shared `setupInAppWallet`/`unlockInAppWallet`, which target the
 // testids of `@pasosdejesus/m/wallet/next` — no selectors reimplemented here.

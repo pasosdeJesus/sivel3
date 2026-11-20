@@ -30,7 +30,7 @@ type:
 	@echo "Type-checking in apps/contracts..."
 	@(cd apps/contracts && $(MAKE) type)
 
-# Estructura (REQ/53 y 56) y direcciones de despliegue (REQ/60).
+# Estructura (issues 53 y 56) y direcciones de despliegue (issue 60).
 # `contract:checkdeploy` necesita `deployments/PasosDeJesusCredentials/`, que es
 # gitignored y sólo existe donde se desplegaron las credenciales.
 check:

@@ -72,7 +72,7 @@ eng-check:
 db-check:
 	-./bin/m eng:check $(FROM_ARG)
 
-# ── E2E (REQ/66) ───────────────────────────────────────────────────────
+# ── E2E (https://gitlab.com/pasosdeJesus/sivel3/-/issues/66) ───────────
 # Targets export IPDES/PUERTOPRU/CHAIN_ID so a bare `bin/m test:e2e` (which
 # defaults to production: learn.tg/443/42220) never hits the wrong site with.
 E2E_ENV = IPDES=sivel.xyz PUERTOPRU=9001 CHAIN_ID=11142220

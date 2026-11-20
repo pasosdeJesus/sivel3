@@ -57,10 +57,10 @@ function ResetOnClose({ onClose }: { onClose: () => void }) {
 /**
  * Header wallet entry point. Delegates the dialog, the trigger and the
  * external-wallet detection to the `wallet` engine's generic `WalletConnect`
- * view (REQ/68 Fase 4), injecting sivel3's `WalletContext` state and
+ * view (issue 68, phase 4), injecting sivel3's `WalletContext` state and
  * Spanish/English texts.
  *
- * `renderBody` is used (the granular override REQ/68 allows) because the engine
+ * `renderBody` is used (the granular override issue 68 allows) because the engine
  * default closes the dialog on setup completion, hiding the recovery phrase;
  * sivel3 must keep it visible so the user can back up the new wallet.
  * `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.

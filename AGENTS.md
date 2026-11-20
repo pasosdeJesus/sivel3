@@ -147,11 +147,14 @@ comments becomes a dead link. Instead, reference the **persistent issue URL**:
   never as `m/REQ/<n>.md`.
 - Do NOT write `REQ/<n>` or `REQ/<n>.md` in source files or repo docs.
 
-**Existing offenders to clean up when they are touched** (verified 2026-10-13):
-`ARCHITECTURE.md`, `REQ/52.md`, `REQ/53.md`, `REQ/58.md`,
+**Offenders status** (cleaned 2026-11-20): `ARCHITECTURE.md`,
 `apps/web/doc/e2e-testing.md`, `apps/web/e2e/specs/in-app-wallet.spec.mjs`,
-`apps/web/lib/contractAddresses.ts`, `apps/web/tests/kysely-pool.test.ts`
-and `apps/web/tests/setup.ts`.
+`apps/web/lib/contractAddresses.ts`, `apps/web/tests/kysely-pool.test.ts`,
+`apps/web/tests/setup.ts`, `Makefile`, `apps/web/Makefile`, `apps/.env.example`
+and `apps/web/components/ConnectWalletButton.tsx` now cite issue URLs. The
+vendored engines (`packages/generated/*`) still contain `REQ/<n>` shorthand from
+the `m` repo: never edit those copies by hand, fix the source in `m` and
+re-vendor.
 
 **Requirement tooling** (from `apps/web`): `bin/m req:list` (the index with
 each status), `bin/m req:compare <n>` (diffs the local file against the remote

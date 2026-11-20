@@ -100,7 +100,7 @@ cache/
 typechain-types/
 apps/web/html-snapshots/
 .next
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 apps/contracts/tmpart
 apps/contracts/deployments/
 contexto.md

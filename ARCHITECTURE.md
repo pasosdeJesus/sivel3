@@ -97,7 +97,7 @@ graph TD
 - **Framework:** Node.js + LLM (internal, see sivel3agent)
 - **Registration:** ERC-8004 (token ID 9330)
 - **Purpose:** Autonomous monitoring of news sources → pre-alert generation → on-chain publishing
-- **Status:** Base pipeline operational (scraper, LLM extraction, cron). Remaining: deduplication, classification, GPU infra (tracked in REQ/53)
+- **Status:** Base pipeline operational (scraper, LLM extraction, cron). Remaining: deduplication, classification, GPU infra (see https://gitlab.com/pasosdeJesus/sivel3/-/issues/53)
 
 ### 5. **Ecosystem Integration**
 - **learn.tg:** KYC verification (EIP-191), premium SBTs, SLEARN course payments
@@ -159,7 +159,7 @@ Documenter submits score (EIP-191 signed)
   ▼
 POST /api/pre-alerts/:id/score
   ├── Verify EIP-191 signature (verifyMessage)
-  ├── Check DOCUMENTER_WALLETS (env var → REQ/52 for SBT)
+  ├── Check DOCUMENTER_WALLETS (env var; SBT work in https://gitlab.com/pasosdeJesus/sivel3/-/issues/52)
   ├── If score=0: reject (no payment)
   └── If score=2-5:
         ├── Determine region from pre-alert departamento
@@ -195,24 +195,24 @@ POST /api/pre-alerts/:id/score
 | Off-chain state machine | Cheaper (no gas), flexible. Blockchain certifies only purchase + payment |
 | Separate RewardEscrow contract | Clean separation: RegionalDonation = incoming, RewardEscrow = outgoing |
 | SLEARN from contractAddresses.ts | Single source of truth, no env var dependency |
-| Calldata-stuffing for buy | `approve()` is not universally supported; on-chain buyPreAlert() deferred to REQ/51 |
+| Calldata-stuffing for buy | `approve()` is not universally supported; on-chain buyPreAlert() deferred to https://gitlab.com/pasosdeJesus/sivel3/-/issues/51 |
 
 ---
 
-## Key REQ References
+## Key Issue References
 
-| REQ | Title | Status |
-|-----|-------|--------|
-| #36 | AI Agent Epic (MVP) | ✅ Closed (MVP) |
-| #39 | SLEARN Cashback | ✅ Closed |
-| #43 | PreAlertMarket.sol | ✅ Closed |
-| #44 | API Endpoints | ✅ Closed |
-| #47 | RewardEscrow | ✅ Closed |
-| #48 | Frontend MVP | ✅ Closed |
-| #49 | Citizen Auth | ✅ Closed (risk accepted) |
-| #51 | On-chain buy/convert | 📋 Open |
-| #52 | SBT Documenter | 📋 Open |
-| #53 | Agent Phase 2 | 📋 Open |
+| Issue | Title | Status |
+|-------|-------|--------|
+| [#36](https://gitlab.com/pasosdeJesus/sivel3/-/issues/36) | AI Agent Epic (MVP) | Closed (MVP) |
+| [#39](https://gitlab.com/pasosdeJesus/sivel3/-/issues/39) | SLEARN Cashback | Closed |
+| [#43](https://gitlab.com/pasosdeJesus/sivel3/-/issues/43) | PreAlertMarket.sol | Closed |
+| [#44](https://gitlab.com/pasosdeJesus/sivel3/-/issues/44) | API Endpoints | Closed |
+| [#47](https://gitlab.com/pasosdeJesus/sivel3/-/issues/47) | RewardEscrow | Closed |
+| [#48](https://gitlab.com/pasosdeJesus/sivel3/-/issues/48) | Frontend MVP | Closed |
+| [#49](https://gitlab.com/pasosdeJesus/sivel3/-/issues/49) | Citizen Auth | Closed (risk accepted) |
+| [#51](https://gitlab.com/pasosdeJesus/sivel3/-/issues/51) | On-chain buy/convert | Open |
+| [#52](https://gitlab.com/pasosdeJesus/sivel3/-/issues/52) | SBT Documenter | Open |
+| [#53](https://gitlab.com/pasosdeJesus/sivel3/-/issues/53) | Agent Phase 2 | Open |
 
 ---
 
