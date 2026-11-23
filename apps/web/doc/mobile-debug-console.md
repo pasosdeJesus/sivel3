@@ -2,7 +2,7 @@
 
 > *"Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres"* (Colosenses 3:23)
 
-Floating debug console for MiniPay and embedded browsers. Displays logs in real
+Floating debug console for embedded browsers. Displays logs in real
 time inside the application without needing browser DevTools.
 
 Uses `@pasosdejesus/m/debug` for all logging and the debug UI. See the
@@ -36,7 +36,6 @@ Under normal conditions (without the parameter), the console does not appear.
 
 | Source | Logged when... |
 |--------|----------------|
-| `[MiniPay]` | Detection, connection, `_request` errors |
 | `[OSMMapData]` | Initial data loading (departments, regions, etc.) |
 | `[Balance]` | Regional balance update |
 | `[Donate]` | Donation start, success, or error |

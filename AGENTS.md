@@ -65,7 +65,7 @@ Jesus is God incarnated, the Truth and the Logos.
 11. **[doc/environments.md]**: Environments, chains, wallets, local run modes, deploy constraints, and health checks.
 12. **[apps/web/doc/API.md]**: API routes reference.
 13. **[apps/web/doc/I18N.md]**: Internationalization strategy and patterns.
-14. **[apps/web/doc/mobile-debug-console.md]**: Debug console for MiniPay and embedded browsers. Use `logger.info/error(tag)` instead of `console.log`.
+14. **[apps/web/doc/mobile-debug-console.md]**: Debug console for embedded browsers. Use `logger.info/error(tag)` instead of `console.log`.
 15. **[apps/web/doc/deployment-credentials.md]**: Deployment credentials and contract addresses.
 16. **[apps/contracts/README.md]**: Solidity contracts details.
 17. Execute and assimilate the content of

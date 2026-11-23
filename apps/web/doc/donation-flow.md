@@ -6,7 +6,7 @@ This document describes the complete donation flow: from the user clicking "Dona
 
 ## Why this document exists
 
-The donation flow went through several iterations (approve+donate two-step, unified ERC-20 transfer, MiniPay compatibility fixes, 4xx retry logic). The design decisions that led to the current architecture were hard-earned and are documented here so future developers don't repeat the same debugging cycles.
+The donation flow went through several iterations (approve+donate two-step, unified ERC-20 transfer, 4xx retry logic). The design decisions that led to the current architecture were hard-earned and are documented here so future developers don't repeat the same debugging cycles.
 
 ---
 
@@ -21,8 +21,8 @@ User clicks "Donate"
 │  Wallet Layer               │
 └─────────────────────────────┘
     │
-    ├── MiniPay?  → ethereum.send()
-    ├── MetaMask/OneKey? → ethereum.request()
+    ├── Effective EIP-1193 provider (in-app wallet, else external EIP-6963)
+    ├── provider.request({ method: 'eth_sendTransaction' })
     │
     ▼
 Transaction sent to Celo (USDT transfer with regionId in data, to sivel.xyz backend wallet)
@@ -50,7 +50,7 @@ Response returned to user
 
 **Decision:** The donation uses a single `transfer()` call to the USDT contract, with the region ID appended to the data field. There is no separate `approve()` step.
 
-**Why:** The old flow required two transactions: (1) approve USDT spending, (2) call donate on the contract. This was confusing, expensive (gas ×2), and error-prone. MiniPay does not support the approve+call pattern (see [issue #24](https://github.com/pasosdeJesus/sivel3/issues/24) and [celo-composer#382](https://github.com/celo-org/celo-composer/issues/382)), which forced the redesign. The current flow encodes the region ID directly in the ERC-20 transfer data, and the backend extracts it server-side.
+**Why:** The old flow required two transactions: (1) approve USDT spending, (2) call donate on the contract. This was confusing, expensive (gas ×2), and error-prone. A single transfer is simpler for every wallet, so the redesign stayed. The flow encodes the region ID directly in the ERC-20 transfer data, and the backend extracts it server-side.
 
 ### 2.2 Transaction Data Encoding
 
@@ -67,44 +67,17 @@ The ERC-20 `transfer(address to, uint256 amount)` function is called on the USDT
 
 The donation arrives at sivel.xyz's wallet. The backend splits it: 10% to SLEARN (mintAndReserve for cashback) and 90% to RegionalDonationV2 (assignDonation).
 
-> **Note:** This is not standard ERC-20. The standard `transfer(address,uint256)` expects exactly 68 bytes of calldata. Appending extra bytes (called *calldata stuffing*) works because the USDT contract ignores surplus data — Solidity only decodes what it needs. It is a pragmatic workaround: MiniPay does not support the standard approve+call pattern, so we encode the region ID in the transfer and verify it server-side instead.
+> **Note:** This is not standard ERC-20. The standard `transfer(address,uint256)` expects exactly 68 bytes of calldata. Appending extra bytes (called *calldata stuffing*) works because the USDT contract ignores surplus data — Solidity only decodes what it needs. The region ID travels in the transfer itself (instead of the request body) so the backend verifies it on-chain.
 
 **Why encode regionId in data?** Security. The frontend sends `regionId` in the POST body, but the backend ignores it and extracts the region directly from the on-chain transaction data. This prevents a compromised frontend from redirecting donations.
 
-### 2.3 Wallet Detection — MiniPay vs MetaMask
+### 2.3 Wallet Layer — One EIP-1193 Provider
 
-| Wallet | Method | Limitation |
-|--------|--------|------------|
-| **MiniPay** | `ethereum.send()` | Does NOT support `ethereum.request()` (throws on `_request`) |
-| **MetaMask / OneKey** | `ethereum.request()` | Does NOT support `ethereum.send()` without callback |
+`donate()` receives the **effective provider** from `WalletContext`: the in-app wallet when it is unlocked, otherwise the external EIP-6963 wallet (`apps/web/ARCHITECTURE.md` §2). Both answer `eth_sendTransaction` through `provider.request`, so the donation has no wallet-specific branch and no detection code.
 
-Detection:
+### 2.4 Transaction Hash
 
-```typescript
-const isMiniPay = window.ethereum.isMiniPay === true
-```
-
-If `isMiniPay`, use `ethereum.send()`. Otherwise, use `ethereum.request()`.
-
-### 2.4 MiniPay Response Parsing
-
-MiniPay returns the transaction hash in different formats depending on the version:
-
-```typescript
-// Format 1: direct string
-"0xabcd..."
-
-// Format 2: object with result
-{ result: "0xabcd..." }
-
-// Format 3: object with hash
-{ hash: "0xabcd..." }
-
-// Format 4: object with transactionHash
-{ transactionHash: "0xabcd..." }
-```
-
-The code tries each format in order. If none matches, it throws with the serialized response for debugging.
+`eth_sendTransaction` returns the hash as the plain result of `provider.request`; the frontend sends it to `POST /api/donations/assign`. There is no per-wallet response parsing: a response without a hash reaches the backend as a missing `txHash` and fails its validation.
 
 ### 2.5 Backend Retry Logic
 
@@ -229,6 +202,6 @@ Enable with `?debug=1` URL parameter. Shows real-time logs from the donation flo
 | **RegionId in tx.data** | Security: prevents frontend tampering |
 | **Transfer to backend wallet** | Enables 90/10 split: 10% SLEARN cashback, 90% RegionalDonation |
 | **SLEARN for all donors** | Donation itself is proof of good faith; verification encouraged via UI |
-| **MiniPay uses `ethereum.send`** | Discovered empirically — MiniPay does not support `request()` |
+| **No wallet-specific branches** | In-app and external wallets are both EIP-1193 providers |
 | **4xx continues retrying** | Transaction may not be confirmed yet (false positive) |
 | **SLEARN is non-blocking** | Donation succeeds even if SLEARN minting fails |

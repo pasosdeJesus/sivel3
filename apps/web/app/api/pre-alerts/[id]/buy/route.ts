@@ -39,7 +39,7 @@ async function verifyPreAlertPurchase(
     const preAlertIdHex = '0x' + input.slice(-64)
     const preAlertId = Number(BigInt(preAlertIdHex))
 
-    // Find Transfer event TO the PreAlertMarket contract (MiniPay creates multiple Transfer events for fee abstraction)
+    // Find the Transfer event TO the PreAlertMarket contract (a transaction may carry other Transfer events, e.g. fee abstraction)
     const usdtAddress = USDT_ADDRESS.toLowerCase()
     const contractAddr = PREALERT_MARKET_ADDRESS.toLowerCase()
     const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'

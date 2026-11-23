@@ -59,6 +59,9 @@ This project uses a `Makefile` for common development tasks.
 - **`make format`**: Formats code with `prettier`.
 - **`make dev`**: Starts the development server via `./bin/dev`.
 - **`make prod`**: Builds and starts production server in background.
+- **`make test-smoke` / `make test-e2e`**: HTTP and browser E2E against `https://sivel.xyz:9001`; `make test-smoke-prod` is the read-only subset for `https://sivel.xyz`.
+- **`make warmup` / `make warmup-local`**: Compiles the routes of `e2e/warmup-paths.json` (dev site / local server) before a cold E2E run.
+- **`make wait-site` / `make wait-deploy`**: Waits until the site answers / until a new build is visible (`test:e2e:wait`), before testing a fresh deploy.
 
 
 ## CLI Usage
@@ -84,10 +87,10 @@ The application uses the Next.js **App Router**:
 
 - `app/`: Pages and API routes (`[locale]/`, `api/`)
 - `components/`: React components (maps, UI, layout)
-- `hooks/`: Custom React hooks (`useTranslation`, `useMiniPay`, `useAutoConnect`)
-- `lib/`: Logic modules (donations, learning points, errors, i18n)
-- `providers/`: Global providers (`AppProvider` with Wagmi/RainbowKit)
-- `contexts/`: React contexts (`WalletContext`)
+- `hooks/`: Custom React hooks (`useTranslation`, `usePreAlerts`)
+- `lib/`: Logic modules (donations, SLEARN cashback, credentials, errors, i18n)
+- `providers/`: Global providers (`AppProvider`: React Query + `WalletContext`)
+- `contexts/`: React contexts (`WalletContext`: in-app wallet first, external EIP-6963)
 - `db/`: Database schema, migrations, types (Kysely)
 - `tests/`: Test suite (Vitest)
 - `bin/m`: The CLI executable.
@@ -102,5 +105,5 @@ The application uses the Next.js **App Router**:
 - **[doc/environments.md](../../doc/environments.md)** - Environments, chains, wallets, local run modes, and deploy constraints
 - **[doc/e2e-testing.md](doc/e2e-testing.md)** - E2E specs, fixtures, and test targets
 - **[doc/donation-flow.md](doc/donation-flow.md)** — Complete donation flow documentation
-- **[doc/mobile-debug-console.md](doc/mobile-debug-console.md)** — Debug console for testing in MiniPay and embedded browsers
+- **[doc/mobile-debug-console.md](doc/mobile-debug-console.md)** — Debug console for testing in embedded browsers
 - **[doc/I18N.md](doc/I18N.md)** — Internationalization strategy and patterns

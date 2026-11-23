@@ -1,0 +1,26 @@
+{
+  "paths": [
+    "/en",
+    "/es",
+    "/en/cases/osmmap",
+    "/es/cases/osmmap",
+    "/en/stats",
+    "/es/stats",
+    "/en/dashboard",
+    "/es/dashboard",
+    "/en/documenter",
+    "/es/documenter",
+    "/en/wallet/0x0000000000000000000000000000000000000001",
+    "/api/cases/counts",
+    "/api/cases/datos-osm",
+    "/api/departments",
+    "/api/categories",
+    "/api/alleged-perpetrators",
+    "/api/regions",
+    "/api/pre-alerts?limit=1",
+    "/api/credential/breakdown",
+    "/api/credential/leaderboard",
+    "/api/web-analytics/summary",
+    "/api/health/credentials"
+  ]
+}

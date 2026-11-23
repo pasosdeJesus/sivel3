@@ -122,6 +122,13 @@ ERC-1155 metadata (which points at the same URL); `make test-smoke`
 (`credential-metadata.spec.mjs`) fails when a badge is missing. The intermediate
 `public/img/credential/generated/*.svg` is derived and stays untracked.
 
+The composer scales the whole icon canvas into a fixed safe square (288 of 512px), so the
+artwork must be centered and fill its viewBox: an icon drawn inside a small area of the
+canvas renders tiny in the badge. Each source here wraps its drawing in a group that
+normalizes the measured alpha bounds to 496px, and repeats `fill="none"` on that group
+because the composer drops the root `<svg fill="none">` attribute and unfilled open paths
+would otherwise render black.
+
 | SBT | Filename | Concept |
 |-----|----------|---------|
 | Connector | `connector.svg` | Link/chain |

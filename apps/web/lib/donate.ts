@@ -103,7 +103,7 @@ export async function donate(params: DonateParams, locale: string = 'en'): Promi
 
   try {
     // The effective EIP-1193 provider is the in-app wallet or the external one;
-    // both support `eth_sendTransaction` via `request` (no MiniPay `send` path).
+    // both support `eth_sendTransaction` via `request`.
     logMsg(`🔄 Enviando transacción con la billetera (provider EIP-1193)...`)
     const txHash = (await provider.request({
       method: 'eth_sendTransaction',

@@ -21,7 +21,7 @@ The application uses a hierarchy of providers (`providers/AppProvider.tsx`) to m
 1.  **React Query (`@tanstack/react-query`):** `QueryClientProvider` for server-state.
 2.  **WalletContext (`contexts/WalletContext.tsx`):** a thin layer over the shared `@pasosdejesus/m/wallet`:
     *   **In-app wallet first:** `useInAppWallet()` (`@pasosdejesus/m/wallet/next`) when the in-app wallet is unlocked.
-    *   **External wallet:** the EIP-6963 connector (`getExternalProvider` / `subscribeExternalProvider`); **no** wagmi, RainbowKit, WalletConnect or MiniPay.
+    *   **External wallet:** the EIP-6963 connector (`getExternalProvider` / `subscribeExternalProvider`); **no** wagmi, RainbowKit or WalletConnect.
     *   The **effective provider** is in-app ?? external; the address is read with `eth_accounts` and refreshed on `accountsChanged`.
     *   Exposes `{ isConnected, effectiveAddress, chainId, provider, isInApp, externalAvailable, disconnect, donate, isTransacting, isProcessing }`.
     *   `donate` orchestrates the on-chain USDT transfer and the backend notification via `lib/donate.ts`.

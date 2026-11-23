@@ -81,14 +81,20 @@ sivel3/
 
 ## 💡 Sustainability Model
 
-Initially we propose to operate SIVeL 3 with a **decentralized donation model** through smart contracts on Celo. Funds are distributed as follows:
+SIVeL 3 runs on a **decentralized donation model** through smart contracts on Celo. Each donation is split when the backend verifies it: **10% goes to the SLEARN reserve** (the donor receives SLEARN at the 22:1 rate as cashback) and **90% is assigned to the region's pool** in `SIVeL3RegionalDonationV2`. If the SLEARN step is unavailable, 100% goes to the regional pool.
+
+That regional pool, together with subscription and credit revenue, is spent following this committed distribution:
 
 | Recipient | % | Purpose |
 |-----------|---|---------|
 | **CINEP Human Rights Data Bank** (Validator) | 20% | Historical archive, academic verification |
-| **Pasos de Jesús** (Operator & Developer) | 30% | Hosting, development, maintenance |
-| **Regional Documenters** | 40% | Stipends for field documentation work |
-| **Citizen Alert Rewards** | 10% | Incentives for verified citizen submissions |
+| **Pasos de Jesús** (Operator & Developer) | 30% | Hosting, development, maintenance (capped at $1,500 USD/month) |
+| **Regional Documenters** | 30% | $5–$20 stipend per verified case |
+| **Restoration Fund (victims)** | 5% | Welcome bonus, reparations, commemorative events |
+| **Church Fund** | 5% | Verified pacifist churches, via learn.tg |
+| **Reinvestment** | 10% | Marketing, new features, hackathons |
+
+The 5% + 5% is the unified tithe described in [PRINCIPLES.md](PRINCIPLES.md). The contracts do not enforce these percentages: `withdraw` releases a region's balance to the destination the operator chooses, so the split is operational and auditable on-chain. The Restoration Fund and the Church Fund are pending (https://gitlab.com/pasosdeJesus/sivel3/-/issues/18 and https://gitlab.com/pasosdeJesus/sivel3/-/issues/19).
 
 *Full details in [VISION.md](VISION.md)*
 

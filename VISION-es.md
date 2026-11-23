@@ -169,8 +169,12 @@ Amnistía, etc.) sin costo.
 
 ## 6. Modelo Financiero y Distribución de Ingresos
 
-Los porcentajes se aplican desde el primer dólar recibido (incluyendo
-donaciones).
+Los porcentajes se aplican al ingreso neto que llega al fondo de donaciones de
+cada región, y a los ingresos por suscripciones y créditos. No se aplican a la
+reserva SLEARN: cada donación se divide en la cadena cuando el backend la
+verifica, **10% a la reserva SLEARN** (el donante recibe SLEARN a la tasa 22:1
+como cashback) y **90% al fondo de la región**. Si el paso SLEARN no está
+disponible, el 100% va al fondo regional.
 
 | Destinatario | Porcentaje | Notas |
 | :--- | :--- | :--- |
@@ -180,6 +184,16 @@ donaciones).
 | **Fondo de Restauración (víctimas)** | 5% | Bono de bienvenida, reparaciones, eventos conmemorativos, reforestación |
 | **Fondo de Iglesias** | 5% | Iglesias pacifistas verificadas (a través de learn.tg) |
 | **Reinversión** | 10% | Marketing, nuevas funcionalidades, hackathones |
+
+**Estado de implementación:** `SIVeL3RegionalDonationV2` guarda el saldo de cada
+región y `withdraw` lo libera hacia el destino que elija el operador, así que
+estos porcentajes son una política comprometida y auditable en la cadena, no una
+división automática del contrato. El Fondo de Restauración y el Fondo de Iglesias
+(5% cada uno) están pendientes
+(https://gitlab.com/pasosdeJesus/sivel3/-/issues/18 y
+https://gitlab.com/pasosdeJesus/sivel3/-/issues/19). Las recompensas a
+ciudadanos (puntaje 2–5 USDT por alerta verificada) ya se liberan del fondo
+regional mediante `SIVeL3RewardEscrow`.
 
 **Mecanismo de tope (cap):** Si el 30% de los ingresos mensuales
 para pdJ supera los $1,500 USD, el excedente se distribuye en partes

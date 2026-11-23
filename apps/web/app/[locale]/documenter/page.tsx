@@ -50,7 +50,7 @@ export default function DocumenterPage() {
   const params = useParams()
   const locale = Array.isArray(params.locale) ? params.locale[0] : params.locale || 'en'
   const pt = (k: keyof typeof tS.en) => (tS[locale as keyof typeof tS]?.[k] || tS.en[k]) as string
-  const { isConnected, effectiveAddress } = useWallet()
+  const { isConnected, effectiveAddress, provider } = useWallet()
   const { toast } = useToast()
 
   const [queue, setQueue] = useState<any[]>([])
@@ -80,21 +80,11 @@ export default function DocumenterPage() {
       const timestamp = Math.floor(Date.now() / 1000)
       const message = `score:${preAlertId}:${score}:${timestamp}`
 
-      let signature: string
-      const ethereum = (window as any).ethereum
-      if (!ethereum) throw new Error('No wallet')
-      try {
-        signature = await ethereum.request({
-          method: 'personal_sign',
-          params: [message, effectiveAddress],
-        })
-      } catch {
-        // MiniPay fallback
-        signature = await ethereum.send({
-          method: 'personal_sign',
-          params: [message, effectiveAddress],
-        })
-      }
+      if (!provider || !effectiveAddress) throw new Error('No wallet')
+      const signature = (await provider.request({
+        method: 'personal_sign',
+        params: [message, effectiveAddress],
+      })) as string
 
       const res = await fetch(`/api/pre-alerts/${preAlertId}/score`, {
         method: 'POST',

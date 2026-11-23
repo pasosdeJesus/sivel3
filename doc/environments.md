@@ -144,6 +144,9 @@ defaults (`learn.tg:443`, chain `42220`, production).
 | `make test-e2e`                  | `https://sivel.xyz:9001` | yes    |
 | `make test-e2e-spec SPEC=<name>` | `https://sivel.xyz:9001` | yes    |
 | `make test-e2e-retry`            | `https://sivel.xyz:9001` | yes    |
+| `make wait-site`                 | `https://sivel.xyz:9001` | no     |
+| `make wait-deploy`               | `https://sivel.xyz:9001` | no     |
+| `make warmup`                    | `https://sivel.xyz:9001` | no     |
 
 The targets export `IPDES=sivel.xyz PUERTOPRU=9001 CHAIN_ID=11142220`. Override
 the site with `SITE_URL`. For client-side on-chain steps whose RPC is
@@ -188,6 +191,7 @@ After the operator deploys:
 
 ```sh
 cd apps/web
+make wait-deploy     # a new build is visible (EXPECT_ASSET=… for static-only deploys)
 make test-smoke
 make test-e2e
 ```

@@ -142,8 +142,8 @@ User sends USDT → sivel.xyz wallet (NEXT_PUBLIC_ADDRESS)
   ▼
 POST /api/donations/assign
   ├── Verify on-chain transfer (Viem)
-  ├── 10% → SLEARN contract → mintAndReserve(donor, amount)
-  │     → 220 SLEARN per USDT minted to donor
+  ├── 10% → SLEARN contract → mintAndReserve(donor, reserve amount)
+  │     → SLEARN minted at 22:1 (1 USDT of reserve = 22 SLEARN)
   ├── 90% → RegionalDonationV2 → assignDonation()
   ├── Mint donor SBTs (Connector, Donor tiers)
   └── Toast: SLEARN cashback + link to learn.tg

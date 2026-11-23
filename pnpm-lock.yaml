@@ -7,20 +7,20 @@ settings:
 catalogs:
   default:
     '@pasosdejesus/contract-test':
-      specifier: ^0.3.10
-      version: 0.3.10
+      specifier: ^0.3.11
+      version: 0.3.11
     '@pasosdejesus/edr':
       specifier: ^0.2.1
       version: 0.2.1
     '@pasosdejesus/m':
-      specifier: ^0.39.0
-      version: 0.39.0
+      specifier: ^0.40.0
+      version: 0.40.0
     '@pasosdejesus/mpdj':
-      specifier: ^0.3.9
-      version: 0.3.9
+      specifier: ^0.3.10
+      version: 0.3.10
     '@pasosdejesus/usdt':
-      specifier: ^0.1.5
-      version: 0.1.5
+      specifier: ^0.1.6
+      version: 0.1.6
     dotenv:
       specifier: ^17.4.2
       version: 17.4.2
@@ -76,13 +76,13 @@ importers:
     devDependencies:
       '@pasosdejesus/contract-test':
         specifier: 'catalog:'
-        version: 0.3.10(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.3.11(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@pasosdejesus/edr':
         specifier: 'catalog:'
         version: 0.2.1(supports-color@8.1.1)
       '@pasosdejesus/usdt':
         specifier: 'catalog:'
-        version: 0.1.5(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.1.6(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@typechain/ethers-v6':
         specifier: ^0.5.1
         version: 0.5.1(ethers@6.17.0)(typechain@8.3.2(supports-color@8.1.1)(typescript@5.9.3))(typescript@5.9.3)
@@ -115,19 +115,19 @@ importers:
         version: 0.8.14
       '@pasosdejesus/contract-test':
         specifier: 'catalog:'
-        version: 0.3.10(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.3.11(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@pasosdejesus/edr':
         specifier: 'catalog:'
         version: 0.2.1(supports-color@8.1.1)
       '@pasosdejesus/m':
         specifier: 'catalog:'
-        version: 0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@pasosdejesus/mpdj':
         specifier: 'catalog:'
-        version: 0.3.9(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(next@16.4.6(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vitest@3.2.7(@types/node@24.19.2)(jiti@2.7.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(lightningcss-wasm@1.32.0)(supports-color@8.1.1)(tsx@4.23.15))
+        version: 0.3.10(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(next@16.4.6(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vitest@3.2.7(@types/node@24.19.2)(jiti@2.7.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(lightningcss-wasm@1.32.0)(supports-color@8.1.1)(tsx@4.23.15))
       '@pasosdejesus/usdt':
         specifier: 'catalog:'
-        version: 0.1.5(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.1.6(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@radix-ui/react-accordion':
         specifier: ^1.2.20
         version: 1.3.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -361,7 +361,7 @@ importers:
     dependencies:
       '@pasosdejesus/m':
         specifier: 'catalog:'
-        version: 0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+        version: 0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       generated-msip:
         specifier: workspace:*
         version: link:../msip
@@ -1206,10 +1206,10 @@ packages:
   '@openzeppelin/contracts@5.6.1':
     resolution: {integrity: sha512-Ly6SlsVJ3mj+b18W3R8gNufB7dTICT105fJhodGAGgyC2oqnBAhqSiNDJ8V8DLY05cCz81GLI0CU5vNYA1EC/w==}
 
-  '@pasosdejesus/contract-test@0.3.10':
-    resolution: {integrity: sha512-/msFeFRH4OJGbi5GvePzJArh0qedoNlCoAlr13o3t6AFl2FJoqaDMjCLYvPYTL9BtLG6q4A35Tm6goNK5Y6bAA==}
+  '@pasosdejesus/contract-test@0.3.11':
+    resolution: {integrity: sha512-slPvYu0iBXqmd76I2tV19ZjroiFKiYlVyQohlKnGFfsGfBDevZxjJ2D4PCKJmpfbGUM6IBMAQ1NrVbjpAt+l7g==}
     peerDependencies:
-      '@pasosdejesus/m': ^0.39.0
+      '@pasosdejesus/m': ^0.40.0
       ethers: ^6
       viem: ^2
     peerDependenciesMeta:
@@ -1221,23 +1221,23 @@ packages:
   '@pasosdejesus/edr@0.2.1':
     resolution: {integrity: sha512-EBhvjuSLIkygCoYkRvOeGSfdWXOpCTPovGATn1JVmxDz2hnvUBlTXPSi2B4KDyxzKprjmUDhZmyCxhT0GhfhuA==}
 
-  '@pasosdejesus/m@0.39.0':
-    resolution: {integrity: sha512-c8YN5q3ucxcjxQ2KNZMIkHKDak3s8dDiGJzBysAOoxYIRNeQeEF3zsdeSctqjmGsZpnsUZkdMaliSTyk94dgeg==}
+  '@pasosdejesus/m@0.40.0':
+    resolution: {integrity: sha512-xVkNyWlcgUyCo6Tru3GyLXE2/fl2HXflkFrlMH3xJpS+bP0l+uusZBj+SOH90eLHYS4a55P2N8uuXxGvaEhglw==}
     engines: {node: '>=22.3'}
     hasBin: true
 
-  '@pasosdejesus/mpdj@0.3.9':
-    resolution: {integrity: sha512-7JDhl/z1Z7uOp6LhMz4OE6706m4qWuK4GIopHMnQ59pbo26YWvfWC14JO/B2+XjvGL5OxedV32FbCemn060pew==}
+  '@pasosdejesus/mpdj@0.3.10':
+    resolution: {integrity: sha512-F75MvulIx6EVdP2tB49ub1CUdB9FXTrkXPgBYuJCxyEkEf7/VHbE0NS7iwcKyFlPKHD1/xmRue5+0wKx+jkDkw==}
     peerDependencies:
-      '@pasosdejesus/m': ^0.39.0
+      '@pasosdejesus/m': ^0.40.0
       next: '>=15.0.0'
       react: '>=18.0.0'
       vitest: '>=2.1.9'
 
-  '@pasosdejesus/usdt@0.1.5':
-    resolution: {integrity: sha512-vVlEktK7VMC8hxy/WdjpiOJ+IEVO5BZXHTna4l2IbmamJjFszHkPzgFT6DCjH/n1JecddQTT+KUykBKzT3BqHQ==}
+  '@pasosdejesus/usdt@0.1.6':
+    resolution: {integrity: sha512-2ah3sq7VrQ4/P6xHaWVvfzW0KLJzBLcqCQTgSJcC14bZfKfiO6bpr7Au2c6CaILVAiORzIbYkazPnVHOPhP3fA==}
     peerDependencies:
-      '@pasosdejesus/m': ^0.39.0
+      '@pasosdejesus/m': ^0.40.0
       react: '>=18.0.0'
       viem: '>=2.0.0'
 
@@ -4896,10 +4896,10 @@ snapshots:
 
   '@openzeppelin/contracts@5.6.1': {}
 
-  '@pasosdejesus/contract-test@0.3.10(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
+  '@pasosdejesus/contract-test@0.3.11(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       '@pasosdejesus/edr': 0.2.1(supports-color@8.1.1)
-      '@pasosdejesus/m': 0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+      '@pasosdejesus/m': 0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       glob: 13.0.6
       mocha: 11.8.0
       solc: 0.8.26(debug@4.4.3(supports-color@8.1.1))
@@ -4924,14 +4924,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
+  '@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       dotenv: 17.4.2
       execa: 9.6.1
       glob: 13.0.6
       picocolors: 1.1.1
     optionalDependencies:
-      '@pasosdejesus/contract-test': 0.3.10(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+      '@pasosdejesus/contract-test': 0.3.11(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       '@pasosdejesus/edr': 0.2.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - debug
@@ -4939,16 +4939,16 @@ snapshots:
       - supports-color
       - viem
 
-  '@pasosdejesus/mpdj@0.3.9(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(next@16.4.6(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vitest@3.2.7(@types/node@24.19.2)(jiti@2.7.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(lightningcss-wasm@1.32.0)(supports-color@8.1.1)(tsx@4.23.15))':
+  '@pasosdejesus/mpdj@0.3.10(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(next@16.4.6(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(vitest@3.2.7(@types/node@24.19.2)(jiti@2.7.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(lightningcss-wasm@1.32.0)(supports-color@8.1.1)(tsx@4.23.15))':
     dependencies:
-      '@pasosdejesus/m': 0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+      '@pasosdejesus/m': 0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       next: 16.4.6(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react: 19.3.1
       vitest: 3.2.7(@types/node@24.19.2)(jiti@2.7.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(lightningcss-wasm@1.32.0)(supports-color@8.1.1)(tsx@4.23.15)
 
-  '@pasosdejesus/usdt@0.1.5(@pasosdejesus/m@0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
+  '@pasosdejesus/usdt@0.1.6(@pasosdejesus/m@0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76)))(react@19.3.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
-      '@pasosdejesus/m': 0.39.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
+      '@pasosdejesus/m': 0.40.0(debug@4.4.3(supports-color@8.1.1))(ethers@6.17.0)(supports-color@8.1.1)(viem@2.57.7(typescript@5.9.3)(zod@3.25.76))
       react: 19.3.1
       viem: 2.57.7(typescript@5.9.3)(zod@3.25.76)
 

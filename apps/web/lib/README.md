@@ -6,10 +6,10 @@ Directory of logic modules shared between components and API routes.
 
 | File | Purpose |
 |------|---------|
-| `donate.ts` | Orchestrates the unified donation: builds the ERC-20 transaction, sends it via MiniPay or MetaMask, and calls the backend for assignment. See `doc/donation-flow.md`. |
+| `donate.ts` | Orchestrates the unified donation: builds the ERC-20 transaction, sends it through the effective EIP-1193 provider (in-app wallet or external EIP-6963), and calls the backend for assignment. See `doc/donation-flow.md`. |
 | `slearn.ts` | SLEARN cashback for donors: transfers 10% of the USDT and calls `mintAndReserve` on the SLEARN contract (replaces the retired learn.tg Learning Points API). |
 | `errors.ts` | Translates wallet/blockchain errors to user-friendly messages (`parseWalletError`). |
-| `logger.ts` | Unified logging system with floating debug console for MiniPay. See `doc/mobile-debug-console.md`. |
+| `logger.ts` | Unified logging system with floating debug console for embedded browsers. See `doc/mobile-debug-console.md`. |
 | `debug.ts` | Debug utilities: `safeStringify` for circular objects, `debugLog`. |
 | `utils.ts` | General utilities (`cn()` for Tailwind class merging). |
 || `web-analytics.ts` | Web analytics helpers: `recordEvent()` for pageviews, donations, wallet connects. |

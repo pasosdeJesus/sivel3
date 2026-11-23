@@ -28,7 +28,7 @@ This document defines the documentation and testing policies for the Next.js app
 | Criterion | Where | Example |
 |-----------|-------|---------|
 | Cross-system protocol or cross-project reusable design | `doc/<feature>.md` | Donation flow (sivel.xyz ↔ Celo ↔ learn.tg), i18n strategy |
-| Internal module decision — *why* this implementation, not another | Comment at top of `.ts` file | SLEARN retry/collision handling in `slearn.ts`, MiniPay `ethereum.send` rationale in `donate.ts` |
+| Internal module decision — *why* this implementation, not another | Comment at top of `.ts` file | SLEARN retry/collision handling in `slearn.ts`, calldata-stuffing rationale in `donate.ts` |
 | What the code does, how it behaves | **Test** | `useTranslation.test.ts` documents every fallback rule |
 
 ### What We Don't Document

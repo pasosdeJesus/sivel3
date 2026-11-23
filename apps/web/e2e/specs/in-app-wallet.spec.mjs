@@ -23,6 +23,7 @@ import {
   waitForConnected,
   waitForRecoveryPhrase,
 } from '../helpers/wallet-ui.mjs'
+import { captureDiagnostics } from '../helpers/diag.mjs'
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -39,6 +40,7 @@ async function main() {
 
   const browser = await launchBrowser(env.headless)
   const page = await browser.newPage()
+  const diag = captureDiagnostics(page)
   try {
     await page.goto(`${base}${PAGE}`, { waitUntil: 'domcontentloaded', timeout: 120000 })
 
@@ -60,6 +62,9 @@ async function main() {
 
     if (await waitForConnected(page)) ok('in-app wallet unlocked and connected')
     else fail('in-app wallet did not connect after unlock')
+  } catch (error) {
+    await diag.dump('in-app wallet create/unlock failed')
+    throw error
   } finally {
     await browser.close()
   }

@@ -30,7 +30,7 @@ export function LandingPage({ locale: propLocale }: LandingPageProps) {
     },
     buttonText: isSpanish ? 'Explorar el Mapa →' : 'Explore the Map →',
     secondaryButton: isSpanish ? 'Código Fuente' : 'Source Code',
-    liveOnCelo: isSpanish ? '🌐 Operando en Celo — pagos y certificaciones on-chain, compatible con MiniPay.' : '🌐 Live on Celo — on-chain payments and certifications, with MiniPay support.',
+    liveOnCelo: isSpanish ? '🌐 Operando en Celo — pagos y certificaciones on-chain.' : '🌐 Live on Celo — on-chain payments and certifications.',
     footer: isSpanish
       ? 'SIVeL 3 es un proyecto de código abierto de Pasos de Jesús · Licencia ISC'
       : 'SIVeL 3 is an open-source project by Pasos de Jesús · ISC License',

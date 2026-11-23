@@ -18,6 +18,11 @@ and B (browser + signature specs) are implemented**.
 | `make test-smoke` | All HTTP smoke specs | ❌ | `https://sivel.xyz:9001` |
 | `make test-e2e` | All browser specs | ✅ | `https://sivel.xyz:9001` |
 | `make test-e2e-spec SPEC=<name>` | One spec by filename pattern | ✅ | `https://sivel.xyz:9001` |
+| `make test-smoke-prod` | Read-only smokes (`PROD_READONLY_SMOKES`) | ❌ | `https://sivel.xyz` |
+| `make warmup` | Compiles the routes of `e2e/warmup-paths.json` | ❌ | `https://sivel.xyz:9001` |
+| `make warmup-local` | Same, sequential | ❌ | `http://localhost:4000` |
+| `make wait-site` | Waits until `--path` answers (`test:e2e:wait`) | ❌ | `https://sivel.xyz:9001` |
+| `make wait-deploy` | Same, plus `EXPECT_CHANGE=1` (a new build is visible) | ❌ | `https://sivel.xyz:9001` |
 | `bin/m test:e2e --smoke` | Smoke only | ❌ | ⚠️ falls back to `learn.tg:443` |
 | `bin/m test:e2e <pattern>` | Browser specs matching `<name>` | ✅ | ⚠️ `learn.tg:443` |
 
@@ -78,6 +83,49 @@ SITE_URL=http://localhost:4000 make test-e2e
 
 `SITE_URL` is honoured by `@pasosdejesus/m`'s `initTestEnv` (P2, `m@0.23.0`), so
 the specs navigate to the HTTP local server — no per-spec patching.
+
+### Warmup (cold compile)
+
+`next dev` compiles each route on demand, so the first request can outlast the
+smoke timeout (measured 2026-11-21: `public-site` failed `GET /en` with
+`The operation was aborted due to timeout` and passed on the immediate retry).
+`bin/m test:e2e:warmup` reads the route list from `e2e/warmup-paths.json` (the
+pages and the GET endpoints the specs touch). `make warmup` targets the dev site
+and `make warmup-local` runs it sequentially against `localhost:4000`, because
+this 1-CPU VM cannot compile routes in parallel. A production build needs no
+warmup. The bare `warmup` command was renamed in `@pasosdejesus/m` 0.40.0 (no
+alias): the target name stays `make warmup`, the binary call changes.
+
+### Waiting for a deploy
+
+`make wait-site` runs `bin/m test:e2e:wait` against the dev site: it polls
+`/en` until it answers 200. `make wait-deploy` adds `--expect-build-change`, so
+it only returns once a new build is visible; a deploy that only adds files under
+`public/` does not move the build marker, and that case is checked with an
+asset:
+
+```sh
+EXPECT_ASSET=/img/credential/1.png make wait-deploy
+SITE_URL=https://sivel.xyz:9001 WAIT_PATH=/es make wait-site
+```
+
+`--insecure` is passed by the target only when the URL ends in `:9001` (the dev
+site's self-signed certificate); production keeps TLS verification.
+
+### Production: read-only smokes
+
+`make test-smoke-prod` runs an **explicit list** (`PROD_READONLY_SMOKES` in the
+Makefile) of smokes that only read: public GETs, no session, no wallet, no funds,
+no malformed requests. It defaults to `https://sivel.xyz` (`SITE_URL` overrides).
+The list is explicit on purpose: a smoke that starts writing must not leak into a
+production run by joining `--smoke`.
+
+### Failure diagnostics
+
+`e2e/helpers/diag.mjs` (`captureDiagnostics`) records `pageerror` and console
+errors and, on a thrown failure, prints the visible `data-testid`s and the tail
+of the page text. The two in-app wallet specs use it: the usual failure is a
+timeout, and by then the wallet has already painted the reason.
 
 ## Fixtures (positive paths)
 

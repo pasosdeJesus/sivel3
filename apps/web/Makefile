@@ -92,3 +92,49 @@ test-e2e-retry:
 test-e2e-summary:
 	./bin/m test:e2e:summary $(LOGS)
 
+# Warmup: Next compiles routes on demand and the first request is slow (measured
+# 2026-11-21: a smoke run timed out on /en and passed on the retry).
+# `bin/m test:e2e:warmup` reads e2e/warmup-paths.json (bare `warmup` was renamed
+# in m 0.40.0, no alias); a production build needs no warmup.
+#   make warmup          # dev site
+#   make warmup-local    # local sandbox, sequential (a 1-CPU VM cannot compile
+#                        # in parallel: the shared runner's second pass is parallel)
+warmup:
+	SITE_URL=$${SITE_URL:-https://sivel.xyz:9001} ./bin/m test:e2e:warmup
+
+warmup-local:
+	SITE_URL=$${SITE_URL:-http://localhost:4000} ./bin/m test:e2e:warmup --sequential
+
+# Wait for a deploy to be visible before the specs (`m >= 0.40.0`). The dev site
+# uses a self-signed certificate, so `--insecure` is passed only for :9001.
+#   make wait-site                     # the site answers (does not prove a deploy)
+#   make wait-deploy                   # EXPECT_CHANGE=1: a new build is visible
+#   EXPECT_ASSET=/img/credential/1.png make wait-deploy   # a static-only deploy
+wait-site:
+	@url="$${SITE_URL:-https://sivel.xyz:9001}"; \
+	insecure=""; case "$$url" in *:9001*) insecure="--insecure";; esac; \
+	./bin/m test:e2e:wait --url "$$url" --path "$${WAIT_PATH:-/en}" $$insecure \
+	  $${EXPECT_CHANGE:+--expect-build-change} \
+	  $${EXPECT_ASSET:+--expect-asset $$EXPECT_ASSET} \
+	  $${TIMEOUT:+--timeout $$TIMEOUT} $${QUIET:+--quiet}
+
+wait-deploy:
+	$(MAKE) wait-site EXPECT_CHANGE=1
+
+# Production: strictly read-only smokes (public GETs only: no session, no wallet,
+# no funds, no writes, no malformed requests). Keep this list explicit: a smoke
+# that starts writing must not leak into a production run.
+#   make test-smoke-prod
+#   SITE_URL=https://sivel.xyz:9001 make test-smoke-prod
+PROD_READONLY_SMOKES = public-site.spec.mjs public-api.spec.mjs \
+	no-rails.spec.mjs credentials.spec.mjs credential-metadata.spec.mjs \
+	pages-and-i18n.spec.mjs pool-lifecycle.spec.mjs
+
+test-smoke-prod:
+	@failed=0; for s in $(PROD_READONLY_SMOKES); do \
+	  echo "── [smoke-prod] $$s"; \
+	  IPDES=sivel.xyz PUERTOPRU=443 CHAIN_ID=42220 \
+	  SITE_URL=$${SITE_URL:-https://sivel.xyz} ./bin/m test:e2e "$$s" --smoke || failed=1; \
+	done; exit $$failed
+
+

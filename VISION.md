@@ -83,7 +83,7 @@ The AI ​​agent is a core innovation of SIVeL 3:
 
 ## 6\. Financial Model and Income Distribution
 
-The percentages are applied from the first dollar received (including donations).
+The percentages are applied to the net income that reaches a region's donation pool, and to subscription and credit revenue. They are not applied to the SLEARN reserve: each donation is split on-chain when the backend verifies it, **10% to the SLEARN reserve** (the donor receives SLEARN at the 22:1 rate as cashback) and **90% to the region's pool**. If the SLEARN step is unavailable, 100% goes to the regional pool.
 
 | Recipient | Percentage | Notes |
 | :---- | :---- | :---- |
@@ -93,6 +93,8 @@ The percentages are applied from the first dollar received (including donations)
 | **Restoration Fund (victims)** | 5% | Welcome bonus, repairs, commemorative events, reforestation |
 | **Church Fund** | 5% | Verified pacifist churches (via learn.tg) |
 | **Reinvestment** | 10% | Marketing, new features, hackathons |
+
+**Implementation status:** `SIVeL3RegionalDonationV2` holds each region's balance and `withdraw` releases it to the destination the operator chooses, so these percentages are a committed policy that is auditable on-chain, not an automated contract split. The Restoration Fund and the Church Fund (5% each) are pending (https://gitlab.com/pasosdeJesus/sivel3/-/issues/18 and https://gitlab.com/pasosdeJesus/sivel3/-/issues/19). Citizen reward payments (score 2–5 USDT per verified alert) are already released from the regional pool through `SIVeL3RewardEscrow`.
 
 **Stop mechanism (cap):** If 30% of the monthly income for pdJ exceeds $1,500 USD, the surplus is distributed equally between the Restoration Fund, the Church Fund, and each active regional contract (Colombia, Palestine, etc.).
 
