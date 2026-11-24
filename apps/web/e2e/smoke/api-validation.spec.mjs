@@ -65,8 +65,28 @@ async function main() {
   await expectGet('/api/cases/0', 404)
   await expectGet('/api/cases/999999999', 404)
 
-  const osm = await get(`${SITE}/api/cases/datos-osm`)
-  const caseId = osm.json?.respuesta ? Object.keys(osm.json.respuesta)[0] : null
+  // `datos-osm` serves cells by default (https://gitlab.com/pasosdeJesus/sivel3/-/issues/69),
+  // so when no marker comes back take a populated cell (zoom 6, 0.1° step) and ask
+  // for its markers at high zoom. A 413 (cell too dense) moves to the next cell.
+  const osm = await get(`${SITE}/api/cases/datos-osm?zoom=6`)
+  let caseId = osm.json?.respuesta ? Object.keys(osm.json.respuesta)[0] : null
+  if (!caseId) {
+    const cells = (osm.json?.celdas ?? []).slice().sort((a, b) => b.n - a.n)
+    for (const cell of cells.slice(0, 5)) {
+      const delta = 0.06
+      const bbox = [
+        cell.longitud - delta,
+        cell.latitud - delta,
+        cell.longitud + delta,
+        cell.latitud + delta,
+      ].join(',')
+      const markers = await get(`${SITE}/api/cases/datos-osm?bbox=${bbox}&zoom=13`)
+      if (markers.status === 200 && markers.json?.respuesta) {
+        caseId = Object.keys(markers.json.respuesta)[0] ?? null
+        if (caseId) break
+      }
+    }
+  }
   if (!caseId) {
     fail('GET /api/cases/datos-osm → no case id to probe the detail endpoint')
   } else {

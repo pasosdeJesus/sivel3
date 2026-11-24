@@ -89,6 +89,7 @@ export default function MapComponent({
   const coordsCache = useRef<Map<number, [number, number]>>(new Map())
   const recargaTimerRef = useRef<number | null>(null)
   const ultimaCargaRef = useRef(0)
+  const ultimaClaveRef = useRef('')
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
 
@@ -174,6 +175,18 @@ export default function MapComponent({
       // payload stays proportional to what the screen can draw (issue 69).
       const map = mapInstanceRef.current
       const bounds = map.getBounds()
+
+      // Leaflet returns a point while the container has no size (first render);
+      // asking the API would be a 400 and the map would stay empty.
+      if (
+        !bounds.isValid() ||
+        bounds.getEast() - bounds.getWest() < 1e-6 ||
+        bounds.getNorth() - bounds.getSouth() < 1e-6
+      ) {
+        setCargando(false)
+        return
+      }
+
       const bbox = [
         bounds.getWest(),
         bounds.getSouth(),
@@ -182,13 +195,27 @@ export default function MapComponent({
       ]
         .map((value) => value.toFixed(5))
         .join(',')
+      const zoom = map.getZoom()
 
-      const params = new URLSearchParams({ bbox, zoom: String(map.getZoom()) })
+      // Several effects ask for a reload on mount and on filter change; the key
+      // keeps one request per viewport (the server also answers 304).
+      const clave = `${bbox}|${zoom}|${JSON.stringify(filtros)}`
+      if (clave === ultimaClaveRef.current) {
+        setCargando(false)
+        return
+      }
+      ultimaClaveRef.current = clave
+
+      const params = new URLSearchParams({ bbox, zoom: String(zoom) })
       Object.entries(filtros).forEach(([key, value]) => {
         if (value) params.set(key, String(value))
       })
 
       const response = await fetch(`/api/cases/datos-osm?${params.toString()}`)
+      if (!response.ok) {
+        ultimaClaveRef.current = ''
+        throw new Error(`datos-osm HTTP ${response.status}`)
+      }
       const datos = await response.json()
       ultimaCargaRef.current = Date.now()
 
@@ -246,6 +273,7 @@ export default function MapComponent({
       }
       markersRef.current?.addLayers(listaMarcadores)
     } catch (error) {
+      ultimaClaveRef.current = ''
       console.error('Error cargando casos:', error)
     } finally {
       setCargando(false)
@@ -311,6 +339,8 @@ export default function MapComponent({
     map.addLayer(markersRef.current)
     mapInstanceRef.current = map
 
+    // The container may not have its final size yet; resize and load again.
+    map.invalidateSize()
     cargarCasos()
 
     map.on('baselayerchange', (e: any) => setCapasVisibles([e.name]))
@@ -320,12 +350,19 @@ export default function MapComponent({
       if (Date.now() - ultimaCargaRef.current < 800) return
       if (recargaTimerRef.current) window.clearTimeout(recargaTimerRef.current)
       recargaTimerRef.current = window.setTimeout(() => {
+        map.invalidateSize()
         cargarCasosRef.current()
       }, 400)
     }
     map.on('moveend', programarRecarga)
+    map.on('resize', programarRecarga)
+    const primerAjuste = window.setTimeout(() => {
+      map.invalidateSize()
+      cargarCasosRef.current()
+    }, 120)
 
     return () => {
+      window.clearTimeout(primerAjuste)
       if (recargaTimerRef.current) window.clearTimeout(recargaTimerRef.current)
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
