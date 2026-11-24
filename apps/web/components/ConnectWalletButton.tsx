@@ -29,6 +29,8 @@ const localT = {
     loading: 'Loading…',
     signIn: 'Sign in with in-app wallet',
     signInHint: 'The wallet is unlocked: sign in to use your account.',
+    done: 'I saved the recovery phrase',
+    lock: 'Lock the in-app wallet',
   },
   es: {
     connect: 'Conectar Billetera',
@@ -45,6 +47,8 @@ const localT = {
     loading: 'Cargando…',
     signIn: 'Ingresar con la billetera de la aplicación',
     signInHint: 'La billetera está desbloqueada: ingresa para usar tu cuenta.',
+    done: 'Ya guardé la frase de recuperación',
+    lock: 'Bloquear la billetera de la aplicación',
   },
 }
 
@@ -62,20 +66,38 @@ function ResetOnClose({ onClose }: { onClose: () => void }) {
  *
  * `renderBody` is used (the granular override issue 68 allows) because the engine
  * default closes the dialog on setup completion, hiding the recovery phrase;
- * sivel3 must keep it visible so the user can back up the new wallet.
- * `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.
+ * sivel3 must keep it visible so the user can back up the new wallet. When the
+ * setup finishes, the dialog stays open with the phrase and a "saved" button
+ * closes it. `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.
  */
 export default function ConnectWalletButton() {
   const { isConnected, effectiveAddress, isInApp, externalAvailable, disconnect } = useWallet()
   const inApp = useInAppWallet()
   const { t, locale } = useTranslation(localT)
   const [showSetup, setShowSetup] = useState(false)
+  const [setupDone, setSetupDone] = useState<string | null>(null)
   const lang = locale === 'es' ? 'es' : 'en'
-  const resetSetup = useCallback(() => setShowSetup(false), [])
+  const resetSetup = useCallback(() => {
+    setShowSetup(false)
+    setSetupDone(null)
+  }, [])
 
   const renderContent = (close: () => void, connectExternal: () => Promise<void>) => {
     if (showSetup) {
-      return <InAppWalletSetup lang={lang} onDone={() => {}} />
+      return (
+        <div className="space-y-3">
+          <InAppWalletSetup lang={lang} onDone={(address) => setSetupDone(address)} />
+          {setupDone && (
+            <Button
+              className="w-full"
+              data-testid="finish-in-app-wallet"
+              onClick={close}
+            >
+              {t('done')}
+            </Button>
+          )}
+        </div>
+      )
     }
     if (isConnected && effectiveAddress) {
       return (
@@ -99,6 +121,17 @@ export default function ConnectWalletButton() {
           >
             {t('disconnect')}
           </Button>
+          {isInApp && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              data-testid="lock-wallet"
+              onClick={() => void inApp.lock()}
+            >
+              {t('lock')}
+            </Button>
+          )}
         </div>
       )
     }
