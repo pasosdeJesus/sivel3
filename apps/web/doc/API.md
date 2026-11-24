@@ -54,11 +54,18 @@ Alleged perpetrators (state actors, armed groups, corporations).
 
 ### `GET /api/cases/datos-osm`
 
-Geo-referenced case data for the interactive map. Read from PostgreSQL with Kysely (no Rails).
+Geo-referenced case data for the interactive map. Read from PostgreSQL with Kysely (no Rails). It
+serves only what the map draws: the case id and its coordinates, bounded by the viewport and
+aggregated when zoomed out (https://gitlab.com/pasosdeJesus/sivel3/-/issues/69).
 
-**Query:** Filter params: `filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[categoria_id]`, `filtro[presponsable_id]`
+**Query:** `bbox=minLng,minLat,maxLng,maxLat`, `zoom=0..20` (default 4), plus the filters
+`filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[categoria_id]`,
+`filtro[presponsable_id]`.
 
-**Response:** GeoJSON-like array with case coordinates, titles, and metadata.
+**Response:** `{ modo: 'marcadores' | 'celdas', total, respuesta: { "<id>": { latitud, longitud } },
+celdas?: [{ latitud, longitud, n }] }`. Below zoom 11 the server aggregates into cells (0.5°,
+0.1° and 0.02° by zoom); from zoom 11 it returns markers. Maximum 5,000 rows (`413`),
+`Cache-Control: public, s-maxage=300` with `ETag`/`304`, and 60 requests/min per IP (`429`).
 
 ---
 
@@ -68,7 +75,7 @@ Aggregated case counts matching filters. Used by the map for marker counts.
 
 **Query:** Same filter params as `datos-osm`.
 
-**Response:** `{ total: number, counts?: object }`
+**Response:** `{ casos: number, victimas: number, actos: number, victimizaciones: number }`. Limited to 60 requests/min per IP (`429`).
 
 ---
 
@@ -76,7 +83,10 @@ Aggregated case counts matching filters. Used by the map for marker counts.
 
 Single case detail.
 
-**Response:** Case object with actos, víctimas, presuntos responsables.
+**Response:** Case object with acts, the victims count (`victimas_count`) and the alleged
+perpetrators. Victim names are not returned to anonymous callers (confidentiality, `PRINCIPLES.md`
+§2). The endpoint is limited to 120 requests/min per IP; wallets' free quota and credits are
+tracked in https://gitlab.com/pasosdeJesus/sivel3/-/issues/17.
 
 ---
 

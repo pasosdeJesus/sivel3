@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
 
 // Definir tipo para los resultados de count
 interface CountResult {
@@ -12,6 +13,9 @@ interface CountResult {
 }
 
 export async function GET(req: NextRequest) {
+  const limited = checkRateLimit(req, { scope: 'cases-counts', limit: 60, windowMs: 60_000 })
+  if (!limited.ok) return rateLimitResponse(limited.retryAfter)
+
   try {
     const { searchParams } = new URL(req.url);
 

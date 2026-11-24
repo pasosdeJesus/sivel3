@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest'
 import { apiDbMocks } from '@pasosdejesus/m/test-utils/kysely-mocks'
+import { resetRateLimits } from '@/lib/rateLimit'
 
 // Mock web-analytics (uses server-only modules not available in tests)
 vi.mock('@/lib/web-analytics', () => ({ recordEvent: vi.fn() }))
@@ -19,6 +20,8 @@ let casoGET: (
   ctx: { params: Promise<{ id: string }> },
 ) => Promise<Response>
 
+const MARKERS_URL = 'http://localhost/api/cases/datos-osm?bbox=-77,2,-76,3&zoom=13'
+
 describe('GET /api/cases/datos-osm', () => {
   beforeAll(async () => {
     const mod = await import('@/app/api/cases/datos-osm/route')
@@ -27,59 +30,58 @@ describe('GET /api/cases/datos-osm', () => {
 
   beforeEach(() => {
     apiDbMocks.resetMocks()
+    resetRateLimits()
   })
 
-  it('returns the { respuesta } envelope with mapped markers', async () => {
+  it('returns markers with only coordinates when zoomed in', async () => {
     apiDbMocks.mockExecute.mockResolvedValue([
-      {
-        caso_id: 1,
-        latitud: 2.4419,
-        longitud: -76.6063,
-        departamento: 'Cauca',
-        municipio: 'Popayán',
-        fecha: new Date(2024, 0, 15),
-      },
-      {
-        caso_id: 2,
-        latitud: null,
-        longitud: null,
-        departamento: null,
-        municipio: null,
-        fecha: '2023-12-31',
-      },
+      { caso_id: 1, latitud: '2.4419', longitud: '-76.6063' },
+      { caso_id: 2, latitud: null, longitud: null },
     ])
 
-    const req = new Request('http://localhost/api/cases/datos-osm')
-    const res = await datosOsmGET(req)
+    const res = await datosOsmGET(new Request(MARKERS_URL))
 
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.respuesta).toEqual({
-      '1': {
-        latitud: '2.4419',
-        longitud: '-76.6063',
-        departamento: 'Cauca',
-        municipio: 'Popayán',
-        fecha: '2024-01-15',
-      },
-      '2': {
-        latitud: '',
-        longitud: '',
-        departamento: '',
-        municipio: '',
-        fecha: '2023-12-31',
-      },
-    })
+    expect(body.modo).toBe('marcadores')
+    expect(body.total).toBe(1)
+    expect(body.respuesta).toEqual({ '1': { latitud: 2.4419, longitud: -76.6063 } })
+    expect(body.celdas).toBeUndefined()
+    expect(res.headers.get('cache-control')).toContain('s-maxage=300')
+    expect(res.headers.get('etag')).toBeTruthy()
   })
 
-  it('returns an empty respuesta when there are no markers', async () => {
-    apiDbMocks.mockExecute.mockResolvedValue([])
+  it('aggregates into cells when the map is zoomed out', async () => {
+    apiDbMocks.mockExecute.mockResolvedValue([
+      { cell_lat: 2.5, cell_lng: -76.5, n: '2' },
+      { cell_lat: 3.5, cell_lng: -75.5, n: '1' },
+    ])
 
-    const req = new Request('http://localhost/api/cases/datos-osm')
-    const res = await datosOsmGET(req)
+    const res = await datosOsmGET(new Request('http://localhost/api/cases/datos-osm'))
 
     expect(res.status).toBe(200)
     const body = await res.json()
+    expect(body.modo).toBe('celdas')
+    expect(body.total).toBe(3)
+    expect(body.respuesta).toEqual({})
+    expect(body.celdas).toEqual([
+      { latitud: 2.5, longitud: -76.5, n: 2 },
+      { latitud: 3.5, longitud: -75.5, n: 1 },
+    ])
+  })
+
+  it('never returns individual markers without a bbox, even at high zoom', async () => {
+    apiDbMocks.mockExecute.mockResolvedValue([
+      { cell_lat: 2.02, cell_lng: -76.58, n: '4' },
+    ])
+
+    const res = await datosOsmGET(
+      new Request('http://localhost/api/cases/datos-osm?zoom=13'),
+    )
+
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.modo).toBe('celdas')
     expect(body.respuesta).toEqual({})
   })
 
@@ -98,7 +100,68 @@ describe('GET /api/cases/datos-osm', () => {
 
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.respuesta).toEqual({})
+    expect(body.modo).toBe('celdas')
+    expect(body.celdas).toEqual([])
+  })
+
+  it('answers 304 when the client already has the payload', async () => {
+    apiDbMocks.mockExecute.mockResolvedValue([
+      { caso_id: 1, latitud: '2.4', longitud: '-76.6' },
+    ])
+
+    const first = await datosOsmGET(new Request(MARKERS_URL))
+    const etag = first.headers.get('etag')
+    expect(etag).toBeTruthy()
+
+    const second = await datosOsmGET(
+      new Request(MARKERS_URL, { headers: { 'if-none-match': etag as string } }),
+    )
+
+    expect(second.status).toBe(304)
+    expect(second.headers.get('etag')).toBe(etag)
+  })
+
+  it('rejects a malformed bbox or zoom', async () => {
+    const urls = [
+      'http://localhost/api/cases/datos-osm?bbox=1,2,3',
+      'http://localhost/api/cases/datos-osm?bbox=-70,2,-71,3',
+      'http://localhost/api/cases/datos-osm?bbox=-77,2,-76,3&zoom=99',
+      'http://localhost/api/cases/datos-osm?bbox=-77,2,-76,3&zoom=abc',
+    ]
+
+    for (const url of urls) {
+      const res = await datosOsmGET(new Request(url))
+      expect(res.status).toBe(400)
+    }
+    expect(apiDbMocks.mockExecute).not.toHaveBeenCalled()
+  })
+
+  it('answers 413 above the row cap', async () => {
+    apiDbMocks.mockExecute.mockResolvedValue(
+      Array.from({ length: 5001 }, (_, index) => ({
+        caso_id: index + 1,
+        latitud: '1',
+        longitud: '-1',
+      })),
+    )
+
+    const res = await datosOsmGET(new Request(MARKERS_URL))
+
+    expect(res.status).toBe(413)
+    const body = await res.json()
+    expect(body.cap).toBe(5000)
+  })
+
+  it('answers 429 after the per-IP limit', async () => {
+    apiDbMocks.mockExecute.mockResolvedValue([])
+
+    let last: Response | undefined
+    for (let index = 0; index < 61; index += 1) {
+      last = await datosOsmGET(new Request('http://localhost/api/cases/datos-osm'))
+    }
+
+    expect(last?.status).toBe(429)
+    expect(last?.headers.get('retry-after')).toBeTruthy()
   })
 
   it('returns 500 on DB error', async () => {
@@ -106,8 +169,7 @@ describe('GET /api/cases/datos-osm', () => {
       throw new Error('Connection refused')
     })
 
-    const req = new Request('http://localhost/api/cases/datos-osm')
-    const res = await datosOsmGET(req)
+    const res = await datosOsmGET(new Request('http://localhost/api/cases/datos-osm'))
 
     expect(res.status).toBe(500)
     const body = await res.json()
@@ -126,31 +188,29 @@ describe('GET /api/cases/[id]', () => {
 
   beforeEach(() => {
     apiDbMocks.resetMocks()
+    resetRateLimits()
   })
 
   function ctx(id: string) {
     return { params: Promise.resolve({ id }) }
   }
 
-  it('returns the { caso } envelope with victims and perpetrators', async () => {
-    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({
-      id: 42,
-      titulo: 'Masacre de X',
-      hechos: 'Descripción de los hechos',
-      fecha: new Date(2024, 0, 15),
-      hora: '14:30',
-      lugar: null,
-      tsitio_id: 1,
-      departamento: 'Cauca',
-      municipio: 'Popayán',
-      centro_poblado: 'El Tambo',
-    })
-    apiDbMocks.mockExecute
-      .mockResolvedValueOnce([
-        { nombres: 'Ana', apellidos: 'Pérez' },
-        { nombres: 'Luis', apellidos: 'Gómez' },
-      ])
-      .mockResolvedValueOnce([{ nombre: 'Ejército Nacional' }])
+  it('returns the { caso } envelope with the victims count, not their names', async () => {
+    apiDbMocks.mockExecuteTakeFirst
+      .mockResolvedValueOnce({
+        id: 42,
+        titulo: 'Masacre de X',
+        hechos: 'Descripción de los hechos',
+        fecha: new Date(2024, 0, 15),
+        hora: '14:30',
+        lugar: null,
+        tsitio_id: 1,
+        departamento: 'Cauca',
+        municipio: 'Popayán',
+        centro_poblado: 'El Tambo',
+      })
+      .mockResolvedValueOnce({ count: '2' })
+    apiDbMocks.mockExecute.mockResolvedValueOnce([{ nombre: 'Ejército Nacional' }])
 
     const req = new Request('http://localhost/api/cases/42')
     const res = await casoGET(req, ctx('42'))
@@ -166,25 +226,28 @@ describe('GET /api/cases/[id]', () => {
       departamento: 'Cauca',
       municipio: 'Popayán',
       centro_poblado: 'El Tambo',
-      victimas: ['Ana Pérez', 'Luis Gómez'],
+      victimas_count: 2,
       presponsables: ['Ejército Nacional'],
     })
+    expect(body.caso.victimas).toBeUndefined()
   })
 
   it('exposes lugar only for "otro sitio" (tsitio_id == 3)', async () => {
-    apiDbMocks.mockExecuteTakeFirst.mockResolvedValue({
-      id: 7,
-      titulo: 'Caso',
-      hechos: 'Hechos',
-      fecha: '2024-02-01',
-      hora: null,
-      lugar: 'Vereda La Esperanza',
-      tsitio_id: 3,
-      departamento: null,
-      municipio: null,
-      centro_poblado: null,
-    })
-    apiDbMocks.mockExecute.mockResolvedValueOnce([]).mockResolvedValueOnce([])
+    apiDbMocks.mockExecuteTakeFirst
+      .mockResolvedValueOnce({
+        id: 7,
+        titulo: 'Caso',
+        hechos: 'Hechos',
+        fecha: '2024-02-01',
+        hora: null,
+        lugar: 'Vereda La Esperanza',
+        tsitio_id: 3,
+        departamento: null,
+        municipio: null,
+        centro_poblado: null,
+      })
+      .mockResolvedValueOnce({ count: '0' })
+    apiDbMocks.mockExecute.mockResolvedValueOnce([])
 
     const req = new Request('http://localhost/api/cases/7')
     const res = await casoGET(req, ctx('7'))
@@ -192,7 +255,7 @@ describe('GET /api/cases/[id]', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.caso.lugar).toBe('Vereda La Esperanza')
-    expect(body.caso.victimas).toEqual([])
+    expect(body.caso.victimas_count).toBe(0)
     expect(body.caso.presponsables).toEqual([])
   })
 

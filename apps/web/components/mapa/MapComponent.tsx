@@ -61,7 +61,7 @@ interface CasoDetalle {
   municipio: string
   centro_poblado: string
   lugar: string
-  victimas: string[]
+  victimas_count?: number
   presponsables: string[]
 }
 
@@ -87,6 +87,8 @@ export default function MapComponent({
   const filtrosAnterioresRef = useRef<any>({})
   const preRef = useRef<L.LayerGroup | null>(null)
   const coordsCache = useRef<Map<number, [number, number]>>(new Map())
+  const recargaTimerRef = useRef<number | null>(null)
+  const ultimaCargaRef = useRef(0)
   const { toast } = useToast()
   const { t } = useTranslation(sbtToastT)
 
@@ -168,15 +170,27 @@ export default function MapComponent({
 
     setCargando(true)
     try {
-      let url = '/api/cases/datos-osm?'
+      // Only the viewport is requested: the server aggregates by zoom, so the
+      // payload stays proportional to what the screen can draw (issue 69).
+      const map = mapInstanceRef.current
+      const bounds = map.getBounds()
+      const bbox = [
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ]
+        .map((value) => value.toFixed(5))
+        .join(',')
+
+      const params = new URLSearchParams({ bbox, zoom: String(map.getZoom()) })
       Object.entries(filtros).forEach(([key, value]) => {
-        if (value) {
-          url += `${key}=${value}&`
-        }
+        if (value) params.set(key, String(value))
       })
 
-      const response = await fetch(url)
+      const response = await fetch(`/api/cases/datos-osm?${params.toString()}`)
       const datos = await response.json()
+      ultimaCargaRef.current = Date.now()
 
       if (onCargarConteos) {
         const conteosUrl = `/api/cases/counts?${new URLSearchParams(filtros).toString()}`
@@ -193,13 +207,35 @@ export default function MapComponent({
 
       markersRef.current?.clearLayers()
       const listaMarcadores: L.Marker[] = []
-      const respuesta = datos.respuesta
+      const respuesta = datos.respuesta || {}
+      const celdas = datos.celdas || []
+
+      for (const celda of celdas) {
+        const lat = Number(celda.latitud)
+        const lng = Number(celda.longitud)
+        const n = Number(celda.n)
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+
+        const icono = L.divIcon({
+          className: 'sivel3-celda',
+          html: `<div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9999px;background:rgba(185,28,28,0.88);color:#fff;font-size:12px;font-weight:600;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${n}</div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+        })
+        const marcador = L.marker([lat, lng], { icon: icono })
+        marcador.on('click', () => {
+          const currentMap = mapInstanceRef.current
+          if (!currentMap) return
+          currentMap.setView([lat, lng], Math.min(currentMap.getZoom() + 2, 12))
+        })
+        listaMarcadores.push(marcador)
+      }
 
       for (const codigo in respuesta) {
         if (respuesta.hasOwnProperty(codigo)) {
           const caso = respuesta[codigo]
-          const lat = parseFloat(caso.latitud)
-          const lng = parseFloat(caso.longitud)
+          const lat = Number(caso.latitud)
+          const lng = Number(caso.longitud)
 
           if (!isNaN(lat) && !isNaN(lng)) {
             const marcador = L.marker([lat, lng])
@@ -279,7 +315,18 @@ export default function MapComponent({
 
     map.on('baselayerchange', (e: any) => setCapasVisibles([e.name]))
 
+    // Reload on pan/zoom, debounced; the response is viewport-bounded (issue 69).
+    const programarRecarga = () => {
+      if (Date.now() - ultimaCargaRef.current < 800) return
+      if (recargaTimerRef.current) window.clearTimeout(recargaTimerRef.current)
+      recargaTimerRef.current = window.setTimeout(() => {
+        cargarCasosRef.current()
+      }, 400)
+    }
+    map.on('moveend', programarRecarga)
+
     return () => {
+      if (recargaTimerRef.current) window.clearTimeout(recargaTimerRef.current)
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
@@ -531,7 +578,7 @@ export default function MapComponent({
                     )}
                   </div>
 
-                  {casoSeleccionado.victimas && casoSeleccionado.victimas.length > 0 && (
+                  {typeof casoSeleccionado.victimas_count === 'number' && casoSeleccionado.victimas_count > 0 && (
                     <>
                       <Separator />
                       <div>
@@ -539,9 +586,7 @@ export default function MapComponent({
                           <Users className="h-4 w-4" />
                           Víctimas
                         </h4>
-                        <ul className="text-sm space-y-1 list-disc pl-5">
-                          {casoSeleccionado.victimas.map((v, i) => <li key={i}>{v}</li>)}
-                        </ul>
+                        <p className="text-sm text-gray-700">{casoSeleccionado.victimas_count}</p>
                       </div>
                     </>
                   )}

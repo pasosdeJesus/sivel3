@@ -35,11 +35,11 @@ Full flow documented in `doc/donation-flow.md`. Receives `{ regionId, donor, amo
 
 ### `GET /api/cases/datos-osm`
 
-Reads the markers directly from the shared database (`sivel2_gen_caso` JOIN `msip_ubicacion`, plus the geo names), replicating the `Sivel2Gen::Conscaso` filter scopes (`filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[presponsable_id]`, `filtro[categoria_id]`). No longer goes through Rails.
+Reads the map markers from the shared database (`sivel2_gen_caso` JOIN `msip_ubicacion`), replicating the `Sivel2Gen::Conscaso` filter scopes (`filtro[fechaini]`, `filtro[fechafin]`, `filtro[departamento_id]`, `filtro[presponsable_id]`, `filtro[categoria_id]`). It serves only the id and coordinates, requires `bbox`/`zoom`, aggregates into cells when zoomed out, caps the response at 5,000 rows and sets `Cache-Control`/`ETag` (https://gitlab.com/pasosdeJesus/sivel3/-/issues/69). No longer goes through Rails.
 
 ### `GET /api/cases/[id]`
 
-Reads a case, its victims and its alleged perpetrators from the shared database with Kysely. No longer goes through Rails.
+Reads a case and its alleged perpetrators from the shared database with Kysely. Victims are returned as a count (`victimas_count`), not by name: the public read is anonymous (https://gitlab.com/pasosdeJesus/sivel3/-/issues/69). No longer goes through Rails.
 
 ### `GET /api/regions/[id]/balance`
 

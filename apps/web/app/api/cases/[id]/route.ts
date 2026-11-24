@@ -1,9 +1,11 @@
 "use server"
 
 import { NextRequest, NextResponse } from 'next/server'
+import { sql } from 'kysely'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
 
 function formatDate(value: Date | string | null | undefined): string | undefined {
   if (!value) return undefined
@@ -18,6 +20,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const limited = checkRateLimit(request, { scope: 'case-detail', limit: 120, windowMs: 60_000 })
+  if (!limited.ok) return rateLimitResponse(limited.retryAfter)
+
   try {
     const { id } = await params
     const casoId = Number(id)
@@ -53,13 +58,14 @@ export async function GET(
       return NextResponse.json({ error: 'Caso no encontrado' }, { status: 404 })
     }
 
-    const victimasRows = await db
+    // Victim names are personal data (PRINCIPLES.md §2, confidentiality of the
+    // sources). The public read is anonymous, so it only gets the count; a
+    // role-gated endpoint for names is a separate requirement.
+    const victimasCountRow = await db
       .selectFrom('sivel2_gen_victima as v')
-      .innerJoin('msip_persona as p', 'p.id', 'v.persona_id')
-      .select('p.nombres as nombres')
-      .select('p.apellidos as apellidos')
+      .select(sql<string>`count(*)`.as('count'))
       .where('v.caso_id', '=', casoId)
-      .execute()
+      .executeTakeFirst()
 
     const presponsablesRows = await db
       .selectFrom('sivel2_gen_caso_presponsable as cp')
@@ -68,9 +74,7 @@ export async function GET(
       .where('cp.caso_id', '=', casoId)
       .execute()
 
-    const victimas = victimasRows
-      .map((v) => `${v.nombres ?? ''} ${v.apellidos ?? ''}`.trim())
-      .filter((nombre) => nombre.length > 0)
+    const victimas_count = Number(victimasCountRow?.count ?? 0)
 
     const presponsables = presponsablesRows
       .map((p) => p.nombre ?? '')
@@ -89,7 +93,7 @@ export async function GET(
           centro_poblado: caso.centro_poblado ?? undefined,
           // Rails only exposed "lugar" for "otro sitio" (tsitio_id == 3)
           lugar: caso.tsitio_id === 3 ? (caso.lugar ?? undefined) : undefined,
-          victimas,
+          victimas_count,
           presponsables,
         },
       },

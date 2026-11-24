@@ -34,8 +34,11 @@ async function main() {
   await expectJson('/api/departments', isArray)
   await expectJson('/api/regions', isArray)
   await expectJson('/api/alleged-perpetrators', isArray)
-  await expectJson('/api/cases/datos-osm', (j) =>
-    j.respuesta && typeof j.respuesta === 'object' ? null : 'missing "respuesta" object')
+  await expectJson('/api/cases/datos-osm', (j) => {
+    if (!j.respuesta || typeof j.respuesta !== 'object') return 'missing "respuesta" object'
+    if (j.modo && j.modo !== 'celdas' && j.modo !== 'marcadores') return `unknown "modo": ${j.modo}`
+    return null
+  })
 
   process.exit(summary(t0) > 0 ? 1 : 0)
 }
