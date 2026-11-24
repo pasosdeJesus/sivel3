@@ -77,6 +77,11 @@ const nextConfig: NextConfig = {
     },
   ],
   webpack: (config) => {
+    // The dev server has 16 GiB and also runs other apps: the default worker
+    // count (one per core) multiplies the heap and the build OOMs / dies with
+    // SIGSEGV. learn.tg caps it at 8 for the same box; sivel3 is smaller, so 4
+    // is enough and WEBPACK_PARALLELISM=1 builds sequentially.
+    config.parallelism = parseInt(process.env.WEBPACK_PARALLELISM || '4', 10)
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,

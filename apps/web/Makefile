@@ -20,8 +20,18 @@ test:
 dev:
 	./bin/dev
 
+# The WASM SWC build needs a large data segment on OpenBSD. Raise it to 12 GiB
+# (the dev server has 16 GiB and already allowed 12.5 GiB) and NEVER lower it: the
+# old fixed 7 GiB lowered the server's own limit and V8 died with SIGSEGV
+# (exit 139, 2026-11-24). Override with ULIMIT_D=<KB> if a box needs another value.
+ULIMIT_D ?= 12582912
+
 prod:
-	sh -c 'ulimit -d 7340032 && pnpm build'
+	sh -c 'cur=$$(ulimit -d 2>/dev/null || echo 0); \
+	  if [ "$$cur" != unlimited ] && [ "$$cur" -lt $(ULIMIT_D) ]; then \
+	    ulimit -d $(ULIMIT_D) 2>/dev/null || true; \
+	  fi; \
+	  pnpm build'
 	./bin/start > prod.log 2>&1 &
 
 # ── Engines (R-#68) ────────────────────────────────────────────────────

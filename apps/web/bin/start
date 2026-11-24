@@ -1,8 +1,14 @@
 #!/bin/sh
 
 # adJ/OpenBSD: the default data segment limit (~1.5 GB) crashes V8's GC.
-# Raise it (7 GB) before starting the server, as `make prod` does for the build.
-ulimit -d 7340032
+# Raise it to 12 GiB and never lower it (`make prod` does the same for the build):
+# the old fixed 7 GiB lowered the dev server's own 12.5 GiB and the process died
+# with SIGSEGV (exit 139, 2026-11-24). Override with ULIMIT_D=<KB>.
+ulimit_d="${ULIMIT_D:-12582912}"
+cur="$(ulimit -d 2>/dev/null || echo 0)"
+if [ "$cur" != unlimited ] && [ "$cur" -lt "$ulimit_d" ]; then
+  ulimit -d "$ulimit_d" 2>/dev/null || true
+fi
 
 . ../.env
 node_modules/next/dist/bin/next start -p${PORT}
