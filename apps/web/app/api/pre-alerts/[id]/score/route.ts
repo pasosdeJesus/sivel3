@@ -4,6 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { REGIONAL_DONATION_ADDRESS, REWARD_ESCROW_ADDRESS } from '@/lib/contractAddresses'
+import { isDocumenterWallet } from '@/lib/documenter'
 
 const SIGNATURE_WINDOW = 300 // 5 minutes anti-replay
 
@@ -51,15 +52,6 @@ function getRegionId(departamento: string | undefined): number {
 const chainEnv = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'celo' : 'celoSepolia'
 const viemChain = chainEnv === 'celo' ? celo : celoSepolia
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL!
-
-// TODO(#9): Replace with SBT-based DOCUMENTER_ROLE verification
-async function isDocumenter(wallet: string): Promise<boolean> {
-  const allowed = (process.env.DOCUMENTER_WALLETS || '')
-    .split(',')
-    .map((w) => w.trim().toLowerCase())
-    .filter(Boolean)
-  return allowed.includes(wallet.toLowerCase())
-}
 
 export async function POST(
   req: NextRequest,
@@ -140,7 +132,7 @@ export async function POST(
       )
     }
 
-    if (!(await isDocumenter(body.documenter_wallet))) {
+    if (!isDocumenterWallet(body.documenter_wallet)) {
       return NextResponse.json(
         { error: 'DOCUMENTER_ROLE required' },
         { status: 403 },
@@ -187,6 +179,39 @@ export async function POST(
         status: 'rejected',
         score: 0,
         citizen_reward: '0 USDT',
+      })
+    }
+
+    if (preAlert.publisher_wallet?.toLowerCase() === body.documenter_wallet.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'No puedes revisar tu propia prealerta', code: 'no_auto_revision' },
+        { status: 403 },
+      )
+    }
+
+    // Una alerta de documentador (R-#20) no tiene comprador: se revisa y se paga
+    // desde el fondo de documentadores, no con `RewardEscrow`.
+    if (preAlert.origin === 'documenter') {
+      await db
+        .updateTable('pre_alert')
+        .set({
+          status: 'paid',
+          score: body.score,
+          feedback: body.feedback,
+          scored_by: body.documenter_wallet.toLowerCase(),
+          scored_at: new Date() as unknown as string,
+          updated_at: new Date() as unknown as string,
+        })
+        .where('id', '=', preAlertId)
+        .execute()
+
+      return NextResponse.json({
+        success: true,
+        pre_alert_id: preAlertId,
+        status: 'paid',
+        score: body.score,
+        citizen_reward: '0 USDT',
+        note: 'Alerta de documentador: sin recompensa de ciudadano',
       })
     }
 

@@ -18,6 +18,7 @@ const tS = {
     noAccess: 'You do not have DOCUMENTER_ROLE.',
     noAlerts: 'No converted pre-alerts awaiting review.',
     citizenNotes: 'Citizen improvements',
+    assistant: 'Documentation assistant',
     score: 'Score',
     scorePrompt: 'Rate the quality (2-5) or reject (0):',
     feedback: 'Feedback',
@@ -34,6 +35,7 @@ const tS = {
     noAccess: 'No tienes DOCUMENTER_ROLE.',
     noAlerts: 'No hay pre-alertas convertidas esperando revisión.',
     citizenNotes: 'Mejoras del ciudadano',
+    assistant: 'Asistente de documentación',
     score: 'Puntuar',
     scorePrompt: 'Califica la calidad (2-5) o rechaza (0):',
     feedback: 'Retroalimentación',
@@ -139,7 +141,16 @@ export default function DocumenterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">{pt('title')}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold">{pt('title')}</h1>
+          <a
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            href={`/${locale}/documenter/asistente`}
+            data-testid="documenter-assistant-link"
+          >
+            {pt('assistant')} →
+          </a>
+        </div>
 
         {queue.length === 0 ? (
           <Card><CardContent className="pt-6 text-center text-gray-500">{pt('noAlerts')}</CardContent></Card>

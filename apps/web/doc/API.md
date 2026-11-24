@@ -209,3 +209,23 @@ These are called by the frontend/backend and are **not intended for direct publi
 | `/api/credential/mint-explorer` | POST | Mints Explorer SBT after 3+ case views |
 | `/api/donations/assign` | POST | Verifies on-chain donation, assigns to region, awards LP |
 | `/api/web-analytics/event` | POST | Records a client-side analytics event |
+| `/api/asistente/[...ruta]` | GET/POST | Signed proxy to the documentation assistant (`sivel3agent`): ingestion, status, extraction, XRLAT |
+| `/api/pre-alerts` | POST | Documenter's pre-alert draft from the assistant |
+
+### Assistant proxy (`/api/asistente/[...ruta]`)
+
+The browser signs `asistente:{METHOD}:{ruta}:{sha256(cuerpo)}:{timestamp}` with the
+documenter wallet (`personal_sign`); the proxy verifies the role (`DOCUMENTER_WALLETS`)
+and the signature (5-minute window) before signing the server-to-server request with
+`SIVEL3_MESSAGES_PRIVATE_KEY` (`sivel3agent:1` canonical message with the documenter's
+opaque user). Allowed routes: `ingesta` (POST), `ingesta/:id` (GET),
+`ingesta/:id/reintentar` (POST), `extraer` (POST), `xrlat` (POST), `health` (GET),
+`:id` (GET) and `:id/candidato` (POST). The agent responses pass through unchanged, with
+`Cache-Control: no-store`.
+
+`POST /api/pre-alerts` (documenter signed, `prealerta:{sha256(cuerpo)}:{timestamp}`)
+creates the pre-alert as a documenter **alert under review**: status `converted`,
+`origin = 'documenter'`, the documenter as publisher and deduplication by
+`event_hash` (the same case returns `409`). It never enters the market (buying
+requires `pending`), pays no citizen reward, and cannot be scored by its own
+author; the payment for the documented case comes from the documenters fund.

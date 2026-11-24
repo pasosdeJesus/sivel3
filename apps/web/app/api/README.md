@@ -18,6 +18,8 @@ These endpoints are consumed by the frontend and in turn query the shared Postgr
 | `/api/regions/[id]/balance` | GET | On-chain balance of a region | Viem → Celo blockchain |
 | `/api/alleged-perpetrators` | GET | Enabled alleged perpetrators | Kysely → PostgreSQL |
 | `/api/donations/assign` | POST | Assign donation: verifies tx on-chain, calls the V2 contract, mints donation SBTs, and increments Learning Points on learn.tg | Viem + Kysely + HTTP |
+| `/api/asistente/[...ruta]` | GET/POST | Documenter-only, EIP-191 signed proxy to `sivel3agent`: ingestion status, extraction, XRLAT. The browser never talks to the agent | HTTP (signed) |
+| `/api/pre-alerts` | POST | Documenter alert from the assistant (`converted`, `origin='documenter'`, dedup by `event_hash`; never in the market) | Kysely → PostgreSQL |
 || `/api/credential/breakdown` | GET | SBT counts by type (JOIN `credential_emission` + `credential_metadata`) | Kysely → PostgreSQL |
 || `/api/credential/leaderboard` | GET | Top donors with SBT counts (`?limit=10`) | Kysely → PostgreSQL |
 || `/api/credential/wallet/[wallet]` | GET | SBTs + donation summary for a specific wallet | Kysely → PostgreSQL |

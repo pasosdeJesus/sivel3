@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { sql } from 'kysely'
-
-// TODO(#9): Replace with SBT-based DOCUMENTER_ROLE verification
-// For MVP2, use hardcoded list from DOCUMENTER_WALLETS env variable
-async function isDocumenter(wallet: string): Promise<boolean> {
-  const allowed = (process.env.DOCUMENTER_WALLETS || '')
-    .split(',')
-    .map((w) => w.trim().toLowerCase())
-    .filter(Boolean)
-  return allowed.includes(wallet.toLowerCase())
-}
+import { isDocumenterWallet } from '@/lib/documenter'
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,7 +15,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    if (!(await isDocumenter(wallet))) {
+    if (!isDocumenterWallet(wallet)) {
       return NextResponse.json(
         { error: 'DOCUMENTER_ROLE required' },
         { status: 403 },
@@ -44,8 +35,12 @@ export async function GET(req: NextRequest) {
         'bought_at',
         'converted_at',
         'status',
+        'origin',
+        'publisher_wallet',
       ])
       .where('status', '=', 'converted')
+      // Nadie revisa su propia prealerta (R-#20, alertas de documentador).
+      .where(sql<boolean>`lower(publisher_wallet) <> ${wallet.toLowerCase()}`)
       .orderBy('converted_at', 'desc')
       .execute()
 
