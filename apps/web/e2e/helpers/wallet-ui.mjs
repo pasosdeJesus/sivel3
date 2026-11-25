@@ -31,39 +31,71 @@ export function loadPrivateKey() {
 }
 
 /**
- * Waits for the header connect button and clicks it to open the wallet dialog.
+ * Waits for the header wallet trigger and clicks it until a dialog shows.
+ *
+ * Since REQ/75 of `m` the engine has two dialogs: its own choice dialog
+ * (`use-in-app-wallet` / `use-external-wallet` / `disconnect-wallet`) when there
+ * is no in-app wallet or the visitor is connected, and `WalletDialog`
+ * (`wallet-dialog`: create, import, unlock…) when an in-app wallet already
+ * exists. The trigger is `connect-wallet`, or `connected-wallet` once connected.
+ *
  * Retries the click: on a remote (slow to hydrate) site the first click can land
  * before React attaches the handler, so a single click is not reliable.
  */
 export async function openWalletDialog(page, { timeout = 90000 } = {}) {
-  await page.waitForFunction(() => !!document.querySelector('[data-testid="connect-wallet"]'), {
-    timeout,
-  })
-  const dialogOpen = () =>
-    page.evaluate(
-      () =>
-        !!document.querySelector('[data-testid="use-in-app-wallet"]') ||
-        !!document.querySelector('[data-testid="in-app-wallet-unlock"]') ||
-        !!document.querySelector('[data-testid="disconnect-wallet"]'),
-    )
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  await page.waitForFunction(
+    () =>
+      !!document.querySelector('[data-testid="connect-wallet"]') ||
+      !!document.querySelector('[data-testid="connected-wallet"]'),
+    { timeout },
+  )
+
+  /**
+   * The engine shows the choice dialog while the in-app store is still loading
+   * (`Loading…` + the in-app button). Clicking the trigger in that window opens
+   * the choice dialog even when a wallet exists, so the helper waits for the
+   * store to settle and closes the transient dialog instead of mistaking it for
+   * the real menu.
+   */
+  const sigueCargando = () =>
+    page.evaluate(() => {
+      const btn = document.querySelector('[data-testid="use-in-app-wallet"]')
+      if (!btn) return false
+      const dialogo = btn.closest('[role="dialog"]')
+      return /loading|cargando/i.test(dialogo?.textContent ?? '')
+    })
+
   const deadline = Date.now() + timeout
   while (Date.now() < deadline) {
-    if (await dialogOpen()) return
-    const btn = await page.$('[data-testid="connect-wallet"]')
+    if (await page.$('[data-testid="wallet-dialog"]')) return
+
+    if (await sigueCargando()) {
+      await page.keyboard.press('Escape').catch(() => {})
+      await sleep(600)
+      continue
+    }
+
+    if (await page.$('[data-testid="use-in-app-wallet"], [data-testid="disconnect-wallet"]')) return
+
+    const btn = await page.$('[data-testid="connected-wallet"], [data-testid="connect-wallet"]')
     if (btn) await btn.click().catch(() => {})
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    await sleep(800)
   }
-  throw new Error('wallet dialog did not open (connect button not interactive?)')
+  throw new Error('wallet dialog did not open (wallet trigger not interactive?)')
 }
 
-/** In the dialog menu (no in-app wallet yet) picks the in-app path. */
+/**
+ * In the choice dialog (no in-app wallet yet) picks the in-app path, which now
+ * opens `WalletDialog` directly (the choice dialog closes first).
+ */
 export async function chooseInAppWallet(page, { timeout = 60000 } = {}) {
   await page.waitForFunction(() => !!document.querySelector('[data-testid="use-in-app-wallet"]'), {
     timeout,
   })
   const btn = await page.$('[data-testid="use-in-app-wallet"]')
   await btn.click()
-  await page.waitForFunction(() => !!document.querySelector('[data-testid="in-app-wallet-setup"]'), {
+  await page.waitForFunction(() => !!document.querySelector('[data-testid="wallet-dialog"]'), {
     timeout,
   })
 }
@@ -99,11 +131,24 @@ export function connectedChipText(page) {
   })
 }
 
-/** True once the in-app setup form shows the recovery phrase (create finished). */
+/** True once `WalletDialog` shows the recovery phrase (create finished, backup pending). */
 export async function waitForRecoveryPhrase(page, { timeout = 60000 } = {}) {
   try {
     await page.waitForFunction(
-      () => !!document.querySelector('[data-testid="recovery-phrase"]'),
+      () => !!document.querySelector('[data-testid="wallet-recovery-words"]'),
+      { timeout },
+    )
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** True once `WalletDialog` shows the created/unlocked wallet address. */
+export async function waitForWalletAddress(page, { timeout = 60000 } = {}) {
+  try {
+    await page.waitForFunction(
+      () => !!document.querySelector('[data-testid="wallet-address"]'),
       { timeout },
     )
     return true

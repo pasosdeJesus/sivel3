@@ -7,6 +7,7 @@
 | `CREDENTIALS_PRIVATE_KEY` | Deployer + `DEFAULT_ADMIN_ROLE`. Register types, set supply, update URIs, grant/revoke roles |
 | `PRIVATE_KEY` | sivel.xyz backend (`MINTER_ROLE`). Mints NFTs on Base and role SBTs on Celo |
 | `LEARNTG_ADDRESS` | learn.tg backend (public address). Receives `MINTER_ROLE` for minting course SBTs on Celo |
+| `LEARNTG_AUTHPARTNER_PRIVATE_KEY` | Dedicated key that signs the partner query to learn.tg (`GET /api/verify`). `LEARNTG_ADDRESS` decides the signer: whichever variable produces that address signs, so an existing deployment keeps its key until both are switched together (fallback order: this key, `PRIVATE_KEY`, `SIVEL3_MESSAGES_PRIVATE_KEY`). Its address must be in learn.tg's `AUTHORIZED_VERIFIERS` (`SIVEL_ADDRESS`) |
 | `NEXT_PUBLIC_BASE_NETWORK` | Base network: `base` (mainnet) or `baseSepolia` (testnet) |
 | `NEXT_PUBLIC_BASE_RPC_URL` | Base RPC endpoint |
 | `BLOCKSCOUT_API_KEY` | Celo contract verification |
@@ -20,6 +21,19 @@
 | Base Mainnet | _pending_ | [Basescan](https://basescan.org) |
 | Celo Sepolia | _pending_ | [Blockscout](https://celo-sepolia.blockscout.com) |
 | Base Sepolia | _pending_ | [Basescan](https://sepolia.basescan.org) |
+
+## 2b. learn.tg partner channel
+
+sivel3 asks learn.tg whether a wallet is KYC-verified (pre-alert purchases and the
+Connector/Explorer SBTs). The query is signed by `lib/learnTgPartner.ts`, cached 5
+minutes and fails closed. **`LEARNTG_ADDRESS` is the switch**: the key whose address
+equals it signs; if none matches, the first available one signs and an error names both
+addresses. Rotating the partner key is therefore "set the new key and the new
+`LEARNTG_ADDRESS`, then update `AUTHORIZED_VERIFIERS` (`SIVEL_ADDRESS`) in learn.tg" — no
+code change — and an existing deployment keeps signing with its current key until both
+values are switched together (`LEARNTG_AUTHPARTNER_PRIVATE_KEY`, then `PRIVATE_KEY`, then
+`SIVEL3_MESSAGES_PRIVATE_KEY`). Do **not** use the on-chain `PRIVATE_KEY` for this channel
+in production: it holds `MINTER_ROLE` and pays gas.
 
 ## 3. Assigned Roles
 

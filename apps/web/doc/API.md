@@ -211,6 +211,7 @@ These are called by the frontend/backend and are **not intended for direct publi
 | `/api/web-analytics/event` | POST | Records a client-side analytics event |
 | `/api/asistente/[...ruta]` | GET/POST/DELETE | Signed proxy to the documentation assistant (`sivel3agent`): ingestion, status, extraction, XRLAT, candidates, deletion |
 | `/api/pre-alerts` | POST | Documenter's pre-alert draft from the assistant |
+| `/api/verify` | GET | Is this wallet verified on learn.tg? Signs with the partner key (`lib/learnTgPartner.ts`), caches 5 min, fails closed, returns only `verified` |
 
 ### Assistant proxy (`/api/asistente/[...ruta]`)
 
@@ -238,3 +239,16 @@ creates the pre-alert as a documenter **alert under review**: status `converted`
 `event_hash` (the same case returns `409`). It never enters the market (buying
 requires `pending`), pays no citizen reward, and cannot be scored by its own
 author; the payment for the documented case comes from the documenters fund.
+
+### Partner verification (`/api/verify`)
+
+`GET /api/verify?wallet=0x…` answers whether the wallet is verified on learn.tg (the map
+uses it to invite visitors to verify). The signing happens server-side
+(`lib/learnTgPartner.ts`) with the **dedicated partner key**
+(`LEARNTG_AUTHPARTNER_PRIVATE_KEY`; `LEARNTG_ADDRESS` decides which key signs, with
+fallback `PRIVATE_KEY` then `SIVEL3_MESSAGES_PRIVATE_KEY`), the boolean is cached for five
+minutes and **every failure is a `false`** (no key, timeout, `403`, invalid body), so no
+SBT is minted on an outage. learn.tg also returns the person's name and country; sivel3
+discards them. The endpoint is rate limited (60/min per IP) and rejects calls declared as
+cross-site (`Sec-Fetch-Site`), but a header-less client cannot be told apart: the real
+contract is the signed claims token planned in `m`'s REQ/78 (work item pending).

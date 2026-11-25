@@ -1,43 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { privateKeyToAccount } from 'viem/accounts'
-import { keccak256, encodePacked } from 'viem'
 
-function getVerifyUrl(): string {
-  return process.env.NEXT_PUBLIC_NETWORK === 'celo'
-    ? 'https://learn.tg'
-    : 'https://learn.tg:9001'
+import { verificarEnLearnTg } from '@/lib/learnTgPartner'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
+
+/**
+ * `GET /api/verify?wallet=0x…` — ¿la billetera está verificada en learn.tg?
+ *
+ * Lo usa el mapa (`/[locale]/cases/osmmap`) para invitar a verificarse. La firma con
+ * la llave de socio ocurre en el servidor (`lib/learnTgPartner.ts`), que cachea el
+ * booleano 5 min y **falla cerrado**. Se devuelve sólo `verified`: learn.tg responde
+ * también nombre y país y aquí se descartan (minimización).
+ *
+ * Mitigaciones mientras llega el token de reclamos (REQ/78): límite de tasa y rechazo
+ * de llamadas declaradas como de otro sitio. A un cliente sin cabeceras (`curl`) no se
+ * le puede distinguir; por eso el contrato real es el token, no este endpoint.
+ */
+function mismoSitio(req: NextRequest): boolean {
+  const sitio = req.headers.get('sec-fetch-site')
+  if (sitio) return sitio === 'same-origin' || sitio === 'same-site' || sitio === 'none'
+  const origen = req.headers.get('origin')
+  if (!origen) return true
+  try {
+    return new URL(origen).host === new URL(req.url).host
+  } catch {
+    return false
+  }
 }
 
 export async function GET(req: NextRequest) {
-  try {
-    const url = new URL(req.url)
-    const wallet = url.searchParams.get('wallet')
-    if (!wallet) {
-      return NextResponse.json({ error: 'wallet required' }, { status: 400 })
-    }
+  const limitado = checkRateLimit(req, { scope: 'verify', limit: 60, windowMs: 60_000 })
+  if (!limitado.ok) return rateLimitResponse(limitado.retryAfter)
 
-    const pk = process.env.PRIVATE_KEY
-    if (!pk) {
-      return NextResponse.json({ verified: false })
-    }
-
-    const account = privateKeyToAccount(pk as `0x${string}`)
-    const timestamp = Math.floor(Date.now() / 1000)
-
-    // learn.tg uses hashMessage(keccak256(encodePacked(...))) → EIP-191
-    // signMessage applies the same EIP-191 wrapping internally
-    const message = keccak256(
-      encodePacked(['address', 'uint256'], [wallet as `0x${string}`, BigInt(timestamp)]),
-    )
-    const signature = await account.signMessage({ message })
-
-    const verifyUrl = `${getVerifyUrl()}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`
-    const res = await fetch(verifyUrl)
-    if (!res.ok) return NextResponse.json({ verified: false })
-
-    const data = await res.json()
-    return NextResponse.json({ verified: !!data.verified })
-  } catch {
-    return NextResponse.json({ verified: false })
+  const wallet = new URL(req.url).searchParams.get('wallet')
+  if (!wallet) {
+    return NextResponse.json({ error: 'wallet required' }, { status: 400 })
   }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) {
+    return NextResponse.json({ error: 'invalid wallet' }, { status: 400 })
+  }
+  if (!mismoSitio(req)) {
+    return NextResponse.json({ error: 'origen no permitido' }, { status: 403 })
+  }
+
+  const verificado = await verificarEnLearnTg(wallet)
+  return NextResponse.json({ verified: verificado }, { headers: { 'Cache-Control': 'no-store' } })
 }

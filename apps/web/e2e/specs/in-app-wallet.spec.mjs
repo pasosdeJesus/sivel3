@@ -21,7 +21,7 @@ import {
   connectedChipText,
   openWalletDialog,
   waitForConnected,
-  waitForRecoveryPhrase,
+  waitForWalletAddress,
 } from '../helpers/wallet-ui.mjs'
 import { captureDiagnostics } from '../helpers/diag.mjs'
 
@@ -49,8 +49,10 @@ async function main() {
     await chooseInAppWallet(page)
     await setupInAppWallet(page, { password: PASSWORD })
 
-    if (await waitForRecoveryPhrase(page)) ok('in-app wallet created — recovery phrase shown')
-    else fail('recovery phrase not shown after create')
+    // The backup phrase and its 3-word quiz are driven by `setupInAppWallet`; what
+    // this spec checks is that the dialog ends on the new address.
+    if (await waitForWalletAddress(page)) ok('in-app wallet created — address shown in the dialog')
+    else fail('the dialog did not show the new address after create')
 
     if (await waitForConnected(page)) ok(`in-app wallet connected: ${await connectedChipText(page)}`)
     else fail('in-app wallet not connected after create')

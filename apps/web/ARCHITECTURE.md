@@ -34,7 +34,7 @@ The in-app storage namespaces are fixed in `configureInAppWallet({ dbName, desti
 
 *   **Signing:** EIP-191 (`personal_sign`) through the effective EIP-1193 provider (in-app or external). SIVeL 3 does **not** use SIWE.
 *   **Sends:** `lib/donate.ts` and `lib/buyPreAlert.ts` receive the effective provider and call `provider.request({ method: 'eth_sendTransaction', params })`.
-*   **UI:** `components/ConnectWalletButton.tsx` renders its own dialog with `InAppWalletSetup`/`InAppWalletUnlock` (from `@pasosdejesus/m/wallet/next`) plus an optional external-wallet path.
+*   **UI:** `components/ConnectWalletButton.tsx` delegates the whole flow to the wallet engine's `WalletConnect` (from `generated-wallet/next`), which since `m@0.41.0` composes `WalletDialog` (from `@pasosdejesus/m/wallet/next`: create, import, protect, recovery + 3-word quiz, unlock, biometrics and delete) and keeps its own choice dialog (in-app or external). sivel3 only injects the connection state of `WalletContext`, the language and the backup `storageKey`; the dialog is themed with the app's semantic tokens, so it has no CSS of its own.
 
 ---
 ## 3b. Rewards (learn.tg)

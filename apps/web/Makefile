@@ -42,7 +42,10 @@ prod:
 # packages (pnpm-workspace.yaml) so `generated-<motor>` imports resolve.
 M_GIT ?= https://gitlab.com/pasosdeJesus/m.git
 MSIP_TAG ?= v0.37.2
-WALLET_TAG ?= wallet-v0.1.1
+WALLET_TAG ?= wallet-v0.1.3
+# Requiere `bin/m` >= 0.41.1: versiones anteriores inyectan `@types/node` en la
+# copia y pnpm crea una segunda instancia de `@pasosdejesus/m` (dos stores de la
+# billetera in-app; REQ/75 H4a). Re-ejecutar `eng-sync` tras subir `m`.
 ENGINES = msip wallet
 # Opcional: checkout local de `m` para medir drift contra las fuentes.
 M_FROM ?=

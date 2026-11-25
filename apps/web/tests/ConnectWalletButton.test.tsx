@@ -1,95 +1,84 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-// The wallet engine and the app context are injected as plain stubs: these tests
-// cover sivel3's composition (the "saved" confirmation and the lock action), not
-// the engine or the store.
+// Since REQ/75 of `m` the whole dialog lives in the engine's `WalletConnect`, so
+// this test covers only sivel3's composition: the language it takes from the
+// route, the connection state it injects, the storage namespace of its backup
+// and the absence of `onSignIn` (sivel3 has no SIWE/session).
 vi.mock('generated-wallet/next', async () => {
   const React = await import('react')
   const element = React.createElement
-  const shared = () => (globalThis as unknown as Record<string, any>).__walletShared
-
   return {
-    WalletConnect: (props: any) =>
-      element(
-        'div',
-        { 'data-testid': 'wallet-connect' },
-        props.renderBody
-          ? props.renderBody({
-              close: () => shared().close(),
-              connectExternal: async () => {},
-            })
-          : null,
-      ),
-    InAppWalletSetup: (props: any) =>
-      element(
-        'button',
-        { 'data-testid': 'mock-setup', onClick: () => props.onDone('0xabc') },
-        'setup',
-      ),
-    InAppWalletUnlock: () => element('div', { 'data-testid': 'mock-unlock' }),
-    useInAppWallet: () => shared().inApp,
+    WalletConnect: (props: Record<string, unknown>) => {
+      ;(globalThis as unknown as Record<string, unknown>).__walletConnectProps = props
+      return element('div', {
+        'data-testid': 'wallet-connect',
+        'data-lang': props.lang,
+        'data-connected': String(props.isConnected),
+        'data-address': String(props.effectiveAddress ?? ''),
+        'data-in-app': String(props.isInApp),
+        'data-external': String(props.externalAvailable),
+        'data-app-name': String(props.appName ?? ''),
+        'data-backup-key': String((props.backup as { storageKey?: string } | undefined)?.storageKey ?? ''),
+        'data-sign-in': String(Boolean(props.onSignIn)),
+        'data-has-render-body': String(Boolean(props.renderBody)),
+      })
+    },
   }
 })
 
 vi.mock('@/contexts/WalletContext', () => ({
-  useWallet: () => (globalThis as unknown as Record<string, any>).__walletShared.wallet,
+  useWallet: () => (globalThis as unknown as Record<string, any>).__walletState,
 }))
 
-vi.mock('@/hooks/useTranslation', () => ({
-  useTranslation: () => ({ t: (key: string) => key, locale: 'en' }),
+vi.mock('next/navigation', () => ({
+  useParams: () => ({ locale: (globalThis as unknown as Record<string, any>).__locale }),
 }))
 
-let close: ReturnType<typeof vi.fn>
-let lock: ReturnType<typeof vi.fn>
+const estado = () => (globalThis as unknown as Record<string, any>).__walletState
 
-beforeEach(() => {
-  close = vi.fn()
-  lock = vi.fn()
-  ;(globalThis as unknown as Record<string, any>).__walletShared = {
-    close,
-    inApp: { status: 'no-wallet', lock },
-    wallet: {
+describe('ConnectWalletButton', () => {
+  beforeEach(() => {
+    ;(globalThis as unknown as Record<string, any>).__locale = 'es'
+    ;(globalThis as unknown as Record<string, any>).__walletState = {
       isConnected: false,
       effectiveAddress: null,
       isInApp: false,
       externalAvailable: false,
       disconnect: vi.fn(),
-    },
-  }
-})
-
-describe('ConnectWalletButton', () => {
-  it('keeps the recovery phrase visible and closes only after the saved confirmation', async () => {
-    const { default: ConnectWalletButton } = await import('@/components/ConnectWalletButton')
-    render(<ConnectWalletButton />)
-
-    fireEvent.click(screen.getByTestId('use-in-app-wallet'))
-    fireEvent.click(screen.getByTestId('mock-setup'))
-
-    const finish = screen.getByTestId('finish-in-app-wallet')
-    expect(close).not.toHaveBeenCalled()
-    fireEvent.click(finish)
-    expect(close).toHaveBeenCalledTimes(1)
+    }
   })
 
-  it('offers locking an unlocked in-app wallet', async () => {
-    const shared = (globalThis as unknown as Record<string, any>).__walletShared
-    shared.inApp.status = 'unlocked'
-    shared.wallet = {
-      isConnected: true,
-      effectiveAddress: '0x84272a6dd0D5fE9ea2Ab28Cf96e72f4F7da00C5C',
-      isInApp: true,
-      externalAvailable: false,
-      disconnect: vi.fn(),
-    }
+  it('delega el diálogo al motor con el idioma de la ruta y sin sesión', async () => {
+    const { default: ConnectWalletButton } = await import('@/components/ConnectWalletButton')
+    render(<ConnectWalletButton />)
+
+    const host = screen.getByTestId('wallet-connect')
+    expect(host).toHaveAttribute('data-lang', 'es')
+    expect(host).toHaveAttribute('data-app-name', 'sivel.xyz')
+    expect(host).toHaveAttribute('data-backup-key', 'sivel3-wallet-backup')
+    expect(host).toHaveAttribute('data-sign-in', 'false')
+    expect(host).toHaveAttribute('data-has-render-body', 'false')
+  })
+
+  it('traduce el locale desconocido a inglés y pasa el estado de conexión', async () => {
+    ;(globalThis as unknown as Record<string, any>).__locale = 'fr'
+    estado().isConnected = true
+    estado().effectiveAddress = '0x84272a6dd0D5fE9ea2Ab28Cf96e72f4F7da00C5C'
+    estado().isInApp = true
 
     const { default: ConnectWalletButton } = await import('@/components/ConnectWalletButton')
     render(<ConnectWalletButton />)
 
-    fireEvent.click(screen.getByTestId('lock-wallet'))
-    expect(lock).toHaveBeenCalledTimes(1)
+    const host = screen.getByTestId('wallet-connect')
+    expect(host).toHaveAttribute('data-lang', 'en')
+    expect(host).toHaveAttribute('data-connected', 'true')
+    expect(host).toHaveAttribute('data-address', '0x84272a6dd0D5fE9ea2Ab28Cf96e72f4F7da00C5C')
+    expect(host).toHaveAttribute('data-in-app', 'true')
+    expect(host).toHaveAttribute('data-external', 'false')
+    const props = (globalThis as unknown as Record<string, any>).__walletConnectProps
+    expect(props.onDisconnect).toBe(estado().disconnect)
   })
 })

@@ -1,205 +1,37 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+
 import { useWallet } from '@/contexts/WalletContext'
-import { useTranslation } from '@/hooks/useTranslation'
-import {
-  WalletConnect,
-  useInAppWallet,
-  InAppWalletSetup,
-  InAppWalletUnlock,
-} from 'generated-wallet/next'
-import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
-import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
-import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
-
-const localT = {
-  en: {
-    connect: 'Connect Wallet',
-    title: 'Wallet',
-    inAppBtn: 'Use in-app wallet',
-    inAppHint: 'Create a wallet inside the app — no installation needed.',
-    external: 'Connect external wallet',
-    externalHint: 'Or connect a wallet you already have (Rabby, MetaMask…).',
-    disconnect: 'Disconnect',
-    connected: 'Connected wallet',
-    inAppBadge: 'In-app',
-    noExternal: 'No external wallet detected.',
-    externalFailed: 'Could not connect the external wallet.',
-    loading: 'Loading…',
-    signIn: 'Sign in with in-app wallet',
-    signInHint: 'The wallet is unlocked: sign in to use your account.',
-    done: 'I saved the recovery phrase',
-    lock: 'Lock the in-app wallet',
-  },
-  es: {
-    connect: 'Conectar Billetera',
-    title: 'Billetera',
-    inAppBtn: 'Usar billetera de la aplicación',
-    inAppHint: 'Crea una billetera dentro de la aplicación, sin instalar nada.',
-    external: 'Conectar billetera externa',
-    externalHint: 'O conecta una billetera que ya tengas (Rabby, MetaMask…).',
-    disconnect: 'Desconectar',
-    connected: 'Billetera conectada',
-    inAppBadge: 'En la app',
-    noExternal: 'No se detectó billetera externa.',
-    externalFailed: 'No se pudo conectar la billetera externa.',
-    loading: 'Cargando…',
-    signIn: 'Ingresar con la billetera de la aplicación',
-    signInHint: 'La billetera está desbloqueada: ingresa para usar tu cuenta.',
-    done: 'Ya guardé la frase de recuperación',
-    lock: 'Bloquear la billetera de la aplicación',
-  },
-}
-
-/** Clears sivel3's local UI state when the wallet dialog unmounts (closes). */
-function ResetOnClose({ onClose }: { onClose: () => void }) {
-  useEffect(() => onClose, [onClose])
-  return null
-}
+import { WalletConnect } from 'generated-wallet/next'
 
 /**
- * Header wallet entry point. Delegates the dialog, the trigger and the
- * external-wallet detection to the `wallet` engine's generic `WalletConnect`
- * view (issue 68, phase 4), injecting sivel3's `WalletContext` state and
- * Spanish/English texts.
+ * Header wallet entry point.
  *
- * `renderBody` is used (the granular override issue 68 allows) because the engine
- * default closes the dialog on setup completion, hiding the recovery phrase;
- * sivel3 must keep it visible so the user can back up the new wallet. When the
- * setup finishes, the dialog stays open with the phrase and a "saved" button
- * closes it. `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.
+ * Since REQ/75 of `m`, the engine's `WalletConnect` already composes the whole
+ * `WalletDialog` (create, import, protect, recovery + 3-word quiz, unlock with
+ * gesture or password, biometrics and delete) and keeps its own choice dialog
+ * (`connect-wallet` → in-app or external), so sivel3 only injects the connection
+ * state of its `WalletContext`, its i18n language and the storage namespace it
+ * configured in `AppProvider`.
+ *
+ * `onSignIn` is intentionally omitted: sivel3 has no SIWE/session.
  */
 export default function ConnectWalletButton() {
+  const params = useParams()
+  const lang = params?.locale === 'es' ? 'es' : 'en'
   const { isConnected, effectiveAddress, isInApp, externalAvailable, disconnect } = useWallet()
-  const inApp = useInAppWallet()
-  const { t, locale } = useTranslation(localT)
-  const [showSetup, setShowSetup] = useState(false)
-  const [setupDone, setSetupDone] = useState<string | null>(null)
-  const lang = locale === 'es' ? 'es' : 'en'
-  const resetSetup = useCallback(() => {
-    setShowSetup(false)
-    setSetupDone(null)
-  }, [])
-
-  const renderContent = (close: () => void, connectExternal: () => Promise<void>) => {
-    if (showSetup) {
-      return (
-        <div className="space-y-3">
-          <InAppWalletSetup lang={lang} onDone={(address) => setSetupDone(address)} />
-          {setupDone && (
-            <Button
-              className="w-full"
-              data-testid="finish-in-app-wallet"
-              onClick={close}
-            >
-              {t('done')}
-            </Button>
-          )}
-        </div>
-      )
-    }
-    if (isConnected && effectiveAddress) {
-      return (
-        <div className="space-y-3">
-          <div>
-            <p className="text-xs text-muted-foreground">{t('connected')}</p>
-            <p className="text-sm font-mono break-all mt-1">{effectiveAddress}</p>
-            {isInApp && (
-              <Badge variant="secondary" className="mt-2 text-[10px]">
-                {t('inAppBadge')}
-              </Badge>
-            )}
-          </div>
-          <Separator />
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            data-testid="disconnect-wallet"
-            onClick={() => disconnect()}
-          >
-            {t('disconnect')}
-          </Button>
-          {isInApp && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full"
-              data-testid="lock-wallet"
-              onClick={() => void inApp.lock()}
-            >
-              {t('lock')}
-            </Button>
-          )}
-        </div>
-      )
-    }
-    if (inApp.status === 'locked') {
-      return <InAppWalletUnlock lang={lang} onUnlocked={close} />
-    }
-    if (inApp.status === 'no-wallet') {
-      return (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">{t('inAppHint')}</p>
-          <Button
-            className="w-full"
-            data-testid="use-in-app-wallet"
-            onClick={() => setShowSetup(true)}
-          >
-            {t('inAppBtn')}
-          </Button>
-          {externalAvailable && (
-            <>
-              <Separator />
-              <p className="text-xs text-muted-foreground">{t('externalHint')}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                data-testid="use-external-wallet"
-                onClick={connectExternal}
-              >
-                {t('external')}
-              </Button>
-            </>
-          )}
-        </div>
-      )
-    }
-    return <p className="text-sm text-muted-foreground">{t('loading')}</p>
-  }
 
   return (
     <WalletConnect
       lang={lang}
-      messages={{
-        connect: t('connect'),
-        title: t('title'),
-        inAppBtn: t('inAppBtn'),
-        inAppHint: t('inAppHint'),
-        external: t('external'),
-        externalHint: t('externalHint'),
-        disconnect: t('disconnect'),
-        connected: t('connected'),
-        inAppBadge: t('inAppBadge'),
-        noExternal: t('noExternal'),
-        externalFailed: t('externalFailed'),
-        loading: t('loading'),
-        signIn: t('signIn'),
-        signInHint: t('signInHint'),
-      }}
       isConnected={isConnected}
       effectiveAddress={effectiveAddress}
       isInApp={isInApp}
       externalAvailable={externalAvailable}
       onDisconnect={disconnect}
-      renderBody={({ close, connectExternal }) => (
-        <>
-          <ResetOnClose onClose={resetSetup} />
-          {renderContent(close, connectExternal)}
-        </>
-      )}
+      appName="sivel.xyz"
+      backup={{ storageKey: 'sivel3-wallet-backup' }}
     />
   )
 }

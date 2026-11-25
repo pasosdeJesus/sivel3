@@ -1,9 +1,12 @@
-// Browser spec: the in-app wallet dialog is actually styled (not bare HTML).
+// Browser spec: the in-app wallet dialog is actually styled (not bare HTML) and
+// it lands inside the viewport.
 //
-// The primitives of `@pasosdejesus/m/wallet/next` ship semantic HTML without
-// classes, so sivel3 styles them by `data-testid`. A missing `@source`, a lost
-// CSS layer or a Tailwind change leaves the dialog usable but ugly, and no other
-// spec notices. This one asserts the computed styles, not the pixels.
+// Since REQ/75 of `m` the dialog is `WalletDialog` (`wallet-dialog`), which has
+// no app CSS: it relies on Tailwind scanning `@pasosdejesus/m/dist/wallet`. A
+// missing `@source` does not just look plain, it removes `fixed`/`translate-*`
+// and the dialog renders below the fold (measured 2026-11-24: `rect.top = 800`
+// on an 800px viewport), so this spec asserts the computed styles and the box,
+// not the pixels.
 //
 //   make test-e2e-spec SPEC=wallet-styling
 
@@ -34,63 +37,98 @@ async function main() {
     await page.goto(`${base}/en`, { waitUntil: 'domcontentloaded', timeout: 120000 })
     await openWalletDialog(page)
     await chooseInAppWallet(page)
-    await page.waitForSelector('[data-testid="in-app-wallet-setup"]', { timeout: 60000 })
+    await page.waitForSelector('[data-testid="wallet-dialog"]', { timeout: 60000 })
 
     const styles = await page.evaluate(() => {
-      const setup = document.querySelector('[data-testid="in-app-wallet-setup"]')
-      const input = setup?.querySelector('input')
-      const submit = setup?.querySelector('button[type="submit"]')
-      const group = setup?.querySelector('[role="group"]')
-      const heading = setup?.querySelector('h2')
-      const dialog = document.querySelector('[role="dialog"]')
+      const dialog = document.querySelector('[data-testid="wallet-dialog"]')
+      const input = document.querySelector('[data-testid="wallet-password"]')
+      const confirm = document.querySelector('[data-testid="wallet-password-confirm"]')
+      const create = document.querySelector('[data-testid="wallet-create"]')
+      const modeCreate = document.querySelector('[data-testid="wallet-mode-create"]')
+      const modeImport = document.querySelector('[data-testid="wallet-mode-import"]')
+      const trigger = document.querySelector('[data-testid="connect-wallet"]')
+      const heading = dialog?.querySelector('h2')
       const read = (el) => (el ? getComputedStyle(el) : null)
+      const box = dialog?.getBoundingClientRect()
+
       const inputStyle = read(input)
-      const submitStyle = read(submit)
-      const groupStyle = read(group)
-      const headingStyle = read(heading)
-      const dialogBox = dialog?.getBoundingClientRect()
+      const createStyle = read(create)
+      const triggerStyle = read(trigger)
+      const modeStyle = read(modeCreate)
 
       return {
-        dialogWidth: dialogBox ? Math.round(dialogBox.width) : 0,
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        box: box ? { top: Math.round(box.top), bottom: Math.round(box.bottom), width: Math.round(box.width) } : null,
+        position: read(dialog)?.position ?? null,
+        radius: read(dialog)?.borderRadius ?? null,
         input: inputStyle
-          ? { radius: inputStyle.borderRadius, border: inputStyle.borderWidth, padding: inputStyle.paddingTop }
+          ? {
+              radius: inputStyle.borderRadius,
+              border: inputStyle.borderWidth,
+              padding: inputStyle.paddingTop,
+              background: inputStyle.backgroundColor,
+            }
           : null,
-        submit: submitStyle
-          ? { radius: submitStyle.borderRadius, background: submitStyle.backgroundColor, padding: submitStyle.paddingTop }
+        hasConfirm: Boolean(confirm),
+        create: createStyle
+          ? {
+              radius: createStyle.borderRadius,
+              padding: createStyle.paddingTop,
+              background: createStyle.backgroundColor,
+              color: createStyle.color,
+            }
           : null,
-        groupDisplay: groupStyle?.display ?? null,
-        headingWeight: headingStyle?.fontWeight ?? null,
+        triggerBackground: triggerStyle?.backgroundColor ?? null,
+        mode: modeStyle ? { display: modeStyle.display, radius: modeStyle.borderRadius } : null,
+        modes: {
+          create: read(modeCreate)?.backgroundColor ?? null,
+          import: read(modeImport)?.backgroundColor ?? null,
+        },
+        headingWeight: read(heading)?.fontWeight ?? null,
       }
     })
 
-    console.log(`  dialog: ${styles.dialogWidth}px`)
+    console.log(`  viewport: ${styles.viewport.width}x${styles.viewport.height}`)
+    console.log(`  dialog: ${JSON.stringify(styles.box)} position=${styles.position}`)
     console.log(`  input: ${JSON.stringify(styles.input)}`)
-    console.log(`  submit: ${JSON.stringify(styles.submit)}`)
-    console.log(`  group: ${styles.groupDisplay} | h2: ${styles.headingWeight}`)
+    console.log(`  create: ${JSON.stringify(styles.create)} (trigger ${styles.triggerBackground})`)
+    console.log(`  mode: ${JSON.stringify(styles.mode)} | h2: ${styles.headingWeight}`)
 
-    if (styles.dialogWidth < 260) fail('dialog is narrower than 260px')
-    else ok('dialog has a usable width')
+    if (!styles.box) fail('wallet-dialog is not in the DOM')
+    else if (styles.position !== 'fixed') fail(`wallet-dialog is not position:fixed (${styles.position}): Tailwind is not scanning the package`)
+    else if (styles.box.top < 0 || styles.box.bottom > styles.viewport.height) {
+      fail(`wallet-dialog is outside the viewport: ${JSON.stringify(styles.box)}`)
+    } else if (styles.box.width < 260) fail(`wallet-dialog is narrower than 260px (${styles.box.width})`)
+    else ok(`wallet-dialog is fixed and centered (${styles.box.width}px, top ${styles.box.top})`)
 
-    if (!styles.input) fail('setup form has no input')
-    else if (styles.input.radius === '0px') fail('input has no border radius (unstyled)')
-    else if (styles.input.border === '0px') fail('input has no border (unstyled)')
-    else if (styles.input.padding === '0px') fail('input has no padding (unstyled)')
-    else ok('input is themed')
+    if (styles.radius === '0px') fail('wallet-dialog has no border radius (unstyled)')
+    else ok(`wallet-dialog is rounded (${styles.radius})`)
 
-    if (!styles.submit) fail('setup form has no submit button')
-    else if (styles.submit.radius === '0px') fail('submit has no border radius (unstyled)')
-    else if (styles.submit.padding === '0px') fail('submit has no padding (unstyled)')
-    else if (styles.submit.background === 'rgba(0, 0, 0, 0)') fail('submit has no background color (unstyled)')
-    else ok('submit button is themed')
+    if (!styles.input) fail('create form has no password input')
+    else if (styles.input.radius === '0px') fail('password input has no border radius (unstyled)')
+    else if (styles.input.border === '0px') fail('password input has no border (unstyled)')
+    else if (styles.input.padding === '0px') fail('password input has no padding (unstyled)')
+    else ok('password input is themed')
 
-    if (styles.groupDisplay !== 'grid' && styles.groupDisplay !== 'flex') {
-      fail(`create/import switch is not laid out (display: ${styles.groupDisplay})`)
-    } else {
-      ok('create/import switch is laid out')
-    }
+    if (!styles.hasConfirm) fail('create form has no confirmation input')
+    else ok('create form asks for the password twice')
 
-    if (styles.headingWeight !== '600') fail(`title weight is ${styles.headingWeight}`)
-    else ok('title uses the heading weight')
+    if (!styles.create) fail('create form has no create button')
+    else if (styles.create.radius === '0px') fail('create button has no border radius (unstyled)')
+    else if (styles.create.padding === '0px') fail('create button has no padding (unstyled)')
+    else if (styles.create.background === 'rgba(0, 0, 0, 0)') fail('create button has no background (unstyled)')
+    else if (styles.triggerBackground && styles.create.background !== styles.triggerBackground) {
+      fail(`create button does not use the site primary (${styles.create.background} vs ${styles.triggerBackground})`)
+    } else ok(`create button is themed with the site primary (${styles.create.background})`)
+
+    if (!styles.mode || (styles.mode.display !== 'inline-flex' && styles.mode.display !== 'flex')) {
+      fail(`create/import switch is not laid out (display: ${styles.mode?.display})`)
+    } else if (styles.modes.create === styles.modes.import) {
+      fail('create/import switch does not highlight the active mode')
+    } else ok('create/import switch is laid out and highlights the active mode')
+
+    if (!(Number(styles.headingWeight) >= 600)) fail(`title weight is ${styles.headingWeight}`)
+    else ok(`title uses a heading weight (${styles.headingWeight})`)
   } catch (error) {
     fail(`unexpected error: ${error instanceof Error ? error.message : String(error)}`)
   } finally {

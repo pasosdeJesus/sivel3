@@ -53,7 +53,7 @@ Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 | Spec | Needs | What it checks |
 |---|---|---|
 | `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
-| `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through the UI (`setupInAppWallet`), sees the recovery phrase; reloads (locks it) and unlocks (`unlockInAppWallet`). |
+| `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through `WalletDialog` (`setupInAppWallet`: password, phrase and 3-word quiz), ends on the new address; reloads (locks it) and unlocks (`unlockInAppWallet`). |
 | `in-app-wallet-import.spec.mjs` | Chrome + server + `PRIVATE_KEY` | Imports the **known test wallet** (no new keys) and unlocks it after a reload; safe to run against production because it creates nothing and the SBT mint is skipped when the wallet already holds it. |
 | `public-pages.spec.mjs` | Chrome + server | Client pages hydrate against the live APIs: the OSM map renders its Leaflet container, EN/ES stats render, and the wallet profile leaves the loading state. |
 | `signatures.spec.mjs` | server (+ `PREALERT_ID`, `DOCUMENTER_WALLETS` for the positive path) | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401); the positive path records a score 0 (**rejected**). |
@@ -68,9 +68,14 @@ map page itself now renders in the browser too (the counts widget no longer
 white-screens when `/api/cases/counts` fails).
 
 The in-app form is driven by `@pasosdejesus/m/e2e`'s `setupInAppWallet`/
-`unlockInAppWallet` (testids of `@pasosdejesus/m/wallet/next`); `helpers/wallet-ui.mjs`
-only covers sivel3's shell (testids of `ConnectWalletButton`). Optional positive
-paths are gated by env (below) and otherwise print `[SKIP]`.
+`unlockInAppWallet` (testids of `WalletDialog`). Since `m@0.41.0` (REQ/75 of `m`)
+sivel3 has no wallet dialog of its own: `ConnectWalletButton` only injects the
+connection state and the language into the engine's `WalletConnect`, so
+`helpers/wallet-ui.mjs` just opens the wallet (`connect-wallet` or `connected-wallet`)
+and picks the in-app path; the dialog testids (`wallet-*`) are driven by the shared
+driver. `wallet-styling.spec.mjs` asserts the dialog is `position: fixed`, centered,
+themed with the site's primary and that Tailwind scanned the package.
+Optional positive paths are gated by env (below) and otherwise print `[SKIP]`.
 
 ## Running against a local server
 

@@ -1,9 +1,9 @@
 {
   "name": "generated-wallet",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
-  "description": "Copia vendorizada de @pasosdejesus/wallet v0.1.1, generada por `bin/m eng:sync --vendor`; no editar a mano.",
+  "description": "Copia vendorizada de @pasosdejesus/wallet v0.1.3, generada por `bin/m eng:sync --vendor`; no editar a mano.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -46,6 +46,9 @@
   },
   "devDependencies": {
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "typescript": "^5.9.3",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3"
   }
 }

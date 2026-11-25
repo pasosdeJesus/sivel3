@@ -43,8 +43,15 @@ Political Violence Information System (SIVeL)
     NEXT_PUBLIC_NETWORK=celoSepolia
 
     # -- learn.tg Integration --
-    # Ethereum address that identifies sivel.xyz (must match learn.tg's SIVEL_ADDRESS)
+    # Public address that identifies sivel.xyz (must match learn.tg's SIVEL_ADDRESS)
+    # and be the address of the partner key below.
     LEARNTG_ADDRESS=0x9F636E5653b649b44c9375E6E103600AE55aF979
+    # Dedicated key that signs the partner verification query (GET /api/verify).
+    # LEARNTG_ADDRESS decides which key signs: an existing deployment keeps its key
+    # until both values are switched together. Falling back (in this order):
+    # LEARNTG_AUTHPARTNER_PRIVATE_KEY, PRIVATE_KEY, SIVEL3_MESSAGES_PRIVATE_KEY.
+    # In production use its own key.
+    LEARNTG_AUTHPARTNER_PRIVATE_KEY=
     ```
 
     **Important!** This database configuration is a starting point. You **must** verify that these values match your local system's setup. For example, the `PG_SUPERUSER` might be different (e.g., `postgres`, `user`, etc.) depending on your PostgreSQL installation. Adjust these variables as needed before proceeding.

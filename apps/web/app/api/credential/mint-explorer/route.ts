@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { keccak256, encodePacked } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { mintSBT, getChainId } from '@/lib/credentials'
+import { verificarEnLearnTg } from '@/lib/learnTgPartner'
 import { getCredentialMetadata } from '@pasosdejesus/mpdj/blockchain'
 
 const MIN_CASES = 3
@@ -21,26 +20,8 @@ async function getTokenId(
   return row ? row.token_id : null
 }
 
-async function isLearnTgVerified(wallet: string): Promise<boolean> {
-  const key = process.env.PRIVATE_KEY
-  if (!key) return true
-  const timestamp = Math.floor(Date.now() / 1000)
-  const message = keccak256(
-    encodePacked(['address', 'uint256'], [wallet as `0x${string}`, BigInt(timestamp)])
-  )
-  const account = privateKeyToAccount(key as `0x${string}`)
-  const signature = await account.signMessage({ message })
-  try {
-    const base = process.env.NEXT_PUBLIC_NETWORK === 'celo' ? 'https://learn.tg' : 'https://learn.tg:9001'
-    const url = `${base}/api/verify?wallet=${wallet}&timestamp=${timestamp}&signature=${signature}`
-    const res = await fetch(url)
-    if (res.ok) {
-      const data = await res.json() as { verified?: boolean }
-      return data.verified === true
-    }
-    return false
-  } catch { return true }
-}
+/** La verificación vive en `lib/learnTgPartner.ts`: llave de socio, caché y fallo cerrado. */
+const isLearnTgVerified = verificarEnLearnTg
 
 async function hasDonated(db: ReturnType<typeof newKyselyPostgresql>, wallet: string): Promise<boolean> {
   const row = await db

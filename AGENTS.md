@@ -223,7 +223,7 @@ and no `-B`/`-A`, so use `grep -E` for alternation.
   the same edit, then `pnpm install`)
 - Vendored engines (`apps/web/packages/generated/*`, derived copies): re-vendor with
   `make -C apps/web eng-sync` (`eng:sync --vendor --prepare`); it takes each motor from a
-  **git ref** of `m` (`M_GIT`, `MSIP_TAG=v0.37.2`, `WALLET_TAG=wallet-v0.1.1`), so
+  **git ref** of `m` (`M_GIT`, `MSIP_TAG=v0.37.2`, `WALLET_TAG=wallet-v0.1.3`), so
   `PROVENANCE.json` records `kind/origin/ref/path` and no local checkout is needed.
   Guard with `make -C apps/web eng-check` (`eng:check --runtime --no-db`) and
   `make -C apps/web eng-verify` (per engine; without a target it also flags the

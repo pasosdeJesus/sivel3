@@ -67,10 +67,15 @@ export async function mintSBT(
 | Connector minted + <50 Global Founders exist | Best-effort mint "Global Founder" |
 | Not verified, no donation | Return `{ minted: false, reason: 'not_verified' }` |
 
-**Verification flow:**
-1. sivel.xyz signs `keccak256(encodePacked(wallet, timestamp))` with its `PRIVATE_KEY`
-2. Calls `POST https://learn.tg/api/verify` with wallet, timestamp, and signature
-3. learn.tg checks if wallet is verified (Self/GD/Passport)
+**Verification flow** (`lib/learnTgPartner.ts`):
+1. sivel.xyz signs `keccak256(encodePacked(wallet, timestamp))` with the **partner key**
+   (`LEARNTG_AUTHPARTNER_PRIVATE_KEY`; `LEARNTG_ADDRESS` decides which key signs, and the
+   fallback order is `PRIVATE_KEY`, then `SIVEL3_MESSAGES_PRIVATE_KEY`)
+2. Calls `GET https://learn.tg/api/verify` with wallet, timestamp, and signature
+3. learn.tg checks if wallet is verified (Self/GD/Passport) and returns the boolean;
+   the name/country it also returns are **discarded** in sivel3
+4. The boolean is cached 5 minutes and any failure (no key, timeout, 403) means
+   **not verified** — the SBT is not minted
 
 ### 2. Donation — Donor Tiers
 
@@ -238,7 +243,9 @@ TokenIds resolved dynamically from `credential_metadata` — not hardcoded.
 ### Operator Notes
 
 - Requires `MINTER_ROLE` + CELO for gas on the `PRIVATE_KEY` wallet
-- Same `PRIVATE_KEY` signs learn.tg verification requests (must be in learn.tg partner list)
+- The **partner key** signs learn.tg verification requests: register its address in
+  learn.tg's `AUTHORIZED_VERIFIERS` (`LEARNTG_AUTHPARTNER_PRIVATE_KEY`; do not reuse
+  the on-chain `PRIVATE_KEY` in production)
 - Idempotent — safe to re-run; checks `credential_emission` before each mint
 - `credential_metadata` cache must be populated first (handled by prior migration `20260520_sync_credential_metadata`)
 - Backup DB before running on mainnet
