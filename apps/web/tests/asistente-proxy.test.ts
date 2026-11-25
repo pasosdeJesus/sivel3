@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import { randomUUID } from 'node:crypto'
 import { privateKeyToAccount } from 'viem/accounts'
 import { verifyMessage } from 'viem'
 import { sha256Hex } from '@/lib/sivel3agent'
@@ -24,19 +25,22 @@ function contexto(...partes: string[]) {
 
 async function firmarDocumentador(opciones: {
   cuenta: typeof DOCUMENTADOR
-  metodo: 'GET' | 'POST'
+  metodo: 'GET' | 'POST' | 'DELETE'
   ruta: string
   cuerpo?: string
   timestamp?: number
+  nonce?: string
 }) {
   const cuerpo = opciones.cuerpo ?? ''
   const timestamp = opciones.timestamp ?? Math.floor(Date.now() / 1000)
-  const mensaje = `asistente:${opciones.metodo}:${opciones.ruta}:${sha256Hex(cuerpo)}:${timestamp}`
+  const nonce = opciones.nonce ?? randomUUID()
+  const mensaje = `asistente:${opciones.metodo}:${opciones.ruta}:${sha256Hex(cuerpo)}:${timestamp}:${nonce}`
   const signature = await opciones.cuenta.signMessage({ message: mensaje })
   return {
     'x-documenter-address': opciones.cuenta.address.toLowerCase(),
     'x-documenter-signature': signature,
     'x-documenter-timestamp': String(timestamp),
+    'x-documenter-nonce': nonce,
   }
 }
 
@@ -146,6 +150,66 @@ describe('proxy /api/asistente', () => {
 
     const reqRuta = new NextRequest('http://localhost/api/asistente/desconocido', { method: 'POST' })
     expect((await POST(reqRuta, contexto('desconocido'))).status).toBe(404)
+  })
+
+  it('rechaza el reenvío de la misma acción (nonce repetido)', async () => {
+    const nonce = randomUUID()
+    const headers = await firmarDocumentador({
+      cuenta: DOCUMENTADOR,
+      metodo: 'POST',
+      ruta: 'ingesta',
+      cuerpo: '{}',
+      nonce,
+    })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response('{"ingesta_id":3,"estado":"en_cola"}', {
+          status: 202,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    )
+    const { POST } = await ruta()
+    const peticion = () =>
+      new NextRequest('http://localhost/api/asistente/ingesta', {
+        method: 'POST',
+        headers,
+        body: '{}',
+      })
+
+    expect((await POST(peticion(), contexto('ingesta'))).status).toBe(202)
+    const repetida = await POST(peticion(), contexto('ingesta'))
+    expect(repetida.status).toBe(401)
+    expect((await repetida.json()).code).toBe('nonce_repetido')
+  })
+
+  it('reenvía el DELETE y propaga Retry-After y Location', async () => {
+    const headers = await firmarDocumentador({
+      cuenta: DOCUMENTADOR,
+      metodo: 'DELETE',
+      ruta: '7',
+    })
+    const capturado: { init?: RequestInit } = {}
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        capturado.init = init
+        return new Response(null, {
+          status: 204,
+          headers: { 'retry-after': '7', location: '/api/revision/ingesta/7' },
+        })
+      }),
+    )
+    const { DELETE } = await ruta()
+    const res = await DELETE(
+      new NextRequest('http://localhost/api/asistente/7', { method: 'DELETE', headers }),
+      contexto('7'),
+    )
+    expect(res.status).toBe(204)
+    expect(capturado.init?.method).toBe('DELETE')
+    expect(res.headers.get('Retry-After')).toBe('7')
+    expect(res.headers.get('Location')).toBe('/api/revision/ingesta/7')
   })
 
   it('propaga los errores del agente sin inventar el estado', async () => {

@@ -56,6 +56,8 @@ describe('POST /api/pre-alerts/[id]/score con alertas de documentador', () => {
     delete process.env.DOCUMENTER_WALLETS
   })
 
+  // La primera importación del route handler cuesta segundos en este VM: el
+  // margen evita un fallo por plazo cuando la suite corre con cobertura.
   it('aprueba la alerta del documentador sin pago al ciudadano', async () => {
     const fake = crearDb({
       id: 5,
@@ -84,7 +86,7 @@ describe('POST /api/pre-alerts/[id]/score con alertas de documentador', () => {
     expect(body.citizen_reward).toBe('0 USDT')
     expect(fake.actualizado.status).toBe('paid')
     expect(fake.actualizado.score).toBe(4)
-  })
+  }, 20_000)
 
   it('impide que el autor revise su propia prealerta', async () => {
     const fake = crearDb({
@@ -110,5 +112,5 @@ describe('POST /api/pre-alerts/[id]/score con alertas de documentador', () => {
 
     expect(res.status).toBe(403)
     expect((await res.json()).code).toBe('no_auto_revision')
-  })
+  }, 20_000)
 })

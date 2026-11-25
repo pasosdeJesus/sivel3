@@ -14,3 +14,21 @@ export function isDocumenterWallet(wallet: string | null | undefined): boolean {
 
 /** Ventana anti-repetición de las firmas del navegador (5 min). */
 export const VENTANA_FIRMA_S = 300
+
+// Nonces vistos dentro de la ventana de firma: una acción firmada no se puede
+// reenviar. Vive en memoria del proceso; con varias instancias sigue evitando la
+// repetición accidental del navegador, no un atacante distribuido.
+const noncesVistos = new Map<string, number>()
+
+export function nonceNuevo(nonce: string, ahora = Date.now()): boolean {
+  for (const [clave, expiraEn] of noncesVistos) {
+    if (expiraEn <= ahora) noncesVistos.delete(clave)
+  }
+  if (noncesVistos.has(nonce)) return false
+  noncesVistos.set(nonce, ahora + VENTANA_FIRMA_S * 1000)
+  return true
+}
+
+export function olvidarNonces(): void {
+  noncesVistos.clear()
+}

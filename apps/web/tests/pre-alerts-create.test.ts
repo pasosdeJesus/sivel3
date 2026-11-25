@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 import { privateKeyToAccount } from 'viem/accounts'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 
 const LLAVE_DOCUMENTADOR = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
 const LLAVE_AJENA = '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6'
@@ -25,15 +25,18 @@ async function firmar(opciones: {
   cuenta: typeof DOCUMENTADOR
   cuerpo: string
   timestamp?: number
+  nonce?: string
 }) {
   const timestamp = opciones.timestamp ?? Math.floor(Date.now() / 1000)
-  const mensaje = `prealerta:${sha256Hex(opciones.cuerpo)}:${timestamp}`
+  const nonce = opciones.nonce ?? randomUUID()
+  const mensaje = `prealerta:${sha256Hex(opciones.cuerpo)}:${timestamp}:${nonce}`
   const signature = await opciones.cuenta.signMessage({ message: mensaje })
   return {
     'content-type': 'application/json',
     'x-documenter-address': opciones.cuenta.address.toLowerCase(),
     'x-documenter-signature': signature,
     'x-documenter-timestamp': String(timestamp),
+    'x-documenter-nonce': nonce,
   }
 }
 
@@ -110,6 +113,22 @@ describe('POST /api/pre-alerts (borrador del asistente)', () => {
     const res = await (POST as Ruta['POST'])(req)
     expect(res.status).toBe(409)
     expect((await res.json()).code).toBe('duplicada')
+  })
+
+  it('rechaza el reenvío de la misma firma (nonce repetido)', async () => {
+    const fake = crearDb({ id: 5, status: 'converted' })
+    estado.db = fake.db
+
+    const { POST } = await import('@/app/api/pre-alerts/route')
+    const cuerpo = JSON.stringify({ relatos: [{ titulo: 'Caso repetido' }] })
+    const headers = await firmar({ cuenta: DOCUMENTADOR, cuerpo })
+    const req = () =>
+      new NextRequest('http://localhost/api/pre-alerts', { method: 'POST', headers, body: cuerpo })
+
+    expect((await (POST as Ruta['POST'])(req())).status).toBe(201)
+    const repetida = await (POST as Ruta['POST'])(req())
+    expect(repetida.status).toBe(401)
+    expect((await repetida.json()).code).toBe('nonce_repetido')
   })
 
   it('rechaza billeteras sin rol y firmas ajenas', async () => {

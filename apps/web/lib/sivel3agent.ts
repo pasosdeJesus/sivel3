@@ -1,4 +1,4 @@
-// Cliente del asistente de documentación (`sivel3agent`, R-#20).
+// Cliente del asistente de documentación (R-#20).
 //
 // El canal es servidor a servidor: el navegador nunca llama al agente. El proxy
 // de `app/api/asistente` verifica al documentador y luego firma aquí el mensaje
@@ -10,14 +10,19 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 export const DOMINIO_AGENTE = 'sivel3agent:1'
 
-/** Tope por omisión de una llamada al agente. */
-export const TIMEOUT_MS = Number(process.env.SIVEL3AGENT_TIMEOUT_MS || 30_000)
+/** Tope por omisión de una llamada al agente. Medido: una noticia de ~3.000
+ * caracteres tardó 56 s con el motor real, así que 120 s deja margen. */
+export const TIMEOUT_MS = Number(process.env.SIVEL3AGENT_TIMEOUT_MS || 120_000)
 
 export function sha256Hex(texto: string): string {
   return createHash('sha256').update(texto).digest('hex')
 }
 
-/** Mismo formato que `sivel3agent/apps/web/lib/authServicio.ts`. */
+/**
+ * Mensaje canónico del canal (`sivel3agent:1`), una línea por campo: dominio,
+ * método, ruta con query, `sha256(cuerpo)`, timestamp ISO, nonce y usuario.
+ * El agente verifica exactamente este orden.
+ */
 export function mensajeServicio(s: {
   metodo: string
   ruta: string
@@ -47,6 +52,8 @@ export class AgenteNoConfigurado extends Error {
 export interface RespuestaAgente {
   status: number
   contentType: string
+  /** Cabeceras en minúsculas: el proxy reenvía `Retry-After` y `Location`. */
+  headers: Record<string, string>
   body: string
 }
 
@@ -60,7 +67,7 @@ export function agenteConfigurado(): boolean {
  * hash del mensaje canónico y el cuerpo deben ser el mismo texto.
  */
 export async function llamarAgente(opciones: {
-  metodo: 'GET' | 'POST'
+  metodo: 'GET' | 'POST' | 'DELETE'
   ruta: string
   cuerpo?: string
   usuario: string
@@ -101,9 +108,14 @@ export async function llamarAgente(opciones: {
   })
 
   const texto = await respuesta.text()
+  const cabeceras: Record<string, string> = {}
+  respuesta.headers.forEach((valor, clave) => {
+    cabeceras[clave.toLowerCase()] = valor
+  })
   return {
     status: respuesta.status,
     contentType: respuesta.headers.get('content-type') || 'application/json',
+    headers: cabeceras,
     body: texto,
   }
 }
@@ -116,12 +128,12 @@ export function codigoDeError(status: number, cuerpo: string): string {
   } catch {
     /* no era JSON */
   }
+  // Sin `code` en el cuerpo sólo se traducen los estados inequívocos; inventar
+  // 409→duplicada o 422→texto_corto mostraba mensajes equivocados.
   if (status === 401 || status === 403) return 'no_documenter'
-  if (status === 409) return 'duplicada'
-  if (status === 413) return 'texto_largo'
-  if (status === 422) return 'texto_corto'
   if (status === 429) return 'cuota'
   if (status === 503) return 'agente_ocupado'
+  if (status === 504) return 'agente_tiempo'
   if (status >= 500) return 'agente_caido'
   return 'error'
 }

@@ -209,21 +209,30 @@ These are called by the frontend/backend and are **not intended for direct publi
 | `/api/credential/mint-explorer` | POST | Mints Explorer SBT after 3+ case views |
 | `/api/donations/assign` | POST | Verifies on-chain donation, assigns to region, awards LP |
 | `/api/web-analytics/event` | POST | Records a client-side analytics event |
-| `/api/asistente/[...ruta]` | GET/POST | Signed proxy to the documentation assistant (`sivel3agent`): ingestion, status, extraction, XRLAT |
+| `/api/asistente/[...ruta]` | GET/POST/DELETE | Signed proxy to the documentation assistant (`sivel3agent`): ingestion, status, extraction, XRLAT, candidates, deletion |
 | `/api/pre-alerts` | POST | Documenter's pre-alert draft from the assistant |
 
 ### Assistant proxy (`/api/asistente/[...ruta]`)
 
-The browser signs `asistente:{METHOD}:{ruta}:{sha256(cuerpo)}:{timestamp}` with the
-documenter wallet (`personal_sign`); the proxy verifies the role (`DOCUMENTER_WALLETS`)
-and the signature (5-minute window) before signing the server-to-server request with
+The browser signs `asistente:{METHOD}:{ruta}:{sha256(cuerpo)}:{timestamp}:{nonce}` with the
+documenter wallet (`personal_sign`) and sends `X-Documenter-Address`, `X-Documenter-Signature`,
+`X-Documenter-Timestamp` and `X-Documenter-Nonce`; the proxy verifies the role
+(`DOCUMENTER_WALLETS`), the 5-minute window and that the nonce is new (a replayed action
+returns `401 nonce_repetido`) before signing the server-to-server request with
 `SIVEL3_MESSAGES_PRIVATE_KEY` (`sivel3agent:1` canonical message with the documenter's
 opaque user). Allowed routes: `ingesta` (POST), `ingesta/:id` (GET),
 `ingesta/:id/reintentar` (POST), `extraer` (POST), `xrlat` (POST), `health` (GET),
-`:id` (GET) and `:id/candidato` (POST). The agent responses pass through unchanged, with
-`Cache-Control: no-store`.
+`:id` (GET), `:id/candidato` (POST) and `:id` (DELETE). The agent responses pass through
+unchanged, with `Cache-Control: no-store`, and `Retry-After`/`Location` are propagated
+(the UI can wait as long as the agent asks).
 
-`POST /api/pre-alerts` (documenter signed, `prealerta:{sha256(cuerpo)}:{timestamp}`)
+The browser sends `fuente.source_id` (the agent's `source_id` from `GET /ingesta/:id`,
+**not** the ingestion id) plus `ingesta_id` to `POST /extraer`: the ingestion id applies
+the per-ingestion generation quota, feeds the trace (`GET /:id` → `generaciones`) and lets
+the candidate copy the generation metadata.
+
+`POST /api/pre-alerts` (documenter signed,
+`prealerta:{sha256(cuerpo)}:{timestamp}:{nonce}`)
 creates the pre-alert as a documenter **alert under review**: status `converted`,
 `origin = 'documenter'`, the documenter as publisher and deduplication by
 `event_hash` (the same case returns `409`). It never enters the market (buying

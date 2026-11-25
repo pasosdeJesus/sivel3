@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyMessage } from 'viem'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
-import { isDocumenterWallet, VENTANA_FIRMA_S } from '@/lib/documenter'
+import { isDocumenterWallet, nonceNuevo, VENTANA_FIRMA_S } from '@/lib/documenter'
 
 export async function GET(req: NextRequest) {
   try {
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
  * `POST /api/pre-alerts` — borrador de prealerta creado por un documentador
  * desde el asistente de documentación (R-#20).
  *
- * El documentador firma `prealerta:{sha256(cuerpo)}:{timestamp}` con su
+ * El documentador firma `prealerta:{sha256(cuerpo)}:{timestamp}:{nonce}` con su
  * billetera; el cuerpo lleva los relatos propuestos por el modelo. La prealerta
  * queda `pending` (mercado), con el documentador como publisher y deduplicada
  * por `event_hash`: el mismo caso no se publica dos veces.
@@ -102,8 +102,9 @@ export async function POST(req: NextRequest) {
     const wallet = (req.headers.get('x-documenter-address') || '').toLowerCase()
     const firma = req.headers.get('x-documenter-signature') || ''
     const timestamp = Number(req.headers.get('x-documenter-timestamp') || 0)
+    const nonce = req.headers.get('x-documenter-nonce') || ''
 
-    if (!wallet || !firma || !timestamp) {
+    if (!wallet || !firma || !timestamp || nonce.length < 8) {
       return NextResponse.json({ error: 'Falta la firma del documentador', code: 'sin_firma' }, { status: 401 })
     }
     if (Math.abs(Math.floor(Date.now() / 1000) - timestamp) > VENTANA_FIRMA_S) {
@@ -116,8 +117,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!nonceNuevo(nonce)) {
+      return NextResponse.json({ error: 'La acción ya se envió', code: 'nonce_repetido' }, { status: 401 })
+    }
+
     const hashCuerpo = createHash('sha256').update(cuerpo).digest('hex')
-    const mensaje = `prealerta:${hashCuerpo}:${timestamp}`
+    const mensaje = `prealerta:${hashCuerpo}:${timestamp}:${nonce}`
     let valida = false
     try {
       valida = await verifyMessage({
