@@ -5,7 +5,51 @@ import { sql } from 'kysely'
 
 import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
-import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
+import { checkRateLimit, clientIp, rateLimitResponse } from '@/lib/rateLimit'
+import { CREDITO_DETALLE, gastar, saldoDe } from '@/lib/creditos'
+import { verificarEnLearnTg } from '@/lib/learnTgPartner'
+import { consumirVista, LIMITES, periodoDe, sujetoDe } from '@/lib/quota'
+import { leerPase } from '@/lib/walletPass'
+
+/**
+ * Cuota de detalle (R-#22 P1, números de R-#17). Si la cuota no se puede consultar
+ * (migración sin aplicar, base caída) la lectura sigue: el mapa y los casos son bien
+ * público y no deben caerse por un contador. Se registra el incidente.
+ */
+async function aplicarCuota(
+  db: ReturnType<typeof newKyselyPostgresql>,
+  request: NextRequest,
+  casoId: number,
+): Promise<
+  | { permitido: true; restantes: number | null; creditos: number | null }
+  | { permitido: false; code: 'cuota_detalle' | 'creditos_insuficientes' }
+> {
+  const wallet = leerPase(request)
+  try {
+    const tipo = wallet
+      ? (await verificarEnLearnTg(wallet))
+        ? 'verificada'
+        : 'billetera'
+      : 'anonimo'
+    const { sujeto } = sujetoDe(clientIp(request), wallet)
+    const cuota = await consumirVista(db, sujeto, periodoDe(tipo), LIMITES[tipo])
+    if (cuota.permitido) return { permitido: true, restantes: cuota.restantes, creditos: null }
+
+    if (!wallet) return { permitido: false, code: 'cuota_detalle' }
+
+    const consumo = await gastar(db, {
+      wallet,
+      creditos: CREDITO_DETALLE,
+      motivo: 'detalle',
+      referencia: `detalle:${casoId}:${Date.now()}`,
+    })
+    if (!consumo.ok) return { permitido: false, code: 'creditos_insuficientes' }
+    return { permitido: true, restantes: 0, creditos: consumo.saldo }
+  } catch (error) {
+    console.error('cuota de detalle no disponible:', error)
+    return { permitido: true, restantes: null, creditos: null }
+  }
+}
 
 function formatDate(value: Date | string | null | undefined): string | undefined {
   if (!value) return undefined
@@ -58,6 +102,24 @@ export async function GET(
       return NextResponse.json({ error: 'Caso no encontrado' }, { status: 404 })
     }
 
+    const cuota = await aplicarCuota(db, request, casoId)
+    if (!cuota.permitido) {
+      const wallet = leerPase(request)
+      return NextResponse.json(
+        {
+          error:
+            cuota.code === 'cuota_detalle'
+              ? 'Alcanzaste la cuota gratuita de detalles por hoy. Conecta tu billetera (sube la cuota) o compra créditos.'
+              : 'No te quedan créditos para más detalles. Compra créditos o espera el próximo periodo.',
+          code: cuota.code,
+          limite: cuota.code === 'cuota_detalle' ? LIMITES.anonimo : LIMITES.billetera,
+          billetera: wallet ?? undefined,
+          saldo: wallet ? await saldoDe(db, wallet) : undefined,
+        },
+        { status: 402 },
+      )
+    }
+
     // Victim names are personal data (PRINCIPLES.md §2, confidentiality of the
     // sources). The public read is anonymous, so it only gets the count; a
     // role-gated endpoint for names is a separate requirement.
@@ -82,6 +144,7 @@ export async function GET(
 
     return NextResponse.json(
       {
+        cuota: { restantes: cuota.restantes, creditos: cuota.creditos },
         caso: {
           id: String(caso.id),
           titulo: caso.titulo ?? undefined,
@@ -97,10 +160,17 @@ export async function GET(
           presponsables,
         },
       },
-      { status: 200 },
+      {
+        status: 200,
+        headers: {
+          ...(cuota.restantes !== null ? { 'X-Cuota-Restante': String(cuota.restantes) } : {}),
+          ...(cuota.creditos !== null ? { 'X-Credito-Saldo': String(cuota.creditos) } : {}),
+        },
+      },
     )
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('GET /api/cases/[id] error:', errorMessage)
     recordEvent({ event_type: 'api_error', metadata: { route: '/api/cases/[id]', status: 500 } })
     return NextResponse.json(
       { error: 'Error al obtener detalle del caso', details: errorMessage },

@@ -82,6 +82,11 @@ eng-verify:
 eng-check:
 	./bin/m eng:check --runtime --no-db $(FROM_ARG)
 
+# Estipendio mensual de créditos a documentadores (R-#22 P2). Idempotente por mes:
+# correrlo dos veces no duplica. Programar en el cron del servidor.
+credits-stipend:
+	node bin/credits-stipend.mjs
+
 db-check:
 	-./bin/m eng:check $(FROM_ARG)
 

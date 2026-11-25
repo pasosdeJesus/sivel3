@@ -786,6 +786,8 @@ export interface PreAlert {
   id: Generated<number>;
   json_data: Json;
   origin: Generated<string>;
+  published_at: Timestamp | null;
+  published_by: string | null;
   publisher_wallet: string;
   rejection_reason: string | null;
   score: number | null;

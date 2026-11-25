@@ -32,6 +32,7 @@ interface OSMMapDesktopProps {
   preAlerts?: any[];
   onPreAlertClick?: (id: number) => void;
   isVerified?: boolean;
+  onActivarCuota?: () => Promise<boolean>;
 }
 
 export function OSMMapDesktop({
@@ -60,6 +61,7 @@ export function OSMMapDesktop({
   preAlerts,
   onPreAlertClick,
   isVerified,
+  onActivarCuota,
 }: OSMMapDesktopProps) {
   const { t } = useTranslation({});
   return (
@@ -108,6 +110,7 @@ export function OSMMapDesktop({
               preAlerts={preAlerts}
               onPreAlertClick={onPreAlertClick}
               isVerified={isVerified}
+              onActivarCuota={onActivarCuota}
             />
           </CardContent>
         </Card>

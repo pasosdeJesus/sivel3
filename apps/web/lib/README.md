@@ -12,6 +12,14 @@ Directory of logic modules shared between components and API routes.
 | `errors.ts` | Translates wallet/blockchain errors to user-friendly messages (`parseWalletError`). |
 | `logger.ts` | Unified logging system with floating debug console for embedded browsers. See `doc/mobile-debug-console.md`. |
 | `debug.ts` | Debug utilities: `safeStringify` for circular objects, `debugLog`. |
+| `alertsPublicas.ts` | Public projection of a published alert (R-#22): summary and detail without `citizen_notes`, wallets or score. |
+| `prealertaFirma.ts` | Documenter EIP-191 signatures for the review queue, publish and unpublish (`revisar|publicar|despublicar`). |
+| `documenterClient.ts` | Browser side of those signatures (personal_sign + nonce). |
+| `walletPass.ts` | Signed cookie (HMAC, 12 h) that raises the case-detail quota per wallet; not a session. |
+| `walletPassClient.ts` | Requests that pass with one `personal_sign`. |
+| `quota.ts` | Detail quota of R-#17 (1/day anonymous, 16/24 per month) with an atomic `ON CONFLICT` counter. |
+| `creditos.ts` | Credit ledger of R-#17: idempotent credit/debit by `reference`, no negative balance. |
+| `usdtTransfer.ts` | Verifies a USDT `Transfer` receipt to a given address (credits purchase). |
 | `utils.ts` | General utilities (`cn()` for Tailwind class merging). |
 || `web-analytics.ts` | Web analytics helpers: `recordEvent()` for pageviews, donations, wallet connects. |
 

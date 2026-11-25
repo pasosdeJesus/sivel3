@@ -212,6 +212,15 @@ These are called by the frontend/backend and are **not intended for direct publi
 | `/api/asistente/[...ruta]` | GET/POST/DELETE | Signed proxy to the documentation assistant (`sivel3agent`): ingestion, status, extraction, XRLAT, candidates, deletion |
 | `/api/pre-alerts` | POST | Documenter's pre-alert draft from the assistant |
 | `/api/verify` | GET | Is this wallet verified on learn.tg? Signs with the partner key (`lib/learnTgPartner.ts`), caches 5 min, fails closed, returns only `verified` |
+| `/api/alerts` | GET | Published alerts (reviewed documenter cases): paginated, no personal data |
+| `/api/pre-alerts/review` | GET | Documenter-signed queue of `converted`/`published` documenter alerts |
+| `/api/pre-alerts/[id]/publish` | POST | Documenter-signed publish (`converted` → `published`, records who/when) |
+| `/api/pre-alerts/[id]/unpublish` | POST | Documenter-signed rollback (`published` → `converted`) |
+| `/api/wallet-pass` | POST | EIP-191 `pase:{address}:{ts}` → HttpOnly signed cookie (12 h) that raises the detail quota |
+| `/api/credits/balance` | GET | Credit balance of a wallet |
+| `/api/credits/purchase` | POST | Verifies a USDT transfer to `CREDITS_TREASURY_ADDRESS` and credits 100 per USDT (idempotent by `tx_hash`) |
+| `/api/credits/stipend` | POST | Monthly 4.000-credit stipend to `DOCUMENTER_WALLETS` (cron secret, idempotent per month) |
+| `/api/credits/grant` | POST | Operator-granted credits without crypto (`x-credits-secret`), idempotent by `reference` |
 
 ### Assistant proxy (`/api/asistente/[...ruta]`)
 
@@ -223,7 +232,8 @@ returns `401 nonce_repetido`) before signing the server-to-server request with
 `SIVEL3_MESSAGES_PRIVATE_KEY` (`sivel3agent:1` canonical message with the documenter's
 opaque user). Allowed routes: `ingesta` (POST), `ingesta/:id` (GET),
 `ingesta/:id/reintentar` (POST), `extraer` (POST), `xrlat` (POST), `health` (GET),
-`:id` (GET), `:id/candidato` (POST) and `:id` (DELETE). The agent responses pass through
+`:id` (GET), `:id/candidato` (POST), `candidato` (POST: candidates from the
+documenter's own notes, no ingestion) and `:id` (DELETE). The agent responses pass through
 unchanged, with `Cache-Control: no-store`, and `Retry-After`/`Location` are propagated
 (the UI can wait as long as the agent asks).
 
@@ -239,6 +249,30 @@ creates the pre-alert as a documenter **alert under review**: status `converted`
 `event_hash` (the same case returns `409`). It never enters the market (buying
 requires `pending`), pays no citizen reward, and cannot be scored by its own
 author; the payment for the documented case comes from the documenters fund.
+
+### Alerts, quota and credits (R-#22)
+
+`GET /api/alerts` y `GET /api/alerts/:id` son públicas y sólo devuelven alertas
+`published`: el caso propuesto, la fuente y las fechas. La proyección vive en
+`lib/alertsPublicas.ts` y **nunca** incluye `citizen_notes`, `buyer_wallet` ni la billetera
+del documentador (hay prueba que falla si aparecen). Publicar y despublicar exigen la
+firma del documentador (`publicar:{id}:{ts}:{nonce}` / `despublicar:…`) y dejan
+`published_by`/`published_at` para auditar.
+
+`GET /api/cases/:id` aplica la cuota de detalle de R-#17: 1/día anónimo por IP, 16/mes con
+el pase de billetera y 24/mes si learn.tg la considera verificada. Al agotarse responde
+`402` con `code: cuota_detalle` (o `creditos_insuficientes`) y el mapa ofrece activar el
+pase o comprar créditos. El pase es una cookie firmada con `SIVEL3_PASS_SECRET` (no es una
+sesión ni identifica a nadie); si la tabla de cuota no está disponible, la lectura sigue
+(falla abierto y se registra el incidente).
+
+Los créditos (1 USDT = 100; detalle fuera de cuota = 4) usan un libro mayor idempotente por
+`referencia`. **El estipendio de documentadores es en créditos, no en cripto**: `make
+credits-stipend` acredita 4.000 al mes a cada billetera de `DOCUMENTER_WALLETS` con
+referencia `stipend:YYYY-MM:<wallet>`, y `POST /api/credits/grant` permite al operador
+acreditar o ajustar una billetera concreta con `x-credits-secret` (sin token, sin cadena).
+La compra con USDT es opcional y está desactivada hasta definir
+`CREDITS_TREASURY_ADDRESS`: sin esa variable responde `503` en vez de inventar un destino.
 
 ### Partner verification (`/api/verify`)
 

@@ -31,6 +31,7 @@ interface OSMMapMobileProps {
   preAlerts?: any[];
   onPreAlertClick?: (id: number) => void;
   isVerified?: boolean;
+  onActivarCuota?: () => Promise<boolean>;
 }
 
 export function OSMMapMobile({
@@ -59,6 +60,7 @@ export function OSMMapMobile({
   preAlerts,
   onPreAlertClick,
   isVerified,
+  onActivarCuota,
 }: OSMMapMobileProps) {
   const { t } = useTranslation({});
   return (
@@ -128,6 +130,7 @@ export function OSMMapMobile({
           preAlerts={preAlerts}
           onPreAlertClick={onPreAlertClick}
           isVerified={isVerified}
+          onActivarCuota={onActivarCuota}
         />
       </div>
     </>

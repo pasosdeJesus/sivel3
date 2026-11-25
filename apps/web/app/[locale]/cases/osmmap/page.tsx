@@ -273,6 +273,12 @@ export default function OSMMapPage() {
     preAlerts,
     onPreAlertClick: handlePreAlertClick,
     isVerified,
+    onActivarCuota: async () => {
+      if (!provider || !effectiveAddress) return false;
+      const { pedirPase } = await import('@/lib/walletPassClient');
+      const pase = await pedirPase({ provider, address: effectiveAddress });
+      return pase.ok;
+    },
   };
 
   return (

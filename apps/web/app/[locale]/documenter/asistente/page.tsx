@@ -70,8 +70,6 @@ const tS = {
     consentNeeded: 'The notes are only saved as a candidate if you authorize their use for training.',
     saveCandidate: 'Save candidate',
     candidateSaved: 'Candidate saved for later review; it is not part of the training corpus yet.',
-    candidateNeedsIngesta:
-      'Saving candidates from your own notes needs an agent endpoint that does not require a download; it is pending on the agent side.',
     errors: {
       sin_firma: 'Missing signature. Reconnect your wallet.',
       firma_vencida: 'Your signature expired. Try again.',
@@ -157,8 +155,6 @@ const tS = {
     consentNeeded: 'Los apuntes sólo se guardan como candidato si autorizas su uso para entrenamiento.',
     saveCandidate: 'Guardar candidato',
     candidateSaved: 'Candidato guardado para revisión posterior; todavía no entra al corpus de entrenamiento.',
-    candidateNeedsIngesta:
-      'Guardar candidatos desde apuntes propios requiere un endpoint del agente que no exija una descarga; está pendiente del lado del agente.',
     errors: {
       sin_firma: 'Falta la firma. Reconecta tu billetera.',
       firma_vencida: 'La firma venció. Inténtalo de nuevo.',
@@ -441,7 +437,7 @@ export default function AsistentePage() {
   }, [provider, effectiveAddress, relatos, url, mostrarError])
 
   const guardar = useCallback(async () => {
-    if (!provider || !effectiveAddress || !relatos || !ingestaId) return
+    if (!provider || !effectiveAddress || !relatos) return
     setError('')
     setCandidatoId(null)
     const r = await guardarCandidato({
@@ -685,22 +681,17 @@ export default function AsistentePage() {
               <Button onClick={crear} data-testid="asistente-prealerta">
                 {t('prealert')}
               </Button>
-              {ingestaId ? (
-                <Button
-                  variant="secondary"
-                  onClick={guardar}
-                  disabled={!consentimiento}
-                  data-testid="asistente-candidato"
-                >
-                  {t('saveCandidate')}
-                </Button>
-              ) : null}
+              <Button
+                variant="secondary"
+                onClick={guardar}
+                disabled={origen === 'notas' && !consentimiento}
+                data-testid="asistente-candidato"
+              >
+                {t('saveCandidate')}
+              </Button>
             </div>
-            {!consentimiento && (
+            {origen === 'notas' && !consentimiento && (
               <p className="text-xs text-muted-foreground">{t('consentNeeded')}</p>
-            )}
-            {origen === 'notas' && !ingestaId && (
-              <p className="text-xs text-muted-foreground">{t('candidateNeedsIngesta')}</p>
             )}
             {prealertaId && (
               <p className="text-sm" aria-live="polite">

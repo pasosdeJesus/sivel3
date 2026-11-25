@@ -49,6 +49,8 @@ interface MapComponentProps {
     source_summary: string | null
   }>
   onPreAlertClick?: (id: number) => void
+  /** Pide el pase de cuota con la billetera (`personal_sign`) y devuelve si quedó activo. */
+  onActivarCuota?: () => Promise<boolean>
 }
 
 interface CasoDetalle {
@@ -80,6 +82,7 @@ export default function MapComponent({
   isVerified = false,
   preAlerts = [],
   onPreAlertClick,
+  onActivarCuota,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -103,6 +106,8 @@ export default function MapComponent({
     null,
   )
   const [mostrarInfo, setMostrarInfo] = useState(false)
+  const [avisoCuota, setAvisoCuota] = useState<string | null>(null)
+  const [codigoSeleccionado, setCodigoSeleccionado] = useState<string | null>(null)
   const [capasVisibles, setCapasVisibles] = useState<string[]>([
     'OpenStreetMap',
   ])
@@ -114,8 +119,16 @@ export default function MapComponent({
     const currentWallet = walletRef.current
     setMostrarInfo(true)
     setCasoSeleccionado(null)
+    setAvisoCuota(null)
+    setCodigoSeleccionado(codigo)
     try {
       const response = await fetch(`/api/cases/${codigo}`)
+
+      if (response.status === 402) {
+        const datos = (await response.json().catch(() => ({}))) as { error?: string }
+        setAvisoCuota(datos.error || 'La cuota gratuita de detalles se agotó.')
+        return
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -578,7 +591,24 @@ export default function MapComponent({
           </CardHeader>
 
           <ScrollArea className="flex-grow px-4" style={{overflow: 'auto'}}>
-             {!casoSeleccionado ? (
+             {avisoCuota ? (
+                <div className="space-y-3 p-2" role="alert">
+                  <p className="text-sm text-gray-700">{avisoCuota}</p>
+                  {wallet && onActivarCuota && codigoSeleccionado && (
+                    <button
+                      type="button"
+                      className="w-full rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+                      data-testid="mapa-activar-cuota"
+                      onClick={async () => {
+                        const activado = await onActivarCuota()
+                        if (activado) await cargarDetalleCaso(codigoSeleccionado)
+                      }}
+                    >
+                      Activar cuota con mi billetera
+                    </button>
+                  )}
+                </div>
+             ) : !casoSeleccionado ? (
                 <div className="space-y-4 p-2">
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-4 w-full" />

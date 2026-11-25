@@ -25,6 +25,7 @@ const RUTAS_PERMITIDAS: Array<{ metodo: 'GET' | 'POST' | 'DELETE'; patron: RegEx
   { metodo: 'GET', patron: /^health$/ },
   { metodo: 'GET', patron: /^\d+$/ },
   { metodo: 'POST', patron: /^\d+\/candidato$/ },
+  { metodo: 'POST', patron: /^candidato$/ },
   { metodo: 'DELETE', patron: /^\d+$/ },
 ]
 

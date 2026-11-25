@@ -212,6 +212,44 @@ describe('proxy /api/asistente', () => {
     expect(res.headers.get('Location')).toBe('/api/revision/ingesta/7')
   })
 
+  it('permite el candidato de notas sueltas (sin ingesta)', async () => {
+    const cuerpo = JSON.stringify({
+      texto: 'Apuntes propios de una masacre.',
+      relatos: [{ titulo: 'Caso' }],
+      origen: 'notas',
+      consentimiento: true,
+    })
+    const headers = await firmarDocumentador({
+      cuenta: DOCUMENTADOR,
+      metodo: 'POST',
+      ruta: 'candidato',
+      cuerpo,
+    })
+    const capturado: { url?: string } = {}
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        capturado.url = url
+        return new Response('{"candidato_id":4,"estado":"candidato"}', {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        })
+      }),
+    )
+
+    const { POST } = await ruta()
+    const res = await POST(
+      new NextRequest('http://localhost/api/asistente/candidato', {
+        method: 'POST',
+        headers,
+        body: cuerpo,
+      }),
+      contexto('candidato'),
+    )
+    expect(res.status).toBe(201)
+    expect(capturado.url).toBe('https://agente.test/api/revision/candidato')
+  })
+
   it('propaga los errores del agente sin inventar el estado', async () => {
     const headers = await firmarDocumentador({
       cuenta: DOCUMENTADOR,

@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { privateKeyToAccount } from 'viem/accounts'
 import { verifyMessage } from 'viem'
-import { borrarIngesta, extraerCaso, nuevoNonce, saludAsistente } from '@/lib/asistenteClient'
+import {
+  borrarIngesta,
+  extraerCaso,
+  guardarCandidato,
+  nuevoNonce,
+  saludAsistente,
+} from '@/lib/asistenteClient'
 
 const LLAVE = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
 const CUENTA = privateKeyToAccount(LLAVE)
@@ -129,6 +135,43 @@ describe('cliente del asistente', () => {
     expect(capturado.url).toBe('/api/asistente/12')
     expect(capturado.init?.method).toBe('DELETE')
     expect(capturado.init?.body).toBeUndefined()
+  })
+
+  it('guarda el candidato de notas sueltas en /candidato y el de una ingesta en /:id/candidato', async () => {
+    const urls: string[] = []
+    const cuerpos: unknown[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        urls.push(url)
+        cuerpos.push(JSON.parse(String(init.body)))
+        return new Response('{"candidato_id":1}', {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        })
+      }),
+    )
+
+    const canal = { provider: proveedorFirmante(), address: CUENTA.address }
+    await guardarCandidato({
+      ...canal,
+      texto: 'Apuntes propios.',
+      relatos: [{ titulo: 'Caso' }],
+      origen: 'notas',
+      consentimiento: true,
+    })
+    await guardarCandidato({
+      ...canal,
+      ingestaId: 9,
+      texto: 'Nota de prensa.',
+      relatos: [{ titulo: 'Caso' }],
+      origen: 'noticia',
+      consentimiento: true,
+    })
+
+    expect(urls).toEqual(['/api/asistente/candidato', '/api/asistente/9/candidato'])
+    expect(cuerpos[0]).toMatchObject({ origen: 'notas', consentimiento: true })
+    expect(cuerpos[1]).toMatchObject({ origen: 'noticia', consentimiento: true })
   })
 
   it('genera nonces distintos', () => {

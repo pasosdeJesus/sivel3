@@ -19,6 +19,7 @@ const tS = {
     noAlerts: 'No converted pre-alerts awaiting review.',
     citizenNotes: 'Citizen improvements',
     assistant: 'Documentation assistant',
+    reviewAlerts: 'Review and publish alerts',
     score: 'Score',
     scorePrompt: 'Rate the quality (2-5) or reject (0):',
     feedback: 'Feedback',
@@ -36,6 +37,7 @@ const tS = {
     noAlerts: 'No hay pre-alertas convertidas esperando revisión.',
     citizenNotes: 'Mejoras del ciudadano',
     assistant: 'Asistente de documentación',
+    reviewAlerts: 'Revisar y publicar alertas',
     score: 'Puntuar',
     scorePrompt: 'Califica la calidad (2-5) o rechaza (0):',
     feedback: 'Retroalimentación',
@@ -143,13 +145,22 @@ export default function DocumenterPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold">{pt('title')}</h1>
-          <a
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-            href={`/${locale}/documenter/asistente`}
-            data-testid="documenter-assistant-link"
-          >
-            {pt('assistant')} →
-          </a>
+          <div className="flex flex-wrap gap-4">
+            <a
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              href={`/${locale}/documenter/asistente`}
+              data-testid="documenter-assistant-link"
+            >
+              {pt('assistant')} →
+            </a>
+            <a
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              href={`/${locale}/documenter/alerts`}
+              data-testid="documenter-alerts-link"
+            >
+              {pt('reviewAlerts')} →
+            </a>
+          </div>
         </div>
 
         {queue.length === 0 ? (

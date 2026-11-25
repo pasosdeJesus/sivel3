@@ -200,7 +200,8 @@ export async function exportarXrlat(opciones: {
 export async function guardarCandidato(opciones: {
   provider: Eip1193Like
   address: string
-  ingestaId: number
+  /** Ingesta que produjo el texto; sin ella el candidato es de notas sueltas. */
+  ingestaId?: number | null
   texto: string
   relatos: unknown[]
   origen: 'noticia' | 'notas'
@@ -210,7 +211,7 @@ export async function guardarCandidato(opciones: {
     provider: opciones.provider,
     address: opciones.address,
     metodo: 'POST',
-    ruta: `${opciones.ingestaId}/candidato`,
+    ruta: opciones.ingestaId ? `${opciones.ingestaId}/candidato` : 'candidato',
     cuerpo: JSON.stringify({
       texto: opciones.texto,
       relatos: opciones.relatos,
