@@ -9,6 +9,7 @@ import { newKyselyPostgresql } from '@/.config/kysely.config'
 import { recordEvent } from '@/lib/web-analytics'
 import { MAX_ROWS, cellStepForZoom, parseBbox, parseZoom } from '@/lib/mapData'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
+import { ventanaPublica } from '@/lib/ventanaPublica'
 
 // Map data for the public map. It only serves what the map draws: the case id
 // (object key) and its coordinates. Filters, viewport (`bbox`) and `zoom` shape
@@ -51,8 +52,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: zoom.error }, { status: 400 })
     }
 
-    const fechaini = searchParams.get('filtro[fechaini]')
-    const fechafin = searchParams.get('filtro[fechafin]')
+    const ventana = ventanaPublica()
+    // La ventana pública es el valor por omisión: si el cliente pide fechas, manda él.
+    const fechaini = searchParams.get('filtro[fechaini]') || ventana.desde
+    const fechafin = searchParams.get('filtro[fechafin]') || ventana.hasta
     const departamentoId = searchParams.get('filtro[departamento_id]')
     const presponsableId = searchParams.get('filtro[presponsable_id]')
     const categoriaId = searchParams.get('filtro[categoria_id]')
@@ -166,6 +169,7 @@ export async function GET(request: NextRequest) {
         modo: 'marcadores',
         total: Object.keys(respuesta).length,
         respuesta,
+        ventana: ventana.activa ? { desde: ventana.desde, hasta: ventana.hasta } : null,
       })
     }
 
@@ -204,7 +208,13 @@ export async function GET(request: NextRequest) {
       })
       .filter((cell) => Number.isFinite(cell.latitud) && Number.isFinite(cell.longitud))
 
-    return respond(request, { modo: 'celdas', total, respuesta: {}, celdas })
+    return respond(request, {
+      modo: 'celdas',
+      total,
+      respuesta: {},
+      celdas,
+      ventana: ventana.activa ? { desde: ventana.desde, hasta: ventana.hasta } : null,
+    })
   } catch (error) {
     console.error('Error en datos-osm:', error)
     recordEvent({ event_type: 'api_error', metadata: { route: '/api/cases/datos-osm', status: 500 } })

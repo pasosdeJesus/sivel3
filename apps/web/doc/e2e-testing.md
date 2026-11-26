@@ -53,8 +53,10 @@ Override the target: `SITE_URL=https://sivel.xyz:9001 bin/m test:e2e`.
 | Spec | Needs | What it checks |
 |---|---|---|
 | `connect-wallet.spec.mjs` | Chrome + server | The **external EIP-6963** wallet (shared mock, real signer) is discovered and shown connected, with the injected address. |
+| `alerts.spec.mjs` | Chrome + server | R-#22 P0 read-only surface: `/es/alerts` renders (empty state or list) and links to the map, a missing alert explains itself, `/es/documenter/alerts` and `/es/documenter` ask to connect a wallet and leak no alerts. |
 | `in-app-wallet.spec.mjs` | Chrome + server | Creates the **in-app wallet** through `WalletDialog` (`setupInAppWallet`: password, phrase and 3-word quiz), ends on the new address; reloads (locks it) and unlocks (`unlockInAppWallet`). |
 | `in-app-wallet-import.spec.mjs` | Chrome + server + `PRIVATE_KEY` | Imports the **known test wallet** (no new keys) and unlocks it after a reload; safe to run against production because it creates nothing and the SBT mint is skipped when the wallet already holds it. |
+| `alerts-creditos.spec.mjs` (smoke) | server | R-#22: `/api/alerts` shape, review/publish/unpublish require the documenter signature (401), the credit ledger answers and the admin routes never open, and the case detail announces the quota (`X-Cuota-Restante`) or answers `402` when the anonymous daily quota is spent. |
 | `public-pages.spec.mjs` | Chrome + server | Client pages hydrate against the live APIs: the OSM map renders its Leaflet container, EN/ES stats render, and the wallet profile leaves the loading state. |
 | `signatures.spec.mjs` | server (+ `PREALERT_ID`, `DOCUMENTER_WALLETS` for the positive path) | `/api/pre-alerts/[id]/score` accepts a valid **EIP-191** signature (fails later on the score range, 400) and rejects a tampered one (401); the positive path records a score 0 (**rejected**). |
 | `prealert-buy.spec.mjs` | server (+ `PENDING_PREALERT_ID` for the positive path) | `/api/pre-alerts/[id]/buy` rejects a missing `buyer_wallet` (400) and an unknown pre-alert (404); the positive path **reserves** a pending one. |
@@ -75,6 +77,13 @@ connection state and the language into the engine's `WalletConnect`, so
 and picks the in-app path; the dialog testids (`wallet-*`) are driven by the shared
 driver. `wallet-styling.spec.mjs` asserts the dialog is `position: fixed`, centered,
 themed with the site's primary and that Tailwind scanned the package.
+**Cuota de detalle (R-#22 P1):** `GET /api/cases/:id` cuenta 1/día por IP en anónimo, 16/mes
+con el pase de billetera y 24/mes si learn.tg la considera verificada. El runner de humo
+comparte la IP del equipo, así que `api-validation.spec.mjs` acepta `402` para el detalle y
+el smoke nuevo comprueba `X-Cuota-Restante` cuando hay `200`. Para no gastar la cuota
+anónima, el pase se verifica con la billetera de prueba o con «Activar cuota con mi
+billetera» en el mapa.
+
 Optional positive paths are gated by env (below) and otherwise print `[SKIP]`.
 
 ## Running against a local server

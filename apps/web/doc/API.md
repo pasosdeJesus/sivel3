@@ -250,6 +250,20 @@ creates the pre-alert as a documenter **alert under review**: status `converted`
 requires `pending`), pays no citizen reward, and cannot be scored by its own
 author; the payment for the documented case comes from the documenters fund.
 
+### Public corpus window (R-#22)
+
+`PUBLIC_CASES_FROM` / `PUBLIC_CASES_TO` (YYYY-MM-DD, inclusive; empty = whole archive)
+bound what the public endpoints show: `GET /api/cases/datos-osm`, `GET /api/cases/counts`
+and `GET /api/cases/:id` apply the window **server-side** (a client-sent
+`filtro[fechaini]`/`filtro[fechafin]` wins) and a case outside it answers `404
+fuera_de_ventana`. `counts` now restricts the four numbers (cases, victims, acts,
+victimizations) to the **same** case set as the map — only cases **with a location and at
+least one act** (the plottable ones: 39.866 of 48.187 in dev), and before only `casos`
+honoured the dates while the legend did not match — and, when the window is active, returns
+`ventana` and `total_archivo` (also plottable) so the map can say "showing 454 of 39.866". Exports are never free: only
+credits (R-#17) may export, and the AI surface runs on `sivel3agent`'s local model, never a
+paid remote API.
+
 ### Alerts, quota and credits (R-#22)
 
 `GET /api/alerts` y `GET /api/alerts/:id` son públicas y sólo devuelven alertas

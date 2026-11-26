@@ -10,6 +10,7 @@ import { CREDITO_DETALLE, gastar, saldoDe } from '@/lib/creditos'
 import { verificarEnLearnTg } from '@/lib/learnTgPartner'
 import { consumirVista, LIMITES, periodoDe, sujetoDe } from '@/lib/quota'
 import { leerPase } from '@/lib/walletPass'
+import { fueraDeVentana, ventanaPublica } from '@/lib/ventanaPublica'
 
 /**
  * Cuota de detalle (R-#22 P1, números de R-#17). Si la cuota no se puede consultar
@@ -100,6 +101,20 @@ export async function GET(
 
     if (!caso) {
       return NextResponse.json({ error: 'Caso no encontrado' }, { status: 404 })
+    }
+
+    // Ventana pública (R-#22): el detalle no puede abrir lo que el mapa no muestra.
+    const fechaCaso = formatDate(caso.fecha)
+    const ventana = ventanaPublica()
+    if (fueraDeVentana(fechaCaso, ventana)) {
+      return NextResponse.json(
+        {
+          error: 'Ese caso está fuera de la ventana pública del archivo',
+          code: 'fuera_de_ventana',
+          ventana: ventana.activa ? { desde: ventana.desde, hasta: ventana.hasta } : null,
+        },
+        { status: 404 },
+      )
     }
 
     const cuota = await aplicarCuota(db, request, casoId)

@@ -108,6 +108,12 @@ export default function MapComponent({
   const [mostrarInfo, setMostrarInfo] = useState(false)
   const [avisoCuota, setAvisoCuota] = useState<string | null>(null)
   const [codigoSeleccionado, setCodigoSeleccionado] = useState<string | null>(null)
+  const [ventanaInfo, setVentanaInfo] = useState<{
+    desde: string | null
+    hasta: string | null
+    casos: number
+    totalArchivo: number
+  } | null>(null)
   const [capasVisibles, setCapasVisibles] = useState<string[]>([
     'OpenStreetMap',
   ])
@@ -240,6 +246,21 @@ export default function MapComponent({
         if (conteosRes.ok) {
           const conteosData = await conteosRes.json()
           onCargarConteos(conteosData)
+          // R-#22: si la ventana pública esconde casos, avisar y ofrecer el paso siguiente.
+          if (
+            conteosData?.ventana &&
+            typeof conteosData.total_archivo === 'number' &&
+            conteosData.total_archivo > Number(conteosData.casos ?? 0)
+          ) {
+            setVentanaInfo({
+              desde: conteosData.ventana.desde ?? null,
+              hasta: conteosData.ventana.hasta ?? null,
+              casos: Number(conteosData.casos ?? 0),
+              totalArchivo: conteosData.total_archivo,
+            })
+          } else {
+            setVentanaInfo(null)
+          }
         } else {
           console.error('Error cargando conteos:', conteosRes.status)
         }
@@ -559,6 +580,47 @@ export default function MapComponent({
           </a>
         )}
       </div>
+
+      {ventanaInfo && (
+        <div
+          className="absolute bottom-4 left-4 z-30 max-w-sm rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 shadow"
+          role="status"
+          data-testid="mapa-ventana"
+        >
+          <p>
+            Mostrando <strong>{ventanaInfo.casos.toLocaleString('es-CO')}</strong> de{' '}
+            <strong>{ventanaInfo.totalArchivo.toLocaleString('es-CO')}</strong> casos
+            {ventanaInfo.desde || ventanaInfo.hasta ? (
+              <>
+                {' '}
+                ({[ventanaInfo.desde, ventanaInfo.hasta].filter(Boolean).join(' – ')})
+              </>
+            ) : null}
+            .
+          </p>
+          <p className="mt-1 text-xs">
+            Conecta tu billetera (arriba) para más acceso, o compra créditos para el archivo
+            completo.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {wallet && onActivarCuota && (
+              <button
+                type="button"
+                className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
+                onClick={() => void onActivarCuota()}
+              >
+                Activar cuota con mi billetera
+              </button>
+            )}
+            <a
+              className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
+              href={window.location.pathname.replace(/\/cases\/osmmap.*/, '/wallet')}
+            >
+              Ver créditos y saldo →
+            </a>
+          </div>
+        </div>
+      )}
 
       <div
         ref={mapRef}

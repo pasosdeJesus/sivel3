@@ -90,9 +90,19 @@ async function main() {
   if (!caseId) {
     fail('GET /api/cases/datos-osm → no case id to probe the detail endpoint')
   } else {
-    const detail = await expectGet(`/api/cases/${caseId}`, 200)
-    if (detail.json?.caso?.id === String(caseId)) ok(`GET /api/cases/${caseId} → case payload`)
-    else fail(`GET /api/cases/${caseId} → unexpected body: ${detail.text.slice(0, 120)}`)
+    // R-#22: el detalle aplica la cuota de R-#17 (1/día por IP en anónimo). El runner y
+    // los usuarios detrás de la misma IP comparten cupo, así que un 402 es la respuesta
+    // correcta cuando ya se gastó; el cuerpo sólo se comprueba cuando hay 200.
+    const detail = await get(`${SITE}/api/cases/${caseId}`)
+    if (detail.status === 402) {
+      ok(`GET /api/cases/${caseId} → 402 (cuota anónima agotada; esperado)`)
+    } else if (detail.status !== 200) {
+      fail(`GET /api/cases/${caseId} → ${detail.status} (esperaba 200 o 402)`)
+    } else if (detail.json?.caso?.id === String(caseId)) {
+      ok(`GET /api/cases/${caseId} → case payload`)
+    } else {
+      fail(`GET /api/cases/${caseId} → unexpected body: ${detail.text.slice(0, 120)}`)
+    }
   }
 
   await expectGet('/api/credential/abc', 400)
