@@ -13,6 +13,7 @@ interface OSMMapMobileProps {
   allegedPerpetrators: any[];
   donationRegions: any[];
   selectedRegion: string;
+  ventana?: { desde: string | null; hasta: string | null; activa: boolean } | null;
   donationAmount: string;
   regionBalance: string | null;
   isConnected: boolean;
@@ -42,6 +43,7 @@ export function OSMMapMobile({
   allegedPerpetrators,
   donationRegions,
   selectedRegion,
+  ventana,
   donationAmount,
   regionBalance,
   isConnected,
@@ -127,6 +129,7 @@ export function OSMMapMobile({
           onCargarConteos={handleCountsLoad}
           isConnected={isConnected}
           wallet={wallet}
+          ventana={ventana}
           preAlerts={preAlerts}
           onPreAlertClick={onPreAlertClick}
           isVerified={isVerified}

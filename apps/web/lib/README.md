@@ -19,6 +19,8 @@ Directory of logic modules shared between components and API routes.
 | `walletPassClient.ts` | Requests that pass with one `personal_sign`. |
 | `quota.ts` | Detail quota of R-#17 (1/day anonymous, 16/24 per month) with an atomic `ON CONFLICT` counter. |
 | `creditos.ts` | Credit ledger of R-#17: idempotent credit/debit by `reference`, no negative balance. |
+| `ventanaPublica.ts` | Public corpus window (R-#22) from `PUBLIC_CASES_FROM`/`PUBLIC_CASES_TO`: validates the dates, decides `fueraDeVentana` and formats the text for the UI. |
+| `accesoPublico.ts` | Row caps of the public map (2,000 anonymous, 10,000 with the wallet) and whether the access notice applies: only when the query widens the window and exceeds the cap. |
 | `usdtTransfer.ts` | Verifies a USDT `Transfer` receipt to a given address (credits purchase). |
 | `utils.ts` | General utilities (`cn()` for Tailwind class merging). |
 || `web-analytics.ts` | Web analytics helpers: `recordEvent()` for pageviews, donations, wallet connects. |

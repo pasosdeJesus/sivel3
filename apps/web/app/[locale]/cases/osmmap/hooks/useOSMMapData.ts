@@ -22,6 +22,12 @@ interface Counts {
   actos: number;
 }
 
+interface Ventana {
+  desde: string | null;
+  hasta: string | null;
+  activa: boolean;
+}
+
 export function useOSMMapData(currentLocale: string) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -39,6 +45,7 @@ export function useOSMMapData(currentLocale: string) {
   const [allegedPerpetrators, setAllegedPerpetrators] = useState<Array<{id: string, nombre: string}>>([]);
   const [donationRegions, setDonationRegions] = useState<DonationRegion[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [ventana, setVentana] = useState<Ventana | null>(null);
 
   const handleFilterChange = (key: string, value: string) => {
     if (value === "separator") return;
@@ -58,17 +65,21 @@ export function useOSMMapData(currentLocale: string) {
     const loadInitialData = async () => {
       setLoading(true);
       try {
-        const [deptRes, catRes, presRes, regionRes] = await Promise.all([
+        const [deptRes, catRes, presRes, regionRes, ventanaRes] = await Promise.all([
           fetch('/api/departments'),
           fetch('/api/categories'),
           fetch('/api/alleged-perpetrators'),
-          fetch(`/api/regions?locale=${currentLocale}`)
+          fetch(`/api/regions?locale=${currentLocale}`),
+          fetch('/api/cases/ventana')
         ]);
         
         const departmentsData = await deptRes.json();
         const categoriesData = await catRes.json();
         const allegedPerpetratorsData = await presRes.json();
         const regionsData = await regionRes.json();
+        // Un servidor viejo sin este endpoint no debe romper el mapa: sin ventana
+        // simplemente se muestran los filtros vacíos como antes.
+        const ventanaData = ventanaRes.ok ? await ventanaRes.json().catch(() => null) : null;
         
         setDepartments(departmentsData);
         setCategories(categoriesData);
@@ -77,6 +88,18 @@ export function useOSMMapData(currentLocale: string) {
         
         if (regionsData.length > 0) {
           setSelectedRegion(String(regionsData[0].id));
+        }
+
+        // La ventana pública del corpus (R-#22) se inicializa en los filtros: el
+        // mapa no avisa nada mientras el usuario esté dentro de ella.
+        const infoVentana: Ventana | null = ventanaData?.ventana ?? null;
+        setVentana(infoVentana);
+        if (infoVentana?.activa) {
+          setFilters(prev => ({
+            ...prev,
+            'filtro[fechaini]': prev['filtro[fechaini]'] || infoVentana.desde || '',
+            'filtro[fechafin]': prev['filtro[fechafin]'] || infoVentana.hasta || ''
+          }));
         }
         
         logger.info('Datos iniciales cargados correctamente', 'OSMMapData');
@@ -108,6 +131,7 @@ export function useOSMMapData(currentLocale: string) {
     allegedPerpetrators,
     donationRegions,
     selectedRegion,
+    ventana,
     setSelectedRegion,
     handleFilterChange,
     applyFilters,

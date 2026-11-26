@@ -68,6 +68,25 @@ async function main() {
     ok('counts sin ventana pública (archivo completo)')
   }
 
+  // La UI inicializa los filtros con la ventana: el endpoint debe coincidir con los conteos.
+  const ventana = await get(`${SITE}/api/cases/ventana`)
+  if (ventana.status !== 200) {
+    fail(`GET /api/cases/ventana → ${ventana.status}`)
+  } else if (conteos.json?.ventana) {
+    const v = ventana.json?.ventana
+    if (v?.desde !== conteos.json.ventana.desde || v?.hasta !== conteos.json.ventana.hasta) {
+      fail(
+        `ventana incoherente: ${JSON.stringify(v)} vs counts ${JSON.stringify(conteos.json.ventana)}`,
+      )
+    } else {
+      ok(`ventana para la UI: ${v.desde ?? '—'} – ${v.hasta ?? '—'}`)
+    }
+  } else if (ventana.json?.ventana?.activa) {
+    fail('/api/cases/ventana activa pero los conteos no informan ventana')
+  } else {
+    ok('ventana para la UI vacía (archivo completo)')
+  }
+
   // `review` es GET: sin firma debe responder 401, no 405.
   await espera('/api/pre-alerts/review', 401)
   await rechazaPost('/api/pre-alerts/1/publish', [401])

@@ -36,6 +36,71 @@ async function waitForLeaflet(page, timeout = 60000) {
   }
 }
 
+async function checkWindowFilters(page, base) {
+  let ventana
+  try {
+    const res = await fetch(`${base}/api/cases/ventana`, { signal: AbortSignal.timeout(20000) })
+    ventana = (await res.json())?.ventana ?? null
+  } catch (err) {
+    fail(`window endpoint failed: ${err.message}`)
+    return
+  }
+
+  if (!ventana?.activa) {
+    ok('no public window configured; date filters stay empty')
+    return
+  }
+
+  const valores = await page.$$eval('input[type="date"]', (els) => els.map((el) => el.value))
+  if (valores.includes(ventana.desde) && valores.includes(ventana.hasta)) {
+    ok(`date filters initialised with the window (${ventana.desde} – ${ventana.hasta})`)
+  } else {
+    fail(
+      `date filters ${JSON.stringify(valores)} do not show the window ${ventana.desde} – ${ventana.hasta}`,
+    )
+  }
+
+  const aviso = await page.$('[data-testid="mapa-aviso-acceso"]')
+  if (aviso) fail('access notice is shown while the default window keeps the view under the cap')
+  else ok('no access notice with the default window')
+}
+
+async function checkWidenedRangeNotice(page, base) {
+  const ancho = await fetch(
+    `${base}/api/cases/counts?filtro%5Bfechaini%5D=1990-01-01&filtro%5Bfechafin%5D=2030-12-31`,
+    { signal: AbortSignal.timeout(30000) },
+  )
+    .then((res) => res.json())
+    .catch(() => null)
+
+  if (!ancho || !(Number(ancho.casos) > 2000)) {
+    ok(`archive under the row cap (${ancho?.casos ?? '?'} cases); widened notice not exercised`)
+    return
+  }
+
+  const inputs = await page.$$('input[type="date"]')
+  if (inputs.length < 2) {
+    fail(`expected the From/To date inputs, found ${inputs.length}`)
+    return
+  }
+
+  await page.$$eval('input[type="date"]', (els) => {
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+    ;['1990-01-01', '2030-12-31'].forEach((valor, i) => {
+      if (!els[i]) return
+      setter.call(els[i], valor)
+      els[i].dispatchEvent(new Event('input', { bubbles: true }))
+      els[i].dispatchEvent(new Event('change', { bubbles: true }))
+    })
+  })
+
+  const mostrado = await page
+    .waitForSelector('[data-testid="mapa-aviso-acceso"]', { timeout: 30000 })
+    .then(() => true, () => false)
+  if (mostrado) ok(`widened range over ${ancho.casos} cases shows the access notice`)
+  else fail('widened range above the row cap did not show the access notice')
+}
+
 async function main() {
   const t0 = performance.now()
   resetFailures()
@@ -56,8 +121,11 @@ async function main() {
         await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 })
         rendered = await waitForLeaflet(page)
       }
-      if (rendered) ok('map page rendered the Leaflet container')
-      else fail('map page did not render the Leaflet container')
+      if (rendered) {
+        ok('map page rendered the Leaflet container')
+        await checkWindowFilters(page, base)
+        await checkWidenedRangeNotice(page, base)
+      } else fail('map page did not render the Leaflet container')
     }
 
     await goto(page, `${base}/en/stats`)

@@ -15,6 +15,7 @@ import {
 import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
 import { useTranslation } from '@/hooks/useTranslation'
+import { requiereAvisoAcceso, topeDeFilas } from '@/lib/accesoPublico'
 import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
 import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
 import { ScrollArea } from '@pasosdejesus/m/shadcn-components/ui/scroll-area'
@@ -51,6 +52,8 @@ interface MapComponentProps {
   onPreAlertClick?: (id: number) => void
   /** Pide el pase de cuota con la billetera (`personal_sign`) y devuelve si quedó activo. */
   onActivarCuota?: () => Promise<boolean>
+  /** Ventana pública del corpus (R-#22); los filtros se inicializan con ella. */
+  ventana?: { desde: string | null; hasta: string | null; activa: boolean } | null
 }
 
 interface CasoDetalle {
@@ -83,6 +86,7 @@ export default function MapComponent({
   preAlerts = [],
   onPreAlertClick,
   onActivarCuota,
+  ventana = null,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -108,12 +112,9 @@ export default function MapComponent({
   const [mostrarInfo, setMostrarInfo] = useState(false)
   const [avisoCuota, setAvisoCuota] = useState<string | null>(null)
   const [codigoSeleccionado, setCodigoSeleccionado] = useState<string | null>(null)
-  const [ventanaInfo, setVentanaInfo] = useState<{
-    desde: string | null
-    hasta: string | null
-    casos: number
-    totalArchivo: number
-  } | null>(null)
+  // Casos que devolvió la última consulta (conteos); el aviso de acceso se decide
+  // comparándolos con el tope del usuario actual (ver `lib/accesoPublico.ts`).
+  const [casosConsultados, setCasosConsultados] = useState<number | null>(null)
   const [capasVisibles, setCapasVisibles] = useState<string[]>([
     'OpenStreetMap',
   ])
@@ -246,21 +247,11 @@ export default function MapComponent({
         if (conteosRes.ok) {
           const conteosData = await conteosRes.json()
           onCargarConteos(conteosData)
-          // R-#22: si la ventana pública esconde casos, avisar y ofrecer el paso siguiente.
-          if (
-            conteosData?.ventana &&
-            typeof conteosData.total_archivo === 'number' &&
-            conteosData.total_archivo > Number(conteosData.casos ?? 0)
-          ) {
-            setVentanaInfo({
-              desde: conteosData.ventana.desde ?? null,
-              hasta: conteosData.ventana.hasta ?? null,
-              casos: Number(conteosData.casos ?? 0),
-              totalArchivo: conteosData.total_archivo,
-            })
-          } else {
-            setVentanaInfo(null)
-          }
+          // R-#22 + issue 69: la vista por omisión ya cabe en el tope, así que el
+          // aviso de acceso sólo aparece si el usuario amplía el rango de fechas.
+          setCasosConsultados(
+            Number(conteosData?.casos ?? datos?.total ?? 0) || null,
+          )
         } else {
           console.error('Error cargando conteos:', conteosRes.status)
         }
@@ -308,6 +299,7 @@ export default function MapComponent({
       markersRef.current?.addLayers(listaMarcadores)
     } catch (error) {
       ultimaClaveRef.current = ''
+      setCasosConsultados(null)
       console.error('Error cargando casos:', error)
     } finally {
       setCargando(false)
@@ -548,6 +540,17 @@ export default function MapComponent({
     }
   }
 
+  const avisoAcceso =
+    casosConsultados !== null &&
+    requiereAvisoAcceso(
+      casosConsultados,
+      { desde: filtros?.['filtro[fechaini]'], hasta: filtros?.['filtro[fechafin]'] },
+      ventana,
+      Boolean(wallet),
+    )
+      ? { casos: casosConsultados, tope: topeDeFilas(Boolean(wallet)) }
+      : null
+
   return (
     <div className="relative h-full">
       {/* Mode toggle */}
@@ -581,32 +584,27 @@ export default function MapComponent({
         )}
       </div>
 
-      {ventanaInfo && (
+      {avisoAcceso && (
         <div
           className="absolute bottom-4 left-4 z-30 max-w-sm rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 shadow"
           role="status"
-          data-testid="mapa-ventana"
+          data-testid="mapa-aviso-acceso"
         >
           <p>
-            Mostrando <strong>{ventanaInfo.casos.toLocaleString('es-CO')}</strong> de{' '}
-            <strong>{ventanaInfo.totalArchivo.toLocaleString('es-CO')}</strong> casos
-            {ventanaInfo.desde || ventanaInfo.hasta ? (
-              <>
-                {' '}
-                ({[ventanaInfo.desde, ventanaInfo.hasta].filter(Boolean).join(' – ')})
-              </>
-            ) : null}
-            .
+            Esta selección reúne <strong>{avisoAcceso.casos.toLocaleString('es-CO')}</strong> casos,
+            más del tope de <strong>{avisoAcceso.tope.toLocaleString('es-CO')}</strong> filas
+            previsto para tu acceso.
           </p>
           <p className="mt-1 text-xs">
-            Conecta tu billetera (arriba) para más acceso, o compra créditos para el archivo
-            completo.
+            Conecta tu billetera (arriba) para ampliar tu cuota, o consulta tus créditos para el
+            archivo completo.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {wallet && onActivarCuota && (
               <button
                 type="button"
                 className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
+                data-testid="mapa-aviso-activar-cuota"
                 onClick={() => void onActivarCuota()}
               >
                 Activar cuota con mi billetera

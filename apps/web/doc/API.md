@@ -256,13 +256,20 @@ author; the payment for the documented case comes from the documenters fund.
 bound what the public endpoints show: `GET /api/cases/datos-osm`, `GET /api/cases/counts`
 and `GET /api/cases/:id` apply the window **server-side** (a client-sent
 `filtro[fechaini]`/`filtro[fechafin]` wins) and a case outside it answers `404
-fuera_de_ventana`. `counts` now restricts the four numbers (cases, victims, acts,
+fuera_de_ventana`. `GET /api/cases/ventana` publishes that configuration to the UI
+(`{ ventana: { desde, hasta, activa } }`, cached 5 min) so the map **initialises** its
+From/To filters with it: the first view asks for the window, and no information box is
+needed. `counts` now restricts the four numbers (cases, victims, acts,
 victimizations) to the **same** case set as the map — only cases **with a location and at
 least one act** (the plottable ones: 39.866 of 48.187 in dev), and before only `casos`
 honoured the dates while the legend did not match — and, when the window is active, returns
-`ventana` and `total_archivo` (also plottable) so the map can say "showing 454 of 39.866". Exports are never free: only
-credits (R-#17) may export, and the AI surface runs on `sivel3agent`'s local model, never a
-paid remote API.
+`ventana` and `total_archivo` (also plottable) for API consumers.
+
+The map only warns about the access tiers (`lib/accesoPublico.ts`) when the user **widens**
+the dates beyond the window **and** the filtered total exceeds the public row cap: 2.000
+cases anonymous, 10.000 with the wallet connected (`TOPE_FILAS_ANONIMO` /
+`TOPE_FILAS_BILLETERA`, issue 17). Exports are never free: only credits (R-#17) may
+export, and the AI surface runs on `sivel3agent`'s local model, never a paid remote API.
 
 ### Alerts, quota and credits (R-#22)
 
