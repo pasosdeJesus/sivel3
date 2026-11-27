@@ -373,6 +373,8 @@ export default function MapComponent({
       // The cells already are aggregates: a cluster bubble must add their `n`, not
       // count how many cells fell inside. Counting cells showed a number that
       // matched neither the cases nor anything the reader could interpret.
+      // A single red for every bubble: one case is as grave as a thousand, so the
+      // colour must not rank severity; the size only helps to read volume.
       iconCreateFunction: (cluster: any) => {
         const n = casosDeCluster(cluster.getAllChildMarkers())
         const tamano = n >= 1000 ? 48 : n >= 100 ? 42 : n >= 10 ? 36 : 30
@@ -617,28 +619,24 @@ export default function MapComponent({
             más del tope de <strong>{avisoAcceso.tope.toLocaleString('es-CO')}</strong> filas
             previsto para tu acceso.
           </p>
-          <p className="mt-1 text-xs">
-            Conecta tu billetera (arriba) para ampliar tu cuota, o consulta tus créditos para el
-            archivo completo.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {wallet && onActivarCuota && (
-              <button
-                type="button"
-                className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
-                data-testid="mapa-aviso-activar-cuota"
-                onClick={() => void onActivarCuota()}
-              >
-                Activar cuota con mi billetera
-              </button>
-            )}
-            <a
-              className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
-              href={window.location.pathname.replace(/\/cases\/osmmap.*/, '/wallet')}
-            >
-              Ver créditos y saldo →
-            </a>
-          </div>
+          {wallet ? (
+            onActivarCuota && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  className="rounded-md border border-amber-400 bg-white px-3 py-1 text-xs"
+                  data-testid="mapa-aviso-activar-cuota"
+                  onClick={() => void onActivarCuota()}
+                >
+                  Activar cuota con mi billetera
+                </button>
+              </div>
+            )
+          ) : (
+            <p className="mt-1 text-xs">
+              Conecta tu billetera (arriba) para ampliar tu cuota.
+            </p>
+          )}
         </div>
       )}
 

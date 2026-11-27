@@ -121,8 +121,22 @@ async function checkWidenedRangeNotice(page, base) {
   const mostrado = await page
     .waitForSelector('[data-testid="mapa-aviso-acceso"]', { timeout: 30000 })
     .then(() => true, () => false)
-  if (mostrado) ok(`widened range over ${ancho.casos} cases shows the access notice`)
-  else fail('widened range above the row cap did not show the access notice')
+  if (!mostrado) {
+    fail('widened range above the row cap did not show the access notice')
+    return
+  }
+  ok(`widened range over ${ancho.casos} cases shows the access notice`)
+
+  // The notice invites the wallet and says nothing about credits or balance
+  // (the operator postponed that subject, 2026-11-26).
+  const texto = await page.$eval('[data-testid="mapa-aviso-acceso"]', (el) => el.textContent || '')
+  if (/cr[eé]dito|saldo|balance/i.test(texto)) {
+    fail(`access notice mentions credits or balance: ${texto.trim()}`)
+  } else if (!/billetera|wallet/i.test(texto)) {
+    fail(`access notice does not invite the wallet: ${texto.trim()}`)
+  } else {
+    ok('access notice invites the wallet and does not mention credits')
+  }
 }
 
 async function main() {
