@@ -16,6 +16,7 @@ import { Button } from '@pasosdejesus/m/shadcn-components/ui/button'
 import { useToast } from '@pasosdejesus/m/shadcn-components/ui/use-toast'
 import { useTranslation } from '@/hooks/useTranslation'
 import { requiereAvisoAcceso, topeDeFilas } from '@/lib/accesoPublico'
+import { casosDeCluster } from '@/lib/mapData'
 import { Badge } from '@pasosdejesus/m/shadcn-components/ui/badge'
 import { Separator } from '@pasosdejesus/m/shadcn-components/ui/separator'
 import { ScrollArea } from '@pasosdejesus/m/shadcn-components/ui/scroll-area'
@@ -76,8 +77,8 @@ const sbtToastT = {
 }
 
 export default function MapComponent({
-  center = [4.6682, -74.071],
-  zoom = 6,
+  center,
+  zoom,
   filtros = {},
   onCargarConteos,
   isConnected = false,
@@ -274,7 +275,7 @@ export default function MapComponent({
           iconSize: [34, 34],
           iconAnchor: [17, 17],
         })
-        const marcador = L.marker([lat, lng], { icon: icono })
+        const marcador = L.marker([lat, lng], { icon: icono, n } as L.MarkerOptions)
         marcador.on('click', () => {
           const currentMap = mapInstanceRef.current
           if (!currentMap) return
@@ -315,7 +316,15 @@ export default function MapComponent({
     const map = L.map(mapRef.current, {
       zoomControl: false,
       minZoom: 2,
-    }).setView(center, zoom)
+    })
+    // The initial view fits the country: a fixed center+zoom clipped the
+    // southern cases (Amazonas) and the map then drew fewer cases than the
+    // counts legible in the same screen. Callers may still pass center/zoom.
+    if (center && zoom !== undefined) {
+      map.setView(center, zoom)
+    } else {
+      map.fitBounds(L.latLngBounds([-4.6, -79.6], [13.6, -66.3]), { padding: [12, 12] })
+    }
 
     const capasBase = {
       OpenStreetMap: L.tileLayer(
@@ -361,6 +370,19 @@ export default function MapComponent({
       showCoverageOnHover: false,
       spiderfyOnMaxZoom: true,
       maxClusterRadius: 50,
+      // The cells already are aggregates: a cluster bubble must add their `n`, not
+      // count how many cells fell inside. Counting cells showed a number that
+      // matched neither the cases nor anything the reader could interpret.
+      iconCreateFunction: (cluster: any) => {
+        const n = casosDeCluster(cluster.getAllChildMarkers())
+        const tamano = n >= 1000 ? 48 : n >= 100 ? 42 : n >= 10 ? 36 : 30
+        return L.divIcon({
+          className: 'sivel3-cluster',
+          html: `<div style="display:flex;align-items:center;justify-content:center;width:${tamano}px;height:${tamano}px;border-radius:9999px;background:rgba(185,28,28,0.92);color:#fff;font-size:12px;font-weight:600;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${n}</div>`,
+          iconSize: [tamano, tamano],
+          iconAnchor: [tamano / 2, tamano / 2],
+        })
+      },
     })
     map.addLayer(markersRef.current)
     mapInstanceRef.current = map

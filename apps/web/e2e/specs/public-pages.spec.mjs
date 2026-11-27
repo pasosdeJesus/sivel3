@@ -65,6 +65,30 @@ async function checkWindowFilters(page, base) {
   else ok('no access notice with the default window')
 }
 
+// Regression: cluster bubbles used to count cells (88) instead of cases (403), and
+// the initial view clipped the southern cases. Every visible bubble must add cases
+// and the initial view must draw the whole filtered set.
+async function checkBubblesAddUpToCases(page, base) {
+  const conteos = await fetch(`${base}/api/cases/counts`, {
+    signal: AbortSignal.timeout(30000),
+  })
+    .then((res) => res.json())
+    .catch(() => null)
+  if (!conteos || typeof conteos.casos !== 'number') {
+    fail('counts endpoint unavailable; cannot compare the map bubbles')
+    return
+  }
+
+  const suma = await page.$$eval('.sivel3-cluster, .sivel3-celda', (els) =>
+    els.reduce((total, el) => total + Number(el.textContent || 0), 0),
+  )
+  if (suma === conteos.casos) {
+    ok(`map bubbles add up to the ${conteos.casos} cases of the counts`)
+  } else {
+    fail(`map bubbles add up to ${suma} but the counts say ${conteos.casos}`)
+  }
+}
+
 async function checkWidenedRangeNotice(page, base) {
   const ancho = await fetch(
     `${base}/api/cases/counts?filtro%5Bfechaini%5D=1990-01-01&filtro%5Bfechafin%5D=2030-12-31`,
@@ -124,6 +148,7 @@ async function main() {
       if (rendered) {
         ok('map page rendered the Leaflet container')
         await checkWindowFilters(page, base)
+        await checkBubblesAddUpToCases(page, base)
         await checkWidenedRangeNotice(page, base)
       } else fail('map page did not render the Leaflet container')
     }

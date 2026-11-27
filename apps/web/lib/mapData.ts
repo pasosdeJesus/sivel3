@@ -62,3 +62,18 @@ export function cellStepForZoom(zoom: number): number | null {
   if (zoom < 9) return 0.1
   return 0.02
 }
+
+/**
+ * Casos que representa un marcador: una celda agregada vale su `n` y un caso
+ * individual vale 1. Sin esto la burbuja de un clúster contaba celdas y mostraba
+ * un número que no cuadraba con los conteos.
+ */
+export function casosDeMarcador(marker: { options?: { n?: unknown } }): number {
+  const n = Number(marker.options?.n)
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
+
+/** Total de casos de los marcadores de un clúster. */
+export function casosDeCluster(markers: Array<{ options?: { n?: unknown } }>): number {
+  return markers.reduce((total, marker) => total + casosDeMarcador(marker), 0)
+}
